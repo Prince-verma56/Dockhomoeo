@@ -115,7 +115,7 @@ const trustBenefits = [
  * ConsultationJourney Section
  *
  * Implements:
- * 1. Scenic Background: /Images/SimplePathBG.png with sunlit archways and undulating dunes.
+ * 1. Scenic Background: /Images/SimplePathBG.webp with sunlit archways and undulating dunes.
  * 2. Header: Floating frosted pill "HOW IT WORKS" + mask wipe animation on the warm serif headline.
  * 3. 5-Node Journey: Interactive pastel aura rings, animated SVG connecting wave line with trail dots.
  * 4. Unified Bottom Card: "Why Choose DocHomeo?" floating frosted card seamlessly integrated.
@@ -228,14 +228,14 @@ export function ConsultationJourney() {
       ref={containerRef}
       id="how-it-works"
       aria-labelledby="journey-heading"
-      className="relative w-full overflow-hidden text-ink py-16 sm:py-20 lg:py-24"
+      className="relative w-full overflow-hidden text-ink pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10 lg:pb-12"
     >
       {/* ----------------------------------------------------------------- */}
       {/* 1. SCENIC BACKGROUND IMAGE (SimplePathBG.png)                     */}
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="/Images/SimplePathBG.png"
+          src="/Images/SimplePathBG.webp"
           alt=""
           aria-hidden="true"
           className="size-full object-cover object-[center_top] lg:object-center"
@@ -356,7 +356,7 @@ export function ConsultationJourney() {
         {/* ----------------------------------------------------------------- */}
         {/* 4. UNIFIED "WHY CHOOSE DOCHOMEO?" TRUST CARD                      */}
         {/* ----------------------------------------------------------------- */}
-        <div data-anim="why-choose-card" className="mt-14 sm:mt-18 lg:mt-22">
+        <div data-anim="why-choose-card" className="mt-10 sm:mt-12 lg:mt-14">
           <div className="rounded-[30px] bg-white/75 hover:bg-white/80 backdrop-blur-2xl border border-white/85 px-6 sm:px-8 lg:px-10 py-6 sm:py-7.5 shadow-[0_16px_42px_rgba(20,40,30,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.95)] transition-all">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8 xl:gap-12">
               

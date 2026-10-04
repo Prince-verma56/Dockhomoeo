@@ -126,6 +126,7 @@
   --font-display: var(--font-sans-main), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-heading: var(--font-sans-main), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
 
   /* geometry */
   --radius-sm: calc(var(--radius) * 0.6);
@@ -201,6 +202,27 @@
 }
 
 @layer utilities {
+  /* ------------------------------------------------------------------ gate
+     Scroll-revealed content must not be painted before its ScrollTrigger
+     fires, otherwise you read the copy and *then* watch it animate.
+
+     `dh-motion` is set on <html> by a tiny inline script in the document head,
+     before first paint, and only when JS is running and the visitor has not
+     asked for reduced motion. So:
+       - no JS            -> class never set   -> everything visible
+       - reduced motion   -> class never set   -> everything visible
+       - client bundle dies -> failsafe in that script strips the class
+     GSAP then owns each element's from-state inline and the element drops its
+     `data-reveal` attribute in the same layout effect, before any paint. */
+  .dh-motion [data-reveal] {
+    opacity: 0;
+  }
+
+  .dh-motion [data-reveal-line] {
+    opacity: 0;
+    transform: translateY(108%);
+  }
+
   /* Display heading face, matching the bold modern hero typography everywhere. */
   .font-display {
     font-family: var(--font-display);
@@ -274,57 +296,57 @@
     padding-bottom: 0.08em;
   }
 
-  /* Atmospheric blurred blend at bottom of scenic section for seamless connectivity */
+  /* Atmospheric clean blurred boundary separation between scenic sections */
   .dh-section-blend-bottom {
     position: absolute;
     inset-inline: 0;
     bottom: 0;
-    height: 8rem;
+    height: 3.5rem;
     pointer-events: none;
     z-index: 10;
-    background: linear-gradient(to bottom, transparent 0%, rgba(246, 242, 234, 0.65) 50%, #f6f2ea 100%);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
+    background: linear-gradient(to bottom, transparent 0%, rgba(246, 242, 234, 0.35) 60%, #f6f2ea 100%);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 40%, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 40%, #000 100%);
   }
 
   @media (min-width: 640px) {
     .dh-section-blend-bottom {
-      height: 11rem;
+      height: 4.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .dh-section-blend-bottom {
-      height: 13rem;
+      height: 5.5rem;
     }
   }
 
-  /* Atmospheric blurred blend at top of scenic section for seamless connectivity */
+  /* Atmospheric clean blurred boundary separation between scenic sections */
   .dh-section-blend-top {
     position: absolute;
     inset-inline: 0;
     top: 0;
-    height: 8rem;
+    height: 3.5rem;
     pointer-events: none;
     z-index: 10;
-    background: linear-gradient(to top, transparent 0%, rgba(246, 242, 234, 0.65) 50%, #f6f2ea 100%);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
-    mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
+    background: linear-gradient(to top, transparent 0%, rgba(246, 242, 234, 0.35) 60%, #f6f2ea 100%);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.5) 40%, #000 100%);
+    mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.5) 40%, #000 100%);
   }
 
   @media (min-width: 640px) {
     .dh-section-blend-top {
-      height: 11rem;
+      height: 4.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .dh-section-blend-top {
-      height: 13rem;
+      height: 5.5rem;
     }
   }
 

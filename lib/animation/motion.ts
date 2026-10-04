@@ -37,3 +37,21 @@ export function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+
+/**
+ * Releases an element from the pre-paint reveal gate (`.dh-motion [data-reveal]`
+ * in app/globals.css).
+ *
+ * Call it in the same layout effect that hands the element's from-state to
+ * GSAP, after the tween is created. The gate and the hand-off then happen in
+ * one synchronous block, so the browser never paints the element ungated and
+ * un-animated — which is the flash this whole mechanism exists to prevent.
+ */
+export function releaseRevealGate(root: Element | null): void {
+  if (!root) return;
+  root.removeAttribute("data-reveal");
+  for (const el of root.querySelectorAll("[data-reveal], [data-reveal-line]")) {
+    el.removeAttribute("data-reveal");
+    el.removeAttribute("data-reveal-line");
+  }
+}

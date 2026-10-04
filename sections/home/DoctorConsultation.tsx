@@ -14,12 +14,13 @@ import {
 } from "lucide-react";
 import { featuredDoctor } from "@/data/mock/home";
 import { formatPrice } from "@/lib/formatters/price";
+import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
 
 /**
  * DoctorConsultation Section
  *
  * Implements the editorial layout matching the user's inspiration screenshot:
- * 1. Background Image: /Images/ConsultentBG.png covering the section with the doctor
+ * 1. Background Image: /Images/ConsultentBG.webp covering the section with the doctor
  *    at his marble desk on the left and the sunlit stone wall on the right.
  * 2. Left Scene Floating UI Components (True Frosted Glassmorphism):
  *    - Card A: Frosted glass doctor booking card at bottom-left (Dr. A. Demo, ratings, availability, price, CTA)
@@ -33,8 +34,20 @@ import { formatPrice } from "@/lib/formatters/price";
  *    - Action buttons: "[ Find a Doctor → ]" and "[ ▶ How It Works ]"
  */
 export function DoctorConsultation() {
+  // Media leads here: the scene is uncovered, then the editorial column reads
+  // in over it. Deliberately the reverse of BestsellingProducts next door.
+  const sectionRef = useSectionTimeline<HTMLElement>([
+    { sel: "[data-r-media]", variant: "backdrop", at: 0 },
+    { sel: "[data-r-float]", variant: "rise", at: 0.45 },
+    { sel: "[data-r-eyebrow]", variant: "rise", at: 0.3 },
+    { sel: "[data-r-head]", variant: "rise", at: 0.42 },
+    { sel: "[data-r-copy]", variant: "rise", at: 0.56 },
+    { sel: "[data-r-item]", variant: "rise", at: 0.68 },
+  ]);
+
   return (
     <section
+      ref={sectionRef}
       id="consultation-section"
       aria-labelledby="consultation-heading"
       className="relative min-h-[640px] lg:h-[720px] xl:h-[760px] max-h-[840px] text-ink overflow-hidden flex items-center py-10 lg:py-0"
@@ -42,9 +55,13 @@ export function DoctorConsultation() {
       {/* ----------------------------------------------------------------- */}
       {/* 1. SCENIC BACKGROUND IMAGE (ConsultentBG.png)                     */}
       {/* ----------------------------------------------------------------- */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+      <div
+        data-r-media
+        data-reveal
+        className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none will-change-transform"
+      >
         <img
-          src="/Images/ConsultentBG.png"
+          src="/Images/ConsultentBG.webp"
           alt=""
           aria-hidden="true"
           className="size-full object-cover object-[24%_center] lg:object-center"
@@ -76,7 +93,7 @@ export function DoctorConsultation() {
             
             {/* Component B: "50+ Certified Doctors" Floating Glass Bubble */}
             {/* Positioned more towards the right direction near the arch window */}
-            <div className="self-end lg:absolute lg:top-12 xl:top-14 lg:right-3 xl:right-6 z-20">
+            <div data-r-float data-reveal className="self-end lg:absolute lg:top-12 xl:top-14 lg:right-3 xl:right-6 z-20">
               <div className="rounded-[22px] bg-white/25 hover:bg-white/30 backdrop-blur-2xl border border-white/60 p-3 sm:p-3.5 shadow-[0_14px_35px_rgba(15,35,25,0.07),inset_0_1px_1.5px_rgba(255,255,255,0.9)] transition-all hover:scale-105 duration-300">
                 <div className="text-base sm:text-lg font-bold text-[#11231a] leading-tight">
                   50+
@@ -250,12 +267,14 @@ export function DoctorConsultation() {
           <div className="lg:col-span-5 w-full flex flex-col justify-center lg:pl-10 xl:pl-16 2xl:pl-20">
             
             {/* Eyebrow - Clean typography without generic AI dash lines */}
-            <div className="text-[0.78rem] font-semibold tracking-[0.16em] text-forest uppercase">
+            <div data-r-eyebrow data-reveal className="text-[0.78rem] font-semibold tracking-[0.16em] text-forest uppercase">
               ONLINE CONSULTATION
             </div>
 
             {/* Display Headline */}
             <h2
+              data-r-head
+              data-reveal
               id="consultation-heading"
               className="mt-3 font-display text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.65rem] font-bold tracking-tight text-ink leading-[1.06]"
             >
@@ -263,7 +282,11 @@ export function DoctorConsultation() {
             </h2>
 
             {/* Subtitle */}
-            <p className="mt-3.5 text-[0.94rem] sm:text-[0.98rem] text-[#2c4035] leading-relaxed max-w-lg font-normal">
+            <p
+              data-r-copy
+              data-reveal
+              className="mt-3.5 text-[0.94rem] sm:text-[0.98rem] text-[#2c4035] leading-relaxed max-w-lg font-normal"
+            >
               Consult experienced homeopathic doctors from the comfort of your home. Get personalised guidance for a healthier, happier tomorrow.
             </p>
 
@@ -271,7 +294,7 @@ export function DoctorConsultation() {
             <div className="mt-6 flex flex-col divide-y divide-black/[0.06] border-y border-black/[0.06] max-w-lg">
               
               {/* Item 1: Video, audio or chat consultations */}
-              <div className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
+              <div data-r-item data-reveal className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
                 <span className="size-9.5 sm:size-10 rounded-full bg-white/45 backdrop-blur-md border border-white/70 shadow-2xs grid place-items-center text-forest shrink-0">
                   <Video className="size-4 stroke-[1.8]" />
                 </span>
@@ -281,7 +304,7 @@ export function DoctorConsultation() {
               </div>
 
               {/* Item 2: Digital prescriptions */}
-              <div className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
+              <div data-r-item data-reveal className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
                 <span className="size-9.5 sm:size-10 rounded-full bg-white/45 backdrop-blur-md border border-white/70 shadow-2xs grid place-items-center text-forest shrink-0">
                   <FileText className="size-4 stroke-[1.8]" />
                 </span>
@@ -291,7 +314,7 @@ export function DoctorConsultation() {
               </div>
 
               {/* Item 3: Follow-up and long-term care */}
-              <div className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
+              <div data-r-item data-reveal className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
                 <span className="size-9.5 sm:size-10 rounded-full bg-white/45 backdrop-blur-md border border-white/70 shadow-2xs grid place-items-center text-forest shrink-0">
                   <CalendarDays className="size-4 stroke-[1.8]" />
                 </span>
@@ -301,7 +324,7 @@ export function DoctorConsultation() {
               </div>
 
               {/* Item 4: Verified and experienced doctors */}
-              <div className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
+              <div data-r-item data-reveal className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
                 <span className="size-9.5 sm:size-10 rounded-full bg-white/45 backdrop-blur-md border border-white/70 shadow-2xs grid place-items-center text-forest shrink-0">
                   <ShieldCheck className="size-4 stroke-[1.8]" />
                 </span>

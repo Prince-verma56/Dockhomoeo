@@ -171,7 +171,24 @@ export function SiteFooter() {
 
         <Separator className="my-10 bg-white/10" />
 
-        <div className="flex flex-col gap-3 text-xs text-cream/50 sm:flex-row sm:items-center sm:justify-between">
+        {/* Build credit. Sits above the legal line, quiet enough that it reads
+            as a signature rather than a second footer row. */}
+        <p className="flex items-center justify-center gap-1.5 text-[0.6875rem] tracking-[0.18em] text-cream/35 uppercase">
+          <span>Made with</span>
+          <span aria-hidden className="text-[0.8125rem] leading-none">&#128293;</span>
+          <span className="sr-only">fire</span>
+          <span>by</span>
+          <a
+            href="https://labs.theangaarbatch.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-sm text-cream/60 underline decoration-cream/20 decoration-from-font underline-offset-4 transition-colors duration-300 hover:text-cream hover:decoration-cream/50 focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-abyss focus-visible:outline-none"
+          >
+            The Angaar Labs
+          </a>
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 text-xs text-cream/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
             &copy; {new Date().getFullYear()} DocHomeo. All rights reserved.
           </p>

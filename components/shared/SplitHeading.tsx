@@ -3,7 +3,13 @@
 import { useRef, type ElementType, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { gsap } from "@/lib/animation/gsap";
-import { DURATION, EASE, STAGGER, prefersReducedMotion } from "@/lib/animation/motion";
+import {
+  DURATION,
+  EASE,
+  STAGGER,
+  prefersReducedMotion,
+  releaseRevealGate,
+} from "@/lib/animation/motion";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 type SplitHeadingProps = {
@@ -25,9 +31,11 @@ type SplitHeadingProps = {
  * The signature masked heading reveal: each line sits in an overflow-hidden
  * wrapper and rises from below its own baseline.
  *
- * Lines render in their final position; GSAP pushes them down in a layout
- * effect before first paint, so there is no flash and no permanently hidden
- * text if JavaScript fails.
+ * Each line ships already pushed below its mask via `data-reveal-line`, so the
+ * heading is never readable before its trigger fires. GSAP takes over the
+ * from-state in a layout effect and releases the gate in the same block. With
+ * JS off or reduced motion requested the gate class is never set and the
+ * heading renders plainly.
  */
 export function SplitHeading({
   lines,
@@ -41,11 +49,19 @@ export function SplitHeading({
 
   useIsomorphicLayoutEffect(() => {
     const root = ref.current;
-    if (!root || prefersReducedMotion()) return;
+    if (!root) return;
+
+    if (prefersReducedMotion()) {
+      releaseRevealGate(root);
+      return;
+    }
 
     const ctx = gsap.context(() => {
       const inner = root.querySelectorAll("[data-line-inner]");
-      if (inner.length === 0) return;
+      if (inner.length === 0) {
+        releaseRevealGate(root);
+        return;
+      }
 
       // fromTo rather than set + to: the from-state is owned by the tween, so
       // it survives a context revert/recreate cycle (which React runs on every
@@ -74,6 +90,8 @@ export function SplitHeading({
               }),
         },
       );
+
+      releaseRevealGate(root);
     }, root);
 
     return () => ctx.revert();
@@ -83,7 +101,11 @@ export function SplitHeading({
     <Tag ref={ref} id={id} className={cn("font-display", className)}>
       {lines.map((line, index) => (
         <span key={index} className="dh-reveal-line">
-          <span data-line-inner className="block will-change-transform">
+          <span
+            data-line-inner
+            data-reveal-line
+            className="block will-change-transform"
+          >
             {line}
           </span>
         </span>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, HeartHandshake, Leaf, ShieldCheck, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ProductCard } from "@/components/commerce/ProductCard";
+import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
 import { bestsellingProducts, productFilters } from "@/data/mock/home";
 
 const ITEMS_PER_VIEW = 4;
@@ -27,6 +28,16 @@ export function BestsellingProducts() {
     return filteredProducts.slice(start, start + ITEMS_PER_VIEW);
   }, [filteredProducts, page]);
 
+  // Heading leads, supporting copy and badges follow, cards land last.
+  const sectionRef = useSectionTimeline<HTMLElement>([
+    { sel: "[data-r-eyebrow]", variant: "rise", at: 0 },
+    { sel: "[data-r-head]", variant: "rise", at: 0.12 },
+    { sel: "[data-r-copy]", variant: "rise", at: 0.26 },
+    { sel: "[data-r-badge]", variant: "rise", at: 0.4 },
+    { sel: "[data-r-bar]", variant: "rise", at: 0.3 },
+    { sel: "[data-r-card]", variant: "card", at: 0.46 },
+  ]);
+
   const handleFilterChange = (tabId: string) => {
     setFilter(tabId);
     setPage(0);
@@ -34,6 +45,7 @@ export function BestsellingProducts() {
 
   return (
     <section
+      ref={sectionRef}
       id="bestselling-section"
       aria-labelledby="bestsellers-heading"
       className="relative text-ink pt-8 sm:pt-12 lg:pt-14 pb-12 sm:pb-16 lg:pb-20 overflow-hidden"
@@ -44,7 +56,7 @@ export function BestsellingProducts() {
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="/Images/ProductsSectionBG.png"
+          src="/Images/ProductsSectionBG.webp"
           alt=""
           aria-hidden="true"
           className="size-full object-cover object-center scale-x-[-1]"
@@ -55,11 +67,14 @@ export function BestsellingProducts() {
           className="pointer-events-none absolute -left-12 top-0 bottom-0 select-none opacity-20 lg:opacity-30"
         >
           <img
-            src="/Images/PNGS/HeroLeftLeaves.png"
+            src="/Images/PNGS/HeroLeftLeaves.webp"
             alt=""
             className="h-full w-auto object-contain filter blur-[0.4px]"
           />
         </div>
+
+        {/* Atmospheric blurred top transition blend connecting seamlessly from Health Goals */}
+        <div aria-hidden="true" className="dh-section-blend-top" />
 
         {/* Atmospheric blurred bottom transition blend connecting seamlessly to Doctor Consultation */}
         <div aria-hidden="true" className="dh-section-blend-bottom" />
@@ -81,7 +96,11 @@ export function BestsellingProducts() {
             {/* Top Text & CTA Block */}
             <div className="flex flex-col items-start relative z-10">
               {/* Eyebrow */}
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/85 backdrop-blur-md border border-[#0c503b]/20 px-3.5 py-1 text-[0.75rem] font-bold text-[#0c503b] tracking-wider uppercase shadow-2xs">
+              <div
+                data-r-eyebrow
+                data-reveal
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/85 backdrop-blur-md border border-[#0c503b]/20 px-3.5 py-1 text-[0.75rem] font-bold text-[#0c503b] tracking-wider uppercase shadow-2xs"
+              >
                 <Sparkles className="size-3.5 text-[#0c503b]" />
                 <span>Top Picks</span>
                 <ArrowRight className="size-3 text-[#0c503b]" />
@@ -89,6 +108,8 @@ export function BestsellingProducts() {
 
               {/* Large Crisp Display Headline (Matching Hero Typography) */}
               <h2
+                data-r-head
+                data-reveal
                 id="bestsellers-heading"
                 className="mt-3.5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.65rem] font-bold tracking-tight text-[#061c12] leading-[1.04] drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]"
               >
@@ -96,12 +117,18 @@ export function BestsellingProducts() {
               </h2>
 
               {/* Subtitle */}
-              <p className="mt-3.5 text-[0.92rem] sm:text-[0.98rem] text-[#143425] font-medium leading-relaxed max-w-sm drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)]">
+              <p
+                data-r-copy
+                data-reveal
+                className="mt-3.5 text-[0.92rem] sm:text-[0.98rem] text-[#143425] font-medium leading-relaxed max-w-sm drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)]"
+              >
                 Most trusted homeopathic remedies for your everyday health and a better tomorrow.
               </p>
 
               {/* Action Button */}
               <Link
+                data-r-copy
+                data-reveal
                 href="/products"
                 className="mt-6 inline-flex items-center justify-center gap-2.5 rounded-full bg-[#0c503b] px-7 py-3.5 text-[0.88rem] sm:text-sm font-semibold text-white shadow-[0_6px_22px_rgba(12,80,59,0.32)] transition-all duration-300 hover:bg-[#07392a] hover:shadow-[0_10px_28px_rgba(12,80,59,0.42)] active:scale-95"
               >
@@ -112,7 +139,7 @@ export function BestsellingProducts() {
 
             {/* Bottom Trust Badges (Open list without enclosing card) */}
             <div className="mt-8 pt-6 border-t border-[#0c503b]/15 flex flex-col gap-3.5 w-full relative z-10">
-              <div className="flex items-center gap-3">
+              <div data-r-badge data-reveal className="flex items-center gap-3">
                 <span className="grid size-9 rounded-full bg-white/95 border border-white shadow-2xs place-items-center text-[#0c503b] shrink-0">
                   <Leaf className="size-4.5 stroke-[2]" />
                 </span>
@@ -122,7 +149,7 @@ export function BestsellingProducts() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div data-r-badge data-reveal className="flex items-center gap-3">
                 <span className="grid size-9 rounded-full bg-white/95 border border-white shadow-2xs place-items-center text-[#0c503b] shrink-0">
                   <ShieldCheck className="size-4.5 stroke-[2]" />
                 </span>
@@ -132,7 +159,7 @@ export function BestsellingProducts() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div data-r-badge data-reveal className="flex items-center gap-3">
                 <span className="grid size-9 rounded-full bg-white/95 border border-white shadow-2xs place-items-center text-[#0c503b] shrink-0">
                   <HeartHandshake className="size-4.5 stroke-[2]" />
                 </span>
@@ -151,7 +178,11 @@ export function BestsellingProducts() {
           <div className="flex-1 min-w-0 w-full flex flex-col justify-between gap-4 sm:gap-5">
             
             {/* Top Filter Bar + Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-black/[0.08]">
+            <div
+              data-r-bar
+              data-reveal
+              className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-black/[0.08]"
+            >
               {/* Animated Filter Pills */}
               <div
                 role="tablist"
@@ -253,11 +284,17 @@ export function BestsellingProducts() {
                       }}
                       className="h-full"
                     >
-                      <ProductCard
-                        product={product}
-                        mediaRatio="aspect-[4/3.5]"
-                        className="rounded-[22px] sm:rounded-[24px] bg-white border border-white/90 shadow-[0_8px_25px_rgba(20,40,30,0.06)] hover:shadow-[0_16px_38px_rgba(13,90,67,0.14)] transition-all duration-300"
-                      />
+                      {/* No `data-reveal` here on purpose: these cards re-mount on every
+                          filter/page change, and the section timeline is `once: true`,
+                          so a gated re-render would have nothing left to release it.
+                          The layout effect hides them before first paint anyway. */}
+                      <div data-r-card className="h-full">
+                        <ProductCard
+                          product={product}
+                          mediaRatio="aspect-[4/3.5]"
+                          className="rounded-[22px] sm:rounded-[24px] bg-white border border-white/90 shadow-[0_8px_25px_rgba(20,40,30,0.06)] hover:shadow-[0_16px_38px_rgba(13,90,67,0.14)] transition-all duration-300"
+                        />
+                      </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>

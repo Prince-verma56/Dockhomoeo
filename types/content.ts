@@ -28,6 +28,7 @@ export type Article = {
   readingMinutes: number;
   href: string;
   mediaLabel: string;
+  image?: string;
 };
 
 export type TrustBenefit = {

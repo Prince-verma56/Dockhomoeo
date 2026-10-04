@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Pre-WebP source images. Kept locally, never served or deployed.
+/assets/source-images/

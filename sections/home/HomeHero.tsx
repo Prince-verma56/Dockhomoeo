@@ -250,11 +250,8 @@ export function HomeHero() {
           className="absolute inset-y-0 left-0 w-full lg:w-[38%] bg-gradient-to-r from-white/20 to-transparent pointer-events-none"
         />
 
-        {/* Minimal soft blend at the bottom */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#f6f2ea]/30 to-transparent pointer-events-none"
-        />
+        {/* Seamless atmospheric bottom blend connecting into Health Goals */}
+        <div aria-hidden className="dh-section-blend-bottom" />
       </div>
 
       {/* ----------------------------------------------------------------- */}
@@ -477,7 +474,7 @@ export function HomeHero() {
             {/* Left Leaf: Layer 3 (Inner image for ambient breathing breeze) */}
             <img
               ref={leftLeafInnerRef}
-              src="/Images/PNGS/HeroLeftLeaves.png"
+              src="/Images/PNGS/HeroLeftLeaves.webp"
               alt=""
               aria-hidden="true"
               className="w-full h-auto object-contain object-left-bottom select-none"
@@ -495,7 +492,7 @@ export function HomeHero() {
             {/* Right Leaf: Layer 3 (Inner image for ambient breathing breeze) */}
             <img
               ref={rightLeafInnerRef}
-              src="/Images/PNGS/HeroRightLeaves.png"
+              src="/Images/PNGS/HeroRightLeaves.webp"
               alt=""
               aria-hidden="true"
               className="w-full h-auto object-contain object-right-bottom select-none"

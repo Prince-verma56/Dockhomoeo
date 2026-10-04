@@ -3,7 +3,13 @@
 import { useRef, type ElementType, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { gsap } from "@/lib/animation/gsap";
-import { DURATION, EASE, STAGGER, prefersReducedMotion } from "@/lib/animation/motion";
+import {
+  DURATION,
+  EASE,
+  STAGGER,
+  prefersReducedMotion,
+  releaseRevealGate,
+} from "@/lib/animation/motion";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 type RevealProps = {
@@ -25,9 +31,13 @@ type RevealProps = {
 /**
  * Scroll-triggered entrance for a block or a group of its children.
  *
- * The "from" state is applied by GSAP in a layout effect, never in markup, so
- * server-rendered content is visible on first paint and stays visible if the
- * animation never runs (brain/23_ACCESSIBILITY_SPEC.md).
+ * The wrapper ships with `data-reveal`, so CSS hides it before first paint and
+ * the copy is never readable ahead of its own trigger. GSAP takes ownership of
+ * the from-state in a layout effect and releases the gate in the same block.
+ *
+ * If JavaScript never runs, or reduced motion is requested, the gate class is
+ * never set on <html> and the content simply renders visible
+ * (brain/23_ACCESSIBILITY_SPEC.md).
  */
 export function Reveal({
   children,
@@ -42,14 +52,22 @@ export function Reveal({
 
   useIsomorphicLayoutEffect(() => {
     const root = ref.current;
-    if (!root || prefersReducedMotion()) return;
+    if (!root) return;
+
+    if (prefersReducedMotion()) {
+      releaseRevealGate(root);
+      return;
+    }
 
     const ctx = gsap.context(() => {
       const targets: Element[] = stagger
         ? Array.from(root.querySelectorAll(stagger))
         : [root];
 
-      if (targets.length === 0) return;
+      if (targets.length === 0) {
+        releaseRevealGate(root);
+        return;
+      }
 
       // fromTo keeps the from-state owned by the tween, so it is re-applied
       // whenever the context is rebuilt or ScrollTrigger refreshes.
@@ -71,13 +89,17 @@ export function Reveal({
           },
         },
       );
+
+      // fromTo renders its from-state immediately, so the targets are already
+      // hidden by inline style here. Safe to drop the CSS gate.
+      releaseRevealGate(root);
     }, root);
 
     return () => ctx.revert();
   }, [y, delay, stagger, start]);
 
   return (
-    <Tag ref={ref} className={cn(className)}>
+    <Tag ref={ref} data-reveal className={cn(className)}>
       {children}
     </Tag>
   );

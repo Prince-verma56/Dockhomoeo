@@ -2,27 +2,111 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { healthGoals } from "@/data/mock/home";
 import { gsap } from "@/lib/animation/gsap";
+
+/**
+ * Curated Health Goal definitions enriched with authentic pharmacopoeia
+ * active botanicals and category focus to match the Mediterranean apothecary aesthetic:
+ */
+const healthGoalData = [
+  {
+    id: "immunity",
+    name: "Immunity",
+    tag: "DEFENSE & VITALITY",
+    herbs: "Echinacea · Aconite · Zincum",
+    remedies: "32 remedies",
+    image: "/Images/HealthGoals/immunity.webp",
+    href: "/products?goal=immunity",
+  },
+  {
+    id: "skin-care",
+    name: "Skin Care",
+    tag: "GLOW & PURITY",
+    herbs: "Calendula · Berberis · Sulphur",
+    remedies: "28 remedies",
+    image: "/Images/HealthGoals/skincare.webp",
+    href: "/products?goal=skin-care",
+  },
+  {
+    id: "hair-care",
+    name: "Hair Care",
+    tag: "ROOT STRENGTH",
+    herbs: "Arnica · Jaborandi · Thuja",
+    remedies: "24 remedies",
+    image: "/Images/HealthGoals/haircare.webp",
+    href: "/products?goal=hair-care",
+  },
+  {
+    id: "digestive",
+    name: "Digestive",
+    tag: "GUT BALANCE",
+    herbs: "Nux Vomica · Carbo Veg",
+    remedies: "36 remedies",
+    image: "/Images/HealthGoals/digestive.webp",
+    href: "/products?goal=digestive",
+  },
+  {
+    id: "womens-health",
+    name: "Women's Health",
+    tag: "HORMONE HARMONY",
+    herbs: "Pulsatilla · Sepia · Ashoka",
+    remedies: "30 remedies",
+    image: "/Images/HealthGoals/womens-health.webp",
+    href: "/products?goal=womens-health",
+  },
+  {
+    id: "children",
+    name: "Children",
+    tag: "GENTLE PEDIATRIC",
+    herbs: "Chamomilla · Calcarea Carb",
+    remedies: "22 remedies",
+    image: "/Images/HealthGoals/children.webp",
+    href: "/products?goal=children",
+  },
+  {
+    id: "joint-bone",
+    name: "Joint & Bone",
+    tag: "MOBILITY & FLEX",
+    herbs: "Rhus Tox · Bryonia Alba",
+    remedies: "26 remedies",
+    image: "/Images/HealthGoals/joint-bone.webp",
+    href: "/products?goal=joint-bone",
+  },
+  {
+    id: "respiratory",
+    name: "Respiratory",
+    tag: "CLEAR BREATHING",
+    herbs: "Drosera · Justicia Adhatoda",
+    remedies: "25 remedies",
+    image: "/Images/HealthGoals/respiratory.webp",
+    href: "/products?goal=respiratory",
+  },
+  {
+    id: "sleep-stress",
+    name: "Sleep & Stress",
+    tag: "CALM & DEEP REST",
+    herbs: "Passiflora · Kali Phosphoricum",
+    remedies: "19 remedies",
+    image: "/Images/HealthGoals/sleep-stress.webp",
+    href: "/products?goal=sleep-stress",
+  },
+];
 
 /**
  * HealthGoals Section
  *
- * Implements a grand, generously scaled floating frosted glass shelf:
- * 1. Prominent scale & height — luxury console proportions that feel substantial and harmonious.
- * 2. Large 3D botanical icons (82px-96px pedestals) with tactile presence and smooth hover lifts.
- * 3. Full, readable labels without any truncation ("Women's Health", "Sleep & Stress", etc.).
- * 4. Perfectly balanced vertical positioning after the Hero section without empty void gaps.
- * 5. Organic curved wave shape separator cradling the shelf and transitioning into Bestselling section.
+ * Harmonized with NaturalWellBG.png color theme:
+ * - Cards tuned to warm Tuscan travertine limestone & botanical parchment tones
+ * - Seamless blend-multiply on botanical sculptures (zero square boundary lines)
+ * - Enriched content: domain tag, 3D sculpture, active botanical herbs, remedy count, and micro-action
+ * - Silky smooth 60fps GPU parallax navigation
  */
 export function HealthGoals() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const shelfRef = useRef<HTMLDivElement | null>(null);
+  const bgRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const waveBackRef = useRef<HTMLDivElement | null>(null);
-  const waveFrontRef = useRef<HTMLDivElement | null>(null);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -32,8 +116,8 @@ export function HealthGoals() {
     const track = trackRef.current;
     if (!track) return;
     const { scrollLeft, scrollWidth, clientWidth } = track;
-    setCanScrollLeft(scrollLeft > 6);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
+    setCanScrollLeft(scrollLeft > 8);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 8);
   }, []);
 
   useEffect(() => {
@@ -42,76 +126,33 @@ export function HealthGoals() {
     return () => window.removeEventListener("resize", checkScroll);
   }, [checkScroll]);
 
-  // Scroll carousel left/right
+  // Smooth carousel scroll
   const handleScroll = (direction: "left" | "right") => {
     const track = trackRef.current;
     if (!track) return;
-    const scrollAmount = direction === "left" ? -320 : 320;
+    const scrollAmount = direction === "left" ? -420 : 420;
     track.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    setTimeout(checkScroll, 320);
+    setTimeout(checkScroll, 350);
   };
 
-  // Setup GSAP Multi-Plane Parallax Animation
+  // Hardware-accelerated lightweight GSAP Scroll Parallax
   useEffect(() => {
-    if (!sectionRef.current || !shelfRef.current) return;
+    if (!sectionRef.current || !bgRef.current) return;
 
     const ctx = gsap.context(() => {
-      // 1. Floating Shelf Parallax: floats up smoothly as user scrolls
-      gsap.to(shelfRef.current, {
-        y: -26,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // 2. Organic Wave Back Layer Parallax
-      if (waveBackRef.current) {
-        gsap.to(waveBackRef.current, {
-          y: -18,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.9,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
-
-      // 3. Organic Wave Front Layer Parallax
-      if (waveFrontRef.current) {
-        gsap.to(waveFrontRef.current, {
-          y: -10,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.0,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
-
-      // 4. Smooth entrance reveal when section approaches viewport
       gsap.fromTo(
-        shelfRef.current,
-        { opacity: 0.92, y: 16 },
+        bgRef.current,
+        { yPercent: -5, force3D: true },
         {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: "power2.out",
+          yPercent: 5,
+          ease: "none",
+          force3D: true,
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: "top 85%",
-            toggleActions: "play none none none",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+            fastScrollEnd: true,
           },
         }
       );
@@ -124,160 +165,143 @@ export function HealthGoals() {
     <section
       ref={sectionRef}
       id="health-goals"
-      aria-label="Find remedies by health goal"
-      className="relative z-20 bg-gradient-to-b from-[#f6f2ea] via-[#faf8f4] to-[#f6f2ea] pt-4 sm:pt-6 lg:pt-8 pb-20 sm:pb-24 lg:pb-28 overflow-hidden"
+      aria-labelledby="health-goals-heading"
+      className="relative z-10 w-full overflow-hidden pt-14 sm:pt-18 lg:pt-22 pb-16 sm:pb-20 lg:pb-24"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. FLOATING FROSTED GLASS SHELF (Generously Scaled & Proportioned) */}
+      {/* 1. SCENIC NATURAL WELLNESS BACKGROUND WITH BUTTER-SMOOTH PARALLAX */}
       {/* ----------------------------------------------------------------- */}
-      <Container width="wide" className="relative z-20">
-        <div
-          ref={shelfRef}
-          className="mx-auto w-full max-w-[1380px] rounded-[32px] sm:rounded-[40px] lg:rounded-[48px] bg-white/90 dark:bg-[#14231b]/90 backdrop-blur-2xl border border-white shadow-[0_24px_55px_-12px_rgba(20,40,30,0.1),0_2px_8px_rgba(0,0,0,0.03),inset_0_1.5px_1.5px_rgba(255,255,255,1)] px-5 py-5 sm:px-8 sm:py-6 lg:px-9 lg:py-7 will-change-transform transition-shadow duration-300 hover:shadow-[0_28px_65px_-12px_rgba(20,40,30,0.14)]"
-        >
-          <div className="flex flex-col md:flex-row md:items-center gap-4 sm:gap-5 lg:gap-6">
-            
-            {/* Left Header Block */}
-            <div className="shrink-0 flex items-center justify-between md:block md:w-[220px] lg:w-[245px]">
-              <div>
-                <h2 className="text-[1.32rem] sm:text-[1.5rem] lg:text-[1.65rem] font-bold text-[#11241c] tracking-tight leading-[1.18]">
-                  Find by Health Goal
-                </h2>
-                <p className="mt-1 text-[0.8rem] sm:text-[0.84rem] text-[#4d5e56] leading-relaxed">
-                  Explore natural solutions for every stage of life.
-                </p>
-              </div>
+      <div
+        ref={bgRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -top-[7%] h-[114%] select-none will-change-transform -z-10 [transform:translate3d(0,0,0)] [backface-visibility:hidden]"
+      >
+        <img
+          src="/Images/NaturalWellBG.webp"
+          alt=""
+          className="size-full object-cover object-[center_34%]"
+        />
+      </div>
 
-              {/* Mobile Carousel Controls */}
-              <div className="flex items-center gap-2 md:hidden">
-                <button
-                  type="button"
-                  onClick={() => handleScroll("left")}
-                  disabled={!canScrollLeft}
-                  aria-label="Previous health goals"
-                  className="size-9 rounded-full bg-white text-[#14251f] shadow-xs border border-line/60 flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95"
-                >
-                  <ChevronLeft className="size-4.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleScroll("right")}
-                  disabled={!canScrollRight}
-                  aria-label="Next health goals"
-                  className="size-9 rounded-full bg-white text-[#14251f] shadow-xs border border-line/60 flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95"
-                >
-                  <ChevronRight className="size-4.5" />
-                </button>
-              </div>
+      {/* Subtle bottom blur blend to connect seamlessly to Bestselling Products */}
+      <div aria-hidden className="dh-section-blend-bottom" />
+
+      {/* ----------------------------------------------------------------- */}
+      {/* 2. SECTION CONTENT                                                */}
+      {/* ----------------------------------------------------------------- */}
+      <Container width="wide" className="relative z-10">
+        
+        {/* Header Block (Pure, clean text directly on the sunlit wall) */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-black/[0.06]">
+          <div className="max-w-xl">
+            {/* Prestige Eyebrow Badge */}
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.18em] uppercase shadow-2xs transition-colors">
+              <Sparkles className="size-3 text-[#0c503b]" />
+              <span>NATURAL WELLNESS PATHS</span>
             </div>
 
-            {/* Vertical Frosted Divider */}
-            <div
-              className="hidden md:block w-px h-20 bg-black/10 shrink-0 mx-1 lg:mx-2"
-              aria-hidden="true"
-            />
+            {/* Display Heading (Plus Jakarta Sans) */}
+            <h2
+              id="health-goals-heading"
+              className="mt-3.5 font-sans text-3xl sm:text-4xl lg:text-[2.65rem] font-bold tracking-tight text-[#0a1e16] leading-tight"
+            >
+              Find by Health Goal
+            </h2>
 
-            {/* Desktop Left Carousel Control (<) */}
+            <p className="mt-2 text-[0.92rem] sm:text-[1rem] text-[#284236] font-medium leading-relaxed">
+              Explore targeted homeopathic remedies formulated by certified laboratories for your specific health needs.
+            </p>
+          </div>
+
+          {/* Controls: "View All Categories" Link & Carousel Arrow Buttons */}
+          <div className="flex items-center gap-3 self-start md:self-end shrink-0">
+            <Link
+              href="/products"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-[0.84rem] font-bold text-[#0c503b] hover:text-[#063b2d] bg-white/75 hover:bg-white backdrop-blur-md border border-white/80 px-4 py-2 rounded-full shadow-2xs transition-all mr-1"
+            >
+              <span>View all categories</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+
             <button
               type="button"
               onClick={() => handleScroll("left")}
               disabled={!canScrollLeft}
               aria-label="Previous health goals"
-              className="hidden md:flex size-10 lg:size-11 shrink-0 rounded-full bg-white hover:bg-white text-[#14251f] shadow-[0_3px_12px_rgba(0,0,0,0.08)] border border-[#e4eae6] items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="size-10 sm:size-11 rounded-full bg-white/80 hover:bg-[#0c503b] text-[#11241b] hover:text-white backdrop-blur-md border border-white/80 shadow-2xs hover:shadow-xs grid place-items-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
-              <ChevronLeft className="size-5" />
+              <ChevronLeft className="size-5 stroke-[2]" />
             </button>
 
-            {/* Scrollable Track of Scaled-Up Botanical Health Goals */}
-            <div
-              ref={trackRef}
-              onScroll={checkScroll}
-              className="flex-1 flex items-center gap-3 sm:gap-4 lg:gap-5 overflow-x-auto no-scrollbar scroll-smooth py-1.5 px-1"
-            >
-              {healthGoals.map((goal) => (
-                <Link
-                  key={goal.id}
-                  href={goal.href}
-                  className="group flex flex-col items-center shrink-0 w-[88px] sm:w-[98px] lg:w-[106px] select-none outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:rounded-2xl"
-                >
-                  {/* Generously Scaled Soft White Pedestal with 3D Botanical Sculpture */}
-                  <div className="relative size-[78px] sm:size-[86px] lg:size-[94px] rounded-[20px] sm:rounded-[24px] bg-white border border-[#e0e6e2] shadow-[0_4px_14px_rgba(0,0,0,0.04)] group-hover:shadow-[0_10px_24px_rgba(13,90,67,0.15)] group-hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center p-2 overflow-hidden">
-                    <img
-                      src={goal.image || `/Images/HealthGoals/${goal.id}.jpg`}
-                      alt=""
-                      aria-hidden="true"
-                      className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300 drop-shadow-xs"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  {/* Clean, Full Non-Truncated Category Label */}
-                  <span className="mt-2 text-[0.78rem] sm:text-[0.82rem] font-semibold text-[#182a22] group-hover:text-forest transition-colors text-center whitespace-nowrap tracking-tight">
-                    {goal.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-
-            {/* Desktop Right Carousel Control (>) */}
             <button
               type="button"
               onClick={() => handleScroll("right")}
               disabled={!canScrollRight}
               aria-label="Next health goals"
-              className="hidden md:flex size-10 lg:size-11 shrink-0 rounded-full bg-white hover:bg-white text-[#14251f] shadow-[0_3px_12px_rgba(0,0,0,0.08)] border border-[#e4eae6] items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="size-10 sm:size-11 rounded-full bg-white/80 hover:bg-[#0c503b] text-[#11241b] hover:text-white backdrop-blur-md border border-white/80 shadow-2xs hover:shadow-xs grid place-items-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
-              <ChevronRight className="size-5" />
+              <ChevronRight className="size-5 stroke-[2]" />
             </button>
           </div>
         </div>
+
+        {/* --------------------------------------------------------------- */}
+        {/* 3. WARM TRAVERTINE APOTHECARY REMEDY CARDS                       */}
+        {/* --------------------------------------------------------------- */}
+        <div className="relative mt-8">
+          <div
+            ref={trackRef}
+            onScroll={checkScroll}
+            className="flex items-stretch gap-4 sm:gap-5 lg:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-3 px-1"
+          >
+            {healthGoalData.map((goal) => (
+              <Link
+                key={goal.id}
+                href={goal.href}
+                className="group relative flex flex-col justify-between w-[175px] sm:w-[195px] lg:w-[215px] shrink-0 rounded-[26px] sm:rounded-[30px] bg-[#faf5eb]/85 hover:bg-[#fffcf6]/95 backdrop-blur-xl border border-[#dccfb8]/50 hover:border-[#0c503b]/45 p-4 sm:p-5 shadow-[0_8px_28px_rgba(35,28,16,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.85)] hover:shadow-[0_20px_45px_rgba(12,80,59,0.14)] hover:-translate-y-2 transition-all duration-300 select-none outline-none focus-visible:ring-2 focus-visible:ring-[#0c503b]"
+              >
+                {/* Top: Category Discipline Tag */}
+                <div className="w-full flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#0c503b]/8 border border-[#0c503b]/12 px-2.5 py-0.5 text-[0.62rem] sm:text-[0.66rem] font-bold text-[#0c503b] tracking-wider uppercase">
+                    {goal.tag}
+                  </span>
+                </div>
+
+                {/* Center: 3D Botanical Sculpture (Seamlessly blends into warm travertine card) */}
+                <div className="my-auto w-full aspect-square max-h-[125px] sm:max-h-[140px] flex items-center justify-center p-1 relative overflow-hidden">
+                  <img
+                    src={goal.image}
+                    alt={goal.name}
+                    className="w-full h-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-400 ease-out"
+                    loading="lazy"
+                  />
+                </div>
+
+                {/* Bottom: Title & Active Pharmacopoeia Botanicals */}
+                <div className="mt-2 text-center w-full">
+                  <h3 className="text-[0.98rem] sm:text-[1.05rem] font-bold text-[#0a1e16] group-hover:text-[#0c503b] tracking-tight transition-colors line-clamp-1">
+                    {goal.name}
+                  </h3>
+                  <p className="mt-0.5 text-[0.68rem] sm:text-[0.72rem] text-[#607669] font-medium truncate">
+                    {goal.herbs}
+                  </p>
+                </div>
+
+                {/* Footer Bar: Remedy Count & Micro Action Button */}
+                <div className="mt-2.5 pt-2 border-t border-black/[0.05] flex items-center justify-between w-full">
+                  <span className="text-[0.72rem] font-bold text-[#0c503b]">
+                    {goal.remedies}
+                  </span>
+                  <span className="size-6 sm:size-6.5 rounded-full bg-[#0c503b]/10 group-hover:bg-[#0c503b] text-[#0c503b] group-hover:text-white flex items-center justify-center transition-all duration-300">
+                    <ArrowRight className="size-3 stroke-[2.2]" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
       </Container>
-
-      {/* ----------------------------------------------------------------- */}
-      {/* 2. ORGANIC CURVED SHAPE SEPARATOR (Parallax Wave to Bestsellers)  */}
-      {/* ----------------------------------------------------------------- */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden z-10 leading-none">
-        {/* Back organic wave: soft translucent warm dune tint */}
-        <div
-          ref={waveBackRef}
-          className="w-full will-change-transform translate-y-1"
-        >
-          <svg
-            viewBox="0 0 1440 140"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-16 sm:h-24 lg:h-32 object-fill"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M0,45 C280,95 560,15 840,55 C1120,95 1320,25 1440,40 L1440,140 L0,140 Z"
-              fill="#ede7dc"
-              fillOpacity="0.6"
-            />
-          </svg>
-        </div>
-
-        {/* Front organic wave: matches next section's cream surface (#f6f2ea) */}
-        <div
-          ref={waveFrontRef}
-          className="w-full will-change-transform -mt-10 sm:-mt-14 lg:-mt-20"
-        >
-          <svg
-            viewBox="0 0 1440 140"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-16 sm:h-24 lg:h-32 object-fill drop-shadow-[0_-4px_12px_rgba(20,40,30,0.03)]"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M0,60 C320,110 580,25 880,60 C1160,95 1340,30 1440,50 L1440,140 L0,140 Z"
-              fill="#f6f2ea"
-            />
-          </svg>
-        </div>
-      </div>
     </section>
   );
 }

@@ -108,15 +108,15 @@ export const heroStats = [
 /* -------------------------------------------------------------------------- */
 
 export const healthGoals: HealthGoal[] = [
-  { id: "immunity", name: "Immunity", icon: "shield-check", href: "/products?goal=immunity", image: "/Images/HealthGoals/immunity.jpg" },
-  { id: "skin-care", name: "Skin Care", icon: "sparkles", href: "/products?goal=skin-care", image: "/Images/HealthGoals/skincare.jpg" },
-  { id: "hair-care", name: "Hair Care", icon: "leaf", href: "/products?goal=hair-care", image: "/Images/HealthGoals/haircare.jpg" },
-  { id: "digestive", name: "Digestive", icon: "flask-conical", href: "/products?goal=digestive", image: "/Images/HealthGoals/digestive.jpg" },
-  { id: "womens-health", name: "Women's Health", icon: "flower-2", href: "/products?goal=womens-health", image: "/Images/HealthGoals/womens-health.jpg" },
-  { id: "children", name: "Children", icon: "baby", href: "/products?goal=children", image: "/Images/HealthGoals/children.jpg" },
-  { id: "joint-bone", name: "Joint & Bone", icon: "bone", href: "/products?goal=joint-bone", image: "/Images/HealthGoals/joint-bone.jpg" },
-  { id: "respiratory", name: "Respiratory", icon: "wind", href: "/products?goal=respiratory", image: "/Images/HealthGoals/respiratory.jpg" },
-  { id: "sleep-stress", name: "Sleep & Stress", icon: "moon", href: "/products?goal=sleep-stress", image: "/Images/HealthGoals/sleep-stress.jpg" },
+  { id: "immunity", name: "Immunity", icon: "shield-check", href: "/products?goal=immunity", image: "/Images/HealthGoals/immunity.webp" },
+  { id: "skin-care", name: "Skin Care", icon: "sparkles", href: "/products?goal=skin-care", image: "/Images/HealthGoals/skincare.webp" },
+  { id: "hair-care", name: "Hair Care", icon: "leaf", href: "/products?goal=hair-care", image: "/Images/HealthGoals/haircare.webp" },
+  { id: "digestive", name: "Digestive", icon: "flask-conical", href: "/products?goal=digestive", image: "/Images/HealthGoals/digestive.webp" },
+  { id: "womens-health", name: "Women's Health", icon: "flower-2", href: "/products?goal=womens-health", image: "/Images/HealthGoals/womens-health.webp" },
+  { id: "children", name: "Children", icon: "baby", href: "/products?goal=children", image: "/Images/HealthGoals/children.webp" },
+  { id: "joint-bone", name: "Joint & Bone", icon: "bone", href: "/products?goal=joint-bone", image: "/Images/HealthGoals/joint-bone.webp" },
+  { id: "respiratory", name: "Respiratory", icon: "wind", href: "/products?goal=respiratory", image: "/Images/HealthGoals/respiratory.webp" },
+  { id: "sleep-stress", name: "Sleep & Stress", icon: "moon", href: "/products?goal=sleep-stress", image: "/Images/HealthGoals/sleep-stress.webp" },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -137,7 +137,7 @@ export const bestsellingProducts: Product[] = [
     badge: "bestseller",
     tone: "clear",
     mediaLabel: "Immunity Support 30 CH bottle on stone pedestal",
-    image: "/Images/Products/sbl-natrum.jpg",
+    image: "/Images/Products/sbl-natrum.webp",
   },
   {
     id: "p-002",
@@ -152,7 +152,7 @@ export const bestsellingProducts: Product[] = [
     badge: "popular",
     tone: "amber",
     mediaLabel: "Digestive Care Drops amber bottle on stone pedestal",
-    image: "/Images/Products/reckeweg-r41.jpg",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "p-003",
@@ -167,7 +167,7 @@ export const bestsellingProducts: Product[] = [
     badge: "for-pain",
     tone: "clear",
     mediaLabel: "Arnica Pellets 200 on stone pedestal",
-    image: "/Images/Products/boiron-arnica.jpg",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-004",
@@ -182,7 +182,7 @@ export const bestsellingProducts: Product[] = [
     badge: "trending",
     tone: "amber",
     mediaLabel: "Arnica Massage Oil bottle on stone pedestal",
-    image: "/Images/Products/bakson-arnica-oil.jpg",
+    image: "/Images/Products/bakson-arnica-oil.webp",
   },
   {
     id: "p-005",
@@ -197,7 +197,7 @@ export const bestsellingProducts: Product[] = [
     badge: "new",
     tone: "clear",
     mediaLabel: "Kali Phos 6X bottle on stone pedestal",
-    image: "/Images/Products/lords-kali-phos.jpg",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-006",
@@ -212,7 +212,7 @@ export const bestsellingProducts: Product[] = [
     badge: "trending",
     tone: "amber",
     mediaLabel: "Respiratory Care Drops bottle on stone pedestal",
-    image: "/Images/Products/reckeweg-r89.jpg",
+    image: "/Images/Products/reckeweg-r89.webp",
   },
   {
     id: "p-007",
@@ -227,7 +227,7 @@ export const bestsellingProducts: Product[] = [
     badge: "for-skin",
     tone: "clear",
     mediaLabel: "Calendula Cream jar on stone pedestal",
-    image: "/Images/Products/sbl-calc-carb.jpg",
+    image: "/Images/Products/sbl-calc-carb.webp",
   },
   {
     id: "p-008",
@@ -242,7 +242,7 @@ export const bestsellingProducts: Product[] = [
     badge: "popular",
     tone: "amber",
     mediaLabel: "Hair Care Drops bottle on stone pedestal",
-    image: "/Images/Products/schwabe-alfalfa.jpg",
+    image: "/Images/Products/schwabe-alfalfa.webp",
   },
 ];
 
@@ -439,28 +439,31 @@ export const testimonials: Testimonial[] = [
 export const articles: Article[] = [
   {
     id: "a-1",
-    title: "How homoeopathy fits into everyday wellness",
+    title: "How Homeopathy Supports Immunity Naturally",
     category: "Wellness",
     readingMinutes: 5,
-    href: "/learn/homoeopathy-everyday-wellness",
+    href: "/learn/homeopathy-supports-immunity",
+    image: "/Images/journal_immunity.webp",
     mediaLabel:
-      "Flat-lay of remedy bottles and a notebook on a linen surface, daylight",
+      "Homeopathic medicine dropper bottle with chamomile flowers and mountain landscape",
   },
   {
     id: "a-2",
-    title: "Natural care routines for children",
+    title: "Natural Care for Children's Health",
     category: "Family",
     readingMinutes: 5,
     href: "/learn/natural-care-for-children",
-    mediaLabel: "Child's hands holding a small remedy tube, warm natural light",
+    image: "/Images/journal_children.webp",
+    mediaLabel: "Smiling happy child playing outdoors in a sunlit green meadow",
   },
   {
     id: "a-3",
-    title: "Women's wellness through every stage",
+    title: "Women's Wellness Through Homeopathy",
     category: "Women's Health",
     readingMinutes: 5,
     href: "/learn/womens-wellness",
-    mediaLabel: "Woman seated by a window with a cup of herbal tea, soft morning light",
+    image: "/Images/journal_women.webp",
+    mediaLabel: "Serene woman meditating in a bright sunny botanical wellness room",
   },
 ];
 
