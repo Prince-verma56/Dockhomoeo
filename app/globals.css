@@ -1,26 +1,388 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =========================================================================
+   DocHomeo design tokens
+   Source of truth: brain/18_DESIGN_TOKENS.md
+   Brand primitives live on :root as --dh-*. The semantic shadcn tokens are
+   mapped onto them so every shadcn primitive inherits the brand palette.
+   ========================================================================= */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- brand primitives --- */
+  --dh-bg: #f6f2ea;
+  --dh-surface: #fffdf8;
+  --dh-surface-sunk: #efeade;
+  --dh-ink: #14251f;
+  --dh-primary: #0d5a43;
+  --dh-primary-deep: #063b2d;
+  --dh-primary-abyss: #042a20;
+  --dh-sage: #b8c9b6;
+  --dh-sage-tint: #e8eee3;
+  --dh-line: #d9ddd3;
+  --dh-muted: #66716c;
+  --dh-accent-warm: #c98e55;
+  --dh-accent-warm-soft: #e8c9a3;
+
+  /* --- motion tokens --- */
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 200ms;
+  --duration-medium: 520ms;
+  --duration-slow: 940ms;
+
+  /* --- geometry --- */
+  --radius: 0.875rem;
+  --radius-card-lg: 1.375rem;
+  --radius-frame-lg: 2rem;
+
+  /* --- shadows: soft, low contrast, never black --- */
+  --shadow-soft: 0 1px 2px rgba(20, 37, 31, 0.04),
+    0 8px 24px -12px rgba(20, 37, 31, 0.1);
+  --shadow-lift: 0 2px 4px rgba(20, 37, 31, 0.04),
+    0 18px 44px -20px rgba(20, 37, 31, 0.18);
+  --shadow-float: 0 4px 10px rgba(20, 37, 31, 0.05),
+    0 32px 68px -28px rgba(20, 37, 31, 0.24);
+
+  /* --- semantic (shadcn) --- */
+  --background: var(--dh-bg);
+  --foreground: var(--dh-ink);
+  --card: var(--dh-surface);
+  --card-foreground: var(--dh-ink);
+  --popover: var(--dh-surface);
+  --popover-foreground: var(--dh-ink);
+  --primary: var(--dh-primary);
+  --primary-foreground: #f7f5ee;
+  --secondary: var(--dh-sage-tint);
+  --secondary-foreground: var(--dh-primary-deep);
+  --muted: #eceadf;
+  --muted-foreground: var(--dh-muted);
+  --accent: var(--dh-sage-tint);
+  --accent-foreground: var(--dh-primary-deep);
+  --destructive: #a63d2f;
+  --border: var(--dh-line);
+  --input: var(--dh-line);
+  --ring: var(--dh-primary);
+  --chart-1: var(--dh-primary);
+  --chart-2: var(--dh-sage);
+  --chart-3: var(--dh-accent-warm);
+  --chart-4: var(--dh-muted);
+  --chart-5: var(--dh-primary-deep);
+  --sidebar: var(--dh-surface);
+  --sidebar-foreground: var(--dh-ink);
+  --sidebar-primary: var(--dh-primary);
+  --sidebar-primary-foreground: #f7f5ee;
+  --sidebar-accent: var(--dh-sage-tint);
+  --sidebar-accent-foreground: var(--dh-primary-deep);
+  --sidebar-border: var(--dh-line);
+  --sidebar-ring: var(--dh-primary);
+}
+
+/* The brand is a light, ivory-first system. This map exists only so shadcn
+   primitives stay legible if a dark surface is ever opted into. */
+.dark {
+  --background: var(--dh-primary-abyss);
+  --foreground: #eef2ea;
+  --card: var(--dh-primary-deep);
+  --card-foreground: #eef2ea;
+  --popover: var(--dh-primary-deep);
+  --popover-foreground: #eef2ea;
+  --primary: #a9c8b4;
+  --primary-foreground: var(--dh-primary-abyss);
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #eef2ea;
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: #9fb0a6;
+  --accent: rgba(255, 255, 255, 0.1);
+  --accent-foreground: #eef2ea;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #a9c8b4;
 }
 
 @theme inline {
+  /* colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ivory: var(--dh-bg);
+  --color-cream: var(--dh-surface);
+  --color-cream-sunk: var(--dh-surface-sunk);
+  --color-ink: var(--dh-ink);
+  --color-forest: var(--dh-primary);
+  --color-forest-deep: var(--dh-primary-deep);
+  --color-forest-abyss: var(--dh-primary-abyss);
+  --color-sage: var(--dh-sage);
+  --color-sage-tint: var(--dh-sage-tint);
+  --color-line: var(--dh-line);
+  --color-muted-ink: var(--dh-muted);
+  --color-warm: var(--dh-accent-warm);
+  --color-warm-soft: var(--dh-accent-warm-soft);
+
+  /* typography */
+  --font-sans: var(--font-sans-main), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans-main), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-sans-main), ui-sans-serif, system-ui, sans-serif;
+
+  /* geometry */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-card: var(--radius-card-lg);
+  --radius-frame: var(--radius-frame-lg);
+
+  /* shadows */
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-float: var(--shadow-float);
+
+  /* motion */
+  --ease-premium: var(--ease-premium);
+  --ease-soft: var(--ease-soft);
+
+  /* shadcn passthrough */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* The page is an art-directed composition; no section may create a
+       horizontal scrollbar on small viewports. */
+    overflow-x: clip;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+}
+
+@layer utilities {
+  /* Display heading face, matching the bold modern hero typography everywhere. */
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  /* Procedural film grain. CSS only, no asset, kept under 4% so it reads as
+     paper texture rather than noise. Used on a handful of large surfaces. */
+  .dh-grain {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .dh-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .dh-grain-dark::after {
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+  }
+
+  /* Uppercase micro-label used for eyebrows and utility text. */
+  .dh-eyebrow {
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Edge fade for horizontal rails, so a cut-off card reads as intentional. */
+  .dh-rail-mask {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 28px,
+      #000 calc(100% - 44px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 28px,
+      #000 calc(100% - 44px),
+      transparent 100%
+    );
+  }
+
+  .dh-no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .dh-no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Wrapper for a masked heading line. The "from" state is set by GSAP in a
+     layout effect; if JS never runs the line simply stays visible. */
+  .dh-reveal-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+
+  /* Atmospheric blurred blend at bottom of scenic section for seamless connectivity */
+  .dh-section-blend-bottom {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 8rem;
+    pointer-events: none;
+    z-index: 10;
+    background: linear-gradient(to bottom, transparent 0%, rgba(246, 242, 234, 0.65) 50%, #f6f2ea 100%);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
+  }
+
+  @media (min-width: 640px) {
+    .dh-section-blend-bottom {
+      height: 11rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dh-section-blend-bottom {
+      height: 13rem;
+    }
+  }
+
+  /* Atmospheric blurred blend at top of scenic section for seamless connectivity */
+  .dh-section-blend-top {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 8rem;
+    pointer-events: none;
+    z-index: 10;
+    background: linear-gradient(to top, transparent 0%, rgba(246, 242, 234, 0.65) 50%, #f6f2ea 100%);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
+    mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.4) 30%, #000 100%);
+  }
+
+  @media (min-width: 640px) {
+    .dh-section-blend-top {
+      height: 11rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dh-section-blend-top {
+      height: 13rem;
+    }
+  }
+
+  /* Organic diffused frosted blur backing for text legibility over scenic backgrounds (not a card box) */
+  .dh-diffuse-blur-backdrop {
+    position: absolute;
+    inset: -1.25rem;
+    border-radius: 2.25rem;
+    background: rgba(255, 255, 255, 0.42);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    pointer-events: none;
+    z-index: -1;
+    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+    mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  @media (min-width: 1024px) {
+    .dh-diffuse-blur-backdrop {
+      inset: -1.75rem;
+      border-radius: 2.75rem;
+      background: rgba(255, 255, 255, 0.48);
+      -webkit-backdrop-filter: blur(26px);
+      backdrop-filter: blur(26px);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* -----------------------------------------------------------------------------
+   Focus ring — deliberately NOT inside a cascade layer.
+   shadcn's primitives carry `outline-none` plus a `focus-visible:ring-*`
+   box-shadow, and in this build that ring composites to transparent, which left
+   the navigation, the search field and both hero CTAs with no visible focus
+   indicator at all. Unlayered declarations outrank every @layer, so this single
+   rule restores one consistent, high-contrast ring across stock elements and
+   shadcn components alike (brain/23_ACCESSIBILITY_SPEC.md).
+   -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--dh-primary);
+  outline-offset: 2px;
+}
+
+/* On deep green surfaces the forest ring would disappear into the background. */
+.bg-forest-deep :focus-visible,
+.bg-forest-abyss :focus-visible,
+footer :focus-visible {
+  outline-color: var(--dh-surface);
+}
+
+/* Reduced motion: strip transforms and scroll choreography, keep every
+   control functional and every string readable (brain/11_ANIMATION_SPEC). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+brain/
 /.pnp
 .pnp.*
 .yarn/*
