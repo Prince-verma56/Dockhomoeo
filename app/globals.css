@@ -209,16 +209,23 @@
      `dh-motion` is set on <html> by a tiny inline script in the document head,
      before first paint, and only when JS is running and the visitor has not
      asked for reduced motion. So:
-       - no JS            -> class never set   -> everything visible
-       - reduced motion   -> class never set   -> everything visible
+       - no JS              -> class never set -> everything visible
+       - reduced motion     -> class never set -> everything visible
        - client bundle dies -> failsafe in that script strips the class
-     GSAP then owns each element's from-state inline and the element drops its
-     `data-reveal` attribute in the same layout effect, before any paint. */
-  .dh-motion [data-reveal] {
+
+     The gate is keyed on the *section root* (`data-motion-gate`) rather than
+     each element, so a section releases atomically with one attribute removal
+     the moment GSAP owns its from-states. Both animation conventions in this
+     codebase are covered: `data-anim` hooks addressed by a section timeline,
+     and `data-reveal` elements. A gated element with no tween behind it simply
+     becomes visible on release — un-animated, never stuck. */
+  .dh-motion [data-motion-gate][data-reveal],
+  .dh-motion [data-motion-gate] [data-reveal],
+  .dh-motion [data-motion-gate] [data-anim] {
     opacity: 0;
   }
 
-  .dh-motion [data-reveal-line] {
+  .dh-motion [data-motion-gate] [data-reveal-line] {
     opacity: 0;
     transform: translateY(108%);
   }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Container } from "@/components/shared/Container";
@@ -30,11 +31,13 @@ export function OfferBanner() {
           {/* 1. PHOTOGRAPHIC SCENIC BACKGROUND (SeasonalEditBG.png)        */}
           {/* ------------------------------------------------------------- */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-            <img
+            <Image
               src="/Images/SeasonalEditBG.webp"
               alt=""
               aria-hidden="true"
-              className="size-full object-cover object-[62%_center] lg:object-center scale-[1.01]"
+              fill
+              sizes="100vw"
+              className="object-cover object-[62%_center] lg:object-center scale-[1.01]"
             />
 
             {/* Directional gradient vignette from left to guarantee crisp text legibility */}

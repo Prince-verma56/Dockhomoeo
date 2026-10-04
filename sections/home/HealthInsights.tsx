@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Section } from "@/components/shared/Section";
@@ -74,10 +75,12 @@ function ArticleCard({ article }: { article: Article }) {
         {/* Top Photographic Crop */}
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#efebe3]">
           {article.image ? (
-            <img
+            <Image
               src={article.image}
               alt={article.title}
-              className="size-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
             <div className="size-full bg-linear-to-br from-[#e8eee3] to-[#d6ded0]" />

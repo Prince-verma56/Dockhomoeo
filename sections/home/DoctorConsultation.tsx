@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -48,6 +49,7 @@ export function DoctorConsultation() {
   return (
     <section
       ref={sectionRef}
+      data-motion-gate
       id="consultation-section"
       aria-labelledby="consultation-heading"
       className="relative min-h-[640px] lg:h-[720px] xl:h-[760px] max-h-[840px] text-ink overflow-hidden flex items-center py-10 lg:py-0"
@@ -60,11 +62,13 @@ export function DoctorConsultation() {
         data-reveal
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none will-change-transform"
       >
-        <img
+        <Image
           src="/Images/ConsultentBG.webp"
           alt=""
           aria-hidden="true"
-          className="size-full object-cover object-[24%_center] lg:object-center"
+          fill
+          sizes="100vw"
+          className="object-cover object-[24%_center] lg:object-center"
         />
 
         {/* Soft atmospheric gradient for small screen text readability */}

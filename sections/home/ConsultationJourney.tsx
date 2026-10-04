@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import {
   Calendar,
@@ -13,7 +14,10 @@ import {
   Video,
 } from "lucide-react";
 import { gsap } from "@/lib/animation/gsap";
-import { prefersReducedMotion } from "@/lib/animation/motion";
+import {
+  prefersReducedMotion,
+  releaseRevealGate,
+} from "@/lib/animation/motion";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 /**
@@ -126,7 +130,12 @@ export function ConsultationJourney() {
 
   useIsomorphicLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container || prefersReducedMotion()) return;
+    if (!container) return;
+
+    if (prefersReducedMotion()) {
+      releaseRevealGate(container);
+      return;
+    }
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -220,12 +229,17 @@ export function ConsultationJourney() {
       );
     }, container);
 
+    // Every `data-anim` target now carries GSAP's from-state inline, so the
+    // section can drop its gate and become paintable.
+    releaseRevealGate(container);
+
     return () => ctx.revert();
   }, []);
 
   return (
     <section
       ref={containerRef}
+      data-motion-gate
       id="how-it-works"
       aria-labelledby="journey-heading"
       className="relative w-full overflow-hidden text-ink pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10 lg:pb-12"
@@ -234,11 +248,13 @@ export function ConsultationJourney() {
       {/* 1. SCENIC BACKGROUND IMAGE (SimplePathBG.png)                     */}
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
+        <Image
           src="/Images/SimplePathBG.webp"
           alt=""
           aria-hidden="true"
-          className="size-full object-cover object-[center_top] lg:object-center"
+          fill
+          sizes="100vw"
+          className="object-cover object-[center_top] lg:object-center"
         />
         {/* Seamless atmospheric top blend connecting from Doctor Consultation */}
         <div aria-hidden="true" className="dh-section-blend-top" />

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, HeartHandshake, Leaf, ShieldCheck, Sparkles } from "lucide-react";
@@ -46,6 +47,7 @@ export function BestsellingProducts() {
   return (
     <section
       ref={sectionRef}
+      data-motion-gate
       id="bestselling-section"
       aria-labelledby="bestsellers-heading"
       className="relative text-ink pt-8 sm:pt-12 lg:pt-14 pb-12 sm:pb-16 lg:pb-20 overflow-hidden"
@@ -55,20 +57,27 @@ export function BestsellingProducts() {
       {/* Natural, crisp, and vibrant without foggy white overlays           */}
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
+        <Image
           src="/Images/ProductsSectionBG.webp"
           alt=""
           aria-hidden="true"
-          className="size-full object-cover object-center scale-x-[-1]"
+          fill
+          sizes="100vw"
+          className="object-cover object-center scale-x-[-1]"
         />
         {/* Decorative botanical leaves on the left side of the background */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -left-12 top-0 bottom-0 select-none opacity-20 lg:opacity-30"
         >
-          <img
+          {/* Intrinsic sizing, not `fill`: this one is height-driven with an
+              auto width, which `fill` would stretch. */}
+          <Image
             src="/Images/PNGS/HeroLeftLeaves.webp"
             alt=""
+            width={1536}
+            height={1024}
+            sizes="40vw"
             className="h-full w-auto object-contain filter blur-[0.4px]"
           />
         </div>

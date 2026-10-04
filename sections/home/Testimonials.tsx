@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
 import {
@@ -159,6 +160,7 @@ export function Testimonials() {
   return (
     <section
       ref={sectionRef}
+      data-motion-gate
       id="testimonials-section"
       aria-labelledby="testimonials-heading"
       className="relative w-full overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-14 sm:pb-18 lg:pb-24"
@@ -170,10 +172,12 @@ export function Testimonials() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 select-none overflow-hidden -z-10"
       >
-        <img
+        <Image
           src="/Images/TestimonialsBg2.webp"
           alt=""
-          className="size-full object-cover object-[center_35%]"
+          fill
+          sizes="100vw"
+          className="object-cover object-[center_35%]"
         />
       </div>
 
@@ -236,11 +240,12 @@ export function Testimonials() {
                     key={idx}
                     className="relative size-9 sm:size-10 rounded-full border-2 border-white overflow-hidden shadow-2xs shrink-0 bg-[#dbe8de]"
                   >
-                    <img
+                    <Image
                       src={avatar.src}
                       alt={avatar.name}
-                      className="size-full object-cover"
-                      loading="lazy"
+                      fill
+                      sizes="40px"
+                      className="object-cover"
                     />
                   </div>
                 ))}

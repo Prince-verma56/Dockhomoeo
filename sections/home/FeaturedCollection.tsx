@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, FlaskConical, Leaf, ShieldCheck } from "lucide-react";
@@ -198,13 +199,16 @@ export function FeaturedCollection() {
       {/* ================================================================= */}
       <div
         ref={stageRef}
+        data-motion-gate
         className="relative mx-auto hidden aspect-[1672/941] w-full max-w-[1720px] select-none overflow-hidden [container-type:inline-size] lg:block"
       >
         <div data-stage-scene data-reveal className="absolute inset-0 will-change-transform">
-          <img
+          <Image
             src="/Images/NaturesCareBG.webp"
             alt="Apothecary medicines on stone podiums beside a reflecting pool"
-            className="pointer-events-none absolute inset-0 size-full select-none object-cover object-center"
+            fill
+            sizes="100vw"
+            className="pointer-events-none select-none object-cover object-center"
           />
         </div>
 
@@ -330,10 +334,12 @@ export function FeaturedCollection() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 overflow-hidden select-none opacity-30"
         >
-          <img
+          <Image
             src="/Images/NaturesCareBG.webp"
             alt=""
-            className="size-full object-cover object-[center_35%]"
+            fill
+            sizes="100vw"
+            className="object-cover object-[center_35%]"
           />
         </div>
 

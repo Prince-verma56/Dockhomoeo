@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
@@ -468,6 +469,7 @@ export function TrustedBrands() {
   return (
     <section
       ref={sectionRef}
+      data-motion-gate
       id="brands-section"
       aria-labelledby="brands-heading"
       className="relative w-full overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24"
@@ -479,10 +481,12 @@ export function TrustedBrands() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 select-none overflow-hidden -z-10"
       >
-        <img
+        <Image
           src="/Images/TestimonialsBg.webp"
           alt=""
-          className="size-full object-cover object-[center_35%]"
+          fill
+          sizes="100vw"
+          className="object-cover object-[center_35%]"
         />
         {/* Soft warm daylight overlay preserving authentic stone texture while ensuring contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#f6f2ea]/30 via-transparent to-[#f6f2ea]/40" />

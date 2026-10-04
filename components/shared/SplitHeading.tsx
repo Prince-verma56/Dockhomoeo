@@ -98,7 +98,7 @@ export function SplitHeading({
   }, [immediate, delay]);
 
   return (
-    <Tag ref={ref} id={id} className={cn("font-display", className)}>
+    <Tag ref={ref} id={id} data-motion-gate className={cn("font-display", className)}>
       {lines.map((line, index) => (
         <span key={index} className="dh-reveal-line">
           <span

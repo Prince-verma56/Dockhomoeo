@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -388,19 +389,25 @@ export function HomeHero() {
                 {/* Patient Avatars */}
                 <div className="flex items-center gap-3">
                   <div className="flex -space-x-2.5 overflow-hidden">
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                       alt="Happy family member"
+                      width={34}
+                      height={34}
                       className="inline-block size-8.5 rounded-full ring-2 ring-white object-cover"
                     />
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
                       alt="Happy family member"
+                      width={34}
+                      height={34}
                       className="inline-block size-8.5 rounded-full ring-2 ring-white object-cover"
                     />
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
                       alt="Happy family member"
+                      width={34}
+                      height={34}
                       className="inline-block size-8.5 rounded-full ring-2 ring-white object-cover"
                     />
                   </div>
@@ -472,11 +479,17 @@ export function HomeHero() {
           {/* Left Leaf: Layer 2 (First-time smooth entrance from bottom-left corner) */}
           <div ref={leftLeafEntranceRef} className="w-full h-auto will-change-transform">
             {/* Left Leaf: Layer 3 (Inner image for ambient breathing breeze) */}
-            <img
+            {/* Above the fold and part of the opening composition, so this one
+                is fetched eagerly rather than lazily. */}
+            <Image
               ref={leftLeafInnerRef}
               src="/Images/PNGS/HeroLeftLeaves.webp"
               alt=""
               aria-hidden="true"
+              width={1536}
+              height={1024}
+              priority
+              sizes="(max-width: 640px) 210px, (max-width: 1024px) 360px, 490px"
               className="w-full h-auto object-contain object-left-bottom select-none"
             />
           </div>
@@ -490,11 +503,15 @@ export function HomeHero() {
           {/* Right Leaf: Layer 2 (First-time smooth entrance from bottom-right corner) */}
           <div ref={rightLeafEntranceRef} className="w-full h-auto will-change-transform">
             {/* Right Leaf: Layer 3 (Inner image for ambient breathing breeze) */}
-            <img
+            <Image
               ref={rightLeafInnerRef}
               src="/Images/PNGS/HeroRightLeaves.webp"
               alt=""
               aria-hidden="true"
+              width={1536}
+              height={1024}
+              priority
+              sizes="(max-width: 640px) 210px, (max-width: 1024px) 360px, 490px"
               className="w-full h-auto object-contain object-right-bottom select-none"
             />
           </div>

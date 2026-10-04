@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { gsap } from "@/lib/animation/gsap";
+import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
 
 /**
  * Curated Health Goal definitions enriched with authentic pharmacopoeia
@@ -135,6 +137,17 @@ export function HealthGoals() {
     setTimeout(checkScroll, 350);
   };
 
+  // Content entrance. The section previously had only a background parallax,
+  // so its heading and rail simply appeared with no choreography at all.
+  // The rail staggers horizontally, 1..n, rather than flying in from anywhere.
+  const revealRef = useSectionTimeline<HTMLDivElement>([
+    { sel: "[data-r-eyebrow]", variant: "rise", at: 0 },
+    { sel: "[data-r-head]", variant: "rise", at: 0.12 },
+    { sel: "[data-r-copy]", variant: "rise", at: 0.24 },
+    { sel: "[data-r-controls]", variant: "rise", at: 0.34 },
+    { sel: "[data-r-goal]", variant: "card", at: 0.42 },
+  ]);
+
   // Hardware-accelerated lightweight GSAP Scroll Parallax
   useEffect(() => {
     if (!sectionRef.current || !bgRef.current) return;
@@ -176,10 +189,12 @@ export function HealthGoals() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 -top-[7%] h-[114%] select-none will-change-transform -z-10 [transform:translate3d(0,0,0)] [backface-visibility:hidden]"
       >
-        <img
+        <Image
           src="/Images/NaturalWellBG.webp"
           alt=""
-          className="size-full object-cover object-[center_34%]"
+          fill
+          sizes="100vw"
+          className="object-cover object-[center_34%]"
         />
       </div>
 
@@ -190,31 +205,41 @@ export function HealthGoals() {
       {/* 2. SECTION CONTENT                                                */}
       {/* ----------------------------------------------------------------- */}
       <Container width="wide" className="relative z-10">
+        <div ref={revealRef} data-motion-gate>
         
         {/* Header Block (Pure, clean text directly on the sunlit wall) */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-black/[0.06]">
           <div className="max-w-xl">
             {/* Prestige Eyebrow Badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.18em] uppercase shadow-2xs transition-colors">
+            <div
+              data-r-eyebrow
+              data-reveal
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.18em] uppercase shadow-2xs transition-colors">
               <Sparkles className="size-3 text-[#0c503b]" />
               <span>NATURAL WELLNESS PATHS</span>
             </div>
 
             {/* Display Heading (Plus Jakarta Sans) */}
             <h2
+              data-r-head
+              data-reveal
               id="health-goals-heading"
               className="mt-3.5 font-sans text-3xl sm:text-4xl lg:text-[2.65rem] font-bold tracking-tight text-[#0a1e16] leading-tight"
             >
               Find by Health Goal
             </h2>
 
-            <p className="mt-2 text-[0.92rem] sm:text-[1rem] text-[#284236] font-medium leading-relaxed">
+            <p
+              data-r-copy
+              data-reveal
+              className="mt-2 text-[0.92rem] sm:text-[1rem] text-[#284236] font-medium leading-relaxed"
+            >
               Explore targeted homeopathic remedies formulated by certified laboratories for your specific health needs.
             </p>
           </div>
 
           {/* Controls: "View All Categories" Link & Carousel Arrow Buttons */}
-          <div className="flex items-center gap-3 self-start md:self-end shrink-0">
+          <div data-r-controls data-reveal className="flex items-center gap-3 self-start md:self-end shrink-0">
             <Link
               href="/products"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-[0.84rem] font-bold text-[#0c503b] hover:text-[#063b2d] bg-white/75 hover:bg-white backdrop-blur-md border border-white/80 px-4 py-2 rounded-full shadow-2xs transition-all mr-1"
@@ -257,6 +282,8 @@ export function HealthGoals() {
             {healthGoalData.map((goal) => (
               <Link
                 key={goal.id}
+                data-r-goal
+                data-reveal
                 href={goal.href}
                 className="group relative flex flex-col justify-between w-[175px] sm:w-[195px] lg:w-[215px] shrink-0 rounded-[26px] sm:rounded-[30px] bg-[#faf5eb]/85 hover:bg-[#fffcf6]/95 backdrop-blur-xl border border-[#dccfb8]/50 hover:border-[#0c503b]/45 p-4 sm:p-5 shadow-[0_8px_28px_rgba(35,28,16,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.85)] hover:shadow-[0_20px_45px_rgba(12,80,59,0.14)] hover:-translate-y-2 transition-all duration-300 select-none outline-none focus-visible:ring-2 focus-visible:ring-[#0c503b]"
               >
@@ -269,11 +296,12 @@ export function HealthGoals() {
 
                 {/* Center: 3D Botanical Sculpture (Seamlessly blends into warm travertine card) */}
                 <div className="my-auto w-full aspect-square max-h-[125px] sm:max-h-[140px] flex items-center justify-center p-1 relative overflow-hidden">
-                  <img
+                  <Image
                     src={goal.image}
                     alt={goal.name}
-                    className="w-full h-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-400 ease-out"
-                    loading="lazy"
+                    fill
+                    sizes="(max-width: 640px) 175px, (max-width: 1024px) 195px, 215px"
+                    className="object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-400 ease-out"
                   />
                 </div>
 
@@ -301,6 +329,7 @@ export function HealthGoals() {
           </div>
         </div>
 
+        </div>
       </Container>
     </section>
   );

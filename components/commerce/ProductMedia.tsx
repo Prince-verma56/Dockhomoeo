@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { MediaPlaceholder, type MediaTone } from "@/components/shared/MediaPlaceholder";
 import { ProductGlyph } from "@/components/commerce/ProductGlyph";
@@ -38,11 +39,12 @@ export function ProductMedia({
       )}
     >
       {product.image ? (
-        <img
+        <Image
           src={product.image}
           alt={product.mediaLabel}
-          className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-          loading="lazy"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
         />
       ) : (
         <ProductGlyph form={product.form} tone={product.tone} size={glyphSize} />

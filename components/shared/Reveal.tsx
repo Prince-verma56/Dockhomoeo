@@ -99,7 +99,7 @@ export function Reveal({
   }, [y, delay, stagger, start]);
 
   return (
-    <Tag ref={ref} data-reveal className={cn(className)}>
+    <Tag ref={ref} data-motion-gate data-reveal className={cn(className)}>
       {children}
     </Tag>
   );
