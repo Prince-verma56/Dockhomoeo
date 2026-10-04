@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { gsap } from "@/lib/animation/gsap";
 import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
 
 /**
@@ -99,15 +98,14 @@ const healthGoalData = [
 /**
  * HealthGoals Section
  *
- * Harmonized with NaturalWellBG.png color theme:
- * - Cards tuned to warm Tuscan travertine limestone & botanical parchment tones
+ * Sits on the light canvas rather than a photograph:
+ * - White cards carrying a real hairline, since a near-white backdrop gives a
+ *   borderless card nothing to separate from
  * - Seamless blend-multiply on botanical sculptures (zero square boundary lines)
  * - Enriched content: domain tag, 3D sculpture, active botanical herbs, remedy count, and micro-action
- * - Silky smooth 60fps GPU parallax navigation
  */
 export function HealthGoals() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const bgRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -148,32 +146,6 @@ export function HealthGoals() {
     { sel: "[data-r-goal]", variant: "card", at: 0.42 },
   ]);
 
-  // Hardware-accelerated lightweight GSAP Scroll Parallax
-  useEffect(() => {
-    if (!sectionRef.current || !bgRef.current) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        bgRef.current,
-        { yPercent: -5, force3D: true },
-        {
-          yPercent: 5,
-          ease: "none",
-          force3D: true,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-            fastScrollEnd: true,
-          },
-        }
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
       ref={sectionRef}
@@ -182,24 +154,11 @@ export function HealthGoals() {
       className="relative z-10 w-full overflow-hidden pt-14 sm:pt-18 lg:pt-22 pb-16 sm:pb-20 lg:pb-24"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC NATURAL WELLNESS BACKGROUND WITH BUTTER-SMOOTH PARALLAX */}
+      {/* 1. LIGHT CANVAS BACKDROP                                          */}
+      {/* Warm-tinted. It resolves to page ivory at both seams, so unlike a  */}
+      {/* photograph it needs no blend band to meet the sections either side. */}
       {/* ----------------------------------------------------------------- */}
-      <div
-        ref={bgRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -top-[7%] h-[114%] select-none will-change-transform -z-10 [transform:translate3d(0,0,0)] [backface-visibility:hidden]"
-      >
-        <Image
-          src="/Images/NaturalWellBG.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-[center_34%]"
-        />
-      </div>
-
-      {/* Subtle bottom blur blend to connect seamlessly to Bestselling Products */}
-      <div aria-hidden className="dh-section-blend-bottom" />
+      <div aria-hidden="true" className="dh-canvas dh-canvas--warm" />
 
       {/* ----------------------------------------------------------------- */}
       {/* 2. SECTION CONTENT                                                */}
@@ -207,14 +166,14 @@ export function HealthGoals() {
       <Container width="wide" className="relative z-10">
         <div ref={revealRef} data-motion-gate>
         
-        {/* Header Block (Pure, clean text directly on the sunlit wall) */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-black/[0.06]">
+        {/* Header Block (text sits straight on the canvas) */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-line/70">
           <div className="max-w-xl">
             {/* Prestige Eyebrow Badge */}
             <div
               data-r-eyebrow
               data-reveal
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.18em] uppercase shadow-2xs transition-colors">
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0c503b]/[0.06] hover:bg-[#0c503b]/10 border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.18em] uppercase transition-colors">
               <Sparkles className="size-3 text-[#0c503b]" />
               <span>NATURAL WELLNESS PATHS</span>
             </div>
@@ -242,7 +201,7 @@ export function HealthGoals() {
           <div data-r-controls data-reveal className="flex items-center gap-3 self-start md:self-end shrink-0">
             <Link
               href="/products"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-[0.84rem] font-bold text-[#0c503b] hover:text-[#063b2d] bg-white/75 hover:bg-white backdrop-blur-md border border-white/80 px-4 py-2 rounded-full shadow-2xs transition-all mr-1"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-[0.84rem] font-bold text-[#0c503b] hover:text-white bg-white hover:bg-[#0c503b] border border-line/70 hover:border-[#0c503b] px-4 py-2 rounded-full shadow-[0_1px_2px_rgba(20,37,31,0.04)] transition-all mr-1"
             >
               <span>View all categories</span>
               <ArrowRight className="size-3.5" />
@@ -253,7 +212,7 @@ export function HealthGoals() {
               onClick={() => handleScroll("left")}
               disabled={!canScrollLeft}
               aria-label="Previous health goals"
-              className="size-10 sm:size-11 rounded-full bg-white/80 hover:bg-[#0c503b] text-[#11241b] hover:text-white backdrop-blur-md border border-white/80 shadow-2xs hover:shadow-xs grid place-items-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+              className="size-10 sm:size-11 rounded-full bg-white hover:bg-[#0c503b] text-[#11241b] hover:text-white border border-line/70 hover:border-[#0c503b] shadow-[0_1px_2px_rgba(20,37,31,0.05)] hover:shadow-[0_10px_24px_-12px_rgba(12,80,59,0.6)] grid place-items-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
               <ChevronLeft className="size-5 stroke-[2]" />
             </button>
@@ -263,7 +222,7 @@ export function HealthGoals() {
               onClick={() => handleScroll("right")}
               disabled={!canScrollRight}
               aria-label="Next health goals"
-              className="size-10 sm:size-11 rounded-full bg-white/80 hover:bg-[#0c503b] text-[#11241b] hover:text-white backdrop-blur-md border border-white/80 shadow-2xs hover:shadow-xs grid place-items-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+              className="size-10 sm:size-11 rounded-full bg-white hover:bg-[#0c503b] text-[#11241b] hover:text-white border border-line/70 hover:border-[#0c503b] shadow-[0_1px_2px_rgba(20,37,31,0.05)] hover:shadow-[0_10px_24px_-12px_rgba(12,80,59,0.6)] grid place-items-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
               <ChevronRight className="size-5 stroke-[2]" />
             </button>
@@ -285,7 +244,7 @@ export function HealthGoals() {
                 data-r-goal
                 data-reveal
                 href={goal.href}
-                className="group relative flex flex-col justify-between w-[175px] sm:w-[195px] lg:w-[215px] shrink-0 rounded-[26px] sm:rounded-[30px] bg-[#faf5eb]/85 hover:bg-[#fffcf6]/95 backdrop-blur-xl border border-[#dccfb8]/50 hover:border-[#0c503b]/45 p-4 sm:p-5 shadow-[0_8px_28px_rgba(35,28,16,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.85)] hover:shadow-[0_20px_45px_rgba(12,80,59,0.14)] hover:-translate-y-2 transition-all duration-300 select-none outline-none focus-visible:ring-2 focus-visible:ring-[#0c503b]"
+                className="group relative flex flex-col justify-between w-[175px] sm:w-[195px] lg:w-[215px] shrink-0 rounded-[26px] sm:rounded-[30px] bg-white border border-line/70 hover:border-[#0c503b]/35 p-4 sm:p-5 shadow-[0_1px_2px_rgba(20,37,31,0.04),0_10px_30px_-18px_rgba(20,37,31,0.35)] hover:shadow-[0_22px_46px_-22px_rgba(12,80,59,0.4)] hover:-translate-y-2 transition-all duration-300 select-none outline-none focus-visible:ring-2 focus-visible:ring-[#0c503b]"
               >
                 {/* Top: Category Discipline Tag */}
                 <div className="w-full flex items-center justify-between">
@@ -296,6 +255,13 @@ export function HealthGoals() {
 
                 {/* Center: 3D Botanical Sculpture (Seamlessly blends into warm travertine card) */}
                 <div className="my-auto w-full aspect-square max-h-[125px] sm:max-h-[140px] flex items-center justify-center p-1 relative overflow-hidden">
+                  {/* Grounds the sculpture on a white card. A radial wash rather
+                      than a tile, so `mix-blend-multiply` below has no edge to
+                      betray. */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_58%,rgba(13,90,67,0.08),transparent_68%)]"
+                  />
                   <Image
                     src={goal.image}
                     alt={goal.name}
@@ -316,7 +282,7 @@ export function HealthGoals() {
                 </div>
 
                 {/* Footer Bar: Remedy Count & Micro Action Button */}
-                <div className="mt-2.5 pt-2 border-t border-black/[0.05] flex items-center justify-between w-full">
+                <div className="mt-2.5 pt-2 border-t border-line/60 flex items-center justify-between w-full">
                   <span className="text-[0.72rem] font-bold text-[#0c503b]">
                     {goal.remedies}
                   </span>

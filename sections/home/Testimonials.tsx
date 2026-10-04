@@ -166,24 +166,12 @@ export function Testimonials() {
       className="relative w-full overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-14 sm:pb-18 lg:pb-24"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC ARCHITECTURAL APOTHECARY BACKGROUND (Clean, no wash)   */}
+      {/* 1. LIGHT CANVAS BACKDROP                                          */}
+      {/* Mint-tinted. Its horizon arc carries the staging the photograph    */}
+      {/* used to provide, and the orbital rings below now draw in brand ink */}
+      {/* rather than white, which a white canvas would have swallowed.      */}
       {/* ----------------------------------------------------------------- */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 select-none overflow-hidden -z-10"
-      >
-        <Image
-          src="/Images/TestimonialsBg2.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-[center_35%]"
-        />
-      </div>
-
-      {/* Atmospheric clean boundary blur separation between sections */}
-      <div aria-hidden className="dh-section-blend-top" />
-      <div aria-hidden className="dh-section-blend-bottom" />
+      <div aria-hidden="true" className="dh-canvas dh-canvas--mint" />
 
       {/* ----------------------------------------------------------------- */}
       {/* 2. MAIN SECTION CONTENT                                           */}
@@ -192,16 +180,10 @@ export function Testimonials() {
         <div className="grid grid-cols-1 lg:grid-cols-[0.88fr_1.12fr] gap-12 lg:gap-8 items-center">
           
           {/* ------------------------------------------------------------- */}
-          {/* LEFT COLUMN: Clean Text with Minimalist Diffused Blur Backing */}
+          {/* LEFT COLUMN: Clean text, straight onto the canvas              */}
           {/* ------------------------------------------------------------- */}
           <div className="relative flex flex-col justify-center max-w-xl lg:max-w-lg">
             
-            {/* Minimalist organic frosted blur backing (no card borders or box container) */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-6 sm:-inset-10 rounded-[3rem] bg-white/30 backdrop-blur-xl -z-10 [mask-image:radial-gradient(ellipse_at_center,rgba(0,0,0,0.95)_48%,rgba(0,0,0,0)_100%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,rgba(0,0,0,0.95)_48%,rgba(0,0,0,0)_100%)]"
-            />
-
             {/* Eyebrow with leading rule */}
             <div
               data-r-eyebrow
@@ -285,7 +267,7 @@ export function Testimonials() {
             >
               <svg
                 viewBox="0 0 760 380"
-                className="w-[125%] max-w-[800px] h-auto opacity-30 sm:opacity-45"
+                className="w-[125%] max-w-[800px] h-auto opacity-70 sm:opacity-90"
                 fill="none"
               >
                 {/* Outer orbital perspective ring */}
@@ -294,7 +276,7 @@ export function Testimonials() {
                   cy="190"
                   rx="340"
                   ry="105"
-                  stroke="rgba(255, 255, 255, 0.85)"
+                  stroke="rgba(13, 90, 67, 0.18)"
                   strokeWidth="1.2"
                   strokeDasharray="6 5"
                   style={{ transform: "rotate(-10deg)", transformOrigin: "center" }}
@@ -305,7 +287,7 @@ export function Testimonials() {
                   cy="190"
                   rx="280"
                   ry="85"
-                  stroke="rgba(12, 80, 59, 0.25)"
+                  stroke="rgba(201, 142, 85, 0.38)"
                   strokeWidth="1.4"
                   style={{ transform: "rotate(-6deg)", transformOrigin: "center" }}
                 />
@@ -381,8 +363,8 @@ export function Testimonials() {
                     }}
                     className={`absolute w-[290px] sm:w-[340px] md:w-[365px] rounded-[26px] sm:rounded-[30px] p-6 sm:p-7 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] select-none ${
                       isCenter
-                        ? "bg-[#faf7f0]/90 backdrop-blur-xl border border-white/70 shadow-[0_10px_28px_rgba(15,35,25,0.08)] cursor-default"
-                        : "bg-[#faf7f0]/70 backdrop-blur-md border border-white/50 shadow-[0_4px_16px_rgba(15,35,25,0.04)] hover:opacity-90 cursor-pointer"
+                        ? "bg-white border border-line/70 shadow-[0_2px_4px_rgba(20,37,31,0.04),0_26px_50px_-26px_rgba(20,37,31,0.45)] cursor-default"
+                        : "bg-[#fbfaf6] border border-line/60 shadow-[0_1px_2px_rgba(20,37,31,0.03),0_14px_30px_-22px_rgba(20,37,31,0.35)] hover:opacity-90 cursor-pointer"
                     }`}
                   >
                     {/* Header: Star Rating and Score */}
@@ -418,7 +400,7 @@ export function Testimonials() {
                     </div>
 
                     {/* Bottom: Reviewer Identity */}
-                    <div className="flex items-center gap-3 pt-3 border-t border-black/[0.04]">
+                    <div className="flex items-center gap-3 pt-3 border-t border-line/60">
                       {/* Avatar Initials Badge */}
                       <span className="size-9 rounded-full bg-[#dbe8de] text-[#134e3a] font-bold text-xs flex items-center justify-center shrink-0 border border-white">
                         {item.initials}
@@ -451,7 +433,7 @@ export function Testimonials() {
                 type="button"
                 onClick={prev}
                 aria-label="Previous testimonial"
-                className="size-9 sm:size-10 rounded-full bg-white/75 hover:bg-white backdrop-blur-md shadow-2xs hover:shadow-xs border border-white/70 grid place-items-center text-[#11241a] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                className="size-9 sm:size-10 rounded-full bg-white hover:bg-[#0d5a43] hover:text-white shadow-[0_2px_10px_-4px_rgba(20,37,31,0.25)] border border-line/70 grid place-items-center text-[#11241a] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
               >
                 <ChevronLeft className="size-4.5 stroke-[2.2]" />
               </button>
@@ -481,7 +463,7 @@ export function Testimonials() {
                 type="button"
                 onClick={next}
                 aria-label="Next testimonial"
-                className="size-9 sm:size-10 rounded-full bg-white/75 hover:bg-white backdrop-blur-md shadow-2xs hover:shadow-xs border border-white/70 grid place-items-center text-[#11241a] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                className="size-9 sm:size-10 rounded-full bg-white hover:bg-[#0d5a43] hover:text-white shadow-[0_2px_10px_-4px_rgba(20,37,31,0.25)] border border-line/70 grid place-items-center text-[#11241a] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
               >
                 <ChevronRight className="size-4.5 stroke-[2.2]" />
               </button>

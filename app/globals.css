@@ -357,28 +357,93 @@
     }
   }
 
-  /* Organic diffused frosted blur backing for text legibility over scenic backgrounds (not a card box) */
-  .dh-diffuse-blur-backdrop {
+  /* ------------------------------------------------------------- canvas
+     Photograph-free section backdrop.
+
+     The scenic photographs this replaces carried the warmth of the brand on
+     their own; a flat fill cannot, so the canvas does it with light: a pool
+     of near-white through the middle of the section, easing back out to page
+     ivory at both seams, lifted by two wide brand-tinted washes, a dot
+     lattice held just above the noise floor, and a single horizon arc.
+
+     Both the first and last gradient stops resolve to --dh-bg, which is what
+     makes the seams disappear: a canvas section meeting a scenic one (whose
+     own `dh-section-blend-*` fades to that same ivory) needs no blend band of
+     its own, and two canvas sections simply run together.
+
+     Content inside the section must sit at z-10 or above. */
+  .dh-canvas {
+    --dh-canvas-wash-a: rgba(13, 90, 67, 0.055);
+    --dh-canvas-wash-b: rgba(201, 142, 85, 0.07);
+    --dh-canvas-wash-c: rgba(184, 201, 182, 0.22);
+    --dh-canvas-lattice: rgba(13, 90, 67, 0.11);
+
     position: absolute;
-    inset: -1.25rem;
-    border-radius: 2.25rem;
-    background: rgba(255, 255, 255, 0.42);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
+    inset: 0;
+    z-index: 0;
     pointer-events: none;
-    z-index: -1;
-    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
-    mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+    overflow: hidden;
+    background:
+      radial-gradient(60rem 32rem at 8% 0%, var(--dh-canvas-wash-a), transparent 62%),
+      radial-gradient(52rem 30rem at 96% 10%, var(--dh-canvas-wash-b), transparent 64%),
+      radial-gradient(46rem 28rem at 50% 106%, var(--dh-canvas-wash-c), transparent 68%),
+      linear-gradient(
+        180deg,
+        var(--dh-bg) 0%,
+        #fcfbf7 11%,
+        #ffffff 46%,
+        #fdfcf8 83%,
+        var(--dh-bg) 100%
+      );
   }
 
-  @media (min-width: 1024px) {
-    .dh-diffuse-blur-backdrop {
-      inset: -1.75rem;
-      border-radius: 2.75rem;
-      background: rgba(255, 255, 255, 0.48);
-      -webkit-backdrop-filter: blur(26px);
-      backdrop-filter: blur(26px);
-    }
+  /* Structure rather than texture: a 26px dot lattice masked to an ellipse so
+     it never reaches an edge, where it would read as a pattern swatch. */
+  .dh-canvas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      var(--dh-canvas-lattice) 1px,
+      transparent 0
+    );
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 58% at 50% 40%, #000 0%, transparent 76%);
+    mask-image: radial-gradient(ellipse 70% 58% at 50% 40%, #000 0%, transparent 76%);
+  }
+
+  /* The one drawn line on the canvas: a horizon arc standing in for the stone
+     plinth the product photography used to sit on. */
+  .dh-canvas::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -56%;
+    width: 150%;
+    aspect-ratio: 2 / 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    border-top: 1px solid rgba(13, 90, 67, 0.09);
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      rgba(255, 255, 255, 0.72),
+      transparent 55%
+    );
+  }
+
+  /* Tint variants, so consecutive canvas sections do not read as one slab. */
+  .dh-canvas--warm {
+    --dh-canvas-wash-a: rgba(201, 142, 85, 0.085);
+    --dh-canvas-wash-b: rgba(13, 90, 67, 0.045);
+    --dh-canvas-wash-c: rgba(232, 201, 163, 0.2);
+    --dh-canvas-lattice: rgba(140, 104, 62, 0.1);
+  }
+
+  .dh-canvas--mint {
+    --dh-canvas-wash-a: rgba(13, 90, 67, 0.07);
+    --dh-canvas-wash-b: rgba(184, 201, 182, 0.26);
+    --dh-canvas-wash-c: rgba(201, 142, 85, 0.05);
   }
 }
 

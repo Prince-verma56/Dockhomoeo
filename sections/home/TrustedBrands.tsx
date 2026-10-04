@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSectionTimeline } from "@/lib/animation/sectionTimeline";
@@ -401,8 +400,9 @@ const qualityPillars = [
 
 /**
  * TopHomeopathicBrands Section
- * Uses authentic architectural apothecary background (TestimonialsBg.png)
- * with frosted glass accreditation cards and quality assurance ribbon.
+ * Sits on the light canvas, with solid white accreditation cards and a quality
+ * assurance ribbon. The cards were frosted glass while a photograph was behind
+ * them; over paper that read as grey, so they are opaque now.
  */
 export function TrustedBrands() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -475,28 +475,12 @@ export function TrustedBrands() {
       className="relative w-full overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC ARCHITECTURAL APOTHECARY BACKGROUND IMAGE & LIGHTING    */}
+      {/* 1. LIGHT CANVAS BACKDROP                                          */}
+      {/* Scenic sections sit on both sides of this one; the canvas resolves */}
+      {/* to page ivory top and bottom, which is what their own blend bands  */}
+      {/* already fade to, so the seams need nothing further.               */}
       {/* ----------------------------------------------------------------- */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 select-none overflow-hidden -z-10"
-      >
-        <Image
-          src="/Images/TestimonialsBg.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-[center_35%]"
-        />
-        {/* Soft warm daylight overlay preserving authentic stone texture while ensuring contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f6f2ea]/30 via-transparent to-[#f6f2ea]/40" />
-      </div>
-
-      {/* ----------------------------------------------------------------- */}
-      {/* 2. ATMOSPHERIC BOUNDARY TRANSITIONS                               */}
-      {/* ----------------------------------------------------------------- */}
-      <div aria-hidden className="dh-section-blend-top" />
-      <div aria-hidden className="dh-section-blend-bottom" />
+      <div aria-hidden="true" className="dh-canvas dh-canvas--warm" />
 
       {/* ----------------------------------------------------------------- */}
       {/* 3. MAIN SECTION CONTENT                                           */}
@@ -508,7 +492,7 @@ export function TrustedBrands() {
           <div
             data-r-eyebrow
             data-reveal
-            className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md border border-[#0c503b]/20 px-4 py-1.5 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.2em] uppercase shadow-2xs"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0c503b]/[0.06] border border-[#0c503b]/15 px-4 py-1.5 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.2em] uppercase"
           >
             <span className="size-1.5 rounded-full bg-[#0c503b] animate-pulse" />
             <span>CLINICALLY CERTIFIED PARTNERS</span>
@@ -547,7 +531,7 @@ export function TrustedBrands() {
             type="button"
             onClick={() => scroll("left")}
             aria-label="Scroll brands left"
-            className="hidden md:grid absolute -left-3 lg:-left-5 z-30 size-11 lg:size-12 rounded-full bg-white/90 hover:bg-white backdrop-blur-md border border-white/80 shadow-[0_4px_20px_rgba(20,40,30,0.1)] place-items-center text-[#11241b] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+            className="hidden md:grid absolute -left-3 lg:-left-5 z-30 size-11 lg:size-12 rounded-full bg-white hover:bg-[#0c503b] hover:text-white border border-line/70 shadow-[0_2px_10px_-4px_rgba(20,40,30,0.3)] hover:shadow-[0_12px_28px_-12px_rgba(12,80,59,0.6)] place-items-center text-[#11241b] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
           >
             <ChevronLeft className="size-5 stroke-[2.2]" />
           </button>
@@ -564,7 +548,7 @@ export function TrustedBrands() {
               <Link
                 key={`${brand.id}-${idx}`}
                 href={brand.href}
-                className="group relative flex flex-col justify-between h-[155px] sm:h-[168px] w-[230px] sm:w-[255px] shrink-0 rounded-2xl sm:rounded-3xl bg-white/85 hover:bg-white backdrop-blur-xl border border-white/90 p-4 sm:p-4.5 shadow-[0_8px_28px_rgba(20,40,30,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.95)] hover:shadow-[0_18px_40px_rgba(12,80,59,0.14)] hover:-translate-y-1.5 transition-all duration-300 select-none"
+                className="group relative flex flex-col justify-between h-[155px] sm:h-[168px] w-[230px] sm:w-[255px] shrink-0 rounded-2xl sm:rounded-3xl bg-white border border-line/70 hover:border-[#0c503b]/30 p-4 sm:p-4.5 shadow-[0_1px_2px_rgba(20,37,31,0.04),0_10px_30px_-18px_rgba(20,37,31,0.35)] hover:shadow-[0_20px_42px_-22px_rgba(12,80,59,0.4)] hover:-translate-y-1.5 transition-all duration-300 select-none"
               >
                 {/* Top: Origin chip & Verified Checkmark */}
                 <div className="flex items-center justify-between gap-2">
@@ -582,7 +566,7 @@ export function TrustedBrands() {
                 </div>
 
                 {/* Bottom: Speciality Tag (Centered, matching user design) */}
-                <div className="text-center pt-2 border-t border-black/[0.04]">
+                <div className="text-center pt-2 border-t border-line/60">
                   <span className="block text-[0.72rem] sm:text-[0.76rem] text-[#42594d] font-medium leading-tight truncate">
                     {brand.speciality}
                   </span>
@@ -596,7 +580,7 @@ export function TrustedBrands() {
             type="button"
             onClick={() => scroll("right")}
             aria-label="Scroll brands right"
-            className="hidden md:grid absolute -right-3 lg:-right-5 z-30 size-11 lg:size-12 rounded-full bg-white/90 hover:bg-white backdrop-blur-md border border-white/80 shadow-[0_4px_20px_rgba(20,40,30,0.1)] place-items-center text-[#11241b] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+            className="hidden md:grid absolute -right-3 lg:-right-5 z-30 size-11 lg:size-12 rounded-full bg-white hover:bg-[#0c503b] hover:text-white border border-line/70 shadow-[0_2px_10px_-4px_rgba(20,40,30,0.3)] hover:shadow-[0_12px_28px_-12px_rgba(12,80,59,0.6)] place-items-center text-[#11241b] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
           >
             <ChevronRight className="size-5 stroke-[2.2]" />
           </button>
@@ -614,7 +598,7 @@ export function TrustedBrands() {
                   key={idx}
                   data-r-pillar
                   data-reveal
-                  className="flex items-center gap-3.5 rounded-2xl bg-white/80 hover:bg-white/95 backdrop-blur-xl border border-white/85 p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(20,40,30,0.04),inset_0_1px_1px_rgba(255,255,255,0.9)] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                  className="flex items-center gap-3.5 rounded-2xl bg-white border border-line/70 hover:border-[#0c503b]/25 p-3.5 sm:p-4 shadow-[0_1px_2px_rgba(20,37,31,0.04)] transition-all duration-300 hover:shadow-[0_14px_30px_-18px_rgba(20,37,31,0.45)] hover:-translate-y-0.5"
                 >
                   <span className="grid size-11 rounded-full bg-[#0c503b]/8 text-[#0c503b] border border-[#0c503b]/15 shrink-0 place-items-center">
                     <Icon className="size-5 stroke-[1.8]" />
