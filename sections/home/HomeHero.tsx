@@ -22,7 +22,7 @@ import { gsap } from "@/lib/animation/gsap";
  * HomeHero
  * 
  * Features:
- * 1. Background video from /Videos/HeroVideo.mp4 playing cleanly without clutter
+ * 1. Background video from /Videos/HeroVideo2.mp4 playing cleanly without clutter
  * 2. Bottom play/mute UI removed completely
  * 3. Masked parallax reveal animation on headline, copy, and trust elements
  * 4. Subparagraph and bottom proof bar encased in subtle frosted glass for 100% legibility
@@ -236,7 +236,7 @@ export function HomeHero() {
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
-          src="/Videos/HeroVideo.mp4"
+          src="/Videos/HeroVideo2.mp4"
           autoPlay
           muted
           playsInline

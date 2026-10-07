@@ -13,7 +13,7 @@ import { offerCampaign } from "@/data/mock/home";
  *
  * Implements the editorial campaign showcase using the photographic
  * artwork `/Images/SeasonalEditBG.webp`:
- * - Deep green dappled-sunlight background with the amber DocHomeo Immunity Support bottle on a stone plinth in rippling water
+ * - Deep green dappled-sunlight background with the amber DocHomoeo Immunity Support bottle on a stone plinth in rippling water
  * - Left editorial copy: Eyebrow, bold display headline, description, and white pill CTA
  * - Center unobstructed focal area spotlighting the real bottle & water ripples
  * - Right frosted-glass benefit capsules: 100% Genuine, Fast Delivery, Secure Payments

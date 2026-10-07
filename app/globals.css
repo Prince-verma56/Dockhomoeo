@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================================
-   DocHomeo design tokens
+   DocHomoeo design tokens
    Source of truth: brain/18_DESIGN_TOKENS.md
    Brand primitives live on :root as --dh-*. The semantic shadcn tokens are
    mapped onto them so every shadcn primitive inherits the brand palette.

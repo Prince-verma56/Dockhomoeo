@@ -1,7 +1,7 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 /**
- * Universal primary font family for DocHomeo.
+ * Universal primary font family for DocHomoeo.
  * Plus Jakarta Sans provides crisp, bold, modern, cohesive typography
  * across hero headlines, section headings, navigation, and body copy.
  */

@@ -82,7 +82,7 @@ const journeySteps = [
 ];
 
 /**
- * 4 Core Trust Benefits for the integrated "Why Choose DocHomeo?" card
+ * 4 Core Trust Benefits for the integrated "Why Choose DocHomoeo?" card
  */
 const trustBenefits = [
   {
@@ -122,7 +122,7 @@ const trustBenefits = [
  * 1. Scenic Background: /Images/SimplePathBG.webp with sunlit archways and undulating dunes.
  * 2. Header: Floating frosted pill "HOW IT WORKS" + mask wipe animation on the warm serif headline.
  * 3. 5-Node Journey: Interactive pastel aura rings, animated SVG connecting wave line with trail dots.
- * 4. Unified Bottom Card: "Why Choose DocHomeo?" floating frosted card seamlessly integrated.
+ * 4. Unified Bottom Card: "Why Choose DocHomoeo?" floating frosted card seamlessly integrated.
  * 5. Professional Entrance Animation: ScrollTrigger mask reveals and staggered springs.
  */
 export function ConsultationJourney() {
@@ -370,7 +370,7 @@ export function ConsultationJourney() {
         </div>
 
         {/* ----------------------------------------------------------------- */}
-        {/* 4. UNIFIED "WHY CHOOSE DOCHOMEO?" TRUST CARD                      */}
+        {/* 4. UNIFIED "WHY CHOOSE DOCHOMOEO?" TRUST CARD                      */}
         {/* ----------------------------------------------------------------- */}
         <div data-anim="why-choose-card" className="mt-10 sm:mt-12 lg:mt-14">
           <div className="rounded-[30px] bg-white/75 hover:bg-white/80 backdrop-blur-2xl border border-white/85 px-6 sm:px-8 lg:px-10 py-6 sm:py-7.5 shadow-[0_16px_42px_rgba(20,40,30,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.95)] transition-all">
@@ -382,7 +382,7 @@ export function ConsultationJourney() {
                   WHY CHOOSE US
                 </p>
                 <h3 className="mt-1 font-display text-2xl sm:text-[1.85rem] font-bold text-ink leading-tight">
-                  Why Choose<br className="hidden sm:inline" /> DocHomeo?
+                  Why Choose<br className="hidden sm:inline" /> DocHomoeo?
                 </h3>
               </div>
 

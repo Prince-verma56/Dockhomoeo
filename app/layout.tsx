@@ -5,8 +5,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "DocHomeo — Natural care for a healthier you",
-    template: "%s · DocHomeo",
+    default: "DocHomoeo — Natural care for a healthier you",
+    template: "%s · DocHomoeo",
   },
   description:
     "Homoeopathic medicines and online consultations with certified doctors, delivered to your home.",

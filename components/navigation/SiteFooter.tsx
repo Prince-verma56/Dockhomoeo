@@ -55,7 +55,7 @@ export function SiteFooter() {
                     href={href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    aria-label={`DocHomeo on ${label}`}
+                    aria-label={`DocHomoeo on ${label}`}
                     className="grid size-10 place-items-center rounded-full border border-white/12 text-cream/70 transition-colors duration-200 hover:border-white/30 hover:text-cream"
                   >
                     <Icon className="size-[18px]" />
@@ -190,7 +190,7 @@ export function SiteFooter() {
 
         <div className="mt-8 flex flex-col gap-3 text-xs text-cream/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            &copy; {new Date().getFullYear()} DocHomeo. All rights reserved.
+            &copy; {new Date().getFullYear()} DocHomoeo. All rights reserved.
           </p>
           <p>Designed for a healthier tomorrow.</p>
         </div>

@@ -44,7 +44,7 @@ export function MobileNav() {
 
       <SheetContent
         side="left"
-        className="flex w-[min(92vw,380px)] flex-col gap-0 border-line bg-ivory p-0"
+        className="flex w-[min(92vw,380px)] flex-col gap-0 border-white/40 bg-white/60 backdrop-blur-2xl p-0 shadow-2xl"
       >
         <SheetHeader className="border-b border-line/70 p-5">
           <SheetTitle asChild>
@@ -66,7 +66,7 @@ export function MobileNav() {
               id="mobile-search"
               name="q"
               placeholder="Search medicines, doctors…"
-              className="h-11 rounded-xl bg-cream text-sm"
+              className="h-11 rounded-xl bg-white/50 backdrop-blur-md text-sm border-white/40 shadow-sm"
             />
           </form>
 

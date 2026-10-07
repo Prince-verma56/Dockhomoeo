@@ -88,8 +88,8 @@ export function SiteHeader() {
         // NO background color on the hero section!
         !isPastHero
           ? "bg-transparent border-b border-transparent shadow-none py-3.5 sm:py-4 px-4 sm:px-8"
-          // Applied background color only when on other sections:
-          : "bg-white/95 backdrop-blur-md border-b border-line/80 shadow-[0_8px_30px_rgba(20,37,31,0.06)] py-2.5 px-4 sm:px-8"
+          // Applied background color only when on other sections (glassy):
+          : "bg-white/40 backdrop-blur-2xl border-b border-white/30 shadow-[0_8px_32px_rgba(20,37,31,0.08)] py-2.5 px-4 sm:px-8"
       )}
     >
       <div className="mx-auto flex h-[58px] sm:h-[62px] max-w-[1400px] items-center gap-3 sm:gap-6">
@@ -115,7 +115,7 @@ export function SiteHeader() {
                 Shop
               </NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="grid w-[460px] grid-cols-2 gap-x-6 gap-y-1 rounded-2xl bg-white/95 p-5 shadow-2xl backdrop-blur-lg border border-line">
+                <div className="grid w-[460px] grid-cols-2 gap-x-6 gap-y-1 rounded-3xl bg-white/30 p-5 shadow-[0_16px_42px_rgba(0,0,0,0.05),inset_0_1px_1.5px_rgba(255,255,255,0.8)] backdrop-blur-2xl border border-white/40">
                   <MenuColumn title="By form" links={shopMenu.byForm} />
                   <MenuColumn title="By health goal" links={shopMenu.byGoal} />
                 </div>
@@ -159,8 +159,8 @@ export function SiteHeader() {
               className={cn(
                 "h-9.5 text-[0.8125rem]",
                 !isPastHero
-                  ? "border-black/10 bg-white/80 backdrop-blur-sm focus:bg-white text-[#14251f] shadow-xs"
-                  : "border-line bg-cream/70 focus:bg-white text-[#14251f]"
+                  ? "border-white/30 bg-white/20 backdrop-blur-2xl focus:bg-white/40 focus:border-white/50 text-[#14251f] shadow-[0_4px_16px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.4)] placeholder:text-[#14251f]/60"
+                  : "border-white/40 bg-white/40 backdrop-blur-xl focus:bg-white/60 focus:border-white/50 text-[#14251f] placeholder:text-[#14251f]/60 shadow-[0_4px_16px_rgba(0,0,0,0.03)]"
               )}
             />
           </form>
@@ -244,7 +244,7 @@ function MenuColumn({
             <NavigationMenuLink asChild>
               <Link
                 href={link.href}
-                className="block rounded-lg px-2.5 py-2 text-[0.875rem] text-ink transition-colors hover:bg-forest/6 hover:text-forest"
+                className="block rounded-xl px-3 py-2.5 text-[0.875rem] font-medium text-ink/80 transition-all duration-200 hover:bg-white/50 hover:text-forest hover:shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:scale-[1.01]"
               >
                 {link.label}
               </Link>
