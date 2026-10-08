@@ -3,12 +3,18 @@ import {
   IProductRepository,
   ISearchRepository,
   ICartRepository,
+  IInsightRepository,
+  IAuthRepository,
+  IAccountRepository,
 } from "./interfaces";
 import {
   LocalHomeRepository,
   LocalProductRepository,
   LocalSearchRepository,
   LocalCartRepository,
+  LocalInsightRepository,
+  LocalAuthRepository,
+  LocalAccountRepository,
 } from "./local";
 
 // Dependency Injection Container
@@ -20,4 +26,7 @@ export const repositories = {
   product: new LocalProductRepository() as IProductRepository,
   search: new LocalSearchRepository() as ISearchRepository,
   cart: new LocalCartRepository() as ICartRepository,
+  insight: new LocalInsightRepository() as IInsightRepository,
+  auth: new LocalAuthRepository() as IAuthRepository,
+  account: new LocalAccountRepository() as IAccountRepository,
 };

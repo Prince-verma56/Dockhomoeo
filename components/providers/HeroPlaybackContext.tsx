@@ -46,14 +46,27 @@ export function HeroPlaybackProvider({
   const skipIntro = useCallback(() => {
     setHasSkipped(true);
     setNavVisible(true);
-    setTimeout(() => {
-      setContentVisible(true);
-    }, 280);
+    setContentVisible(true);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("dochomoeo_hero_seen", "true");
+    }
+  }, []);
+
+  // Check initial state on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasSeen = sessionStorage.getItem("dochomoeo_hero_seen");
+      if (hasSeen === "true") {
+        setHasSkipped(true);
+        setNavVisible(true);
+        setContentVisible(true);
+      }
+    }
   }, []);
 
   // Time trigger for sequential appearance at 5 seconds
   useEffect(() => {
-    if (navVisible) return;
+    if (navVisible || hasSkipped) return;
 
     if (currentTime >= 5.0) {
       // First: NAV bar appears at 5 seconds
@@ -61,10 +74,13 @@ export function HeroPlaybackProvider({
       // Next: text content begins appearing right after
       const timer = setTimeout(() => {
         setContentVisible(true);
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("dochomoeo_hero_seen", "true");
+        }
       }, 350);
       return () => clearTimeout(timer);
     }
-  }, [currentTime, navVisible]);
+  }, [currentTime, navVisible, hasSkipped]);
 
   // Fallback: if video fails to play or user scrolls down, reveal after 5s or on scroll
   useEffect(() => {

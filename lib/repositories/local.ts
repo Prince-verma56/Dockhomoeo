@@ -3,13 +3,16 @@ import {
   IProductRepository,
   ISearchRepository,
   ICartRepository,
+  IInsightRepository,
 } from "./interfaces";
 import { mockProducts } from "@/data/mock/products";
 import { ApiHomeResponse } from "@/types/api/home";
 import { ApiProductDetail, ApiProductCard } from "@/types/api/product";
 import { ApiProductListingResponse, ApiSearchFilters, ApiSuggestResponse } from "@/types/api/search";
 import { ApiQuote, ApiQuoteLineInput, ApiCheckoutPayload, ApiCheckoutResponse } from "@/types/api/cart";
+import { ApiInsightDetail, ApiInsightListingResponse, ApiInsightCard } from "@/types/api/insight";
 import { Product } from "@/types/product";
+import { articles, healthGoals, brands as mockBrands } from "@/data/mock/home";
 
 // Simulated network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -45,16 +48,22 @@ export class LocalHomeRepository implements IHomeRepository {
           platform: "HOME_HERO",
         },
       ],
-      categories: [
-        { id: 1, name: "First Aid", slug: "first-aid", imageUrl: null, productCount: 4 },
-        { id: 2, name: "Digestion", slug: "digestion", imageUrl: null, productCount: 6 },
-        { id: 3, name: "Wellness", slug: "wellness", imageUrl: null, productCount: 12 },
-      ],
-      brands: [
-        { id: 1, name: "SBL", slug: "sbl", logoUrl: null, description: null, isActive: true, productCount: 10 },
-        { id: 2, name: "Dr. Reckeweg", slug: "reckeweg", logoUrl: null, description: null, isActive: true, productCount: 8 },
-        { id: 3, name: "Schwabe", slug: "schwabe", logoUrl: null, description: null, isActive: true, productCount: 5 },
-      ],
+      categories: healthGoals.map((goal, i) => ({
+        id: i + 1,
+        name: goal.name,
+        slug: goal.id,
+        imageUrl: goal.image,
+        productCount: Math.floor(Math.random() * 50) + 10,
+      })),
+      brands: mockBrands.map((brand, i) => ({
+        id: i + 1,
+        name: brand.name,
+        slug: brand.name.toLowerCase().replace(/ /g, '-'),
+        logoUrl: null,
+        description: `${brand.name} is a trusted homoeopathic brand.`,
+        isActive: true,
+        productCount: Math.floor(Math.random() * 30) + 5,
+      })),
       rails: [
         {
           key: "bestsellers",
@@ -273,3 +282,240 @@ export class LocalCartRepository implements ICartRepository {
     };
   }
 }
+
+const mapToApiInsightCard = (article: any): ApiInsightCard => ({
+  id: parseInt(article.id.replace('a-', '')),
+  title: article.title,
+  slug: article.href.replace('/learn/', '').replace('/insights/', ''),
+  excerpt: `Learn more about ${article.title.toLowerCase()} and how to improve your health.`,
+  coverImageUrl: article.image || null,
+  authorName: "Dr. Jane Doe",
+  publishedAt: new Date().toISOString(),
+  category: { name: article.category, slug: article.category.toLowerCase() },
+});
+
+export class LocalInsightRepository implements IInsightRepository {
+  async getInsights(page = 1, pageSize = 12, category?: string): Promise<ApiInsightListingResponse> {
+    await delay(300);
+    
+    let filtered = articles;
+    if (category) {
+      filtered = filtered.filter(a => a.category.toLowerCase() === category.toLowerCase());
+    }
+    
+    const items = filtered.map(mapToApiInsightCard);
+    
+    return {
+      items: items.slice((page - 1) * pageSize, page * pageSize),
+      total: items.length,
+      page,
+      pageSize,
+      pageCount: Math.ceil(items.length / pageSize),
+    };
+  }
+  
+  async getBySlug(slug: string): Promise<ApiInsightDetail | null> {
+    await delay(300);
+    
+    // Support both /learn/slug and /insights/slug styles in the mock data
+    const article = articles.find(a => a.href.endsWith(`/${slug}`));
+    
+    if (!article) return null;
+    
+    const card = mapToApiInsightCard(article);
+    
+    return {
+      ...card,
+      content: `
+        <h2>Understanding ${article.title}</h2>
+        <p>This is a detailed article about ${article.title.toLowerCase()}. Homoeopathy provides a natural, holistic approach to maintaining wellness and treating ailments.</p>
+        <p>According to classical principles, treatments are individualized. This means two people with similar symptoms might receive different remedies based on their overall constitution.</p>
+        <h3>Key Benefits</h3>
+        <ul>
+          <li>Natural ingredients derived from plants and minerals</li>
+          <li>Gentle action suitable for all ages</li>
+          <li>Focuses on the root cause rather than just suppressing symptoms</li>
+        </ul>
+        <p>Always consult with a qualified homoeopathic practitioner before starting any new regimen.</p>
+      `,
+      authorBio: "Dr. Jane Doe is a senior homoeopathic consultant with 15 years of experience.",
+      authorImageUrl: null,
+      updatedAt: card.publishedAt,
+      seoTitle: article.title,
+      seoDescription: card.excerpt,
+      seo: {
+        title: article.title,
+        description: card.excerpt,
+        path: `/insights/${slug}`,
+        image: card.coverImageUrl,
+      }
+    };
+  }
+  
+  async getRelated(slug: string): Promise<ApiInsightListingResponse> {
+    await delay(200);
+    const related = articles.filter(a => !a.href.endsWith(`/${slug}`)).slice(0, 3);
+    const items = related.map(mapToApiInsightCard);
+    return {
+      items,
+      total: related.length,
+      page: 1,
+      pageSize: 3,
+      pageCount: 1,
+    };
+  }
+}
+
+import { IAuthRepository, IAccountRepository } from "./interfaces";
+import { ApiAuthResponse, ApiUser } from "@/types/api/auth";
+import { ApiAccountProfile, ApiAddress, ApiOrder, ApiOrderSummary } from "@/types/api/account";
+
+export class LocalAuthRepository implements IAuthRepository {
+  async requestOtp(phone: string): Promise<{ success: boolean; message?: string }> {
+    await delay(600);
+    return { success: true, message: "OTP sent successfully" };
+  }
+
+  async verifyOtp(phone: string, code: string): Promise<ApiAuthResponse> {
+    await delay(800);
+    if (code === "000000") {
+      return { success: false, message: "Invalid OTP" };
+    }
+    const mockUser: ApiUser = {
+      id: 1,
+      firstName: "Test",
+      lastName: "User",
+      email: "test@example.com",
+      phone,
+      roles: ["USER"],
+    };
+    return {
+      success: true,
+      session: {
+        token: "mock-jwt-token",
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
+        user: mockUser,
+      }
+    };
+  }
+
+  async logout(): Promise<void> {
+    await delay(400);
+  }
+
+  async getCurrentUser(): Promise<ApiUser | null> {
+    await delay(300);
+    return null;
+  }
+}
+
+const mockAddresses: ApiAddress[] = [
+  {
+    id: "addr_1",
+    fullName: "Test User",
+    phone: "9876543210",
+    line1: "123 Health Ave",
+    landmark: "Near Park",
+    city: "Mumbai",
+    state: "Maharashtra",
+    pincode: "400001",
+    isDefault: true,
+  }
+];
+
+const mockOrders: ApiOrder[] = [
+  {
+    id: "ord_1",
+    orderNumber: "DH-1001",
+    status: "DELIVERED",
+    placedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+    subtotal: 450,
+    shipping: 50,
+    tax: 0,
+    grandTotal: 500,
+    items: [
+      { id: "item_1", productId: 1, productName: "Arnica Montana", variantId: 1, variantName: "30 CH", quantity: 2, price: 225 }
+    ],
+    shippingAddress: mockAddresses[0],
+    paymentMethod: "UPI",
+    paymentStatus: "PAID",
+  }
+];
+
+export class LocalAccountRepository implements IAccountRepository {
+  async getProfile(): Promise<ApiAccountProfile | null> {
+    await delay(300);
+    return {
+      id: 1,
+      firstName: "Test",
+      lastName: "User",
+      email: "test@example.com",
+      phone: "9876543210",
+      gender: "MALE",
+    };
+  }
+  
+  async updateProfile(profile: Partial<ApiAccountProfile>): Promise<ApiAccountProfile> {
+    await delay(500);
+    return { id: 1, firstName: "Test", lastName: "User", email: "test@example.com", phone: "9876543210", ...profile };
+  }
+  
+  async getAddresses(): Promise<ApiAddress[]> {
+    await delay(400);
+    return [...mockAddresses];
+  }
+  
+  async addAddress(address: Omit<ApiAddress, 'id'>): Promise<ApiAddress> {
+    await delay(500);
+    const newAddr = { ...address, id: "addr_" + Date.now() };
+    if (newAddr.isDefault) {
+      mockAddresses.forEach(a => a.isDefault = false);
+    }
+    mockAddresses.push(newAddr as ApiAddress);
+    return newAddr as ApiAddress;
+  }
+  
+  async updateAddress(id: string, address: Partial<ApiAddress>): Promise<ApiAddress> {
+    await delay(500);
+    const idx = mockAddresses.findIndex(a => a.id === id);
+    if (idx >= 0) {
+      if (address.isDefault) {
+        mockAddresses.forEach(a => a.isDefault = false);
+      }
+      mockAddresses[idx] = { ...mockAddresses[idx], ...address } as ApiAddress;
+      return mockAddresses[idx];
+    }
+    throw new Error("Address not found");
+  }
+  
+  async deleteAddress(id: string): Promise<void> {
+    await delay(400);
+    const idx = mockAddresses.findIndex(a => a.id === id);
+    if (idx >= 0) {
+      mockAddresses.splice(idx, 1);
+    }
+  }
+  
+  async setDefaultAddress(id: string): Promise<void> {
+    await delay(300);
+    mockAddresses.forEach(a => a.isDefault = a.id === id);
+  }
+  
+  async getOrders(): Promise<ApiOrderSummary[]> {
+    await delay(500);
+    return mockOrders.map(o => ({
+      id: Number(o.id.split('_')[1]),
+      orderNumber: o.orderNumber,
+      status: o.status,
+      grandTotal: o.grandTotal,
+      placedAt: o.placedAt,
+      itemCount: o.items.length
+    }));
+  }
+  
+  async getOrderById(id: string): Promise<ApiOrder | null> {
+    await delay(500);
+    return mockOrders.find(o => o.id === id || o.orderNumber === id) || null;
+  }
+}
+

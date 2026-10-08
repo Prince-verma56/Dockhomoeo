@@ -17,7 +17,7 @@ import {
   XMark,
   YoutubeMark,
 } from "@/components/shared/SocialIcons";
-const footerGroups = [{ id: "shop", label: "Shop", links: [{ label: "All Products", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" }]},{ id: "about", label: "About", links: [{ label: "Our Story", href: "/about" },{ label: "Quality Standards", href: "/quality" }]},{ id: "support", label: "Support", links: [{ label: "Contact Us", href: "/contact" },{ label: "Track Order", href: "/account/orders" }]}]; const paymentMarks = ["Visa", "Mastercard", "Amex", "UPI"];
+const footerGroups = [{ id: "shop", label: "Shop", links: [{ label: "All Products", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" }, { label: "Health Insights", href: "/insights" }]},{ id: "about", label: "About", links: [{ label: "Our Story", href: "/about" },{ label: "Quality Standards", href: "/quality" }]},{ id: "support", label: "Support", links: [{ label: "Contact Us", href: "/contact" },{ label: "Track Order", href: "/account/orders" }]}]; const paymentMarks = ["Visa", "Mastercard", "Amex", "UPI"];
 
 const SOCIALS = [
   { label: "Facebook", href: "https://facebook.com", Icon: FacebookMark },
@@ -142,6 +142,7 @@ export function SiteFooter() {
                 required
                 placeholder="Enter your email"
                 className="h-12 flex-1 rounded-xl border-white/15 bg-white/6 text-sm text-cream placeholder:text-cream/40"
+                suppressHydrationWarning
               />
               <Button
                 type="submit"

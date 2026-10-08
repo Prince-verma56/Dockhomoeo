@@ -21,3 +21,34 @@ export interface ICartRepository {
   getQuote(lines: ApiQuoteLineInput[], couponCode?: string): Promise<ApiQuote>;
   checkout(payload: ApiCheckoutPayload): Promise<ApiCheckoutResponse>;
 }
+import { ApiInsightDetail, ApiInsightListingResponse } from "@/types/api/insight";
+
+export interface IInsightRepository {
+  getInsights(page?: number, pageSize?: number, category?: string): Promise<ApiInsightListingResponse>;
+  getBySlug(slug: string): Promise<ApiInsightDetail | null>;
+  getRelated(slug: string): Promise<ApiInsightListingResponse>;
+}
+
+import { ApiAuthResponse, ApiUser } from "@/types/api/auth";
+import { ApiAccountProfile, ApiAddress, ApiOrder, ApiOrderSummary } from "@/types/api/account";
+
+export interface IAuthRepository {
+  requestOtp(phone: string): Promise<{ success: boolean; message?: string }>;
+  verifyOtp(phone: string, code: string): Promise<ApiAuthResponse>;
+  logout(): Promise<void>;
+  getCurrentUser(): Promise<ApiUser | null>;
+}
+
+export interface IAccountRepository {
+  getProfile(): Promise<ApiAccountProfile | null>;
+  updateProfile(profile: Partial<ApiAccountProfile>): Promise<ApiAccountProfile>;
+  
+  getAddresses(): Promise<ApiAddress[]>;
+  addAddress(address: Omit<ApiAddress, 'id'>): Promise<ApiAddress>;
+  updateAddress(id: string, address: Partial<ApiAddress>): Promise<ApiAddress>;
+  deleteAddress(id: string): Promise<void>;
+  setDefaultAddress(id: string): Promise<void>;
+  
+  getOrders(): Promise<ApiOrderSummary[]>;
+  getOrderById(id: string): Promise<ApiOrder | null>;
+}

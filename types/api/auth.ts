@@ -7,16 +7,30 @@ export interface ApiUser {
   roles: string[];
 }
 
-export interface ApiOrderSummary {
-  id: number;
-  orderNumber: string;
-  status: string;
-  grandTotal: number;
-  placedAt: string | Date;
-  itemCount: number;
-}
 
 export interface ApiAuthState {
   isAuthenticated: boolean;
   user: ApiUser | null;
+  status: "idle" | "loading" | "authenticated" | "unauthenticated";
+}
+
+export interface ApiSession {
+  token: string;
+  expiresAt: string;
+  user: ApiUser;
+}
+
+export interface ApiOtpRequest {
+  phone: string;
+}
+
+export interface ApiOtpVerification {
+  phone: string;
+  code: string;
+}
+
+export interface ApiAuthResponse {
+  success: boolean;
+  message?: string;
+  session?: ApiSession;
 }

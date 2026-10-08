@@ -98,6 +98,7 @@ function ArticleCard({
                 src={article.image}
                 alt={article.mediaLabel || ""}
                 fill
+                sizes={isLead ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"}
                 className="object-cover transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
               />
             </div>

@@ -101,6 +101,25 @@ export function HomeHero() {
     if (!contentVisible || hasEnteredRef.current) return;
     hasEnteredRef.current = true;
 
+    // If we've skipped the intro, jump the video to the end instantly
+    if (playback?.hasSkipped && videoRef.current) {
+      const video = videoRef.current;
+      video.autoplay = false;
+      
+      const setEndOfVideo = () => {
+        if (video.duration && video.duration > 0) {
+          video.currentTime = video.duration - 0.1;
+        }
+        video.pause();
+      };
+
+      if (video.readyState >= 1) {
+        setEndOfVideo();
+      } else {
+        video.addEventListener("loadedmetadata", setEndOfVideo, { once: true });
+      }
+    }
+
     const timer = setTimeout(() => {
       // Left leaf glides in smoothly from bottom-left corner
       if (leftLeafEntranceRef.current) {
@@ -125,10 +144,10 @@ export function HomeHero() {
           ease: "power3.out",
         });
       }
-    }, 280);
+    }, playback?.hasSkipped ? 0 : 280);
 
     return () => clearTimeout(timer);
-  }, [contentVisible]);
+  }, [contentVisible, playback?.hasSkipped, videoRef]);
 
   // 3. Scroll-tracked scrub animation (Outer layer) & Ambient Yoyo Sway (Inner layer)
   useEffect(() => {
@@ -248,6 +267,12 @@ export function HomeHero() {
         <div
           aria-hidden
           className="absolute inset-y-0 left-0 w-full lg:w-[38%] bg-gradient-to-r from-white/20 to-transparent pointer-events-none"
+        />
+
+        {/* Subtle top gradient to ensure navbar text visibility over bright sky */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/70 to-transparent pointer-events-none"
         />
 
         {/* Minimal soft blend at the bottom */}

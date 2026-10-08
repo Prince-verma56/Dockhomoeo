@@ -20,6 +20,8 @@ import { MobileNav } from "@/components/navigation/MobileNav";
 const primaryNav = [{ label: "Shop", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" },{ label: "Health Insights", href: "/insights" }] as const; const shopMenu = { byForm: [{ label: "Drops & Dilutions", href: "/products?form=drops" },{ label: "Tablets & Pellets", href: "/products?form=tablets" },{ label: "Mother Tinctures", href: "/products?form=tincture" },{ label: "Creams & Ointments", href: "/products?form=cream" }], byGoal: [{ label: "Immunity", href: "/products?goal=immunity" },{ label: "Skin Care", href: "/products?goal=skin-care" },{ label: "Digestive", href: "/products?goal=digestive" },{ label: "Sleep & Stress", href: "/products?goal=sleep-stress" }] } as const;
 import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
 import { useCart } from "@/components/providers/CartProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { AccountMenu } from "@/components/navigation/AccountMenu";
 
 /**
  * SiteHeader
@@ -45,6 +47,7 @@ export function SiteHeader() {
   const isNavVisible = heroPlayback ? heroPlayback.navVisible : true;
   
   const { itemCount, setIsOpen } = useCart();
+  const { status, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -199,15 +202,19 @@ export function SiteHeader() {
             )}
           </Button>
 
-          {/* Login / Register Green Button */}
-          <Button
-            asChild
-            className="ml-1 hidden sm:inline-flex h-9 sm:h-9.5 rounded-full bg-[#0d5a43] hover:bg-[#063b2d] text-white px-5 text-[0.8125rem] font-semibold tracking-wide shadow-sm hover:shadow hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-          >
-            <Link href="/login">
-              Login / Register
-            </Link>
-          </Button>
+          {/* Account Menu or Login / Register */}
+          {status === "loading" ? null : isAuthenticated ? (
+            <AccountMenu />
+          ) : (
+            <Button
+              asChild
+              className="ml-1 hidden sm:inline-flex h-9 sm:h-9.5 rounded-full bg-[#0d5a43] hover:bg-[#063b2d] text-white px-5 text-[0.8125rem] font-semibold tracking-wide shadow-sm hover:shadow hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            >
+              <Link href="/login">
+                Login / Register
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
