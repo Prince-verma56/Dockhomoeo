@@ -35,6 +35,12 @@ export type Product = {
   /** Describes the photograph that will replace the placeholder. */
   mediaLabel: string;
   image?: string;
+  category?: string;
+  healthGoals?: string[];
+  description?: string;
+  ingredients?: string[];
+  usage?: string;
+  availability?: string;
 };
 
 /** A dosage-form collection, used by the featured collection section. */

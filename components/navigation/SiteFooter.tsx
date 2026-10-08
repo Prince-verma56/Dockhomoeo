@@ -17,7 +17,7 @@ import {
   XMark,
   YoutubeMark,
 } from "@/components/shared/SocialIcons";
-import { footerGroups, paymentMarks } from "@/data/mock/home";
+const footerGroups = [{ id: "shop", label: "Shop", links: [{ label: "All Products", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" }]},{ id: "about", label: "About", links: [{ label: "Our Story", href: "/about" },{ label: "Quality Standards", href: "/quality" }]},{ id: "support", label: "Support", links: [{ label: "Contact Us", href: "/contact" },{ label: "Track Order", href: "/account/orders" }]}]; const paymentMarks = ["Visa", "Mastercard", "Amex", "UPI"];
 
 const SOCIALS = [
   { label: "Facebook", href: "https://facebook.com", Icon: FacebookMark },
@@ -71,7 +71,7 @@ export function SiteFooter() {
             <div className="hidden gap-10 md:grid md:grid-cols-3">
               {footerGroups.map((group) => (
                 <div key={group.id}>
-                  <h2 className="dh-eyebrow text-cream/50">{group.title}</h2>
+                  <h2 className="dh-eyebrow text-cream/50">{group.label}</h2>
                   <ul className="mt-5 flex flex-col gap-3">
                     {group.links.map((link) => (
                       <li key={link.href}>
@@ -100,7 +100,7 @@ export function SiteFooter() {
                   className="border-b border-white/10"
                 >
                   <AccordionTrigger className="py-4 text-[0.9375rem] text-cream hover:no-underline">
-                    {group.title}
+                    {group.label}
                   </AccordionTrigger>
                   <AccordionContent>
                     <ul className="flex flex-col gap-3 pb-4">

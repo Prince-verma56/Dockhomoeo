@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Headset, PackageCheck, ShieldCheck, Stethoscope, Truck } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { utilityMessages } from "@/data/mock/home";
+const utilityMessages = ["Free shipping on orders over ₹500", "100% Authentic Homoeopathic Remedies"];
 
 const MESSAGE_ICONS = [Truck, ShieldCheck, Stethoscope] as const;
 
@@ -23,11 +23,11 @@ export function UtilityBar() {
               const Icon = MESSAGE_ICONS[index] ?? ShieldCheck;
               return (
                 <li
-                  key={message.id}
+                  key={index}
                   className="flex shrink-0 items-center gap-2 text-[0.75rem] text-cream/80"
                 >
                   <Icon aria-hidden className="size-3.5" strokeWidth={1.6} />
-                  {message.label}
+                  {message}
                 </li>
               );
             })}

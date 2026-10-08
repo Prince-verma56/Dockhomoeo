@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Heart, Search, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { SearchBar } from "@/components/shared/SearchBar";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,8 +17,9 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { MobileNav } from "@/components/navigation/MobileNav";
-import { primaryNav, shopMenu } from "@/data/mock/home";
+const primaryNav = [{ label: "Shop", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" },{ label: "Health Insights", href: "/insights" }] as const; const shopMenu = { byForm: [{ label: "Drops & Dilutions", href: "/products?form=drops" },{ label: "Tablets & Pellets", href: "/products?form=tablets" },{ label: "Mother Tinctures", href: "/products?form=tincture" },{ label: "Creams & Ointments", href: "/products?form=cream" }], byGoal: [{ label: "Immunity", href: "/products?goal=immunity" },{ label: "Skin Care", href: "/products?goal=skin-care" },{ label: "Digestive", href: "/products?goal=digestive" },{ label: "Sleep & Stress", href: "/products?goal=sleep-stress" }] } as const;
 import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
+import { useCart } from "@/components/providers/CartProvider";
 
 /**
  * SiteHeader
@@ -42,6 +43,8 @@ export function SiteHeader() {
 
   const heroPlayback = useHeroPlayback();
   const isNavVisible = heroPlayback ? heroPlayback.navVisible : true;
+  
+  const { itemCount, setIsOpen } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -143,27 +146,9 @@ export function SiteHeader() {
         {/* Right side controls: Search, Wishlist, Cart, Login */}
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           {/* Search bar using shared SearchBar component */}
-          <form
-            role="search"
-            action="/search"
-            className="hidden md:block"
-          >
-            <label htmlFor="site-search" className="sr-only">
-              Search medicines, doctors and symptoms
-            </label>
-            <SearchBar
-              id="site-search"
-              name="q"
-              placeholder="Search medicines, doctors, symptoms..."
-              containerClassName="w-[210px] lg:w-[250px] xl:w-[280px] focus-within:w-[310px]"
-              className={cn(
-                "h-9.5 text-[0.8125rem]",
-                !isPastHero
-                  ? "border-white/30 bg-white/20 backdrop-blur-2xl focus:bg-white/40 focus:border-white/50 text-[#14251f] shadow-[0_4px_16px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.4)] placeholder:text-[#14251f]/60"
-                  : "border-white/40 bg-white/40 backdrop-blur-xl focus:bg-white/60 focus:border-white/50 text-[#14251f] placeholder:text-[#14251f]/60 shadow-[0_4px_16px_rgba(0,0,0,0.03)]"
-              )}
-            />
-          </form>
+          <div className="hidden md:block">
+            <GlobalSearch />
+          </div>
 
           {/* Search button for small screens */}
           <Button
@@ -194,23 +179,24 @@ export function SiteHeader() {
 
           {/* Cart with Red Badge */}
           <Button
-            asChild
+            onClick={() => setIsOpen(true)}
             variant="ghost"
             size="icon"
+            aria-label={`Cart, ${itemCount} items`}
             className={cn(
               "relative size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
               !isPastHero && "hover:bg-white/40"
             )}
           >
-            <Link href="/cart" aria-label="Cart, 0 items">
-              <ShoppingBag className="size-[18px]" strokeWidth={1.75} />
+            <ShoppingBag className="size-[18px]" strokeWidth={1.75} />
+            {itemCount > 0 && (
               <span
                 aria-hidden
                 className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#e11d48] text-[0.625rem] font-bold text-white shadow-xs"
               >
-                0
+                {itemCount > 99 ? "99+" : itemCount}
               </span>
-            </Link>
+            )}
           </Button>
 
           {/* Login / Register Green Button */}

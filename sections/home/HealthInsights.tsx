@@ -1,104 +1,113 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { Section } from "@/components/shared/Section";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { Reveal } from "@/components/shared/Reveal";
-import { SplitHeading } from "@/components/shared/SplitHeading";
-import { Eyebrow } from "@/components/shared/Eyebrow";
-import { articles } from "@/data/mock/home";
-import type { Article } from "@/types/content";
 
-/**
- * Editorial Health Insights Journal.
- * 3-card photographic layout matching the user's desired design:
- * High-quality imagery, clean white rounded cards, bold headlines, and green read-more CTAs.
- */
 export function HealthInsights() {
   return (
-    <Section
-      labelledBy="insights-heading"
-      space="none"
-      className="py-14 md:py-20 bg-[#fbf9f4]"
-    >
-      <Container width="wide">
-        {/* Section Header */}
-        <div className="flex flex-col gap-4 border-b border-[#e5e1d5] pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <section className="py-24 bg-white">
+      <Container>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
           <div>
-            <Reveal>
-              <Eyebrow>From the journal</Eyebrow>
-            </Reveal>
-            <SplitHeading
-              id="insights-heading"
-              lines={["Health Insights for a Better You"]}
-              className="mt-3.5 font-sans text-3xl sm:text-4xl lg:text-[2.6rem] font-bold text-[#0d2118] tracking-tight leading-[1.1]"
-            />
+            <h2 className="text-3xl font-bold text-[#0a2015] tracking-tight mb-2">
+              Health Insights
+            </h2>
+            <p className="text-[#4b6b5a]">
+              Knowledge and understanding for your wellness journey.
+            </p>
           </div>
-
-          <Reveal delay={0.1}>
-            <Link
-              href="/learn"
-              className="group inline-flex items-center gap-1.5 text-sm font-semibold text-[#0c503b] hover:text-[#063b2d] transition-colors"
-            >
-              <span>Read all articles</span>
-              <ArrowUpRight
-                aria-hidden
-                className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 stroke-[2]"
-              />
-            </Link>
-          </Reveal>
+          
+          <Link 
+            href="/insights" 
+            className="hidden md:inline-flex items-center gap-2 text-sm font-semibold text-[#1b7a54] hover:text-[#115539] transition-colors"
+          >
+            Read all articles
+            <ArrowRight className="size-4" />
+          </Link>
         </div>
 
-        {/* 3-Card Editorial Grid */}
-        <Reveal
-          stagger="[data-article]"
-          className="mt-8 sm:mt-10 grid gap-6 sm:gap-7 md:grid-cols-3"
-        >
-          {articles.map((article) => (
-            <div key={article.id} data-article className="h-full">
-              <ArticleCard article={article} />
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+          {/* Main Featured Article */}
+          <Link 
+            href="/insights/understanding-potency" 
+            className="group relative rounded-3xl overflow-hidden bg-[#f4f7f5] aspect-square sm:aspect-[4/3] lg:aspect-auto lg:h-[480px]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a2015]/90 via-[#0a2015]/40 to-transparent z-10" />
+            
+            {/* Minimal aesthetic placeholder for article image */}
+            <div className="absolute inset-0 bg-[#e7f0ec] group-hover:scale-105 transition-transform duration-700">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/40 via-white/0 to-transparent opacity-60" />
             </div>
-          ))}
-        </Reveal>
-      </Container>
-    </Section>
-  );
-}
 
-function ArticleCard({ article }: { article: Article }) {
-  return (
-    <article className="group h-full">
-      <Link
-        href={article.href}
-        className="flex h-full flex-col overflow-hidden rounded-[20px] bg-white border border-[#eae6dc] shadow-[0_2px_12px_rgba(20,37,31,0.04)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_14px_30px_rgba(20,37,31,0.1)] hover:border-[#ded8cc]"
-      >
-        {/* Top Photographic Crop */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#efebe3]">
-          {article.image ? (
-            <Image
-              src={article.image}
-              alt={article.title}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
-            />
-          ) : (
-            <div className="size-full bg-linear-to-br from-[#e8eee3] to-[#d6ded0]" />
-          )}
-        </div>
+            <div className="absolute inset-0 z-20 flex flex-col justify-end p-8 sm:p-10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-xs font-medium text-white mb-4 w-fit">
+                <BookOpen className="size-3" />
+                Guide
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 group-hover:text-[#a7c5b6] transition-colors">
+                Understanding Homoeopathic Potencies: 30C vs 200C
+              </h3>
+              <p className="text-white/80 line-clamp-2 text-sm sm:text-base max-w-md">
+                A definitive guide to understanding dilution scales and selecting the right potency for acute and chronic conditions.
+              </p>
+            </div>
+          </Link>
 
-        {/* Bottom Editorial Content */}
-        <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
-          <h3 className="font-sans text-[1.08rem] sm:text-[1.18rem] font-bold text-[#0d2118] leading-[1.3] group-hover:text-[#0c503b] transition-colors line-clamp-2">
-            {article.title}
-          </h3>
-
-          <div className="mt-4 sm:mt-5 flex items-center gap-1.5 text-xs sm:text-[0.82rem] font-bold text-[#0c503b] group-hover:text-[#063b2d] transition-colors">
-            <span>{article.readingMinutes} min read</span>
-            <ArrowRight className="size-3.5 stroke-[2.2] transition-transform duration-300 group-hover:translate-x-1" />
+          {/* Secondary Articles Stack */}
+          <div className="flex flex-col gap-6 lg:gap-8">
+            {[
+              {
+                title: "Building a First Aid Kit",
+                category: "Wellness",
+                desc: "The top 5 essential homoeopathic remedies every family should have on hand for minor emergencies.",
+                slug: "first-aid-kit"
+              },
+              {
+                title: "How to Store Your Medicines",
+                category: "Care",
+                desc: "Learn why strong odors and direct sunlight can affect the efficacy of your homoeopathic dilutions.",
+                slug: "storage-guide"
+              },
+              {
+                title: "Navigating Combination Remedies",
+                category: "Education",
+                desc: "When to choose a complex combination formula versus a single classical remedy.",
+                slug: "combination-remedies"
+              }
+            ].map((article, i) => (
+              <Link 
+                key={i} 
+                href={`/insights/${article.slug}`}
+                className="group flex flex-col sm:flex-row gap-6 p-6 rounded-3xl bg-white border border-black/5 hover:border-[#1b7a54]/30 hover:shadow-lg hover:shadow-[#1b7a54]/5 transition-all flex-1"
+              >
+                <div className="w-full sm:w-32 lg:w-40 h-32 rounded-2xl bg-[#f4f7f5] shrink-0 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#e7f0ec] to-[#d5e5db] group-hover:scale-105 transition-transform duration-500" />
+                </div>
+                
+                <div className="flex flex-col justify-center flex-1">
+                  <div className="text-xs font-semibold text-[#1b7a54] mb-2 uppercase tracking-wider">
+                    {article.category}
+                  </div>
+                  <h3 className="text-xl font-bold text-[#0a2015] mb-2 group-hover:text-[#1b7a54] transition-colors">
+                    {article.title}
+                  </h3>
+                  <p className="text-[#4b6b5a] text-sm line-clamp-2">
+                    {article.desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
-      </Link>
-    </article>
+        
+        <div className="mt-8 text-center md:hidden">
+          <Link 
+            href="/insights" 
+            className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#f4f7f5] text-sm font-semibold text-[#0a2015] hover:bg-[#e7f0ec] transition-colors"
+          >
+            View all articles
+          </Link>
+        </div>
+      </Container>
+    </section>
   );
 }

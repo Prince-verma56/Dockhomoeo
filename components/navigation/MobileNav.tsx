@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { Separator } from "@/components/ui/separator";
 import { Wordmark } from "@/components/navigation/Wordmark";
-import { healthGoals, primaryNav, shopMenu } from "@/data/mock/home";
+const primaryNav = [{ label: "Shop", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" },{ label: "Health Insights", href: "/insights" }] as const; const shopMenu = { byForm: [{ label: "Drops & Dilutions", href: "/products?form=drops" },{ label: "Tablets & Pellets", href: "/products?form=tablets" },{ label: "Mother Tinctures", href: "/products?form=tincture" },{ label: "Creams & Ointments", href: "/products?form=cream" }], byGoal: [{ label: "Immunity", href: "/products?goal=immunity" },{ label: "Skin Care", href: "/products?goal=skin-care" },{ label: "Digestive", href: "/products?goal=digestive" },{ label: "Sleep & Stress", href: "/products?goal=sleep-stress" }] } as const; const healthGoals = [{ id: "immunity", name: "Immunity", href: "/products?goal=immunity" }, { id: "skin-care", name: "Skin Care", href: "/products?goal=skin-care" }];
 
 /**
  * Mobile navigation drawer.

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { plusJakartaSans } from "@/lib/fonts";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { CartProvider } from "@/components/providers/CartProvider";
+import { CartDrawer } from "@/components/commerce/CartDrawer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,7 +42,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body suppressHydrationWarning className="flex min-h-full flex-col font-sans">
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <CartProvider>
+          <SmoothScrollProvider>{children}</SmoothScrollProvider>
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );
