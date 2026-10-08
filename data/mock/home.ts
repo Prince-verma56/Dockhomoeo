@@ -264,6 +264,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 120,
     tone: "amber",
     mediaLabel: "Dropper bottle with a single suspended droplet, backlit",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "c-tablets",
@@ -273,6 +274,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 200,
     tone: "clear",
     mediaLabel: "Glass pellet jar with the lid resting beside it",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "c-tinctures",
@@ -282,6 +284,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 90,
     tone: "forest",
     mediaLabel: "Tincture bottle among pressed botanical leaves",
+    image: "/Images/Products/sbl-natrum.webp",
   },
   {
     id: "c-creams",
@@ -291,6 +294,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 80,
     tone: "cobalt",
     mediaLabel: "Cream tube on a folded linen cloth, top-down light",
+    image: "/Images/Products/sbl-calc-carb.webp",
   },
 ];
 

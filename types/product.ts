@@ -52,6 +52,7 @@ export type ProductCollection = {
   productCount: number;
   tone: GlassTone;
   mediaLabel: string;
+  image?: string;
 };
 
 /** A health goal entry in the category explorer. */

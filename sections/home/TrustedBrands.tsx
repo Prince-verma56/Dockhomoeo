@@ -358,7 +358,7 @@ export function TrustedBrands() {
         {/* Left flank botanical foliage with gentle blur */}
         <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-25 lg:opacity-30">
           <img
-            src="/Images/PNGS/HeroLeftLeaves.png"
+            src="/Images/PNGS/HeroLeftLeaves.webp"
             alt=""
             className="h-72 sm:h-96 w-auto object-contain filter blur-[0.6px]"
           />
@@ -367,7 +367,7 @@ export function TrustedBrands() {
         {/* Right flank botanical foliage with gentle blur */}
         <div className="absolute -right-10 top-1/2 -translate-y-1/2 opacity-20 lg:opacity-25 scale-x-[-1]">
           <img
-            src="/Images/PNGS/HeroLeftLeaves.png"
+            src="/Images/PNGS/HeroLeftLeaves.webp"
             alt=""
             className="h-64 sm:h-80 w-auto object-contain filter blur-[0.8px]"
           />

@@ -29,7 +29,7 @@ export function CheckoutView() {
     pincode: "",
   });
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("ONLINE");
-  const [note, setNote] = useState("");
+  const [note] = useState("");
 
   if (items.length === 0) {
     return (

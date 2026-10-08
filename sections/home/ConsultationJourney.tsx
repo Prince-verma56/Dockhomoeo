@@ -115,7 +115,7 @@ const trustBenefits = [
  * ConsultationJourney Section
  *
  * Implements:
- * 1. Scenic Background: /Images/SimplePathBG.png with sunlit archways and undulating dunes.
+ * 1. Scenic Background: /Images/SimplePathBG.webp with sunlit archways and undulating dunes.
  * 2. Header: Floating frosted pill "HOW IT WORKS" + mask wipe animation on the warm serif headline.
  * 3. 5-Node Journey: Interactive pastel aura rings, animated SVG connecting wave line with trail dots.
  * 4. Unified Bottom Card: "Why Choose DocHomeo?" floating frosted card seamlessly integrated.
@@ -231,11 +231,11 @@ export function ConsultationJourney() {
       className="relative w-full overflow-hidden text-ink py-16 sm:py-20 lg:py-24"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC BACKGROUND IMAGE (SimplePathBG.png)                     */}
+      {/* 1. SCENIC BACKGROUND IMAGE (SimplePathBG.webp)                     */}
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="/Images/SimplePathBG.png"
+          src="/Images/SimplePathBG.webp"
           alt=""
           aria-hidden="true"
           className="size-full object-cover object-[center_top] lg:object-center"

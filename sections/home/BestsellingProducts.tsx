@@ -39,28 +39,13 @@ export function BestsellingProducts() {
       className="relative text-ink pt-8 sm:pt-12 lg:pt-14 pb-12 sm:pb-16 lg:pb-20 overflow-hidden"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC BACKGROUND IMAGE (ProductsSectionBG.png)                */}
+      {/* 1. SCENIC BACKGROUND IMAGE (ProductsSectionBG.webp)                */}
       {/* Natural, crisp, and vibrant without foggy white overlays           */}
       {/* ----------------------------------------------------------------- */}
+      {/* ----------------------------------------------------------------- */}
+      {/* 1. SCENIC BACKGROUND IMAGE (Removed per user request)              */}
+      {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
-          src="/Images/ProductsSectionBG.png"
-          alt=""
-          aria-hidden="true"
-          className="size-full object-cover object-center scale-x-[-1]"
-        />
-        {/* Decorative botanical leaves on the left side of the background */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-12 top-0 bottom-0 select-none opacity-20 lg:opacity-30"
-        >
-          <img
-            src="/Images/PNGS/HeroLeftLeaves.png"
-            alt=""
-            className="h-full w-auto object-contain filter blur-[0.4px]"
-          />
-        </div>
-
         {/* Atmospheric blurred bottom transition blend connecting seamlessly to Doctor Consultation */}
         <div aria-hidden="true" className="dh-section-blend-bottom" />
       </div>
@@ -75,8 +60,7 @@ export function BestsellingProducts() {
           {/* LEFT EDITORIAL COLUMN (Diffused organic blur, NOT a card box)  */}
           {/* ============================================================== */}
           <div className="relative w-full lg:w-[350px] xl:w-[390px] 2xl:w-[420px] shrink-0 flex flex-col justify-between py-3 sm:py-4 lg:py-5 px-3 sm:px-4">
-            {/* Diffused organic frosted blur backing - softens busy rocks/leaves without card borders */}
-            <div aria-hidden="true" className="dh-diffuse-blur-backdrop" />
+            {/* Removed diffused organic frosted blur backing since background is now solid */}
             
             {/* Top Text & CTA Block */}
             <div className="flex flex-col items-start relative z-10">
@@ -90,13 +74,13 @@ export function BestsellingProducts() {
               {/* Large Crisp Display Headline (Matching Hero Typography) */}
               <h2
                 id="bestsellers-heading"
-                className="mt-3.5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.65rem] font-bold tracking-tight text-[#061c12] leading-[1.04] drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]"
+                className="mt-3.5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.65rem] font-bold tracking-tight text-[#061c12] leading-[1.04]"
               >
                 Bestselling<br />Medicines
               </h2>
 
               {/* Subtitle */}
-              <p className="mt-3.5 text-[0.92rem] sm:text-[0.98rem] text-[#143425] font-medium leading-relaxed max-w-sm drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)]">
+              <p className="mt-3.5 text-[0.92rem] sm:text-[0.98rem] text-[#143425] font-medium leading-relaxed max-w-sm">
                 Most trusted homeopathic remedies for your everyday health and a better tomorrow.
               </p>
 
@@ -117,7 +101,7 @@ export function BestsellingProducts() {
                   <Leaf className="size-4.5 stroke-[2]" />
                 </span>
                 <div className="text-[0.84rem] leading-tight text-[#061d13]">
-                  <span className="font-bold block drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">100% Natural</span>
+                  <span className="font-bold block">100% Natural</span>
                   <span className="text-[#204030] font-medium text-xs">Pure classical plant & mineral extracts</span>
                 </div>
               </div>
@@ -127,7 +111,7 @@ export function BestsellingProducts() {
                   <ShieldCheck className="size-4.5 stroke-[2]" />
                 </span>
                 <div className="text-[0.84rem] leading-tight text-[#061d13]">
-                  <span className="font-bold block drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">Safe & Effective</span>
+                  <span className="font-bold block">Safe & Effective</span>
                   <span className="text-[#204030] font-medium text-xs">Standardized pharmacopoeia grade</span>
                 </div>
               </div>
@@ -137,7 +121,7 @@ export function BestsellingProducts() {
                   <HeartHandshake className="size-4.5 stroke-[2]" />
                 </span>
                 <div className="text-[0.84rem] leading-tight text-[#061d13]">
-                  <span className="font-bold block drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">Trusted by 10K+ Families</span>
+                  <span className="font-bold block">Trusted by 10K+ Families</span>
                   <span className="text-[#204030] font-medium text-xs">Verified doctor-curated remedies</span>
                 </div>
               </div>

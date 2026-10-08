@@ -26,7 +26,7 @@ import { gsap } from "@/lib/animation/gsap";
  * 3. Masked parallax reveal animation on headline, copy, and trust elements
  * 4. Subparagraph and bottom proof bar encased in subtle frosted glass for 100% legibility
  * 5. Right side cards redesigned with pure glassmorphism, uniform width, and aligned on right edge
- * 6. Botanical Corner Leaves (HeroLeftLeaves.png & HeroRightLeaves.png):
+ * 6. Botanical Corner Leaves (HeroLeftLeaves.webp & HeroRightLeaves.webp):
  *    - Reveal elastically from bottom-left and bottom-right corners AFTER content animation finishes
  *    - Continuous gentle YOYO swaying breathing animation powered by GSAP
  *    - Scroll reactivity: Smoothly retreat back to corner origins on scroll down, spring back elastically on scroll up to hero!
@@ -235,7 +235,7 @@ export function HomeHero() {
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
-          src="/Videos/HeroVideo.mp4"
+          src="/Videos/HeroVideo2.mp4"
           autoPlay
           muted
           playsInline
@@ -477,7 +477,7 @@ export function HomeHero() {
             {/* Left Leaf: Layer 3 (Inner image for ambient breathing breeze) */}
             <img
               ref={leftLeafInnerRef}
-              src="/Images/PNGS/HeroLeftLeaves.png"
+              src="/Images/PNGS/HeroLeftLeaves.webp"
               alt=""
               aria-hidden="true"
               className="w-full h-auto object-contain object-left-bottom select-none"
@@ -495,7 +495,7 @@ export function HomeHero() {
             {/* Right Leaf: Layer 3 (Inner image for ambient breathing breeze) */}
             <img
               ref={rightLeafInnerRef}
-              src="/Images/PNGS/HeroRightLeaves.png"
+              src="/Images/PNGS/HeroRightLeaves.webp"
               alt=""
               aria-hidden="true"
               className="w-full h-auto object-contain object-right-bottom select-none"

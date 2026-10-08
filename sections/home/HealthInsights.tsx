@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Section } from "@/components/shared/Section";
@@ -91,26 +92,32 @@ function ArticleCard({
     <article className="group h-full">
       <Link href={article.href} className="flex h-full flex-col">
         <ClipReveal from="bottom">
-          {/* All three crops share a media height so the row keeps one
-              baseline; the lead's double width is what changes its crop from
-              portrait-ish to cinematic. */}
-          <MediaPlaceholder
-            label={article.mediaLabel}
-            tone={isLead ? "clay" : "sage"}
-            ratio="h-[12rem] sm:h-[13.5rem]"
-            className="rounded-frame transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
-          >
-            {/* An abstract editorial crop stands in for the photograph: two
-                soft masses that give the frame a subject and a horizon. */}
-            <span
-              aria-hidden
-              className="absolute bottom-0 left-[12%] h-[58%] w-[46%] rounded-t-[38%_30%] bg-ink/8"
-            />
-            <span
-              aria-hidden
-              className="absolute right-[14%] bottom-0 h-[34%] w-[28%] rounded-t-[50%_40%] bg-ink/5"
-            />
-          </MediaPlaceholder>
+          {article.image ? (
+            <div className="relative w-full h-[12rem] sm:h-[13.5rem] rounded-frame overflow-hidden">
+              <Image 
+                src={article.image}
+                alt={article.mediaLabel || ""}
+                fill
+                className="object-cover transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
+              />
+            </div>
+          ) : (
+            <MediaPlaceholder
+              label={article.mediaLabel}
+              tone={isLead ? "clay" : "sage"}
+              ratio="h-[12rem] sm:h-[13.5rem]"
+              className="rounded-frame transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
+            >
+              <span
+                aria-hidden
+                className="absolute bottom-0 left-[12%] h-[58%] w-[46%] rounded-t-[38%_30%] bg-ink/8"
+              />
+              <span
+                aria-hidden
+                className="absolute right-[14%] bottom-0 h-[34%] w-[28%] rounded-t-[50%_40%] bg-ink/5"
+              />
+            </MediaPlaceholder>
+          )}
         </ClipReveal>
 
         <div className="mt-5 flex flex-1 flex-col">

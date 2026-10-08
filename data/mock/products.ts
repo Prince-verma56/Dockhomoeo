@@ -16,7 +16,7 @@ export const mockProducts: Product[] = [
     badge: "bestseller",
     tone: "amber",
     mediaLabel: "Arnica 30C bottle",
-    image: "/Images/Products/sbl-arnica.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-002",

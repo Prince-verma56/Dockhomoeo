@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/shared/Section";
@@ -73,18 +74,29 @@ export function FeaturedCollection() {
                       href={`/products?form=${collection.form}`}
                       className="group block"
                     >
-                      <MediaPlaceholder
-                        label={collection.mediaLabel}
-                        tone={index % 2 === 0 ? "cream" : "sage"}
-                        ratio="aspect-[4/5]"
-                        className="rounded-frame transition-transform duration-500 ease-premium group-hover:-translate-y-2"
-                      >
-                        <ProductGlyph
-                          form={collection.form}
-                          tone={collection.tone}
-                          size="md"
-                        />
-                      </MediaPlaceholder>
+                      {collection.image ? (
+                        <div className="relative w-full aspect-[4/5] rounded-frame overflow-hidden transition-transform duration-500 ease-premium group-hover:-translate-y-2">
+                          <Image
+                            src={collection.image}
+                            alt={collection.mediaLabel || ""}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <MediaPlaceholder
+                          label={collection.mediaLabel}
+                          tone={index % 2 === 0 ? "cream" : "sage"}
+                          ratio="aspect-[4/5]"
+                          className="rounded-frame transition-transform duration-500 ease-premium group-hover:-translate-y-2"
+                        >
+                          <ProductGlyph
+                            form={collection.form}
+                            tone={collection.tone}
+                            size="md"
+                          />
+                        </MediaPlaceholder>
+                      )}
 
                       <div className="mt-4">
                         <h3 className="font-display text-[1.25rem] text-ink transition-colors group-hover:text-forest">

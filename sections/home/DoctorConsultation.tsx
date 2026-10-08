@@ -19,7 +19,7 @@ import { formatPrice } from "@/lib/formatters/price";
  * DoctorConsultation Section
  *
  * Implements the editorial layout matching the user's inspiration screenshot:
- * 1. Background Image: /Images/ConsultentBG.png covering the section with the doctor
+ * 1. Background Image: /Images/ConsultentBG.webp covering the section with the doctor
  *    at his marble desk on the left and the sunlit stone wall on the right.
  * 2. Left Scene Floating UI Components (True Frosted Glassmorphism):
  *    - Card A: Frosted glass doctor booking card at bottom-left (Dr. A. Demo, ratings, availability, price, CTA)
@@ -40,11 +40,11 @@ export function DoctorConsultation() {
       className="relative min-h-[640px] lg:h-[720px] xl:h-[760px] max-h-[840px] text-ink overflow-hidden flex items-center py-10 lg:py-0"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC BACKGROUND IMAGE (ConsultentBG.png)                     */}
+      {/* 1. SCENIC BACKGROUND IMAGE (ConsultentBG.webp)                     */}
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="/Images/ConsultentBG.png"
+          src="/Images/ConsultentBG.webp"
           alt=""
           aria-hidden="true"
           className="size-full object-cover object-[24%_center] lg:object-center"

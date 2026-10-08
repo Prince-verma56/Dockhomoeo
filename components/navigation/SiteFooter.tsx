@@ -130,7 +130,7 @@ export function SiteFooter() {
               Health tips, new arrivals and exclusive offers.
             </p>
 
-            <form className="mt-5 flex items-center gap-2">
+            <form className="mt-5 flex items-center gap-2" suppressHydrationWarning>
               <label htmlFor="newsletter-email" className="sr-only">
                 Email address
               </label>

@@ -203,7 +203,7 @@ export function HealthGoals() {
                   {/* Generously Scaled Soft White Pedestal with 3D Botanical Sculpture */}
                   <div className="relative size-[78px] sm:size-[86px] lg:size-[94px] rounded-[20px] sm:rounded-[24px] bg-white border border-[#e0e6e2] shadow-[0_4px_14px_rgba(0,0,0,0.04)] group-hover:shadow-[0_10px_24px_rgba(13,90,67,0.15)] group-hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center p-2 overflow-hidden">
                     <img
-                      src={goal.image || `/Images/HealthGoals/${goal.id}.jpg`}
+                      src={goal.image || `/Images/HealthGoals/${goal.id}.webp`}
                       alt=""
                       aria-hidden="true"
                       className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300 drop-shadow-xs"

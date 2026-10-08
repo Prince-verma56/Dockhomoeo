@@ -9,7 +9,7 @@ import { OrderSummary } from "@/components/commerce/OrderSummary";
 import { useState } from "react";
 
 export function CartView() {
-  const { items, quote, updateQuantity, removeItem, isQuoteLoading } = useCart();
+  const { items, quote, updateQuantity, removeItem } = useCart();
   const [coupon, setCoupon] = useState("");
 
   if (items.length === 0) {
@@ -21,7 +21,7 @@ export function CartView() {
           </div>
           <h1 className="text-3xl font-bold text-[#0a2015] mb-4">Your cart is empty</h1>
           <p className="text-lg text-[#4b6b5a] mb-8">
-            Looks like you haven't added any homoeopathic medicines yet.
+            Looks like you haven&apos;t added any homoeopathic medicines yet.
           </p>
           <Link 
             href="/products"

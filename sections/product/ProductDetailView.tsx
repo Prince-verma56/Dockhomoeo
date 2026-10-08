@@ -20,6 +20,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   );
   const [quantity, setQuantity] = useState(selectedVariant?.minQuantity || 1);
   const [isAdding, setIsAdding] = useState(false);
+  const { addItem } = useCart();
 
   // If no variants, fallback gracefully
   if (!selectedVariant) return null;
@@ -30,8 +31,6 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       setQuantity(newQ);
     }
   };
-
-  const { addItem } = useCart();
 
   const handleAddToCart = async () => {
     setIsAdding(true);

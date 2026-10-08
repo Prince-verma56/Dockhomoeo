@@ -35,8 +35,9 @@ export function OfferBanner() {
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
-              backgroundImage:
-                "radial-gradient(44% 56% at 62% 14%, rgba(201,226,208,0.2), transparent 70%), radial-gradient(40% 44% at 98% 96%, rgba(201,142,85,0.18), transparent 72%)",
+              backgroundImage: "url('/Images/SeasonalEditBG.webp')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
           />
 
@@ -76,15 +77,7 @@ export function OfferBanner() {
 
             {/* ---------------------------------------------- product stage */}
             <div className="mx-auto w-full max-w-[16rem] sm:max-w-[18rem] lg:max-w-[17rem]">
-              <Parallax speed={-9} minWidth={1024}>
-                <ProductStage
-                  label={offerCampaign.mediaLabel}
-                  tone="dark"
-                  ratio="aspect-[4/5]"
-                >
-                  <ProductGlyph form="drops" tone="forest" size="lg" />
-                </ProductStage>
-              </Parallax>
+              {/* Product is part of the background image */}
             </div>
 
             {/* -------------------------------------------------- benefits */}
