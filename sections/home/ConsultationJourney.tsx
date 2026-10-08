@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRef } from "react";
 import {
   Calendar,
@@ -14,10 +13,7 @@ import {
   Video,
 } from "lucide-react";
 import { gsap } from "@/lib/animation/gsap";
-import {
-  prefersReducedMotion,
-  releaseRevealGate,
-} from "@/lib/animation/motion";
+import { prefersReducedMotion } from "@/lib/animation/motion";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 /**
@@ -82,7 +78,7 @@ const journeySteps = [
 ];
 
 /**
- * 4 Core Trust Benefits for the integrated "Why Choose DocHomoeo?" card
+ * 4 Core Trust Benefits for the integrated "Why Choose DocHomeo?" card
  */
 const trustBenefits = [
   {
@@ -119,10 +115,10 @@ const trustBenefits = [
  * ConsultationJourney Section
  *
  * Implements:
- * 1. Scenic Background: /Images/SimplePathBG.webp with sunlit archways and undulating dunes.
+ * 1. Scenic Background: /Images/SimplePathBG.png with sunlit archways and undulating dunes.
  * 2. Header: Floating frosted pill "HOW IT WORKS" + mask wipe animation on the warm serif headline.
  * 3. 5-Node Journey: Interactive pastel aura rings, animated SVG connecting wave line with trail dots.
- * 4. Unified Bottom Card: "Why Choose DocHomoeo?" floating frosted card seamlessly integrated.
+ * 4. Unified Bottom Card: "Why Choose DocHomeo?" floating frosted card seamlessly integrated.
  * 5. Professional Entrance Animation: ScrollTrigger mask reveals and staggered springs.
  */
 export function ConsultationJourney() {
@@ -130,12 +126,7 @@ export function ConsultationJourney() {
 
   useIsomorphicLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
-
-    if (prefersReducedMotion()) {
-      releaseRevealGate(container);
-      return;
-    }
+    if (!container || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -229,32 +220,25 @@ export function ConsultationJourney() {
       );
     }, container);
 
-    // Every `data-anim` target now carries GSAP's from-state inline, so the
-    // section can drop its gate and become paintable.
-    releaseRevealGate(container);
-
     return () => ctx.revert();
   }, []);
 
   return (
     <section
       ref={containerRef}
-      data-motion-gate
       id="how-it-works"
       aria-labelledby="journey-heading"
-      className="relative w-full overflow-hidden text-ink pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10 lg:pb-12"
+      className="relative w-full overflow-hidden text-ink py-16 sm:py-20 lg:py-24"
     >
       {/* ----------------------------------------------------------------- */}
       {/* 1. SCENIC BACKGROUND IMAGE (SimplePathBG.png)                     */}
       {/* ----------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <Image
-          src="/Images/SimplePathBG.webp"
+        <img
+          src="/Images/SimplePathBG.png"
           alt=""
           aria-hidden="true"
-          fill
-          sizes="100vw"
-          className="object-cover object-[center_top] lg:object-center"
+          className="size-full object-cover object-[center_top] lg:object-center"
         />
         {/* Seamless atmospheric top blend connecting from Doctor Consultation */}
         <div aria-hidden="true" className="dh-section-blend-top" />
@@ -370,9 +354,9 @@ export function ConsultationJourney() {
         </div>
 
         {/* ----------------------------------------------------------------- */}
-        {/* 4. UNIFIED "WHY CHOOSE DOCHOMOEO?" TRUST CARD                      */}
+        {/* 4. UNIFIED "WHY CHOOSE DOCHOMEO?" TRUST CARD                      */}
         {/* ----------------------------------------------------------------- */}
-        <div data-anim="why-choose-card" className="mt-10 sm:mt-12 lg:mt-14">
+        <div data-anim="why-choose-card" className="mt-14 sm:mt-18 lg:mt-22">
           <div className="rounded-[30px] bg-white/75 hover:bg-white/80 backdrop-blur-2xl border border-white/85 px-6 sm:px-8 lg:px-10 py-6 sm:py-7.5 shadow-[0_16px_42px_rgba(20,40,30,0.06),inset_0_1px_1.5px_rgba(255,255,255,0.95)] transition-all">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8 xl:gap-12">
               
@@ -382,7 +366,7 @@ export function ConsultationJourney() {
                   WHY CHOOSE US
                 </p>
                 <h3 className="mt-1 font-display text-2xl sm:text-[1.85rem] font-bold text-ink leading-tight">
-                  Why Choose<br className="hidden sm:inline" /> DocHomoeo?
+                  Why Choose<br className="hidden sm:inline" /> DocHomeo?
                 </h3>
               </div>
 

@@ -25,7 +25,7 @@ export function WhyChoose() {
             data-benefit
             className="shrink-0 font-display text-[1.3125rem] text-ink"
           >
-            Why Choose DocHomoeo?
+            Why Choose DocHomeo?
           </h2>
 
           <Separator
