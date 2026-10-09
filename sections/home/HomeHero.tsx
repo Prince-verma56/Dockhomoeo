@@ -135,7 +135,7 @@ export function HomeHero() {
           y: 0,
           rotation: 0,
           opacity: 1,
-          duration: 1.8,
+          duration: playback?.hasSkipped ? 0 : 1.8,
           ease: "power3.out",
         });
       }
@@ -147,7 +147,7 @@ export function HomeHero() {
           y: 0,
           rotation: 0,
           opacity: 1,
-          duration: 1.8,
+          duration: playback?.hasSkipped ? 0 : 1.8,
           ease: "power3.out",
         });
       }
@@ -264,6 +264,7 @@ export function HomeHero() {
           src="/Videos/HeroVideo2.mp4"
           muted
           playsInline
+          autoPlay
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
           className="h-full w-full object-cover object-center scale-[1.01]"

@@ -19,6 +19,7 @@ interface HeroPlaybackContextValue {
   navVisible: boolean;
   contentVisible: boolean;
   hasSkipped: boolean;
+  isMounted: boolean;
   togglePlay: () => void;
   toggleMute: () => void;
   skipIntro: () => void;
@@ -41,46 +42,52 @@ export function HeroPlaybackProvider({
   // Nav is always visible now as per user request
   const [navVisible, setNavVisible] = useState(true);
   
-  // Initialize synchronously from localStorage to prevent flicker on client render
-  const [hasSkipped, setHasSkipped] = useState(() => {
+  // Initialize with false for SSR, then update on mount to avoid hydration mismatch
+  const [hasSkipped, setHasSkipped] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
     if (typeof window !== "undefined") {
-      return localStorage.getItem("dochomoeo_hero_seen") === "true";
+      const seen = sessionStorage.getItem("dochomoeo_hero_seen") === "true";
+      if (seen) {
+        setHasSkipped(true);
+        setContentVisible(true);
+      }
     }
-    return false;
-  });
-  const [contentVisible, setContentVisible] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("dochomoeo_hero_seen") === "true";
-    }
-    return false;
-  });
+  }, []);
 
   // Skip function to immediately trigger content
   const skipIntro = useCallback(() => {
     setHasSkipped(true);
     setContentVisible(true);
     if (typeof window !== "undefined") {
-      localStorage.setItem("dochomoeo_hero_seen", "true");
+      sessionStorage.setItem("dochomoeo_hero_seen", "true");
     }
   }, []);
 
-  // Time trigger for sequential appearance at 5 seconds
+  // Time trigger for sequential appearance closer to the end of the video
   useEffect(() => {
     if (contentVisible || hasSkipped) return;
 
-    if (currentTime >= 5.0) {
+    // Trigger after 8.5 seconds to give the video time to play out
+    // (If the user meant the video is 5 seconds long, we also use a fallback of duration - 0.5)
+    const triggerTime = (duration > 0 && duration < 9) ? duration - 0.5 : 8.5;
+
+    if (currentTime >= triggerTime || isCompleted) {
       setContentVisible(true);
       if (typeof window !== "undefined") {
-        localStorage.setItem("dochomoeo_hero_seen", "true");
+        sessionStorage.setItem("dochomoeo_hero_seen", "true");
       }
     }
-  }, [currentTime, contentVisible, hasSkipped]);
+  }, [currentTime, contentVisible, hasSkipped, duration, isCompleted]);
 
-  // Fallback: if video fails to play or user scrolls down, reveal after 5s or on scroll
+  // Fallback: if video fails to play or user scrolls down, reveal after 9s or on scroll
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
       setContentVisible(true);
-    }, 5500);
+    }, 9000);
 
     const onScroll = () => {
       if (window.scrollY > 80 && !contentVisible) {
@@ -151,6 +158,7 @@ export function HeroPlaybackProvider({
         navVisible,
         contentVisible,
         hasSkipped,
+        isMounted,
         togglePlay,
         toggleMute,
         skipIntro,
