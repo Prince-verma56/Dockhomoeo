@@ -101,22 +101,29 @@ export function HomeHero() {
     if (!contentVisible || hasEnteredRef.current) return;
     hasEnteredRef.current = true;
 
-    // If we've skipped the intro, jump the video to the end instantly
-    if (playback?.hasSkipped && videoRef.current) {
+    // Handle video state manually since we removed autoPlay to prevent flickering
+    if (videoRef.current) {
       const video = videoRef.current;
-      video.autoplay = false;
       
-      const setEndOfVideo = () => {
-        if (video.duration && video.duration > 0) {
-          video.currentTime = video.duration - 0.1;
-        }
-        video.pause();
-      };
+      if (playback?.hasSkipped) {
+        // Jump the video to the end instantly
+        const setEndOfVideo = () => {
+          if (video.duration && video.duration > 0 && !isNaN(video.duration)) {
+            video.currentTime = video.duration - 0.1;
+          } else {
+            video.currentTime = 9.9; 
+          }
+          video.pause();
+        };
 
-      if (video.readyState >= 1) {
-        setEndOfVideo();
+        if (video.readyState >= 1) {
+          setEndOfVideo();
+        } else {
+          video.addEventListener("loadedmetadata", setEndOfVideo, { once: true });
+        }
       } else {
-        video.addEventListener("loadedmetadata", setEndOfVideo, { once: true });
+        // Play the video normally since it's their first time
+        video.play().catch(() => {});
       }
     }
 
@@ -255,7 +262,6 @@ export function HomeHero() {
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
           src="/Videos/HeroVideo2.mp4"
-          autoPlay
           muted
           playsInline
           onTimeUpdate={handleTimeUpdate}
@@ -269,10 +275,10 @@ export function HomeHero() {
           className="absolute inset-y-0 left-0 w-full lg:w-[38%] bg-gradient-to-r from-white/20 to-transparent pointer-events-none"
         />
 
-        {/* Subtle top gradient to ensure navbar text visibility over bright sky */}
+        {/* Stronger top gradient to ensure navbar logo & text visibility over any sky/background */}
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/70 to-transparent pointer-events-none"
+          className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#f6f2ea]/90 via-[#f6f2ea]/40 to-transparent pointer-events-none"
         />
 
         {/* Minimal soft blend at the bottom */}
@@ -298,9 +304,10 @@ export function HomeHero() {
                   "flex items-center gap-3.5 transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)]",
                   contentVisible
                     ? "translate-y-0 opacity-100"
-                    : "translate-y-full opacity-0"
+                    : "translate-y-full opacity-0",
+                  playback?.hasSkipped && "!transition-none !duration-0"
                 )}
-                style={{ transitionDelay: "80ms" }}
+                style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "80ms" }}
               >
                 <span className="text-[0.75rem] sm:text-[0.8125rem] font-bold tracking-[0.22em] uppercase text-[#0d5a43] drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
                   Natural Healing. Real Results.
@@ -318,9 +325,10 @@ export function HomeHero() {
                     "block transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] drop-shadow-[0_2px_10px_rgba(255,255,255,0.7)]",
                     contentVisible
                       ? "translate-y-0 opacity-100"
-                      : "translate-y-[120%] opacity-0"
+                      : "translate-y-[120%] opacity-0",
+                    playback?.hasSkipped && "!transition-none !duration-0"
                   )}
-                  style={{ transitionDelay: "140ms" }}
+                  style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "140ms" }}
                 >
                   Gentle Care
                 </span>
@@ -332,9 +340,10 @@ export function HomeHero() {
                     "block transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] drop-shadow-[0_2px_10px_rgba(255,255,255,0.7)]",
                     contentVisible
                       ? "translate-y-0 opacity-100"
-                      : "translate-y-[120%] opacity-0"
+                      : "translate-y-[120%] opacity-0",
+                    playback?.hasSkipped && "!transition-none !duration-0"
                   )}
-                  style={{ transitionDelay: "260ms" }}
+                  style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "260ms" }}
                 >
                   For a Healthier
                 </span>
@@ -346,9 +355,10 @@ export function HomeHero() {
                     "block transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] drop-shadow-[0_2px_10px_rgba(255,255,255,0.7)]",
                     contentVisible
                       ? "translate-y-0 opacity-100"
-                      : "translate-y-[120%] opacity-0"
+                      : "translate-y-[120%] opacity-0",
+                    playback?.hasSkipped && "!transition-none !duration-0"
                   )}
-                  style={{ transitionDelay: "380ms" }}
+                  style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "380ms" }}
                 >
                   <em className="font-display italic font-normal text-[#0d5a43]">
                     Tomorrow
@@ -363,9 +373,10 @@ export function HomeHero() {
                 "transition-all duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 contentVisible
                   ? "translate-y-0 opacity-100 filter-none"
-                  : "translate-y-8 opacity-0 blur-xs"
+                  : "translate-y-8 opacity-0 blur-xs",
+                playback?.hasSkipped && "!transition-none !duration-0"
               )}
-              style={{ transitionDelay: "480ms" }}
+              style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "480ms" }}
             >
               <div className="rounded-2xl bg-white/35 backdrop-blur-md border border-white/60 px-5 py-3 shadow-[0_4px_24px_rgba(20,37,31,0.05)] max-w-[42ch]">
                 <p className="text-[0.9375rem] sm:text-[1rem] leading-relaxed text-[#14251f] font-semibold">
@@ -381,9 +392,10 @@ export function HomeHero() {
                 "flex flex-wrap items-center gap-3.5 pt-1 transition-all duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 contentVisible
                   ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0"
+                  : "translate-y-8 opacity-0",
+                playback?.hasSkipped && "!transition-none !duration-0"
               )}
-              style={{ transitionDelay: "580ms" }}
+              style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "580ms" }}
             >
               <Link
                 href="/products"
@@ -408,9 +420,10 @@ export function HomeHero() {
                 "pt-2 transition-all duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 contentVisible
                   ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0"
+                  : "translate-y-8 opacity-0",
+                playback?.hasSkipped && "!transition-none !duration-0"
               )}
-              style={{ transitionDelay: "680ms" }}
+              style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "680ms" }}
             >
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 rounded-full bg-white/40 backdrop-blur-md border border-white/60 px-5 py-2.5 shadow-[0_4px_24px_rgba(20,37,31,0.06)] w-fit">
                 {/* Patient Avatars */}
@@ -472,9 +485,10 @@ export function HomeHero() {
                   "transition-all duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]",
                   contentVisible
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-12 opacity-0"
+                    : "translate-x-12 opacity-0",
+                  playback?.hasSkipped && "!transition-none !duration-0"
                 )}
-                style={{ transitionDelay: `${250 + i * 110}ms` }}
+                style={{ transitionDelay: playback?.hasSkipped ? "0ms" : `${250 + i * 110}ms` }}
               >
                 <GlassmorphicCard
                   icon={card.icon}

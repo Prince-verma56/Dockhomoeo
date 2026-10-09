@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { CategoryCard } from "@/components/commerce/CategoryCard";
 import Link from "next/link";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight, Pill, Droplet, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -18,50 +18,59 @@ export default async function CategoriesPage() {
   const { categories } = homeData;
 
   const featuredCategory = categories[0];
-  const otherCategories = categories.slice(1);
+  const mediumCategories = categories.slice(1, 3);
+  const smallCategories = categories.slice(3);
 
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
+      <main id="main" className="flex-1 bg-[#f6f2ea]">
+        
         {/* Editorial Page Header */}
-        <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24 border-b border-forest-abyss/5">
-          <Container width="wide" className="relative z-10 text-center">
-            <h1 className="font-display text-5xl leading-tight tracking-tight text-forest-abyss sm:text-6xl md:text-7xl">
-              Curated <span className="italic text-leaf-800">Categories</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-forest-abyss/70 sm:text-xl">
-              Navigate our comprehensive catalog of trusted homoeopathic remedies organized intelligently around your wellness journey.
-            </p>
+        <section className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24">
+          <Container width="wide" className="relative z-10">
+            {/* Breadcrumb */}
+            <nav className="mb-8 flex items-center space-x-2 text-sm font-medium text-muted-ink">
+              <Link href="/" className="hover:text-forest-deep transition-colors">Home</Link>
+              <ChevronRight className="size-4" />
+              <span className="text-ink">Categories</span>
+            </nav>
+
+            <div className="max-w-3xl">
+              <h1 className="font-display text-5xl leading-tight tracking-tight text-ink sm:text-6xl md:text-7xl">
+                Curated <span className="italic text-forest-deep">Categories</span>
+              </h1>
+              <p className="mt-6 text-xl leading-relaxed text-muted-ink">
+                Navigate our comprehensive catalog of trusted homoeopathic remedies, intelligently organized around your wellness journey and specific health goals.
+              </p>
+            </div>
           </Container>
-          <div className="absolute top-0 left-1/2 -z-10 h-full w-full max-w-4xl -translate-x-1/2 bg-gradient-to-b from-sage-100/50 to-transparent blur-3xl opacity-50" />
+          <div className="absolute top-0 right-0 -z-10 h-full w-full max-w-2xl bg-gradient-to-bl from-forest-deep/10 to-transparent blur-3xl opacity-60" />
         </section>
 
-        <section className="py-16 md:py-24">
+        <section className="pb-16 md:pb-24">
           <Container width="wide">
-            <div className="flex flex-col gap-16 md:gap-24">
+            <div className="flex flex-col gap-6 md:gap-8">
               
-              {/* Featured category (if available) */}
+              {/* Featured category */}
               {featuredCategory && (
                 <div className="w-full">
-                  <div className="mb-8 flex items-center justify-between border-b border-forest-abyss/10 pb-4">
-                    <h2 className="font-display text-2xl text-forest-abyss">Highlight Collection</h2>
-                  </div>
-                  <CategoryCard category={featuredCategory} isFeatured />
+                  <CategoryCard category={featuredCategory} size="large" />
                 </div>
               )}
 
-              {/* Grid for remaining categories */}
-              {otherCategories.length > 0 && (
-                <div className="w-full">
-                  <div className="mb-8 flex items-center justify-between border-b border-forest-abyss/10 pb-4">
-                    <h2 className="font-display text-2xl text-forest-abyss">Explore Topics</h2>
-                  </div>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
-                    {otherCategories.map((category) => (
-                      <CategoryCard key={category.id} category={category} />
-                    ))}
-                  </div>
+              {/* Grid: 2 Medium, Rest Small */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {mediumCategories.map((category) => (
+                  <CategoryCard key={category.id} category={category} size="medium" />
+                ))}
+              </div>
+
+              {smallCategories.length > 0 && (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {smallCategories.map((category) => (
+                    <CategoryCard key={category.id} category={category} size="small" />
+                  ))}
                 </div>
               )}
             </div>
@@ -69,38 +78,48 @@ export default async function CategoriesPage() {
         </section>
 
         {/* Secondary Navigation Area (Browse by Form) */}
-        <section className="py-16 md:py-24 bg-white border-t border-forest-abyss/5">
+        <section className="py-20 md:py-28 bg-white">
           <Container width="narrow">
-            <div className="rounded-[2rem] bg-[#F0F2EB] p-10 md:p-16 text-center">
-              <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl bg-white text-forest-abyss shadow-sm">
-                <FileText className="size-8" />
-              </div>
-              <h2 className="mb-4 font-display text-3xl text-forest-abyss">Looking for specific forms?</h2>
-              <p className="mx-auto mb-10 max-w-lg text-forest-abyss/70 leading-relaxed text-lg">
-                Sometimes you know exactly what format you prefer. Discover remedies sorted by their medicinal preparation.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                {["Drops", "Tablets", "Tincture", "Cream"].map((form) => (
-                  <Link
-                    key={form}
-                    href={`/products?form=${form.toLowerCase()}`}
-                    className="rounded-full bg-white px-6 py-3 text-sm font-medium text-forest-abyss shadow-sm transition-colors hover:bg-forest-abyss hover:text-white border border-forest-abyss/5"
-                  >
-                    {form}
-                  </Link>
-                ))}
+            <div className="rounded-[3rem] bg-[#f6f2ea] p-10 md:p-20 text-center relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-forest-deep/5 via-transparent to-transparent opacity-60" />
+              
+              <div className="relative z-10">
+                <div className="mx-auto mb-8 flex size-20 items-center justify-center rounded-[2rem] bg-white text-forest-deep shadow-sm">
+                  <Pill className="size-10" />
+                </div>
+                <h2 className="mb-4 font-display text-4xl text-ink">Looking for specific forms?</h2>
+                <p className="mx-auto mb-12 max-w-xl text-muted-ink leading-relaxed text-lg">
+                  Sometimes you know exactly what format you prefer. Discover remedies sorted by their medicinal preparation for easier consumption.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  {[
+                    { label: "Drops", icon: Droplet },
+                    { label: "Tablets", icon: Pill },
+                    { label: "Tinctures", icon: Sparkles },
+                    { label: "Creams", icon: Sparkles }
+                  ].map((form) => (
+                    <Link
+                      key={form.label}
+                      href={`/products?form=${form.label.toLowerCase()}`}
+                      className="group flex items-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-semibold text-ink shadow-sm transition-all hover:bg-forest-deep hover:text-white hover:shadow-md hover:-translate-y-1"
+                    >
+                      <form.icon className="size-5 text-forest-deep group-hover:text-white transition-colors" />
+                      {form.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </Container>
         </section>
 
-        <section className="py-16 md:py-24 text-center">
+        <section className="py-24 text-center bg-forest-abyss">
           <Container width="narrow">
-            <h2 className="mb-8 font-display text-3xl text-forest-abyss">Not sure where to start?</h2>
-            <Button asChild size="lg" className="rounded-full bg-forest-abyss text-white hover:bg-forest-abyss/90 h-14 px-8 text-base">
+            <h2 className="mb-8 font-display text-4xl text-white">Not sure where to start?</h2>
+            <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-[#f6f2ea] h-14 px-10 text-lg font-bold">
               <Link href="/products">
                 Shop all products
-                <ArrowRight className="ml-2 size-5" />
+                <ArrowRight className="ml-3 size-5" />
               </Link>
             </Button>
           </Container>

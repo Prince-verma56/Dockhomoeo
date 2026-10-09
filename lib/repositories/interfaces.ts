@@ -52,3 +52,13 @@ export interface IAccountRepository {
   getOrders(): Promise<ApiOrderSummary[]>;
   getOrderById(id: string): Promise<ApiOrder | null>;
 }
+import { ApiPrescription } from "@/types/api/prescription";
+import { ApiServiceabilityResult } from "@/types/api/serviceability";
+
+export interface IServiceabilityRepository {
+  checkPincode(pincode: string): Promise<ApiServiceabilityResult>;
+}
+
+export interface IPrescriptionRepository {
+  getPrescriptions(): Promise<ApiPrescription[]>;
+}

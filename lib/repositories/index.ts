@@ -6,6 +6,8 @@ import {
   IInsightRepository,
   IAuthRepository,
   IAccountRepository,
+  IServiceabilityRepository,
+  IPrescriptionRepository,
 } from "./interfaces";
 import {
   LocalHomeRepository,
@@ -15,6 +17,8 @@ import {
   LocalInsightRepository,
   LocalAuthRepository,
   LocalAccountRepository,
+  LocalServiceabilityRepository,
+  LocalPrescriptionRepository,
 } from "./local";
 
 // Dependency Injection Container
@@ -29,4 +33,6 @@ export const repositories = {
   insight: new LocalInsightRepository() as IInsightRepository,
   auth: new LocalAuthRepository() as IAuthRepository,
   account: new LocalAccountRepository() as IAccountRepository,
+  serviceability: new LocalServiceabilityRepository() as IServiceabilityRepository,
+  prescription: new LocalPrescriptionRepository() as IPrescriptionRepository,
 };

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, Package, MapPin, CreditCard } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+// import { OrderTimeline } from "@/components/commerce/OrderTimeline";
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -59,6 +60,12 @@ export default function OrderDetailPage() {
             {order.status}
           </Badge>
         </div>
+      </div>
+
+      {/* Order Status Timeline */}
+      <div className="rounded-[2rem] bg-white p-6 sm:p-8 shadow-sm border border-forest-abyss/5">
+        <h3 className="font-display text-lg font-bold text-ink mb-6">Tracking</h3>
+        {/* <OrderTimeline status={order.status} /> */}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

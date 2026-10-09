@@ -38,60 +38,52 @@ export function HeroPlaybackProvider({
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [navVisible, setNavVisible] = useState(false);
-  const [contentVisible, setContentVisible] = useState(false);
-  const [hasSkipped, setHasSkipped] = useState(false);
+  // Nav is always visible now as per user request
+  const [navVisible, setNavVisible] = useState(true);
+  
+  // Initialize synchronously from localStorage to prevent flicker on client render
+  const [hasSkipped, setHasSkipped] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("dochomoeo_hero_seen") === "true";
+    }
+    return false;
+  });
+  const [contentVisible, setContentVisible] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("dochomoeo_hero_seen") === "true";
+    }
+    return false;
+  });
 
-  // Skip function to immediately trigger nav then content
+  // Skip function to immediately trigger content
   const skipIntro = useCallback(() => {
     setHasSkipped(true);
-    setNavVisible(true);
     setContentVisible(true);
     if (typeof window !== "undefined") {
-      sessionStorage.setItem("dochomoeo_hero_seen", "true");
-    }
-  }, []);
-
-  // Check initial state on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hasSeen = sessionStorage.getItem("dochomoeo_hero_seen");
-      if (hasSeen === "true") {
-        setHasSkipped(true);
-        setNavVisible(true);
-        setContentVisible(true);
-      }
+      localStorage.setItem("dochomoeo_hero_seen", "true");
     }
   }, []);
 
   // Time trigger for sequential appearance at 5 seconds
   useEffect(() => {
-    if (navVisible || hasSkipped) return;
+    if (contentVisible || hasSkipped) return;
 
     if (currentTime >= 5.0) {
-      // First: NAV bar appears at 5 seconds
-      setNavVisible(true);
-      // Next: text content begins appearing right after
-      const timer = setTimeout(() => {
-        setContentVisible(true);
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem("dochomoeo_hero_seen", "true");
-        }
-      }, 350);
-      return () => clearTimeout(timer);
+      setContentVisible(true);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dochomoeo_hero_seen", "true");
+      }
     }
-  }, [currentTime, navVisible, hasSkipped]);
+  }, [currentTime, contentVisible, hasSkipped]);
 
   // Fallback: if video fails to play or user scrolls down, reveal after 5s or on scroll
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
-      setNavVisible(true);
-      setTimeout(() => setContentVisible(true), 350);
+      setContentVisible(true);
     }, 5500);
 
     const onScroll = () => {
-      if (window.scrollY > 80 && !navVisible) {
-        setNavVisible(true);
+      if (window.scrollY > 80 && !contentVisible) {
         setContentVisible(true);
       }
     };
@@ -101,7 +93,7 @@ export function HeroPlaybackProvider({
       clearTimeout(fallbackTimer);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [navVisible]);
+  }, [contentVisible]);
 
   // Play / Pause toggle
   const togglePlay = useCallback(() => {

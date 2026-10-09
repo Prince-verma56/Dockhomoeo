@@ -52,7 +52,7 @@ export class LocalHomeRepository implements IHomeRepository {
         id: i + 1,
         name: goal.name,
         slug: goal.id,
-        imageUrl: goal.image,
+        imageUrl: goal.image || null,
         productCount: Math.floor(Math.random() * 50) + 10,
       })),
       brands: mockBrands.map((brand, i) => ({
@@ -149,15 +149,75 @@ export class LocalSearchRepository implements ISearchRepository {
     
     let results = [...mockApiCards];
     
+    // Apply Filters
     if (filters.q) {
       const q = filters.q.toLowerCase();
       results = results.filter((p) => p.name.toLowerCase().includes(q) || (p.brandName?.toLowerCase().includes(q)));
+    }
+    
+    if (filters.category) {
+      const c = filters.category.toLowerCase();
+      results = results.filter((p) => {
+        const prod = mockProducts.find(m => m.slug === p.slug);
+        return prod?.category?.toLowerCase() === c;
+      });
+    }
+
+    if (filters.brand && filters.brand.length > 0) {
+      results = results.filter((p) => p.brandName && filters.brand!.includes(p.brandName));
+    }
+
+    if (filters.form && filters.form.length > 0) {
+      results = results.filter((p) => p.form && filters.form!.includes(p.form));
     }
     
     if (filters.inStock) {
       results = results.filter((p) => p.inStock);
     }
     
+    // Compute Facets (from the unfiltered or minimally filtered dataset depending on UX, but usually computed from results or base dataset. We'll compute from base + category/q to allow drilling down)
+    let facetBase = [...mockApiCards];
+    if (filters.q) {
+      const q = filters.q.toLowerCase();
+      facetBase = facetBase.filter((p) => p.name.toLowerCase().includes(q) || (p.brandName?.toLowerCase().includes(q)));
+    }
+    if (filters.category) {
+      const c = filters.category.toLowerCase();
+      facetBase = facetBase.filter((p) => {
+        const prod = mockProducts.find(m => m.slug === p.slug);
+        return prod?.category?.toLowerCase() === c;
+      });
+    }
+
+    const brandCounts: Record<string, number> = {};
+    const formCounts: Record<string, number> = {};
+    
+    facetBase.forEach(p => {
+      if (p.brandName) brandCounts[p.brandName] = (brandCounts[p.brandName] || 0) + 1;
+      if (p.form) formCounts[p.form] = (formCounts[p.form] || 0) + 1;
+    });
+
+    const facets = {
+      categories: [],
+      brands: Object.entries(brandCounts).map(([value, count]) => ({ value, count })).sort((a,b) => b.count - a.count),
+      forms: Object.entries(formCounts).map(([value, count]) => ({ value, count })).sort((a,b) => b.count - a.count),
+      potencies: [],
+      packs: [],
+      prices: [],
+      priceRange: { min: 0, max: 2000 },
+      discounts: [],
+      ratings: [],
+    };
+
+    // Sorting
+    if (filters.sort) {
+      if (filters.sort === "price_asc") results.sort((a, b) => a.price - b.price);
+      else if (filters.sort === "price_desc") results.sort((a, b) => b.price - a.price);
+      else if (filters.sort === "newest") results.sort((a, b) => b.id - a.id);
+      else if (filters.sort === "popular") results.sort((a, b) => b.sold - a.sold);
+      // default is relevance (no sort)
+    }
+
     const page = filters.page || 1;
     const pageSize = filters.pageSize || 24;
     const total = results.length;
@@ -171,18 +231,8 @@ export class LocalSearchRepository implements ISearchRepository {
       pageSize,
       pageCount,
       sort: filters.sort || "relevance",
-      category: null,
-      facets: {
-        categories: [],
-        brands: [],
-        forms: [],
-        potencies: [],
-        packs: [],
-        prices: [],
-        priceRange: { min: 0, max: 2000 },
-        discounts: [],
-        ratings: [],
-      },
+      category: filters.category ? { name: filters.category, slug: filters.category, trail: [{name: "Home", slug: ""}, {name: filters.category, slug: filters.category}] } : null,
+      facets,
       wholesale: false,
     };
   }
@@ -519,3 +569,52 @@ export class LocalAccountRepository implements IAccountRepository {
   }
 }
 
+import { IServiceabilityRepository, IPrescriptionRepository } from "./interfaces";
+import { ApiServiceabilityResult } from "@/types/api/serviceability";
+import { ApiPrescription } from "@/types/api/prescription";
+
+export class LocalServiceabilityRepository implements IServiceabilityRepository {
+  async checkPincode(pincode: string): Promise<ApiServiceabilityResult> {
+    await delay(600);
+    // Simple deterministic mock
+    if (pincode === "000000" || pincode.length < 6) {
+      return {
+        pincode,
+        isServiceable: false,
+        message: "Invalid pincode or not serviceable area.",
+      };
+    }
+    return {
+      pincode,
+      isServiceable: true,
+      message: "Delivery available in this area.",
+      estimatedDeliveryDays: 2,
+      city: "Mumbai",
+      state: "Maharashtra",
+    };
+  }
+}
+
+const mockPrescriptions: ApiPrescription[] = [
+  {
+    id: "rx_1",
+    patientId: 1,
+    fileName: "prescription_oct_2023.pdf",
+    fileUrl: "/mocks/prescription.pdf",
+    status: "VERIFIED",
+    uploadedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+    notes: "For recurring hair fall treatment"
+  }
+];
+
+export class LocalPrescriptionRepository implements IPrescriptionRepository {
+  async getPrescriptions(): Promise<ApiPrescription[]> {
+    await delay(400);
+    return mockPrescriptions;
+  }
+
+  async getPrescriptionById(id: string): Promise<ApiPrescription | null> {
+    await delay(200);
+    return mockPrescriptions.find(p => p.id === id) || null;
+  }
+}

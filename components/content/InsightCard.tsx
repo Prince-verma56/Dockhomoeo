@@ -11,7 +11,6 @@ interface InsightCardProps {
 export function InsightCard({ insight, isFeatured = false }: InsightCardProps) {
   const href = `/insights/${insight.slug}`;
   
-  // Format the date if it's available and valid
   const formattedDate = insight.publishedAt 
     ? new Intl.DateTimeFormat("en-IN", {
         month: "long",
@@ -24,23 +23,23 @@ export function InsightCard({ insight, isFeatured = false }: InsightCardProps) {
     return (
       <Link
         href={href}
-        className="group relative flex w-full flex-col-reverse overflow-hidden rounded-[2rem] bg-white transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] lg:flex-row border border-forest-abyss/5 hover:border-forest-abyss/10"
+        className="group relative flex w-full flex-col-reverse overflow-hidden rounded-[2rem] bg-white transition-all duration-500 hover:shadow-xl lg:flex-row border border-forest-abyss/5 hover:border-forest-deep/20"
       >
         <div className="flex flex-1 flex-col justify-center p-8 sm:p-12 lg:p-16">
-          <div className="mb-6 flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-leaf-700">
+          <div className="mb-6 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-forest-deep">
             <BookOpen className="size-4" />
             {insight.category?.name || "Featured Read"}
           </div>
-          <h2 className="font-display text-4xl leading-tight text-forest-abyss sm:text-5xl lg:text-6xl transition-colors duration-300 group-hover:text-leaf-800">
+          <h2 className="font-display text-4xl leading-tight text-ink sm:text-5xl lg:text-6xl transition-colors duration-300 group-hover:text-forest-deep">
             {insight.title}
           </h2>
-          <p className="mt-6 line-clamp-3 text-lg leading-relaxed text-forest-abyss/70 sm:text-xl max-w-2xl">
+          <p className="mt-6 line-clamp-3 text-lg leading-relaxed text-muted-ink sm:text-xl max-w-2xl">
             {insight.excerpt}
           </p>
           
-          <div className="mt-10 flex items-center gap-4 text-sm text-forest-abyss/60 font-medium">
+          <div className="mt-10 flex items-center gap-4 text-sm text-muted-ink font-medium">
             {insight.authorName && (
-              <span className="text-forest-abyss/90">By {insight.authorName}</span>
+              <span className="text-ink">By {insight.authorName}</span>
             )}
             {formattedDate && (
               <>
@@ -50,14 +49,13 @@ export function InsightCard({ insight, isFeatured = false }: InsightCardProps) {
             )}
           </div>
           
-          <div className="mt-8 flex items-center gap-2 text-base font-medium text-forest-abyss transition-colors group-hover:text-leaf-800 bg-sage-50 w-fit px-6 py-3 rounded-full">
+          <div className="mt-8 flex items-center gap-2 text-base font-semibold text-ink transition-colors group-hover:text-white bg-forest-abyss/5 group-hover:bg-forest-deep w-fit px-6 py-3 rounded-full">
             Read article
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
           </div>
         </div>
         
-        {/* Visual / Image Area */}
-        <div className="relative h-64 w-full shrink-0 overflow-hidden bg-[#F0F2EB] lg:h-auto lg:w-[45%]">
+        <div className="relative h-72 w-full shrink-0 overflow-hidden bg-[#f6f2ea] lg:h-auto lg:w-[45%]">
           {insight.coverImageUrl ? (
             <Image
               src={insight.coverImageUrl}
@@ -67,8 +65,8 @@ export function InsightCard({ insight, isFeatured = false }: InsightCardProps) {
               className="object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
             />
           ) : (
-             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-sage-50 to-[#E8ECE2]">
-                <BookOpen className="size-20 text-forest-abyss/10 transition-transform duration-700 group-hover:scale-110" />
+             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-[#f6f2ea] to-[#e8e4dc]">
+                <BookOpen className="size-20 text-forest-deep/10 transition-transform duration-700 group-hover:scale-110" />
              </div>
           )}
         </div>
@@ -79,9 +77,9 @@ export function InsightCard({ insight, isFeatured = false }: InsightCardProps) {
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col overflow-hidden rounded-[2rem] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.06)] border border-forest-abyss/5 hover:border-forest-abyss/10"
+      className="group flex h-full flex-col overflow-hidden rounded-[2rem] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border border-forest-abyss/5 hover:border-forest-deep/20"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F0F2EB]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f6f2ea]">
         {insight.coverImageUrl ? (
           <Image
             src={insight.coverImageUrl}
@@ -91,26 +89,26 @@ export function InsightCard({ insight, isFeatured = false }: InsightCardProps) {
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
         ) : (
-           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-sage-50 to-[#E8ECE2]">
-              <BookOpen className="size-12 text-forest-abyss/10" />
+           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#f6f2ea] to-[#e8e4dc]">
+              <BookOpen className="size-12 text-forest-deep/10" />
            </div>
         )}
       </div>
       
       <div className="flex flex-1 flex-col p-8 sm:p-10">
-        <div className="mb-4 text-xs font-semibold uppercase tracking-widest text-sage-600">
+        <div className="mb-4 text-xs font-bold uppercase tracking-widest text-forest-deep">
           {insight.category?.name || "Article"}
         </div>
         
-        <h3 className="mb-4 font-display text-2xl leading-tight text-forest-abyss transition-colors duration-300 group-hover:text-leaf-800">
+        <h3 className="mb-4 font-display text-2xl leading-tight text-ink transition-colors duration-300 group-hover:text-forest-deep">
           {insight.title}
         </h3>
         
         <div className="mt-auto pt-6 flex items-center justify-between border-t border-forest-abyss/5">
-          <div className="text-sm font-medium text-forest-abyss/50">
+          <div className="text-sm font-medium text-muted-ink">
             {formattedDate}
           </div>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-forest-abyss transition-colors group-hover:text-leaf-800">
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-ink transition-colors group-hover:text-forest-deep">
             Read <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
           </div>
         </div>

@@ -150,6 +150,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.6, count: 120 },
     tone: "amber",
     mediaLabel: "Nux Vomica 30C",
+    image: "/Images/Products/sbl-natrum.webp",
   },
   {
     id: "p-010",
@@ -164,6 +165,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.3, count: 45 },
     tone: "clear",
     mediaLabel: "Bryonia Alba",
+    image: "/Images/Products/sbl-calc-carb.webp",
   },
   {
     id: "p-011",
@@ -180,6 +182,7 @@ export const mockProducts: Product[] = [
     badge: "bestseller",
     tone: "amber",
     mediaLabel: "Echinacea",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "p-012",
@@ -195,6 +198,7 @@ export const mockProducts: Product[] = [
     badge: "for-pain",
     tone: "clear",
     mediaLabel: "Rhus Tox Ointment",
+    image: "/Images/Products/bakson-arnica-oil.webp",
   },
   {
     id: "p-013",
@@ -210,6 +214,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.7, count: 110 },
     tone: "amber",
     mediaLabel: "Berberis Vulgaris",
+    image: "/Images/Products/schwabe-alfalfa.webp",
   },
   {
     id: "p-014",
@@ -225,6 +230,7 @@ export const mockProducts: Product[] = [
     badge: "popular",
     tone: "clear",
     mediaLabel: "Silicea 12X",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-015",
@@ -239,6 +245,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.6, count: 200 },
     tone: "amber",
     mediaLabel: "Gelsemium 30C",
+    image: "/Images/Products/sbl-natrum.webp",
   },
   {
     id: "p-016",
@@ -255,6 +262,7 @@ export const mockProducts: Product[] = [
     badge: "bestseller",
     tone: "clear",
     mediaLabel: "Calendula Ointment",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-017",
@@ -269,6 +277,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.4, count: 50 },
     tone: "clear",
     mediaLabel: "Pulsatilla 200",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-018",
@@ -283,6 +292,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.7, count: 180 },
     tone: "amber",
     mediaLabel: "Ignatia Amara",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "p-019",
@@ -298,6 +308,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.3, count: 75 },
     tone: "clear",
     mediaLabel: "Thuja Cream",
+    image: "/Images/Products/bakson-arnica-oil.webp",
   },
   {
     id: "p-020",
@@ -312,6 +323,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.5, count: 92 },
     tone: "clear",
     mediaLabel: "Aesculus Ointment",
+    image: "/Images/Products/sbl-calc-carb.webp",
   },
   {
     id: "p-021",
@@ -327,6 +339,7 @@ export const mockProducts: Product[] = [
     badge: "popular",
     tone: "clear",
     mediaLabel: "Ferrum Phos 6X",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-022",
@@ -342,6 +355,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.8, count: 140 },
     tone: "amber",
     mediaLabel: "Spongia Tosta",
+    image: "/Images/Products/reckeweg-r89.webp",
   },
   {
     id: "p-023",
@@ -356,6 +370,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.7, count: 210 },
     tone: "clear",
     mediaLabel: "Cantharis Ointment",
+    image: "/Images/Products/bakson-arnica-oil.webp",
   },
   {
     id: "p-024",

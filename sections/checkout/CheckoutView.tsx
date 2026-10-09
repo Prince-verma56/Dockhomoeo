@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2, ChevronLeft, CreditCard, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronLeft, CreditCard, Wallet, Loader2, XCircle, FileText } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { useCart } from "@/components/providers/CartProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { OrderSummary } from "@/components/commerce/OrderSummary";
 import { repositories } from "@/lib/repositories";
 import { ApiAddress } from "@/types/api/cart";
+import { ApiPrescription } from "@/types/api/prescription";
+import { ApiServiceabilityResult } from "@/types/api/serviceability";
 
 type CheckoutStep = "information" | "payment" | "review";
 
@@ -30,6 +33,38 @@ export function CheckoutView() {
   });
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("ONLINE");
   const [note] = useState("");
+  
+  const { status } = useAuth();
+  const [prescriptions, setPrescriptions] = useState<ApiPrescription[]>([]);
+  const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<string | undefined>(undefined);
+
+  const [serviceability, setServiceability] = useState<ApiServiceabilityResult | null>(null);
+  const [isCheckingServiceability, setIsCheckingServiceability] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      setLoadingPrescriptions(true);
+      repositories.prescription.getPrescriptions().then((res: ApiPrescription[]) => {
+        setPrescriptions(res);
+      }).catch(console.error).finally(() => {
+        setLoadingPrescriptions(false);
+      });
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (address.pincode.length === 6) {
+      setIsCheckingServiceability(true);
+      repositories.serviceability.checkPincode(address.pincode).then((res: ApiServiceabilityResult) => {
+        setServiceability(res);
+      }).catch(console.error).finally(() => {
+        setIsCheckingServiceability(false);
+      });
+    } else {
+      setServiceability(null);
+    }
+  }, [address.pincode]);
 
   if (items.length === 0) {
     return (
@@ -63,6 +98,7 @@ export function CheckoutView() {
         address,
         note,
         expectedTotal: quote?.grandTotal,
+        prescriptionId: selectedPrescriptionId ? parseInt(selectedPrescriptionId.replace('rx_', '')) : undefined,
       };
       const res = await repositories.cart.checkout(payload);
       
@@ -170,20 +206,119 @@ export function CheckoutView() {
                     onChange={(e) => setAddress({...address, state: e.target.value})}
                     className="w-full h-14 px-4 rounded-xl border border-black/10 focus:border-[#1b7a54] focus:ring-1 focus:ring-[#1b7a54] outline-none"
                   />
-                  <input 
-                    required
-                    type="text" 
-                    placeholder="PIN Code" 
-                    value={address.pincode}
-                    onChange={(e) => setAddress({...address, pincode: e.target.value})}
-                    className="w-full md:col-span-2 h-14 px-4 rounded-xl border border-black/10 focus:border-[#1b7a54] focus:ring-1 focus:ring-[#1b7a54] outline-none"
-                  />
+                  <div className="md:col-span-2">
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="PIN Code" 
+                      value={address.pincode}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        if (val.length <= 6) {
+                          setAddress({...address, pincode: val});
+                        }
+                      }}
+                      className="w-full h-14 px-4 rounded-xl border border-black/10 focus:border-[#1b7a54] focus:ring-1 focus:ring-[#1b7a54] outline-none"
+                      maxLength={6}
+                    />
+                    
+                    {isCheckingServiceability && (
+                      <div className="mt-2 text-sm text-[#4b6b5a] flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" /> Checking delivery availability...
+                      </div>
+                    )}
+                    
+                    {!isCheckingServiceability && serviceability && (
+                      <div className={`mt-3 p-3 rounded-xl text-sm flex items-start gap-3 ${
+                        serviceability.isServiceable ? 'bg-green-50 text-green-900 border border-green-200/50' : 'bg-red-50 text-red-900 border border-red-200/50'
+                      }`}>
+                        {serviceability.isServiceable ? (
+                          <CheckCircle2 className="size-5 text-green-600 shrink-0 mt-0.5" />
+                        ) : (
+                          <XCircle className="size-5 text-red-600 shrink-0 mt-0.5" />
+                        )}
+                        <div>
+                          <p className="font-semibold">
+                            {serviceability.isServiceable ? "Delivery Available" : "Not Serviceable"}
+                          </p>
+                          <p className="mt-0.5 opacity-90 leading-snug">
+                            {serviceability.isServiceable 
+                              ? "Get it by " + new Date(Date.now() + (serviceability.estimatedDeliveryDays || 3) * 86400000).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })
+                              : serviceability.message || "We do not deliver to this pincode yet."
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </section>
+
+              {/* Prescription Section */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-[#0a2015]">Prescription (Optional)</h2>
+                </div>
+                {loadingPrescriptions ? (
+                  <div className="p-4 rounded-2xl border border-black/5 flex justify-center">
+                    <Loader2 className="size-5 animate-spin text-[#4b6b5a]" />
+                  </div>
+                ) : prescriptions.length > 0 ? (
+                  <div className="space-y-3">
+                    <label 
+                      className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                        !selectedPrescriptionId
+                          ? "border-[#1b7a54] bg-[#1b7a54]/5" 
+                          : "border-black/5 bg-white hover:border-black/20"
+                      }`}
+                    >
+                      <input 
+                        type="radio" 
+                        name="prescription" 
+                        value=""
+                        checked={!selectedPrescriptionId}
+                        onChange={() => setSelectedPrescriptionId(undefined)}
+                        className="size-5 accent-[#1b7a54]"
+                      />
+                      <div className="flex-1 font-semibold text-[#0a2015]">No Prescription</div>
+                    </label>
+                    {prescriptions.map(rx => (
+                      <label 
+                        key={rx.id}
+                        className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          selectedPrescriptionId === rx.id 
+                            ? "border-[#1b7a54] bg-[#1b7a54]/5" 
+                            : "border-black/5 bg-white hover:border-black/20"
+                        }`}
+                      >
+                        <input 
+                          type="radio" 
+                          name="prescription" 
+                          value={rx.id}
+                          checked={selectedPrescriptionId === rx.id}
+                          onChange={() => setSelectedPrescriptionId(rx.id)}
+                          className="size-5 accent-[#1b7a54]"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold text-[#0a2015] flex items-center gap-2">
+                            <FileText className="size-4 text-[#1b7a54]" /> {rx.fileName}
+                          </div>
+                          <div className="text-sm text-[#4b6b5a]">Uploaded {new Date(rx.uploadedAt || rx.issuedAt || Date.now()).toLocaleDateString()}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-white border border-black/5 text-sm text-[#4b6b5a]">
+                    You have no saved prescriptions. If required, our doctors will contact you after order placement.
+                  </div>
+                )}
               </section>
 
               <button 
                 type="submit"
-                className="w-full md:w-auto h-14 px-8 rounded-xl bg-[#0a2015] text-white font-semibold flex items-center justify-center gap-2 hover:bg-[#153a27] transition-all"
+                disabled={serviceability?.isServiceable === false || address.pincode.length < 6}
+                className="w-full md:w-auto h-14 px-8 rounded-xl bg-[#0a2015] text-white font-semibold flex items-center justify-center gap-2 hover:bg-[#153a27] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue to Payment <ArrowRight className="size-4" />
               </button>

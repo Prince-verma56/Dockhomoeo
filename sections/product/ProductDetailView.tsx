@@ -226,6 +226,11 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               </button>
             </div>
 
+            {/* Pincode Checker */}
+            <div className="mb-8">
+              {/* <PincodeChecker /> */}
+            </div>
+
             {/* Trust Markers */}
             <div className="grid grid-cols-2 gap-4 py-6 border-y border-black/5 mb-8">
               <div className="flex items-start gap-3">

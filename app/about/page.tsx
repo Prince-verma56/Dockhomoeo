@@ -16,29 +16,28 @@ export default function AboutPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
+      <main id="main" className="flex-1 bg-[#f6f2ea]">
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32">
+        <section className="relative overflow-hidden pt-28 pb-20 md:pt-40 md:pb-32 border-b border-forest-abyss/5">
           <Container width="narrow" className="relative z-10 text-center">
-            <h1 className="font-display text-5xl leading-tight tracking-tight text-forest-abyss sm:text-6xl md:text-7xl">
-              Bringing clarity to <span className="italic text-leaf-800">natural healing.</span>
+            <h1 className="font-display text-5xl leading-tight tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-8xl">
+              Bringing clarity to <span className="italic text-forest-deep">natural healing.</span>
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-forest-abyss/80 md:text-2xl">
+            <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-ink md:text-2xl">
               We are on a mission to organize the world’s trusted homoeopathic remedies, making them accessible, transparent, and easy to discover for your family's health journey.
             </p>
           </Container>
           
-          {/* Subtle background decoration */}
-          <div className="absolute top-0 left-1/2 -z-10 h-full w-full max-w-5xl -translate-x-1/2 bg-gradient-to-b from-sage-100/50 to-transparent blur-3xl" />
+          <div className="absolute top-0 right-0 -z-10 h-full w-full max-w-3xl bg-gradient-to-bl from-forest-deep/10 to-transparent blur-3xl opacity-60" />
         </section>
 
         {/* Narrative Section */}
-        <section className="py-16 md:py-24 bg-white">
-          <Container width="default">
+        <section className="py-20 md:py-32 bg-white relative">
+          <Container width="wide">
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center lg:gap-24">
-              <div className="relative aspect-[4/5] lg:aspect-square overflow-hidden rounded-[2.5rem] bg-[#F0F2EB] shadow-[0_20px_40px_rgba(0,0,0,0.06)] border border-forest-abyss/5">
+              <div className="relative aspect-[4/5] lg:aspect-[4/4] overflow-hidden rounded-[2.5rem] bg-forest-deep/5 shadow-2xl border border-forest-abyss/5">
                 <Image
-                  src="/Images/Family_Health.webp" // Assuming this image exists from earlier context
+                  src="/Images/Family_Health.webp" 
                   alt="Family health and wellness"
                   fill
                   className="object-cover"
@@ -46,13 +45,14 @@ export default function AboutPage() {
                 />
               </div>
               <div className="flex flex-col justify-center">
-                <div className="mb-6 text-sm font-semibold uppercase tracking-widest text-sage-600">
+                <div className="mb-6 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-forest-deep">
+                  <Leaf className="size-4" />
                   Our Philosophy
                 </div>
-                <h2 className="mb-6 font-display text-3xl leading-tight text-forest-abyss sm:text-4xl">
+                <h2 className="mb-8 font-display text-4xl leading-tight text-ink sm:text-5xl lg:text-6xl">
                   A modern approach to classical wellness
                 </h2>
-                <div className="space-y-6 text-lg leading-relaxed text-forest-abyss/70">
+                <div className="space-y-6 text-xl leading-relaxed text-muted-ink">
                   <p>
                     Navigating the world of homoeopathy can often feel overwhelming. With thousands of remedies, differing potencies, and various manufacturers, finding the right product requires both trust and clarity.
                   </p>
@@ -69,41 +69,41 @@ export default function AboutPage() {
         </section>
 
         {/* Core Values */}
-        <section className="py-16 md:py-24">
-          <Container width="default">
-            <div className="mb-16 text-center">
-              <h2 className="font-display text-3xl text-forest-abyss sm:text-4xl">
+        <section className="py-20 md:py-32 bg-[#f6f2ea]">
+          <Container width="wide">
+            <div className="mb-20 text-center">
+              <h2 className="font-display text-4xl text-ink sm:text-5xl">
                 What drives us
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-12">
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-100 text-forest-abyss">
-                  <ShieldCheck className="size-8" />
+            <div className="grid grid-cols-1 gap-10 md:grid-cols-3 lg:gap-16">
+              <div className="flex flex-col items-center text-center p-10 bg-white rounded-[2rem] border border-forest-abyss/5 shadow-sm hover:shadow-xl transition-shadow duration-300">
+                <div className="mb-8 flex size-20 items-center justify-center rounded-full bg-forest-deep/10 text-forest-deep">
+                  <ShieldCheck className="size-10" />
                 </div>
-                <h3 className="mb-4 font-display text-2xl text-forest-abyss">Trusted Sources</h3>
-                <p className="text-forest-abyss/70 leading-relaxed">
+                <h3 className="mb-4 font-display text-3xl text-ink">Trusted Sources</h3>
+                <p className="text-muted-ink leading-relaxed text-lg">
                   We partner strictly with respected manufacturers who adhere to established homoeopathic pharmacopoeia standards.
                 </p>
               </div>
               
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-100 text-forest-abyss">
-                  <HeartPulse className="size-8" />
+              <div className="flex flex-col items-center text-center p-10 bg-white rounded-[2rem] border border-forest-abyss/5 shadow-sm hover:shadow-xl transition-shadow duration-300">
+                <div className="mb-8 flex size-20 items-center justify-center rounded-full bg-forest-deep/10 text-forest-deep">
+                  <HeartPulse className="size-10" />
                 </div>
-                <h3 className="mb-4 font-display text-2xl text-forest-abyss">Empowered Care</h3>
-                <p className="text-forest-abyss/70 leading-relaxed">
+                <h3 className="mb-4 font-display text-3xl text-ink">Empowered Care</h3>
+                <p className="text-muted-ink leading-relaxed text-lg">
                   We provide transparent product information, clear ingredients, and health insights to support your wellness journey.
                 </p>
               </div>
               
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-100 text-forest-abyss">
-                  <Leaf className="size-8" />
+              <div className="flex flex-col items-center text-center p-10 bg-white rounded-[2rem] border border-forest-abyss/5 shadow-sm hover:shadow-xl transition-shadow duration-300">
+                <div className="mb-8 flex size-20 items-center justify-center rounded-full bg-forest-deep/10 text-forest-deep">
+                  <Leaf className="size-10" />
                 </div>
-                <h3 className="mb-4 font-display text-2xl text-forest-abyss">Digital Clarity</h3>
-                <p className="text-forest-abyss/70 leading-relaxed">
+                <h3 className="mb-4 font-display text-3xl text-ink">Digital Clarity</h3>
+                <p className="text-muted-ink leading-relaxed text-lg">
                   A seamless, noise-free shopping experience designed specifically for discovering and organizing natural remedies.
                 </p>
               </div>
@@ -112,22 +112,22 @@ export default function AboutPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-t border-forest-abyss/5 bg-white py-24 text-center">
+        <section className="bg-forest-abyss py-24 text-center">
           <Container width="narrow">
-            <h2 className="mb-6 font-display text-3xl text-forest-abyss sm:text-4xl">
+            <h2 className="mb-6 font-display text-4xl text-white sm:text-5xl">
               Ready to explore?
             </h2>
-            <p className="mx-auto mb-10 max-w-2xl text-lg text-forest-abyss/70">
+            <p className="mx-auto mb-12 max-w-2xl text-xl text-white/70">
               Browse our catalog of high-quality products or discover remedies by your specific health goals.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" className="rounded-full bg-forest-abyss text-white hover:bg-forest-abyss/90 h-14 px-8 text-base">
+              <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-[#f6f2ea] h-14 px-10 text-lg font-bold">
                 <Link href="/products">
                   Shop All Products
-                  <ArrowRight className="ml-2 size-5" />
+                  <ArrowRight className="ml-3 size-5" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full border-forest-abyss/20 text-forest-abyss hover:bg-forest-abyss/5 h-14 px-8 text-base">
+              <Button asChild variant="outline" size="lg" className="rounded-2xl border-white/20 text-white hover:bg-white/10 h-14 px-10 text-lg font-bold bg-transparent">
                 <Link href="/categories">
                   Explore Categories
                 </Link>

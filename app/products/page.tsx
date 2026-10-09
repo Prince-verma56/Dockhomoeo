@@ -20,6 +20,7 @@ export default async function ProductsPage(props: PageProps) {
   const page = typeof searchParams.page === "string" ? parseInt(searchParams.page, 10) : 1;
   const sort = typeof searchParams.sort === "string" ? searchParams.sort : undefined;
   const category = typeof searchParams.category === "string" ? searchParams.category : undefined;
+  const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
   
   const brand = typeof searchParams.brand === "string" 
     ? [searchParams.brand] 
@@ -33,6 +34,7 @@ export default async function ProductsPage(props: PageProps) {
   
   // Fetch data
   const result = await repositories.search.search({
+    q,
     category,
     brand,
     form,
@@ -46,7 +48,7 @@ export default async function ProductsPage(props: PageProps) {
     <div className="flex flex-col min-h-screen bg-[#faf9f6]">
       <SiteHeader />
       <main className="flex-1 pt-[72px]">
-        <ShopView result={result} />
+        <ShopView result={result} searchQuery={q} />
       </main>
       <SiteFooter />
     </div>

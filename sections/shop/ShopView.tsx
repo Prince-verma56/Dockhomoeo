@@ -57,7 +57,7 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
           <div>
             {searchQuery ? (
               <h1 className="text-3xl lg:text-4xl font-bold text-[#0a2015] tracking-tight mb-2">
-                Search Results for "{searchQuery}"
+                Search Results for &quot;{searchQuery}&quot;
               </h1>
             ) : result.category ? (
               <h1 className="text-3xl lg:text-4xl font-bold text-[#0a2015] tracking-tight mb-2">
@@ -142,7 +142,7 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
                 </div>
                 <h3 className="text-xl font-bold text-[#0a2015] mb-2">No products found</h3>
                 <p className="text-[#4b6b5a] max-w-sm mb-6">
-                  We couldn't find any products matching your current filters. Try adjusting them or clearing your search.
+                  We couldn&apos;t find any products matching your current filters. Try adjusting them or clearing your search.
                 </p>
                 <button 
                   onClick={clearFilters}
