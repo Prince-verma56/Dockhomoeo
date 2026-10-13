@@ -1,56 +1,45 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { repositories } from "@/lib/repositories";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
-import { SiteFooter } from "@/components/navigation/SiteFooter";
-import { ShopView } from "@/sections/shop/ShopView";
+import { parseSearchState, searchHref, toSearchFilters } from "@/lib/search/searchState";
+import { SearchView } from "@/sections/search/SearchView";
 
-export const metadata: Metadata = {
-  title: "Search Results | DocHomo",
-  description: "Search for premium homoeopathic remedies and products.",
-};
+export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
+  const { q } = parseSearchState(await searchParams);
+  return {
+    title: q ? `Search results for “${q}”` : "Search",
+    description: q
+      ? `Homoeopathic medicines matching “${q}” on DocHomoeo.`
+      : "Search homoeopathic medicines by name, brand, dosage form or health concern.",
+    // Result pages are thin, unbounded and built from whatever is typed, so
+    // none of them belong in the index. `follow` still lets crawlers reach the
+    // product pages they link to. No canonical: it would contradict noindex.
+    robots: { index: false, follow: true },
+  };
+}
 
-type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+/**
+ * Catalogue categories double as suggested searches: a category name is part
+ * of every product's searchable text, so each one is known to return results.
+ */
+async function suggestedSearches() {
+  const catalogue = await repositories.search.search({ pageSize: 1 });
+  return catalogue.facets.categories.slice(0, 8).map((category) => category.name);
+}
 
-export default async function SearchPage(props: PageProps) {
-  const searchParams = await props.searchParams;
-  
-  const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
-  
-  const page = typeof searchParams.page === "string" ? parseInt(searchParams.page, 10) : 1;
-  const sort = typeof searchParams.sort === "string" ? searchParams.sort : undefined;
-  const category = typeof searchParams.category === "string" ? searchParams.category : undefined;
-  
-  const brand = typeof searchParams.brand === "string" 
-    ? [searchParams.brand] 
-    : Array.isArray(searchParams.brand) ? searchParams.brand : undefined;
-    
-  const form = typeof searchParams.form === "string" 
-    ? [searchParams.form] 
-    : Array.isArray(searchParams.form) ? searchParams.form : undefined;
+export default async function SearchPage({ searchParams }: PageProps<"/search">) {
+  const state = parseSearchState(await searchParams);
 
-  const inStock = searchParams.inStock === "true";
-  
-  // Fetch data
-  const result = await repositories.search.search({
-    q,
-    category,
-    brand,
-    form,
-    inStock,
-    sort,
-    page,
-    pageSize: 24,
-  });
+  if (!state.q) {
+    return <SearchView state={state} result={null} suggestions={await suggestedSearches()} />;
+  }
 
-  return (
-    <div className="flex flex-col min-h-screen bg-[#faf9f6]">
-      <SiteHeader />
-      <main className="flex-1 pt-[72px]">
-        <ShopView result={result} searchQuery={q} />
-      </main>
-      <SiteFooter />
-    </div>
-  );
+  const result = await repositories.search.search(toSearchFilters(state));
+  // A page past the end (an old link, a narrowed search) goes to the last real one.
+  if (result.items.length === 0 && result.total > 0) {
+    redirect(searchHref({ ...state, page: result.pageCount }));
+  }
+  const suggestions = result.total === 0 ? await suggestedSearches() : [];
+
+  return <SearchView state={state} result={result} suggestions={suggestions} />;
 }

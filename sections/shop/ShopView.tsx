@@ -5,6 +5,17 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, LayoutGrid, X } from "lucide-react";
 import { Container } from "@/components/shared/Container";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { ApiProductListingResponse, ApiFacetOption } from "@/types/api/search";
 import { ProductBadgeKind, ProductForm } from "@/types/product";
@@ -39,7 +50,7 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
     }
     
     params.delete('page');
-    router.push(`?${params.toString()}`);
+    router.push(`?${params.toString()}`, { scroll: false });
   };
 
   const clearFilters = () => {
@@ -89,10 +100,58 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-[#4b6b5a] pointer-events-none" />
             </div>
             
-            {/* Mobile Filter Toggle */}
-            <button className="lg:hidden flex items-center justify-center size-10 rounded-full bg-white border border-black/10 text-[#0a2015]">
-              <SlidersHorizontal className="size-4" />
-            </button>
+            {/* Mobile filters: the same groups as the sidebar, in a sheet.
+                Each tick applies at once, as it does on desktop. */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={activeFilterCount > 0 ? `Filters, ${activeFilterCount} active` : "Filters"}
+                  className="lg:hidden relative flex items-center justify-center size-10 rounded-full bg-white border border-black/10 text-[#0a2015]"
+                >
+                  <SlidersHorizontal className="size-4" />
+                  {activeFilterCount > 0 && (
+                    <span aria-hidden className="absolute -top-1 -right-1 grid size-4.5 place-items-center rounded-full bg-[#1b7a54] text-[0.625rem] font-bold text-white">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="max-h-[85dvh] gap-0 rounded-t-3xl bg-white p-0">
+                <SheetHeader className="border-b border-black/5 px-5 py-4">
+                  <SheetTitle className="text-lg font-bold text-[#0a2015]">Filters</SheetTitle>
+                  <SheetDescription className="sr-only">Each choice applies immediately.</SheetDescription>
+                </SheetHeader>
+                <div className="min-h-0 flex-1 space-y-8 overflow-y-auto overscroll-contain px-5 py-6">
+                  <FilterGroup
+                    title="Brands"
+                    options={result.facets.brands}
+                    groupKey="brand"
+                    onToggle={(val) => toggleFilter("brand", val)}
+                    selected={searchParams.getAll("brand")}
+                  />
+                  <FilterGroup
+                    title="Forms"
+                    options={result.facets.forms}
+                    groupKey="form"
+                    onToggle={(val) => toggleFilter("form", val)}
+                    selected={searchParams.getAll("form")}
+                  />
+                </div>
+                <SheetFooter className="flex-row gap-3 border-t border-black/5 p-4">
+                  {activeFilterCount > 0 && (
+                    <Button type="button" variant="brandOutline" size="xl" onClick={clearFilters}>
+                      Clear all
+                    </Button>
+                  )}
+                  <SheetClose asChild>
+                    <Button type="button" variant="brand" size="xl" className="flex-1">
+                      Show {result.total} {result.total === 1 ? "product" : "products"}
+                    </Button>
+                  </SheetClose>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
@@ -169,6 +228,8 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
                       tone: "amber" as const,
                       mediaLabel: apiItem.name,
                       image: apiItem.imageUrl || undefined,
+                      // Lets the card's "Add" put this pack in the shared cart.
+                      variantId: apiItem.variantId,
                     };
 
                     return (
@@ -259,7 +320,15 @@ function FilterGroup({
       <div className="space-y-2">
         {options.map((opt) => (
           <label key={String(opt.value)} className="flex items-center gap-3 cursor-pointer group">
-            <div className={`size-4 rounded-[4px] border flex items-center justify-center transition-colors ${
+            {/* The input carries state and keyboard support; the box beside it
+                is the existing visual. */}
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={selected.includes(String(opt.value))}
+              onChange={() => onToggle(String(opt.value))}
+            />
+            <div aria-hidden className={`size-4 rounded-[4px] border flex items-center justify-center transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#1b7a54] ${
               selected.includes(String(opt.value))
                 ? 'bg-[#1b7a54] border-[#1b7a54]'
                 : 'border-black/20 group-hover:border-[#1b7a54]'

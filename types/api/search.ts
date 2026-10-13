@@ -63,6 +63,17 @@ export interface ApiSuggestResponse {
   brands: { name: string; slug: string }[];
 }
 
+/** Sort keys accepted by GET /api/shop/products (backend listingSchema). */
+export type ApiListingSort =
+  | "relevance"
+  | "popular"
+  | "price-asc"
+  | "price-desc"
+  | "newest"
+  | "discount"
+  | "rating"
+  | "name";
+
 export interface ApiSearchFilters {
   q?: string;
   category?: string;

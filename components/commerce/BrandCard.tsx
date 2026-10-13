@@ -1,110 +1,142 @@
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Building2, Sparkles } from "lucide-react";
-import { ApiBrand } from "@/types/api/home";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/commerce/BrandMark";
+import type { BrandSummary } from "@/lib/catalogue";
 
-interface BrandCardProps {
-  brand: ApiBrand;
-  isFeatured?: boolean;
-}
+const countLabel = (count: number) => `${count} ${count === 1 ? "product" : "products"}`;
 
-export function BrandCard({ brand, isFeatured = false }: BrandCardProps) {
-  const href = `/products?brand=${brand.slug}`;
-  
-  const monogram = brand.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+/**
+ * A brand on /brands.
+ *
+ * `featured` — editorial card for the widest-range brands. Shows real product
+ *   thumbnails in a compact image strip so the card reads as an entry point into a
+ *   genuine product collection rather than an avatar placeholder.
+ *
+ * `row` — compact directory entry with an optional single thumbnail.
+ *
+ * Nothing here is written about the brand that the data does not say.
+ */
+export function BrandCard({
+  brand,
+  variant = "row",
+  detail,
+  thumbnails,
+  className,
+}: {
+  brand: BrandSummary;
+  variant?: "featured" | "row";
+  /** A data-derived description line, e.g. the forms the brand is stocked in. */
+  detail?: string;
+  /**
+   * Absolute image URLs from real products belonging to this brand. Up to 3 are
+   * shown in the featured variant; up to 1 in the row variant.
+   */
+  thumbnails?: string[];
+  className?: string;
+}) {
+  const href = `/brands/${brand.slug}`;
+  const activeThumbnails = (thumbnails ?? []).filter(Boolean);
 
-  if (isFeatured) {
+  if (variant === "featured") {
+    const displayThumbnails = activeThumbnails.slice(0, 3);
+
     return (
       <Link
         href={href}
-        className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-white p-8 transition-all duration-300 hover:shadow-lg sm:flex-row sm:items-center sm:p-10 border border-forest-abyss/5 hover:border-forest-deep/20"
+        className={cn(
+          "group flex h-full flex-col gap-5 rounded-card border border-line/70 bg-cream p-6 sm:p-7",
+          "transition-[border-color,box-shadow,transform] duration-400 ease-premium hover:-translate-y-0.5 hover:border-forest/25 hover:shadow-lift",
+          className,
+        )}
       >
-        <div className="mb-6 flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-full border border-forest-abyss/5 bg-[#f6f2ea] shadow-sm sm:mb-0 sm:mr-8 sm:size-32">
-          {brand.logoUrl ? (
-            <Image src={brand.logoUrl} alt={brand.name} width={128} height={128} className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-110" />
-          ) : (
-            <span className="font-display text-4xl tracking-widest text-forest-deep/40 transition-colors duration-300 group-hover:text-forest-deep">
-              {monogram}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-1 flex-col justify-center">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-forest-deep">
-            <Sparkles className="size-3" />
-            Featured Partner
+        {/* Brand identity row */}
+        <div className="flex items-center gap-4">
+          <BrandMark name={brand.name} logoUrl={brand.logoUrl} size="md" />
+          <div className="min-w-0">
+            <h3 className="truncate font-display text-2xl tracking-tight text-ink transition-colors group-hover:text-forest">
+              {brand.name}
+            </h3>
+            <p className="text-[0.8125rem] font-semibold text-forest">{countLabel(brand.productCount)}</p>
           </div>
-          <h3 className="mb-2 font-display text-3xl text-ink transition-colors duration-300 group-hover:text-forest-deep">
-            {brand.name}
-          </h3>
-          {brand.description && (
-            <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-muted-ink max-w-sm">
-              {brand.description}
-            </p>
-          )}
-          <div className="flex items-center justify-between mt-auto">
-            {brand.productCount > 0 && (
-              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-ink bg-forest-abyss/5 px-3 py-1 rounded-full">
-                <Building2 className="size-3.5" />
-                {brand.productCount} Products
+        </div>
+
+        {/* Product thumbnail strip — real product imagery, not decorative */}
+        {displayThumbnails.length > 0 ? (
+          <div className="flex gap-2">
+            {displayThumbnails.map((src, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "relative overflow-hidden rounded-lg border border-line/50 bg-ivory",
+                  displayThumbnails.length === 1
+                    ? "h-28 flex-1"
+                    : displayThumbnails.length === 2
+                      ? "h-24 flex-1"
+                      : "h-20 flex-1",
+                )}
+              >
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 33vw, 120px"
+                  className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                />
               </div>
-            )}
-            <div className="flex items-center gap-2 text-sm font-semibold text-forest-deep">
-              Shop Brand
-              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </div>
+            ))}
           </div>
-        </div>
+        ) : null}
+
+        {/* Data-derived description */}
+        {detail ? <p className="text-sm leading-relaxed text-muted-ink first-letter:uppercase">{detail}</p> : null}
+
+        {/* CTA */}
+        <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-ink transition-colors group-hover:text-forest">
+          View brand
+          <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </span>
       </Link>
     );
   }
 
+  // Row variant — compact directory entry with optional single thumbnail
+  const thumb = activeThumbnails[0];
+
   return (
     <Link
       href={href}
-      className="group relative flex flex-col items-center overflow-hidden rounded-[2rem] bg-white p-8 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 sm:p-10 border border-forest-abyss/5 hover:border-forest-deep/20"
+      className={cn(
+        "group flex items-center gap-3 rounded-2xl border border-line/70 bg-cream p-3 pr-4",
+        "transition-[border-color,box-shadow] duration-300 hover:border-forest/25 hover:shadow-soft",
+        className,
+      )}
     >
-      <div className="absolute top-0 right-0 p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <div className="flex size-8 items-center justify-center rounded-full bg-forest-deep/10 text-forest-deep">
-           <ArrowRight className="size-4 -rotate-45" />
+      {/* Thumbnail when available; brand mark when not */}
+      {thumb ? (
+        <div className="relative size-11 shrink-0 overflow-hidden rounded-[0.8rem] border border-line/50 bg-ivory">
+          <Image
+            src={thumb}
+            alt=""
+            fill
+            sizes="44px"
+            className="object-contain p-1.5"
+          />
         </div>
-      </div>
-
-      <div className="mb-6 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-forest-abyss/5 bg-[#f6f2ea] shadow-sm sm:size-28">
-        {brand.logoUrl ? (
-          <Image src={brand.logoUrl} alt={brand.name} width={112} height={112} className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-110" />
-        ) : (
-          <span className="font-display text-3xl tracking-widest text-forest-deep/30 sm:text-4xl transition-colors duration-300 group-hover:text-forest-deep">
-            {monogram}
-          </span>
-        )}
-      </div>
-
-      <h3 className="font-display text-2xl text-ink transition-colors duration-300 group-hover:text-forest-deep">
-        {brand.name}
-      </h3>
-      
-      {brand.productCount > 0 && (
-         <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-ink bg-forest-abyss/5 px-3 py-1 rounded-full">
-           <Building2 className="size-3.5" />
-           {brand.productCount} Products
-         </div>
+      ) : (
+        <BrandMark name={brand.name} logoUrl={brand.logoUrl} size="sm" />
       )}
-
-      {brand.description && (
-        <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-muted-ink">
-          {brand.description}
-        </p>
-      )}
-
-      <div className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-ink opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:text-forest-deep">
-        Explore Brand
-        <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-      </div>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[0.9375rem] font-semibold text-ink transition-colors group-hover:text-forest">
+          {brand.name}
+        </span>
+        <span className="block text-xs text-muted-ink">{countLabel(brand.productCount)}</span>
+      </span>
+      <ArrowRight
+        aria-hidden
+        className="size-4 shrink-0 text-muted-ink transition-[transform,color] duration-300 group-hover:translate-x-0.5 group-hover:text-forest"
+      />
     </Link>
   );
 }

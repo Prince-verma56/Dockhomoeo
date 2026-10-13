@@ -1,178 +1,314 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AlertCircle, ArrowLeft, ArrowRight, RotateCw, ShoppingBag, Trash2 } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { useCart } from "@/components/providers/CartProvider";
+import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { OrderSummary } from "@/components/commerce/OrderSummary";
-import { useState } from "react";
+import { QuantityStepper } from "@/components/commerce/QuantityStepper";
+import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { useCart } from "@/components/providers/CartProvider";
+import { buildCartView, type CartLineView } from "@/lib/cart/cartView";
+import { formatRupees } from "@/lib/formatters/price";
+import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
+import { CouponField } from "./CouponField";
 
 export function CartView() {
-  const { items, quote, updateQuantity, removeItem } = useCart();
-  const [coupon, setCoupon] = useState("");
+  const cart = useCart();
+  const itemsHeadingRef = useRef<HTMLHeadingElement>(null);
+  const { lines, totals } = buildCartView(cart.items, cart.quote, cart.quoteIsCurrent);
+  const blocked = lines.some((line) => line.problem);
 
-  if (items.length === 0) {
-    return (
-      <Container>
-        <div className="max-w-2xl mx-auto mt-12 py-24 px-6 bg-white rounded-3xl border border-black/5 text-center shadow-sm">
-          <div className="size-24 mx-auto rounded-full bg-[#f4f7f5] flex items-center justify-center mb-6">
-            <ShoppingBag className="size-10 text-[#1b7a54]" />
-          </div>
-          <h1 className="text-3xl font-bold text-[#0a2015] mb-4">Your cart is empty</h1>
-          <p className="text-lg text-[#4b6b5a] mb-8">
-            Looks like you haven&apos;t added any homoeopathic medicines yet.
-          </p>
-          <Link 
-            href="/products"
-            className="inline-flex h-14 items-center justify-center rounded-full bg-[#0a2015] px-8 text-base font-semibold text-white transition-all hover:bg-[#153a27] shadow-lg shadow-[#0a2015]/20"
-          >
-            Start Shopping
-          </Link>
-        </div>
-      </Container>
-    );
-  }
+  if (!cart.hydrated) return <CartSkeleton />;
+  if (lines.length === 0) return <EmptyCart dropped={cart.droppedCount} />;
 
   return (
-    <Container>
-      <h1 className="text-3xl sm:text-4xl font-bold text-[#0a2015] tracking-tight mb-8">
-        Your Cart
-      </h1>
-      
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Cart Items List */}
-        <div className="w-full lg:w-2/3">
-          <div className="bg-white rounded-3xl border border-black/5 overflow-hidden shadow-sm">
-            {/* Desktop Header */}
-            <div className="hidden sm:grid grid-cols-12 gap-4 p-6 border-b border-black/5 bg-[#fcfdfc] text-sm font-semibold text-[#4b6b5a] uppercase tracking-wider">
-              <div className="col-span-6">Product</div>
-              <div className="col-span-3 text-center">Quantity</div>
-              <div className="col-span-3 text-right">Total</div>
+    <>
+      <section aria-labelledby="cart-heading" className="pt-24 pb-14 sm:pt-28 lg:pb-20">
+        <Container>
+          <CartBreadcrumb current="Cart" />
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h1 id="cart-heading" className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
+              Your cart
+            </h1>
+            <p className="text-sm text-muted-ink">
+              {totals.itemCount} {totals.itemCount === 1 ? "item" : "items"}
+            </p>
+          </div>
+
+          {cart.droppedCount > 0 ? (
+            <p role="status" className="mt-5 flex items-start gap-2 rounded-xl border border-line bg-cream px-4 py-3 text-sm text-ink">
+              <AlertCircle aria-hidden className="mt-0.5 size-4 shrink-0 text-warm" />
+              {cart.droppedCount === 1 ? "An item is" : `${cart.droppedCount} items are`} no longer sold and{" "}
+              {cart.droppedCount === 1 ? "was" : "were"} removed from your cart.
+            </p>
+          ) : null}
+
+          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+            <div className="min-w-0">
+              <h2 ref={itemsHeadingRef} tabIndex={-1} className="sr-only">
+                Items in your cart
+              </h2>
+              <ul className="border-t border-line/70">
+                <AnimatePresence initial={false}>
+                  {lines.map((line) => (
+                    <CartRow
+                      key={line.variantId}
+                      line={line}
+                      onQuantity={(quantity) => cart.updateQuantity(line.variantId, quantity)}
+                      onRemove={() => {
+                        cart.removeItem(line.variantId);
+                        // The row and its buttons are going; keep keyboard users in the list.
+                        itemsHeadingRef.current?.focus();
+                      }}
+                    />
+                  ))}
+                </AnimatePresence>
+              </ul>
+              <Link
+                href="/products"
+                className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-forest"
+              >
+                <ArrowLeft aria-hidden className="size-4 transition-transform group-hover:-translate-x-0.5" />
+                Continue shopping
+              </Link>
             </div>
-            
-            {/* Items */}
-            <ul className="divide-y divide-black/5">
-              {items.map((item) => {
-                const quoteLine = quote?.lines.find(l => l.variantId === item.variantId);
-                const title = quoteLine?.productName || item.title;
-                const price = quoteLine?.unitPrice || item.price;
-                const variantTitle = quoteLine?.variantTitle || "";
-                const image = quoteLine?.imageUrl || item.imageUrl;
-                const mrp = quoteLine?.mrp || item.price;
-                const brand = quoteLine?.brandName || item.brand;
-                
-                return (
-                  <li key={item.variantId} className="p-6">
-                    <div className="flex flex-col sm:grid sm:grid-cols-12 gap-6 items-center">
-                      
-                      {/* Product Info */}
-                      <div className="col-span-6 flex items-start gap-4 w-full">
-                        <div className="relative size-24 rounded-2xl bg-[#f4f7f5] border border-black/5 overflow-hidden shrink-0 flex items-center justify-center">
-                          {image ? (
-                            <Image src={image} alt={title} fill className="object-contain p-3" />
-                          ) : (
-                            <span className="font-serif text-3xl text-[#0a2015] opacity-20">{title.charAt(0)}</span>
-                          )}
-                        </div>
-                        <div className="flex flex-col justify-center pt-1">
-                          {brand && <span className="text-xs font-bold text-[#1b7a54] uppercase tracking-wider mb-1">{brand}</span>}
-                          <Link href={`/product/${quoteLine?.slug || "unknown"}`} className="font-semibold text-lg text-[#0a2015] leading-tight hover:underline">
-                            {title}
-                          </Link>
-                          {variantTitle && (
-                            <span className="text-sm text-[#4b6b5a] mt-1">{variantTitle}</span>
-                          )}
-                          <button 
-                            onClick={() => removeItem(item.variantId)}
-                            className="text-sm text-red-500 font-medium hover:underline mt-3 self-start flex items-center gap-1"
-                          >
-                            <X className="size-3" /> Remove
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Quantity */}
-                      <div className="col-span-3 w-full sm:w-auto flex justify-between sm:justify-center items-center">
-                        <span className="sm:hidden text-sm font-semibold text-[#4b6b5a]">Quantity:</span>
-                        <div className="flex items-center bg-[#f4f7f5] rounded-xl p-1 border border-black/5">
-                          <button 
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                            className="size-9 flex items-center justify-center rounded-lg hover:bg-white text-[#0a2015] transition-colors shadow-sm"
-                          >
-                            <Minus className="size-4" />
-                          </button>
-                          <span className="w-10 text-center font-semibold text-[#0a2015]">
-                            {item.quantity}
-                          </span>
-                          <button 
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            className="size-9 flex items-center justify-center rounded-lg hover:bg-white text-[#0a2015] transition-colors shadow-sm"
-                          >
-                            <Plus className="size-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Total */}
-                      <div className="col-span-3 w-full sm:w-auto flex justify-between sm:justify-end items-center sm:items-end flex-row sm:flex-col">
-                        <span className="sm:hidden text-sm font-semibold text-[#4b6b5a]">Total:</span>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-[#0a2015]">₹{(price * item.quantity).toFixed(2)}</div>
-                          {mrp > price && (
-                            <div className="text-sm text-[#4b6b5a] line-through">₹{(mrp * item.quantity).toFixed(2)}</div>
-                          )}
-                        </div>
-                      </div>
-                      
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+
+            <div className="lg:sticky lg:top-28 lg:self-start">
+              <OrderSummary totals={totals} updating={cart.quoteStatus === "loading"}>
+                {cart.quoteStatus === "error" ? (
+                  <div role="alert" className="flex items-start justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-ink">
+                    <span>{cart.quoteError} Your cart is safe.</span>
+                    <button
+                      type="button"
+                      onClick={cart.retryQuote}
+                      className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-forest"
+                    >
+                      <RotateCw aria-hidden className="size-3.5" />
+                      Retry
+                    </button>
+                  </div>
+                ) : null}
+                <CouponField />
+                {blocked || cart.quoteStatus === "error" ? (
+                  <Button type="button" variant="brand" size="xl" className="w-full" disabled>
+                    Proceed to checkout
+                  </Button>
+                ) : (
+                  <Button asChild variant="brand" size="xl" className="w-full">
+                    <Link href="/checkout">
+                      Proceed to checkout
+                      <ArrowRight aria-hidden />
+                    </Link>
+                  </Button>
+                )}
+                {blocked ? (
+                  <p className="text-xs text-destructive">Fix the items marked above to continue.</p>
+                ) : null}
+              </OrderSummary>
+            </div>
           </div>
-          
-          <div className="mt-8">
-            <Link 
-              href="/products"
-              className="text-[#1b7a54] font-semibold hover:underline inline-flex items-center gap-2"
-            >
-              Continue Shopping
-            </Link>
-          </div>
+        </Container>
+      </section>
+      <DemoContentNotice />
+    </>
+  );
+}
+
+export function CartBreadcrumb({ current, via }: { current: string; via?: { label: string; href: string } }) {
+  return (
+    <Breadcrumb className="mb-5">
+      <BreadcrumbList className="text-[0.8125rem] text-muted-ink">
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild className="-my-2 py-2 hover:text-forest">
+            <Link href="/">Home</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        {via ? (
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild className="-my-2 py-2 hover:text-forest">
+                <Link href={via.href}>{via.label}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        ) : null}
+        <BreadcrumbItem>
+          <BreadcrumbPage className="text-ink">{current}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
+
+function CartRow({
+  line,
+  onQuantity,
+  onRemove,
+}: {
+  line: CartLineView;
+  onQuantity: (quantity: number) => void;
+  onRemove: () => void;
+}) {
+  const reducedMotion = useReducedMotion();
+  const href = line.slug ? `/product/${line.slug}` : null;
+
+  return (
+    <motion.li
+      layout={reducedMotion ? false : "position"}
+      initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, height: 0 }}
+      transition={{ duration: DURATION.fast, ease: EASE_PREMIUM_BEZIER }}
+      className="overflow-hidden border-b border-line/70"
+    >
+      <div className="flex gap-4 py-5 sm:gap-5">
+        <div className="relative size-20 shrink-0 overflow-hidden rounded-2xl border border-line/70 bg-cream-sunk sm:size-24">
+          {line.imageUrl ? (
+            <Image src={line.imageUrl} alt="" fill sizes="96px" className="object-cover" />
+          ) : (
+            <span aria-hidden className="absolute inset-0 grid place-items-center font-display text-2xl text-ink/25">
+              {line.name.charAt(0)}
+            </span>
+          )}
         </div>
-        
-        {/* Right Sidebar */}
-        <div className="w-full lg:w-1/3 flex flex-col gap-6">
-          
-          {/* Coupon Input */}
-          <div className="bg-white rounded-2xl border border-black/5 p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-[#0a2015] mb-4">Apply Coupon</h3>
-            <div className="flex gap-2">
-              <input 
-                type="text" 
-                value={coupon}
-                onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-                placeholder="Enter code (e.g. DOC10)" 
-                className="flex-1 h-12 px-4 rounded-xl border border-black/10 focus:border-[#1b7a54] focus:ring-1 focus:ring-[#1b7a54] outline-none transition-all uppercase"
-              />
-              <button className="h-12 px-6 rounded-xl bg-black/5 text-[#0a2015] font-semibold hover:bg-black/10 transition-colors">
-                Apply
-              </button>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <div className="min-w-0">
+              {line.brand ? <p className="dh-eyebrow text-[0.66rem] text-muted-ink">{line.brand}</p> : null}
+              <h3 className="mt-0.5 text-base font-semibold leading-snug text-ink">
+                {href ? (
+                  <Link href={href} className="transition-colors hover:text-forest">
+                    {line.name}
+                  </Link>
+                ) : (
+                  line.name
+                )}
+              </h3>
+              {line.variantTitle ? <p className="text-sm text-muted-ink">{line.variantTitle}</p> : null}
+              <p className="mt-1 text-sm text-ink">
+                {formatRupees(line.unitPrice)}
+                {line.mrp > line.unitPrice ? (
+                  <s className="ml-1.5 text-muted-ink">
+                    <span className="sr-only">MRP </span>
+                    {formatRupees(line.mrp)}
+                  </s>
+                ) : null}
+                <span className="text-muted-ink"> each</span>
+              </p>
             </div>
+            <p className="text-base font-semibold tabular-nums text-ink sm:text-right">
+              <span className="sr-only">Line total </span>
+              {formatRupees(line.lineTotal)}
+            </p>
           </div>
-          
-          <OrderSummary />
-          
-          <Link 
-            href="/checkout"
-            className="w-full h-14 flex items-center justify-center gap-2 rounded-xl bg-[#0a2015] text-white font-semibold text-lg hover:bg-[#153a27] transition-all shadow-lg shadow-[#0a2015]/20"
-          >
-            Proceed to Checkout <ArrowRight className="size-5" />
-          </Link>
-          
+
+          {line.problem ? (
+            <p className="flex items-center gap-1.5 text-sm font-medium text-destructive">
+              <AlertCircle aria-hidden className="size-4" />
+              {line.problem}
+            </p>
+          ) : null}
+
+          <div className="flex items-center justify-between gap-4">
+            <QuantityStepper
+              value={line.quantity}
+              min={line.minQuantity}
+              max={Math.max(line.maxQuantity, line.minQuantity)}
+              label={line.name}
+              onChange={onQuantity}
+            />
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={`Remove ${line.name} from cart`}
+              className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted-ink transition-colors hover:bg-destructive/6 hover:text-destructive"
+            >
+              <Trash2 aria-hidden className="size-4" />
+              <span className="hidden sm:inline">Remove</span>
+            </button>
+          </div>
         </div>
       </div>
-    </Container>
+    </motion.li>
+  );
+}
+
+function EmptyCart({ dropped }: { dropped: number }) {
+  return (
+    <section aria-labelledby="cart-heading" className="pt-24 pb-20 sm:pt-28 lg:pb-28">
+      <Container>
+        <CartBreadcrumb current="Cart" />
+        <div className="mx-auto mt-6 max-w-xl text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
+          <span className="mx-auto grid size-20 place-items-center rounded-full bg-sage-tint text-forest">
+            <ShoppingBag aria-hidden className="size-8" strokeWidth={1.6} />
+          </span>
+          <h1 id="cart-heading" className="mt-6 font-display text-4xl tracking-tight text-ink sm:text-5xl">
+            Your cart is empty
+          </h1>
+          <p className="mt-3 text-base leading-relaxed text-muted-ink">
+            {dropped > 0
+              ? "The items you had are no longer sold, so we removed them. "
+              : null}
+            Browse remedies by health concern, brand or form — anything you add waits here.
+          </p>
+          <Button asChild variant="brand" size="xl" className="mt-8">
+            <Link href="/products">
+              Shop medicines
+              <ArrowRight aria-hidden />
+            </Link>
+          </Button>
+          <p className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm">
+            <Link href="/categories" className="font-semibold text-forest underline-offset-4 hover:underline">
+              Shop by category
+            </Link>
+            <Link href="/brands" className="font-semibold text-forest underline-offset-4 hover:underline">
+              Shop by brand
+            </Link>
+          </p>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function CartSkeleton() {
+  return (
+    <section className="pt-24 pb-20 sm:pt-28" role="status">
+      <span className="sr-only">Loading your cart…</span>
+      <Container>
+        <div aria-hidden className="h-5 w-32 rounded-md bg-cream-sunk motion-safe:animate-pulse" />
+        <div aria-hidden className="mt-5 h-12 w-56 rounded-md bg-cream-sunk motion-safe:animate-pulse" />
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+          <div className="border-t border-line/70">
+            {Array.from({ length: 2 }, (_, i) => (
+              <div key={i} aria-hidden className="flex gap-5 border-b border-line/70 py-5">
+                <div className="size-24 rounded-2xl bg-cream-sunk motion-safe:animate-pulse" />
+                <div className="flex-1 space-y-2.5 pt-1">
+                  <div className="h-3 w-20 rounded bg-cream-sunk motion-safe:animate-pulse" />
+                  <div className="h-4 w-2/3 rounded bg-cream-sunk motion-safe:animate-pulse" />
+                  <div className="h-10 w-32 rounded-full bg-cream-sunk motion-safe:animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div aria-hidden className="h-72 rounded-card bg-cream-sunk motion-safe:animate-pulse" />
+        </div>
+      </Container>
+    </section>
   );
 }

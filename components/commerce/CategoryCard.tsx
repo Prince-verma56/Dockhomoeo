@@ -1,112 +1,93 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ApiCategory } from "@/types/api/home";
+import { describeForms, type CategorySummary } from "@/lib/catalogue";
 
-interface CategoryCardProps {
-  category: ApiCategory;
-  size?: "large" | "medium" | "small";
-}
+const countLabel = (count: number) => `${count} ${count === 1 ? "product" : "products"}`;
 
-export function CategoryCard({ category, size = "small" }: CategoryCardProps) {
-  const href = `/products?category=${category.slug}`;
+/**
+ * A category in the /categories directory. Two compositions so a row of
+ * them does not read as one repeated box: `wide` sets copy beside the
+ * artwork, `tile` stacks the artwork over the copy. The artwork is a square
+ * illustration on a soft grey vignette, so it fills its frame (cover) rather
+ * than sitting as a visible box inside it.
+ */
+export function CategoryCard({
+  category,
+  variant = "tile",
+  className,
+}: {
+  category: CategorySummary;
+  variant?: "wide" | "tile";
+  className?: string;
+}) {
+  const href = `/products?category=${encodeURIComponent(category.slug)}`;
+  const forms = describeForms(category.forms);
+  const wide = variant === "wide";
 
-  if (size === "large") {
-    return (
-      <Link
-        href={href}
-        className="group relative flex min-h-[360px] w-full flex-col overflow-hidden rounded-[2rem] bg-white p-8 sm:p-12 transition-all duration-500 hover:shadow-xl sm:min-h-[460px] lg:flex-row lg:items-center border border-forest-abyss/5 hover:border-forest-deep/20"
-      >
-        <div className="relative z-10 flex flex-1 flex-col justify-center lg:pr-12">
-          <div className="mb-6 flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-forest-deep">
-            <Sparkles className="size-4" />
-            Featured Category
-          </div>
-          <h2 className="font-display text-4xl text-ink sm:text-5xl lg:text-6xl">
-            {category.name}
-          </h2>
-          {category.productCount > 0 && (
-            <p className="mt-6 text-lg text-muted-ink max-w-md leading-relaxed">
-              Discover {category.productCount} trusted products specifically formulated for this category.
-            </p>
-          )}
-          <div className="mt-10 flex items-center gap-2 text-base font-medium text-ink transition-colors group-hover:text-forest-deep bg-forest-deep/5 w-fit px-6 py-3 rounded-full">
-            Explore Collection
-            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </div>
-        </div>
-        <div className="relative mt-10 h-64 w-full shrink-0 overflow-hidden rounded-2xl bg-forest-abyss/5 lg:mt-0 lg:h-[360px] lg:w-[45%]">
-          {category.imageUrl ? (
-            <Image src={category.imageUrl} alt={category.name} fill className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-forest-abyss/5 to-forest-abyss/10">
-               <div className="text-8xl font-display text-forest-abyss/10 select-none transition-transform duration-700 group-hover:scale-110">
-                 {category.name.substring(0, 2).toUpperCase()}
-               </div>
-            </div>
-          )}
-        </div>
-      </Link>
-    );
-  }
-
-  if (size === "medium") {
-    return (
-      <Link
-        href={href}
-        className="group relative flex h-[320px] w-full flex-col justify-end overflow-hidden rounded-[2rem] p-8 transition-all duration-500 hover:shadow-lg"
-      >
-        <div className="absolute inset-0 bg-forest-abyss/5 z-0" />
-        {category.imageUrl && (
-          <Image src={category.imageUrl} alt={category.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105 z-0" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-forest-abyss/90 via-forest-abyss/20 to-transparent z-10" />
-        <div className="relative z-20 flex flex-col">
-          <h3 className="mb-2 font-display text-3xl text-white">
-            {category.name}
-          </h3>
-          <div className="flex items-center justify-between">
-            {category.productCount > 0 && (
-              <p className="text-sm text-white/80 font-medium">
-                {category.productCount} Products
-              </p>
-            )}
-            <div className="flex size-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all group-hover:bg-white group-hover:text-forest-abyss">
-              <ArrowRight className="size-4 transition-transform duration-300 group-hover:-rotate-45" />
-            </div>
-          </div>
-        </div>
-      </Link>
-    );
-  }
+  const media = (
+    <div
+      className={cn(
+        "relative overflow-hidden bg-[#f2f2f1]",
+        // Side by side at every width: stacked, a wide tile would be a phone screen tall.
+        wide ? "min-h-40 w-[40%] sm:w-[46%]" : "aspect-4/3 border-b border-line/50",
+      )}
+    >
+      {category.imageUrl ? (
+        // Decorative: the category name sits right beside it.
+        <Image
+          src={category.imageUrl}
+          alt=""
+          fill
+          sizes={wide ? "(min-width: 1024px) 300px, 46vw" : "(min-width: 1024px) 300px, 50vw"}
+          className="object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.04]"
+        />
+      ) : (
+        <span aria-hidden className="absolute inset-0 grid place-items-center font-display text-5xl text-forest/15">
+          {category.name.charAt(0)}
+        </span>
+      )}
+    </div>
+  );
 
   return (
     <Link
       href={href}
-      className="group relative flex h-full min-h-[220px] flex-col overflow-hidden rounded-3xl bg-white p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border border-forest-abyss/5 hover:border-forest-deep/20"
+      className={cn(
+        "group relative flex h-full overflow-hidden rounded-card border border-line/70 bg-cream",
+        "transition-[border-color,box-shadow,transform] duration-400 ease-premium hover:-translate-y-0.5 hover:border-forest/25 hover:shadow-lift",
+        wide ? "flex-row" : "flex-col",
+        className,
+      )}
     >
-      <div className="relative z-10 flex h-full flex-col">
-        <h3 className="mb-2 font-display text-2xl text-ink transition-colors group-hover:text-forest-deep">
+      {wide ? null : media}
+      <div className={cn("flex min-w-0 flex-1 flex-col gap-1.5 p-5", wide && "justify-center sm:p-7")}>
+        <h3
+          className={cn(
+            "font-display tracking-tight text-ink transition-colors group-hover:text-forest",
+            wide ? "text-2xl sm:text-[1.75rem]" : "text-lg sm:text-xl",
+          )}
+        >
           {category.name}
         </h3>
-        
-        {category.productCount > 0 && (
-          <p className="text-sm text-muted-ink uppercase tracking-wider font-medium">
-            {category.productCount} {category.productCount === 1 ? "Product" : "Products"}
-          </p>
-        )}
-        
-        <div className="mt-auto pt-8 flex items-center justify-between">
-          <div className="text-sm font-medium text-muted-ink transition-colors group-hover:text-forest-deep">
-            View products
-          </div>
-          <div className="flex size-10 items-center justify-center rounded-full bg-forest-deep/5 text-forest-deep transition-all group-hover:bg-forest-deep group-hover:text-white">
-            <ArrowRight className="size-4 transition-transform duration-300 group-hover:-rotate-45" />
-          </div>
-        </div>
+        <p className="text-[0.8125rem] font-semibold text-forest">{countLabel(category.productCount)}</p>
+        {forms ? <p className="text-sm leading-snug text-muted-ink first-letter:uppercase">{forms}</p> : null}
+        {/* Every tile says what clicking it does, not only the wide ones. */}
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 text-sm font-semibold text-ink transition-colors group-hover:text-forest",
+            wide ? "mt-4" : "mt-auto pt-3",
+          )}
+        >
+          {wide ? `Shop ${category.name}` : "Browse"}
+          <ArrowUpRight
+            aria-hidden
+            className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
+        </span>
       </div>
-      <div className="absolute -bottom-24 -right-24 size-48 rounded-full bg-forest-deep/10 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+      {wide ? media : null}
     </Link>
   );
 }

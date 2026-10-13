@@ -45,7 +45,7 @@ export function HealthInsights() {
 
           <Reveal delay={0.1}>
             <Link
-              href="/learn"
+              href="/insights"
               className="group inline-flex items-center gap-2 text-[0.875rem] font-medium text-forest"
             >
               Read all articles

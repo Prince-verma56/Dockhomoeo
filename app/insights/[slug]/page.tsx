@@ -9,16 +9,29 @@ import { Container } from "@/components/shared/Container";
 import { InsightCard } from "@/components/content/InsightCard";
 import { ArrowLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const params = await props.params;
   const insight = await repositories.insight.getBySlug(params.slug);
-  if (!insight) return { title: "Insight Not Found" };
+  if (!insight) return { title: "Article not found", robots: { index: false, follow: true } };
 
+  const title = insight.seoTitle || insight.title;
+  const description = insight.seoDescription || insight.excerpt;
+  const url = `/insights/${insight.slug}`;
   return {
-    title: `${insight.seoTitle || insight.title} | DocHomoeo Insights`,
-    description: insight.seoDescription || insight.excerpt,
-    openGraph: insight.coverImageUrl ? { images: [insight.coverImageUrl] } : undefined,
+    // The root layout's title template adds the site name.
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url,
+      ...(insight.publishedAt ? { publishedTime: insight.publishedAt } : {}),
+      ...(insight.coverImageUrl ? { images: [insight.coverImageUrl] } : {}),
+    },
   };
 }
 
@@ -161,7 +174,7 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
                 </Link>
               </div>
               
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+              <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 xl:gap-8 ${related.items.length > 2 ? "lg:grid-cols-3" : ""}`}>
                 {related.items.map((item) => (
                   <InsightCard key={item.id} insight={item} />
                 ))}
@@ -170,6 +183,7 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
           </section>
         )}
       </main>
+      <DemoContentNotice />
       <SiteFooter />
     </>
   );

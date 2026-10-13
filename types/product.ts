@@ -35,6 +35,11 @@ export type Product = {
   /** Describes the photograph that will replace the placeholder. */
   mediaLabel: string;
   image?: string;
+  /**
+   * The purchasable pack behind the card. Only listing data carries it; a card
+   * without one has nothing to add to the cart.
+   */
+  variantId?: number;
   category?: string;
   healthGoals?: string[];
   description?: string;

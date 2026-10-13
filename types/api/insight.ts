@@ -10,7 +10,8 @@ export interface ApiInsightCard {
   excerpt: string;
   coverImageUrl: string | null;
   authorName: string | null;
-  publishedAt: string; // ISO date string
+  /** ISO date. Null until the article has a real publication date. */
+  publishedAt: string | null;
   category: ApiInsightCategory | null;
 }
 
@@ -18,7 +19,7 @@ export interface ApiInsightDetail extends ApiInsightCard {
   content: string; // HTML or Markdown content
   authorBio: string | null;
   authorImageUrl: string | null;
-  updatedAt: string;
+  updatedAt: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   seo: {

@@ -7,7 +7,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Quality Standards | DocHomoeo",
+  title: "Quality standards",
   description: "Learn about how DocHomoeo approaches product quality, transparency, and information accuracy.",
 };
 

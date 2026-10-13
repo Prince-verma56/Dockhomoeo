@@ -1,3 +1,4 @@
+import { mockVariantIdForSlug } from "@/data/mock/products";
 import type {
   HealthGoal,
   Product,
@@ -52,10 +53,10 @@ export const shopMenu = {
     { label: "Creams & Ointments", href: "/products?form=cream" },
   ],
   byGoal: [
-    { label: "Immunity", href: "/products?goal=immunity" },
-    { label: "Skin Care", href: "/products?goal=skin-care" },
-    { label: "Digestive", href: "/products?goal=digestive" },
-    { label: "Sleep & Stress", href: "/products?goal=sleep-stress" },
+    { label: "Immunity", href: "/products?category=immunity" },
+    { label: "Skin Care", href: "/products?category=skin-care" },
+    { label: "Digestive", href: "/products?category=digestive" },
+    { label: "Sleep & Stress", href: "/products?category=sleep-stress" },
   ],
 } as const;
 
@@ -108,22 +109,22 @@ export const heroStats = [
 /* -------------------------------------------------------------------------- */
 
 export const healthGoals: HealthGoal[] = [
-  { id: "immunity", name: "Immunity", icon: "shield-check", href: "/products?goal=immunity", image: "/Images/HealthGoals/immunity.webp" },
-  { id: "skin-care", name: "Skin Care", icon: "sparkles", href: "/products?goal=skin-care", image: "/Images/HealthGoals/skincare.webp" },
-  { id: "hair-care", name: "Hair Care", icon: "leaf", href: "/products?goal=hair-care", image: "/Images/HealthGoals/haircare.webp" },
-  { id: "digestive", name: "Digestive", icon: "flask-conical", href: "/products?goal=digestive", image: "/Images/HealthGoals/digestive.webp" },
-  { id: "womens-health", name: "Women's Health", icon: "flower-2", href: "/products?goal=womens-health", image: "/Images/HealthGoals/womens-health.webp" },
-  { id: "children", name: "Children", icon: "baby", href: "/products?goal=children", image: "/Images/HealthGoals/children.webp" },
-  { id: "joint-bone", name: "Joint & Bone", icon: "bone", href: "/products?goal=joint-bone", image: "/Images/HealthGoals/joint-bone.webp" },
-  { id: "respiratory", name: "Respiratory", icon: "wind", href: "/products?goal=respiratory", image: "/Images/HealthGoals/respiratory.webp" },
-  { id: "sleep-stress", name: "Sleep & Stress", icon: "moon", href: "/products?goal=sleep-stress", image: "/Images/HealthGoals/sleep-stress.webp" },
+  { id: "immunity", name: "Immunity", icon: "shield-check", href: "/products?category=immunity", image: "/Images/HealthGoals/immunity.webp" },
+  { id: "skin-care", name: "Skin Care", icon: "sparkles", href: "/products?category=skin-care", image: "/Images/HealthGoals/skincare.webp" },
+  { id: "hair-care", name: "Hair Care", icon: "leaf", href: "/products?category=hair-care", image: "/Images/HealthGoals/haircare.webp" },
+  { id: "digestive", name: "Digestive", icon: "flask-conical", href: "/products?category=digestive", image: "/Images/HealthGoals/digestive.webp" },
+  { id: "womens-health", name: "Women's Health", icon: "flower-2", href: "/products?category=womens-health", image: "/Images/HealthGoals/womens-health.webp" },
+  { id: "children", name: "Children", icon: "baby", href: "/products?category=children", image: "/Images/HealthGoals/children.webp" },
+  { id: "joint-bone", name: "Joint & Bone", icon: "bone", href: "/products?category=joint-bone", image: "/Images/HealthGoals/joint-bone.webp" },
+  { id: "respiratory", name: "Respiratory", icon: "wind", href: "/products?category=respiratory", image: "/Images/HealthGoals/respiratory.webp" },
+  { id: "sleep-stress", name: "Sleep & Stress", icon: "moon", href: "/products?category=sleep-stress", image: "/Images/HealthGoals/sleep-stress.webp" },
 ];
 
 /* -------------------------------------------------------------------------- */
 /* Products                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export const bestsellingProducts: Product[] = [
+const bestsellingProductData: Product[] = [
   {
     id: "p-001",
     slug: "immunity-support-30-ch",
@@ -245,6 +246,12 @@ export const bestsellingProducts: Product[] = [
     image: "/Images/Products/schwabe-alfalfa.webp",
   },
 ];
+
+/** Each card's "Add" needs the pack the shop sells; it comes from the catalogue by slug. */
+export const bestsellingProducts: Product[] = bestsellingProductData.map((product) => ({
+  ...product,
+  variantId: mockVariantIdForSlug(product.slug),
+}));
 
 /** Tabs in the bestsellers section map to these dosage forms. */
 export const productFilters = [
@@ -446,7 +453,9 @@ export const articles: Article[] = [
     title: "How Homeopathy Supports Immunity Naturally",
     category: "Wellness",
     readingMinutes: 5,
-    href: "/learn/homeopathy-supports-immunity",
+    excerpt:
+      "An overview of how homoeopathic remedies are discussed in relation to everyday immune health, and the questions worth taking to a practitioner.",
+    href: "/insights/homeopathy-supports-immunity",
     image: "/Images/journal_immunity.webp",
     mediaLabel:
       "Homeopathic medicine dropper bottle with chamomile flowers and mountain landscape",
@@ -456,7 +465,9 @@ export const articles: Article[] = [
     title: "Natural Care for Children's Health",
     category: "Family",
     readingMinutes: 5,
-    href: "/learn/natural-care-for-children",
+    excerpt:
+      "What parents commonly ask about homoeopathy for children, and why a practitioner's guidance matters for younger patients.",
+    href: "/insights/natural-care-for-children",
     image: "/Images/journal_children.webp",
     mediaLabel: "Smiling happy child playing outdoors in a sunlit green meadow",
   },
@@ -465,7 +476,9 @@ export const articles: Article[] = [
     title: "Women's Wellness Through Homeopathy",
     category: "Women's Health",
     readingMinutes: 5,
-    href: "/learn/womens-wellness",
+    excerpt:
+      "How homoeopathy is approached across different stages of women's health, written to support a conversation with your practitioner.",
+    href: "/insights/womens-wellness",
     image: "/Images/journal_women.webp",
     mediaLabel: "Serene woman meditating in a bright sunny botanical wellness room",
   },

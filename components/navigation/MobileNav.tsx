@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/shared/SearchBar";
 import { Separator } from "@/components/ui/separator";
 import { Wordmark } from "@/components/navigation/Wordmark";
-const primaryNav = [{ label: "Shop", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" },{ label: "Health Insights", href: "/insights" }] as const; const shopMenu = { byForm: [{ label: "Drops & Dilutions", href: "/products?form=drops" },{ label: "Tablets & Pellets", href: "/products?form=tablets" },{ label: "Mother Tinctures", href: "/products?form=tincture" },{ label: "Creams & Ointments", href: "/products?form=cream" }], byGoal: [{ label: "Immunity", href: "/products?goal=immunity" },{ label: "Skin Care", href: "/products?goal=skin-care" },{ label: "Digestive", href: "/products?goal=digestive" },{ label: "Sleep & Stress", href: "/products?goal=sleep-stress" }] } as const; const healthGoals = [{ id: "immunity", name: "Immunity", href: "/products?goal=immunity" }, { id: "skin-care", name: "Skin Care", href: "/products?goal=skin-care" }];
+import { primaryNav, shopMenu } from "@/components/navigation/navLinks";
 
 /**
  * Mobile navigation drawer.
@@ -97,14 +97,14 @@ export function MobileNav() {
               Shop by health goal
             </h2>
             <ul className="mt-3.5 flex flex-wrap gap-2">
-              {healthGoals.map((goal) => (
-                <li key={goal.id}>
+              {shopMenu.byGoal.map((goal) => (
+                <li key={goal.href}>
                   <SheetClose asChild>
                     <Link
                       href={goal.href}
                       className="inline-flex rounded-full border border-line bg-cream px-3.5 py-2 text-[0.8125rem] text-ink transition-colors hover:border-forest/30 hover:text-forest"
                     >
-                      {goal.name}
+                      {goal.label}
                     </Link>
                   </SheetClose>
                 </li>
@@ -145,14 +145,14 @@ export function MobileNav() {
 
           <div className="flex items-center justify-between text-[0.8125rem] text-muted-ink">
             <Link
-              href="/user/orders"
+              href="/account/orders"
               className="flex items-center gap-2 transition-colors hover:text-forest"
             >
               <PackageCheck aria-hidden className="size-4" strokeWidth={1.6} />
               Track Order
             </Link>
             <Link
-              href="/inquiry"
+              href="/contact"
               className="flex items-center gap-2 transition-colors hover:text-forest"
             >
               <Headset aria-hidden className="size-4" strokeWidth={1.6} />

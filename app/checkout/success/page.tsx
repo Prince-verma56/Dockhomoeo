@@ -1,21 +1,10 @@
-import { Metadata } from "next";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
-import { SiteFooter } from "@/components/navigation/SiteFooter";
-import { SuccessView } from "@/sections/checkout/SuccessView";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Order Confirmed | DocHomo",
-  description: "Your order has been placed successfully.",
-};
-
+/**
+ * Order confirmation lives at /thankyou (brain/19_ROUTE_SPEC.md). This older
+ * address forwards there; its `orderNumber` query never identified an order,
+ * so it is not carried over.
+ */
 export default function CheckoutSuccessPage() {
-  return (
-    <div className="flex flex-col min-h-screen bg-[#faf9f6]">
-      <SiteHeader />
-      <main className="flex-1 pt-[100px] pb-24">
-        <SuccessView />
-      </main>
-      <SiteFooter />
-    </div>
-  );
+  permanentRedirect("/thankyou");
 }

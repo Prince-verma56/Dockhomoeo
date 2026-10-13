@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { ShopView } from "@/sections/shop/ShopView";
 
 export const metadata: Metadata = {
-  title: "Shop Homoeopathic Remedies | DocHomo",
+  title: "Shop homoeopathic remedies",
   description: "Browse our premium selection of authentic homoeopathic medicines and products.",
 };
 

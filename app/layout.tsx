@@ -4,9 +4,12 @@ import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvide
 import { CartProvider } from "@/components/providers/CartProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { CartDrawer } from "@/components/commerce/CartDrawer";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Lets pages declare canonical and Open Graph URLs as paths.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "DocHomoeo — Natural care for a healthier you",
     template: "%s · DocHomoeo",

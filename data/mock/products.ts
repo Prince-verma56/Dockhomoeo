@@ -385,5 +385,36 @@ export const mockProducts: Product[] = [
     rating: { value: 4.6, count: 130 },
     tone: "clear",
     mediaLabel: "Calcarea Phos 6X",
-  }
+  },
+  {
+    // Shown on the homepage bestseller row; listed here so its card links to
+    // a real product page and can be added to the cart.
+    id: "p-025",
+    slug: "immunity-support-30-ch",
+    name: "Immunity Support 30 CH",
+    brand: "DOC HOMEO",
+    category: "Wellness",
+    healthGoals: ["immunity"],
+    form: "tablets",
+    variant: "30 CH · 25 g pellets",
+    price: { amount: 85, currency: "INR" },
+    compareAtPrice: { amount: 100, currency: "INR" },
+    rating: { value: 4.8, count: 120 },
+    badge: "bestseller",
+    tone: "clear",
+    mediaLabel: "Immunity Support 30 CH bottle",
+    image: "/Images/Products/sbl-natrum.webp",
+  },
 ];
+
+/**
+ * The pack the mock shop sells for a catalogue product. One scheme for the
+ * local repositories and for static homepage data, so a card's "Add" and the
+ * cart's quote always mean the same variant.
+ */
+export const mockVariantId = (catalogueIndex: number) => (catalogueIndex + 1) * 1000 + 1;
+
+export function mockVariantIdForSlug(slug: string): number | undefined {
+  const index = mockProducts.findIndex((product) => product.slug === slug);
+  return index < 0 ? undefined : mockVariantId(index);
+}

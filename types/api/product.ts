@@ -13,6 +13,9 @@ export interface ApiProductCard {
   inStock: boolean;
   sold: number;
   wholesalePrice?: number;
+  /** The pack the card shows, as returned by GET /api/shop/products. */
+  variantId?: number;
+  variantTitle?: string | null;
 }
 
 export interface ApiProductVariant {

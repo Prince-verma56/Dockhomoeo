@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Ignored nested project
 docohomo-prince/
+
+# Local audit / implementation reports (not committed)
+project-docs/

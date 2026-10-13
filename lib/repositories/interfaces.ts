@@ -1,7 +1,14 @@
 import { ApiHomeResponse } from "@/types/api/home";
 import { ApiProductDetail } from "@/types/api/product";
 import { ApiProductListingResponse, ApiSearchFilters, ApiSuggestResponse } from "@/types/api/search";
-import { ApiCheckoutPayload, ApiCheckoutResponse, ApiQuote, ApiQuoteLineInput } from "@/types/api/cart";
+import {
+  ApiCheckoutPayload,
+  ApiCheckoutResponse,
+  ApiOrderDetail,
+  ApiPaymentMethod,
+  ApiQuote,
+  ApiQuoteLineInput,
+} from "@/types/api/cart";
 
 export interface IHomeRepository {
   getHomeData(): Promise<ApiHomeResponse>;
@@ -17,9 +24,18 @@ export interface ISearchRepository {
   suggest(query: string): Promise<ApiSuggestResponse>;
 }
 
+/**
+ * The shop's cart and order boundary. Maps onto, and only onto:
+ *   POST /api/shop/quote      — price a cart (coupon, payment method)
+ *   POST /api/me/checkout     — place an order (signed in)
+ *   GET  /api/me/orders/:id   — read one of my orders (signed in)
+ * Implementations throw CheckoutError (lib/checkout/checkoutForm) with a
+ * customer-facing message when the shop refuses an order.
+ */
 export interface ICartRepository {
-  getQuote(lines: ApiQuoteLineInput[], couponCode?: string): Promise<ApiQuote>;
+  getQuote(lines: ApiQuoteLineInput[], couponCode?: string, paymentMethod?: ApiPaymentMethod): Promise<ApiQuote>;
   checkout(payload: ApiCheckoutPayload): Promise<ApiCheckoutResponse>;
+  getOrder(orderId: number): Promise<ApiOrderDetail | null>;
 }
 import { ApiInsightDetail, ApiInsightListingResponse } from "@/types/api/insight";
 

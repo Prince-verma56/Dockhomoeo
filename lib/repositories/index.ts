@@ -21,6 +21,14 @@ import {
   LocalPrescriptionRepository,
 } from "./local";
 
+/**
+ * True while the repositories below are the local development mocks. Pages
+ * use it to label previews honestly — e.g. an order placed here is a preview
+ * reference, not an order. Flip it in the same change that swaps in API
+ * repositories.
+ */
+export const usingMockData = true;
+
 // Dependency Injection Container
 // The UI only imports from this file, ensuring that swapping to
 // API-based repositories in the future requires exactly zero UI changes.

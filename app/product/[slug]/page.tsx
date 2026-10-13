@@ -17,13 +17,15 @@ export async function generateMetadata(
 
   if (!product) {
     return {
-      title: "Product Not Found | DocHomo",
+      title: "Product not found",
     };
   }
 
   return {
-    title: `${product.seo.title || product.name} | DocHomo`,
-    description: product.seo.description || product.shortDescription || `Buy ${product.name} online at DocHomo.`,
+    // The shop composes a full SEO title (site name included), so it replaces
+    // the layout's template rather than getting the site name a second time.
+    title: product.seo.title ? { absolute: product.seo.title } : product.name,
+    description: product.seo.description || product.shortDescription || `Buy ${product.name} online at DocHomoeo.`,
   };
 }
 

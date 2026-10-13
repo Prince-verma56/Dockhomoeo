@@ -2,24 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Heart, Search, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { MobileNav } from "@/components/navigation/MobileNav";
-const primaryNav = [{ label: "Shop", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" },{ label: "Health Insights", href: "/insights" }] as const; const shopMenu = { byForm: [{ label: "Drops & Dilutions", href: "/products?form=drops" },{ label: "Tablets & Pellets", href: "/products?form=tablets" },{ label: "Mother Tinctures", href: "/products?form=tincture" },{ label: "Creams & Ointments", href: "/products?form=cream" }], byGoal: [{ label: "Immunity", href: "/products?goal=immunity" },{ label: "Skin Care", href: "/products?goal=skin-care" },{ label: "Digestive", href: "/products?goal=digestive" },{ label: "Sleep & Stress", href: "/products?goal=sleep-stress" }] } as const;
+import { ShopMegaMenu } from "@/components/navigation/ShopMegaMenu";
+import { isActivePath, primaryNav } from "@/components/navigation/navLinks";
 import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
 import { useCart } from "@/components/providers/CartProvider";
+import { useFavourites } from "@/lib/favourites/favourites";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 
@@ -46,7 +40,9 @@ export function SiteHeader() {
   const heroPlayback = useHeroPlayback();
   const isNavVisible = heroPlayback ? heroPlayback.navVisible : true;
   
+  const pathname = usePathname();
   const { itemCount, setIsOpen } = useCart();
+  const { count: savedCount } = useFavourites();
   const { status, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -81,6 +77,12 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const navItemClass = cn(
+    "inline-flex h-9 items-center rounded-full bg-transparent px-3.5 text-[0.875rem] font-semibold transition-colors",
+    "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43]",
+    !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]",
+  );
+
   // Determine visibility & translate classes
   const isHidden = !isNavVisible || (isPastHero && isScrollingDown);
 
@@ -107,49 +109,33 @@ export function SiteHeader() {
         {/* Wordmark logo */}
         <Wordmark className="shrink-0" />
 
-        {/* Desktop Navigation Links - crisp dark text with clean contrast */}
-        <NavigationMenu className="mx-auto hidden lg:flex">
-          <NavigationMenuList className="gap-1 xl:gap-2">
-            <NavigationMenuItem>
-              <NavigationMenuTrigger
-                className={cn(
-                  "h-9 rounded-full bg-transparent px-3.5 text-[0.875rem] font-semibold transition-colors",
-                  "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43] data-[state=open]:bg-[#0d5a43]/10 data-[state=open]:text-[#0d5a43]",
-                  !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]"
-                )}
-              >
-                Shop
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid w-[460px] grid-cols-2 gap-x-6 gap-y-1 rounded-3xl bg-white/30 p-5 shadow-[0_16px_42px_rgba(0,0,0,0.05),inset_0_1px_1.5px_rgba(255,255,255,0.8)] backdrop-blur-2xl border border-white/40">
-                  <MenuColumn title="By form" links={shopMenu.byForm} />
-                  <MenuColumn title="By health goal" links={shopMenu.byGoal} />
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-
-            {primaryNav.slice(1).map((item) => (
-              <NavigationMenuItem key={item.href}>
-                <NavigationMenuLink
-                  asChild
-                  className={cn(
-                    navigationMenuTriggerStyle(),
-                    "h-9 rounded-full bg-transparent px-3.5 text-[0.875rem] font-semibold transition-colors",
-                    "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43]",
-                    !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]"
-                  )}
-                >
-                  <Link href={item.href}>{item.label}</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+        {/* Desktop navigation. Every label is a link; Shop's panel opens from
+            hover or its own chevron (components/navigation/ShopMegaMenu). */}
+        <nav aria-label="Main" className="mx-auto hidden lg:block">
+          <ul className="flex items-center gap-1 xl:gap-2">
+            <ShopMegaMenu className={navItemClass} active={isActivePath(pathname, "/products")} />
+            {primaryNav.slice(1).map((item) => {
+              const active = isActivePath(pathname, item.href);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(navItemClass, active && "bg-[#0d5a43]/10 text-[#0d5a43]")}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
         {/* Right side controls: Search, Wishlist, Cart, Login */}
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          {/* Search bar using shared SearchBar component */}
-          <div className="hidden md:block">
+          {/* Between lg and xl the nav and the field do not both fit (the
+              Login button was clipped at 1024–1100px); the icon stands in. */}
+          <div className="hidden md:block lg:hidden xl:block">
             <GlobalSearch />
           </div>
 
@@ -158,7 +144,7 @@ export function SiteHeader() {
             asChild
             variant="ghost"
             size="icon"
-            className="size-9 rounded-full text-[#14251f] hover:bg-black/5 md:hidden"
+            className="size-9 rounded-full text-[#14251f] hover:bg-black/5 md:hidden lg:inline-flex xl:hidden"
           >
             <Link href="/search" aria-label="Search">
               <Search className="size-[18px]" strokeWidth={1.75} />
@@ -175,8 +161,20 @@ export function SiteHeader() {
               !isPastHero && "hover:bg-white/40"
             )}
           >
-            <Link href="/user/favourites" aria-label="Favourites">
+            <Link
+              href="/favourites"
+              aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
+              className="relative"
+            >
               <Heart className="size-[18px]" strokeWidth={1.75} />
+              {savedCount > 0 ? (
+                <span
+                  aria-hidden
+                  className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#0d5a43] text-[0.625rem] font-bold text-white shadow-xs"
+                >
+                  {savedCount > 99 ? "99+" : savedCount}
+                </span>
+              ) : null}
             </Link>
           </Button>
 
@@ -218,33 +216,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  );
-}
-
-function MenuColumn({
-  title,
-  links,
-}: {
-  title: string;
-  links: readonly { label: string; href: string }[];
-}) {
-  return (
-    <div>
-      <p className="dh-eyebrow mb-2.5 text-muted-ink">{title}</p>
-      <ul className="flex flex-col">
-        {links.map((link) => (
-          <li key={link.href}>
-            <NavigationMenuLink asChild>
-              <Link
-                href={link.href}
-                className="block rounded-xl px-3 py-2.5 text-[0.875rem] font-medium text-ink/80 transition-all duration-200 hover:bg-white/50 hover:text-forest hover:shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:scale-[1.01]"
-              >
-                {link.label}
-              </Link>
-            </NavigationMenuLink>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }

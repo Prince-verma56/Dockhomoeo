@@ -26,6 +26,8 @@ export type Article = {
   title: string;
   category: string;
   readingMinutes: number;
+  /** Short summary for listings; the blog API's `excerpt`. */
+  excerpt?: string;
   href: string;
   mediaLabel: string;
   image?: string;

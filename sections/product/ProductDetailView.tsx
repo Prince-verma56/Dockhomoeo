@@ -9,6 +9,7 @@ import { ApiProductDetail, ApiProductVariant } from "@/types/api/product";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { ProductBadgeKind, ProductForm } from "@/types/product";
 import { useCart } from "@/components/providers/CartProvider";
+import { useFavourites } from "@/lib/favourites/favourites";
 
 interface ProductDetailViewProps {
   product: ApiProductDetail;
@@ -21,6 +22,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   const [quantity, setQuantity] = useState(selectedVariant?.minQuantity || 1);
   const [isAdding, setIsAdding] = useState(false);
   const { addItem } = useCart();
+  const favourites = useFavourites();
+  const favourited = favourites.isFavourite(product.slug);
 
   // If no variants, fallback gracefully
   if (!selectedVariant) return null;
@@ -221,8 +224,14 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 )}
               </button>
 
-              <button className="h-14 w-14 shrink-0 rounded-full border border-black/10 flex items-center justify-center text-[#4b6b5a] hover:text-red-500 hover:border-red-500/30 hover:bg-red-50 transition-all">
-                <Heart className="size-5" />
+              <button
+                type="button"
+                onClick={() => favourites.toggle(product.slug)}
+                aria-pressed={favourited}
+                aria-label={favourited ? `Remove ${product.name} from favourites` : `Save ${product.name} to favourites`}
+                className={`h-14 w-14 shrink-0 rounded-full border flex items-center justify-center transition-all hover:text-red-500 hover:border-red-500/30 hover:bg-red-50 ${favourited ? "border-red-500/30 text-[#a63d2f]" : "border-black/10 text-[#4b6b5a]"}`}
+              >
+                <Heart className={`size-5 ${favourited ? "fill-current" : ""}`} />
               </button>
             </div>
 

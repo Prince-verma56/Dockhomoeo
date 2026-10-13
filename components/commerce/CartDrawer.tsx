@@ -5,9 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
+import { buildCartView } from "@/lib/cart/cartView";
+import { formatRupees } from "@/lib/formatters/price";
 
 export function CartDrawer() {
-  const { isOpen, setIsOpen, quote, items, updateQuantity, removeItem, isQuoteLoading } = useCart();
+  const { isOpen, setIsOpen, quote, quoteIsCurrent, items, updateQuantity, removeItem, isQuoteLoading } = useCart();
+  // The same figures as the cart and checkout pages (lib/cart/cartView).
+  const { lines, totals } = buildCartView(items, quote, quoteIsCurrent);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape
@@ -73,7 +77,7 @@ export function CartDrawer() {
                 <ShoppingBag className="size-10 text-black/20" />
               </div>
               <p className="text-lg font-medium text-[#0a2015]">Your cart is empty</p>
-              <p className="text-sm">Looks like you haven't added anything yet.</p>
+              <p className="text-sm">Looks like you haven&apos;t added anything yet.</p>
               <button 
                 onClick={() => setIsOpen(false)}
                 className="mt-4 px-6 py-3 rounded-full bg-[#1b7a54]/10 text-[#1b7a54] font-semibold hover:bg-[#1b7a54]/20 transition-colors"
@@ -83,14 +87,12 @@ export function CartDrawer() {
             </div>
           ) : (
             <div className="space-y-6">
-              {items.map((item) => {
-                // If quote is available, use real line data for accuracy
-                const quoteLine = quote?.lines.find(l => l.variantId === item.variantId);
-                const title = quoteLine?.productName || item.title;
-                const price = quoteLine?.unitPrice || item.price;
-                const variantTitle = quoteLine?.variantTitle || "";
-                const image = quoteLine?.imageUrl || item.imageUrl;
-                const mrp = quoteLine?.mrp || item.price;
+              {lines.map((line) => {
+                const item = line;
+                const title = line.name;
+                const variantTitle = line.variantTitle;
+                const image = line.imageUrl;
+                const mrp = line.mrp;
                 
                 return (
                   <div key={item.variantId} className="flex gap-4 p-4 bg-white rounded-2xl border border-black/5">
@@ -111,7 +113,7 @@ export function CartDrawer() {
                           <button 
                             onClick={() => removeItem(item.variantId)}
                             className="text-black/30 hover:text-red-500 transition-colors p-1 -mt-1 -mr-1"
-                            aria-label="Remove item"
+                            aria-label={`Remove ${title} from cart`}
                           >
                             <X className="size-4" />
                           </button>
@@ -124,6 +126,7 @@ export function CartDrawer() {
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center bg-[#f4f7f5] rounded-lg p-0.5 border border-black/5">
                           <button 
+                            aria-label={`Decrease quantity of ${title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
                             className="size-7 flex items-center justify-center rounded-md hover:bg-white text-[#0a2015] transition-colors"
                           >
@@ -133,6 +136,8 @@ export function CartDrawer() {
                             {item.quantity}
                           </span>
                           <button 
+                            aria-label={`Increase quantity of ${title}`}
+                            disabled={item.quantity >= line.maxQuantity}
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                             className="size-7 flex items-center justify-center rounded-md hover:bg-white text-[#0a2015] transition-colors"
                           >
@@ -141,9 +146,9 @@ export function CartDrawer() {
                         </div>
                         
                         <div className="text-right">
-                          <div className="font-bold text-[#0a2015]">₹{(price * item.quantity).toFixed(2)}</div>
-                          {mrp > price && (
-                            <div className="text-xs text-[#4b6b5a] line-through">₹{(mrp * item.quantity).toFixed(2)}</div>
+                          <div className="font-bold text-[#0a2015]">{formatRupees(line.lineTotal)}</div>
+                          {mrp > line.unitPrice && (
+                            <div className="text-xs text-[#4b6b5a] line-through">{formatRupees(mrp * item.quantity)}</div>
                           )}
                         </div>
                       </div>
@@ -160,26 +165,25 @@ export function CartDrawer() {
             <div className="space-y-3 mb-6 text-sm text-[#4b6b5a]">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="font-medium text-[#0a2015]">₹{quote?.subtotal?.toFixed(2) || "---"}</span>
+                <span className="font-medium text-[#0a2015]">{formatRupees(totals.subtotal)}</span>
               </div>
-              {quote?.savings ? (
+              {totals.coupon ? (
                 <div className="flex justify-between text-emerald-600">
-                  <span>Savings</span>
-                  <span>-₹{quote.savings.toFixed(2)}</span>
+                  <span>Coupon {totals.coupon.code}</span>
+                  <span>−{formatRupees(totals.coupon.discount)}</span>
                 </div>
               ) : null}
-              {quote?.shippingCharge !== undefined ? (
+              {totals.shipping !== null ? (
                 <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{quote.shippingCharge === 0 ? <span className="text-emerald-600 font-medium">Free</span> : `₹${quote.shippingCharge.toFixed(2)}`}</span>
+                  <span>Delivery</span>
+                  <span>{totals.shipping === 0 ? <span className="text-emerald-600 font-medium">Free</span> : formatRupees(totals.shipping)}</span>
                 </div>
               ) : null}
               <div className="flex justify-between text-base font-bold text-[#0a2015] pt-3 border-t border-black/5">
-                <span>Total</span>
-                <span>
-                  {isQuoteLoading ? "Calculating..." : `₹${quote?.grandTotal?.toFixed(2) || "---"}`}
-                </span>
+                <span>Estimated total</span>
+                <span>{isQuoteLoading ? "Updating…" : formatRupees(totals.total)}</span>
               </div>
+              {totals.savings > 0 ? <p className="text-xs">Includes {formatRupees(totals.savings)} off MRP.</p> : null}
             </div>
             
             <div className="space-y-3">

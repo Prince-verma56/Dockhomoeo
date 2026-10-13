@@ -3,10 +3,13 @@ export interface ApiQuoteLineInput {
   quantity: number;
 }
 
+/** How an order is paid (backend quoteSchema). CREDIT is for approved wholesale accounts only. */
+export type ApiPaymentMethod = "COD" | "ONLINE" | "CREDIT";
+
 export interface ApiQuoteInput {
   lines: ApiQuoteLineInput[];
   couponCode?: string;
-  paymentMethod?: "COD" | "ONLINE" | "CREDIT";
+  paymentMethod?: ApiPaymentMethod;
 }
 
 export interface ApiQuoteLine {
@@ -85,4 +88,42 @@ export interface ApiCheckoutResponse {
   total: number;
   paid: boolean;
   payUrl: string | null;
+}
+
+/** GET /api/me/orders/:id — one of the signed-in customer's orders. */
+export interface ApiOrderDetail {
+  id: number;
+  orderNumber: string;
+  channel: "D2C" | "B2B";
+  status: string;
+  paymentMethod: ApiPaymentMethod;
+  paymentStatus: string;
+  placedAt: string;
+  estimatedDelivery: string | null;
+  subtotal: number;
+  couponCode: string | null;
+  couponDiscount: number;
+  shippingCharge: number;
+  codCharge: number;
+  grandTotal: number;
+  customerName: string;
+  customerPhone: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingPincode: string;
+  items: {
+    id: number;
+    productName: string;
+    variantTitle: string;
+    brandName: string | null;
+    imageUrl: string | null;
+    quantity: number;
+    mrp: number | null;
+    unitPrice: number;
+    lineTotal: number;
+    slug: string | null;
+  }[];
+  canCancel: boolean;
+  canPay: boolean;
 }

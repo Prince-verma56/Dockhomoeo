@@ -8,7 +8,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "About Us | DocHomoeo",
+  title: "About us",
   description: "Learn about DocHomoeo's mission to provide transparent, trusted, and organized access to homoeopathic products.",
 };
 
@@ -24,7 +24,7 @@ export default function AboutPage() {
               Bringing clarity to <span className="italic text-forest-deep">natural healing.</span>
             </h1>
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-ink md:text-2xl">
-              We are on a mission to organize the world’s trusted homoeopathic remedies, making them accessible, transparent, and easy to discover for your family's health journey.
+              We are on a mission to organize the world’s trusted homoeopathic remedies, making them accessible, transparent, and easy to discover for your family&apos;s health journey.
             </p>
           </Container>
           
@@ -37,8 +37,9 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center lg:gap-24">
               <div className="relative aspect-[4/5] lg:aspect-[4/4] overflow-hidden rounded-[2.5rem] bg-forest-deep/5 shadow-2xl border border-forest-abyss/5">
                 <Image
-                  src="/Images/Family_Health.webp" 
-                  alt="Family health and wellness"
+                  // The asset this pointed at (Family_Health.webp) never existed.
+                  src="/Images/journal_children.webp"
+                  alt="A child playing outdoors in a sunlit meadow"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"

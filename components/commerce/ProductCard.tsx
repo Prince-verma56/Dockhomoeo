@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -11,6 +10,8 @@ import { ProductMedia } from "@/components/commerce/ProductMedia";
 import { ProductBadge } from "@/components/commerce/ProductBadge";
 import { ProductPrice } from "@/components/commerce/ProductPrice";
 import { Rating } from "@/components/shared/Rating";
+import { useCart } from "@/components/providers/CartProvider";
+import { useFavourites } from "@/lib/favourites/favourites";
 import type { Product } from "@/types/product";
 
 type ProductCardProps = {
@@ -32,9 +33,9 @@ type ProductCardProps = {
 /**
  * The commerce card: media-dominant, predictable controls, one add-to-cart.
  *
- * Cart and wishlist mutations are not wired yet — this component owns only the
- * pressed state of the favourite control and leaves the actual mutation to the
- * commerce layer, per the data-boundary rule in brain/03_ARCHITECTURE.md.
+ * "Add" hands the card's pack to the cart provider when the product carries a
+ * `variantId` (listing data does). The heart saves the product to favourites
+ * on this device (lib/favourites) — the shop has no wishlist contract yet.
  */
 export function ProductCard({
   product,
@@ -42,9 +43,12 @@ export function ProductCard({
   variant = "default",
   mediaRatio = "aspect-[4/5]",
 }: ProductCardProps) {
-  const [favourited, setFavourited] = useState(false);
+  const favourites = useFavourites();
+  const favourited = favourites.isFavourite(product.slug);
   const isFeatured = variant === "featured";
   const reducedMotion = useReducedMotion();
+  const { addItem } = useCart();
+  const { variantId } = product;
 
   return (
     <Card
@@ -70,7 +74,7 @@ export function ProductCard({
 
         <button
           type="button"
-          onClick={() => setFavourited((previous) => !previous)}
+          onClick={() => favourites.toggle(product.slug)}
           aria-pressed={favourited}
           aria-label={
             favourited
@@ -149,6 +153,19 @@ export function ProductCard({
           <Button
             size="sm"
             aria-label={`Add ${product.name} to cart`}
+            onClick={
+              variantId === undefined
+                ? undefined
+                : () =>
+                    addItem({
+                      variantId,
+                      quantity: 1,
+                      title: product.name,
+                      price: product.price.amount,
+                      imageUrl: product.image,
+                      brand: product.brand,
+                    })
+            }
             className="relative z-3 h-8 rounded-lg bg-forest px-3 text-[0.76rem] font-semibold text-white hover:bg-forest-deep shadow-xs inline-flex items-center gap-1.5 transition-all active:scale-95"
           >
             <ShoppingCart className="size-3.5" strokeWidth={2} />

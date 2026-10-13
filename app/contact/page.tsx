@@ -6,7 +6,7 @@ import { Container } from "@/components/shared/Container";
 import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact Us | DocHomoeo",
+  title: "Contact us",
   description: "Get in touch with DocHomoeo for order support, product inquiries, and general questions.",
 };
 

@@ -1,148 +1,218 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { cache } from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { repositories } from "@/lib/repositories";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
+import { Reveal } from "@/components/shared/Reveal";
+import { SplitHeading } from "@/components/shared/SplitHeading";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { InsightCard } from "@/components/content/InsightCard";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Sparkles, BookOpen, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "Health Insights | DocHomoeo",
-  description: "Explore our editorial health knowledge hub. Discover trusted homoeopathic remedies and wellness tips.",
+type Props = PageProps<"/insights">;
+
+const DESCRIPTION =
+  "Reading on homoeopathy, natural wellness and family care from DocHomoeo — written to help you prepare questions for your practitioner.";
+
+/** Every article, for the topic list. Shared by metadata and page within one request. */
+const allInsights = cache(() => repositories.insight.getInsights(1, 100));
+
+async function topicsOf() {
+  const { items } = await allInsights();
+  const topics = new Map<string, { name: string; slug: string; count: number }>();
+  for (const item of items) {
+    if (!item.category) continue;
+    const topic = topics.get(item.category.slug) ?? { ...item.category, count: 0 };
+    topic.count += 1;
+    topics.set(item.category.slug, topic);
+  }
+  return { total: items.length, topics: [...topics.values()] };
+}
+
+const topicParam = async (searchParams: Props["searchParams"]) => {
+  const value = (await searchParams).category;
+  return (Array.isArray(value) ? value[0] : value)?.trim() || null;
 };
 
-export default async function InsightsPage(props: { searchParams: Promise<{ category?: string }> }) {
-  const searchParams = await props.searchParams;
-  const categoryFilter = searchParams.category;
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const slug = await topicParam(searchParams);
+  if (!slug) {
+    return {
+      title: "Health insights",
+      description: DESCRIPTION,
+      alternates: { canonical: "/insights" },
+      openGraph: { title: "Health insights · DocHomoeo", description: DESCRIPTION, url: "/insights", type: "website" },
+    };
+  }
+  const topic = (await topicsOf()).topics.find((t) => t.slug === slug);
+  // A topic is a real listing of its own; an unknown one is not worth indexing.
+  if (!topic) return { title: "Health insights", robots: { index: false, follow: true } };
+  const description = `Articles on ${topic.name.toLowerCase()} from DocHomoeo Health Insights.`;
+  const url = `/insights?category=${encodeURIComponent(topic.slug)}`;
+  return {
+    title: `${topic.name} — health insights`,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: `${topic.name} · DocHomoeo`, description, url, type: "website" },
+  };
+}
 
-  const allInsightsData = await repositories.insight.getInsights(1, 100);
-  const categories = Array.from(
-    new Set(allInsightsData.items.map((item) => item.category?.name).filter(Boolean))
-  ) as string[];
+/** Columns that fit the count, so a short list never leaves a ragged last row. */
+const gridColumns = (count: number) =>
+  count === 1 ? "max-w-2xl" : count === 2 || count === 4 ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3";
 
-  const pageData = await repositories.insight.getInsights(1, 12, categoryFilter);
-  const items = pageData.items;
+export default async function InsightsPage({ searchParams }: Props) {
+  const slug = await topicParam(searchParams);
+  const [{ total, topics }, listing, home] = await Promise.all([
+    topicsOf(),
+    repositories.insight.getInsights(1, 12, slug ?? undefined),
+    repositories.home.getHomeData(),
+  ]);
+  const activeTopic = topics.find((t) => t.slug === slug) ?? null;
+  const [featured, ...latest] = listing.items;
 
-  const featuredInsight = items[0];
-  const gridInsights = items.slice(1);
+  const pill = (active: boolean) =>
+    cn(
+      "inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
+      active
+        ? "border-forest-deep bg-forest-deep text-cream"
+        : "border-line bg-cream text-ink hover:border-forest/35 hover:text-forest",
+    );
 
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-[#f6f2ea]">
-        <section className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24 border-b border-forest-abyss/5">
-          <Container width="wide" className="relative z-10">
-            {/* Breadcrumb */}
-            <nav className="mb-8 flex items-center space-x-2 text-sm font-medium text-muted-ink">
-              <Link href="/" className="hover:text-forest-deep transition-colors">Home</Link>
-              <ChevronRight className="size-4" />
-              <span className="text-ink">Insights</span>
-            </nav>
-            
-            <div className="max-w-4xl">
-              <div className="mb-6 flex w-fit items-center gap-2 rounded-full border border-forest-deep/20 bg-forest-deep/5 px-4 py-1.5 text-sm font-bold tracking-wide text-forest-deep uppercase">
-                <Sparkles className="size-4" />
-                Editorial Hub
-              </div>
-              <h1 className="font-display text-5xl leading-tight tracking-tight text-ink sm:text-6xl md:text-7xl">
-                Health <span className="italic text-forest-deep">Insights</span>
-              </h1>
-              <p className="mt-6 text-xl leading-relaxed text-muted-ink">
-                Trusted editorial knowledge covering natural wellness, homoeopathy, and family health. Read expert advice to support your wellness journey.
+      <main id="main" className="flex-1 bg-ivory">
+        <section aria-labelledby="insights-heading" className="pt-24 pb-8 sm:pt-28 lg:pb-10">
+          <Container>
+            <PageBreadcrumb
+              items={[
+                { name: "Health insights", href: "/insights" },
+                ...(activeTopic
+                  ? [{ name: activeTopic.name, href: `/insights?category=${encodeURIComponent(activeTopic.slug)}` }]
+                  : []),
+              ]}
+              className="mb-6"
+            />
+            <div className="max-w-2xl">
+              <SplitHeading
+                as="h1"
+                id="insights-heading"
+                immediate
+                className="text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
+                lines={[<span key="line">Health <span className="italic text-forest-deep">insights</span></span>]}
+              />
+              <p className="mt-4 text-base leading-relaxed text-muted-ink sm:text-lg">
+                Reading on homoeopathy, natural wellness and family care — written to help you
+                prepare questions for your practitioner, not to replace a consultation.
               </p>
             </div>
+
+            {topics.length > 1 ? (
+              <nav aria-label="Article topics" className="mt-8">
+                <ul className="flex flex-wrap gap-2">
+                  <li>
+                    <Link href="/insights" aria-current={activeTopic ? undefined : "page"} className={pill(!activeTopic)}>
+                      All topics
+                      <span className="text-xs opacity-70">{total}</span>
+                    </Link>
+                  </li>
+                  {topics.map((topic) => {
+                    const active = topic.slug === activeTopic?.slug;
+                    return (
+                      <li key={topic.slug}>
+                        <Link
+                          href={`/insights?category=${encodeURIComponent(topic.slug)}`}
+                          aria-current={active ? "page" : undefined}
+                          className={pill(active)}
+                        >
+                          {topic.name}
+                          <span className="text-xs opacity-70">
+                            {topic.count}
+                            <span className="sr-only"> {topic.count === 1 ? "article" : "articles"}</span>
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            ) : null}
           </Container>
-          <div className="absolute top-0 right-0 -z-10 h-full w-full max-w-2xl bg-gradient-to-bl from-forest-deep/10 to-transparent blur-3xl opacity-60" />
         </section>
 
-        <section className="py-12 md:py-16">
-          <Container width="wide">
-            {categories.length > 0 && (
-              <div className="mb-12 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/insights"
-                  className={cn(
-                    "rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-300",
-                    !categoryFilter
-                      ? "bg-forest-abyss text-white shadow-md"
-                      : "bg-white text-ink hover:bg-forest-deep/10 border border-forest-abyss/10"
-                  )}
-                >
-                  All Topics
+        <section aria-label="Articles" className="pb-14 lg:pb-20">
+          <Container>
+            {featured ? (
+              <>
+                <InsightCard insight={featured} featured />
+                {latest.length > 0 ? (
+                  <div className="mt-12 lg:mt-16">
+                    <div className="mb-6 flex items-end justify-between gap-4">
+                      <h2 className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
+                        {activeTopic ? `More on ${activeTopic.name.toLowerCase()}` : "Latest articles"}
+                      </h2>
+                      <p className="text-sm text-muted-ink">
+                        {latest.length} more {latest.length === 1 ? "article" : "articles"}
+                      </p>
+                    </div>
+                    <Reveal as="ul" stagger=":scope > li" y={18} className={cn("grid gap-5 lg:gap-6", gridColumns(latest.length))}>
+                      {latest.map((insight) => (
+                        <li key={insight.id}>
+                          <InsightCard insight={insight} />
+                        </li>
+                      ))}
+                    </Reveal>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <div className="rounded-card border border-dashed border-line bg-cream/60 px-6 py-14 text-center">
+                <h2 className="text-xl font-semibold text-ink">No articles in this topic yet</h2>
+                <p className="mx-auto mt-2 max-w-sm text-sm text-muted-ink">New reading is added regularly.</p>
+                <Link href="/insights" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
+                  See all articles
+                  <ArrowRight aria-hidden className="size-4" />
                 </Link>
-                {categories.map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/insights?category=${cat}`}
-                    className={cn(
-                      "rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-300",
-                      categoryFilter?.toLowerCase() === cat.toLowerCase()
-                        ? "bg-forest-abyss text-white shadow-md"
-                        : "bg-white text-ink hover:bg-forest-deep/10 border border-forest-abyss/10"
-                    )}
-                  >
-                    {cat}
-                  </Link>
-                ))}
               </div>
             )}
-
-            <div className="flex flex-col gap-12 md:gap-20">
-              {featuredInsight && (
-                <div className="w-full">
-                  <InsightCard insight={featuredInsight} isFeatured />
-                </div>
-              )}
-
-              {gridInsights.length > 0 && (
-                <div className="w-full">
-                  <div className="mb-10">
-                    <h2 className="font-display text-4xl text-ink">Latest Articles</h2>
-                  </div>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
-                    {gridInsights.map((insight) => (
-                      <InsightCard key={insight.id} insight={insight} />
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {items.length === 0 && (
-                <div className="py-32 text-center rounded-[2rem] bg-white border border-forest-abyss/5">
-                  <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-forest-abyss/5 text-forest-abyss/20">
-                    <BookOpen className="size-10" />
-                  </div>
-                  <h3 className="font-display text-3xl text-ink mb-2">No insights found</h3>
-                  <p className="text-lg text-muted-ink">Try selecting a different topic to explore more content.</p>
-                </div>
-              )}
-            </div>
           </Container>
         </section>
 
-        {/* CTA */}
-        <section className="py-24 text-center border-t border-forest-abyss/5 bg-forest-abyss">
-          <Container width="narrow">
-            <h2 className="mb-6 font-display text-4xl text-white">
-              Apply what you've learned
-            </h2>
-            <p className="mx-auto mb-10 max-w-2xl text-xl text-white/70">
-              Discover trusted homoeopathic remedies organized by the health goals discussed in our insights.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-[#f6f2ea] h-14 px-10 text-lg font-bold">
-                <Link href="/products">
-                  Shop Remedies
-                  <ArrowRight className="ml-3 size-5" />
-                </Link>
-              </Button>
-            </div>
-          </Container>
-        </section>
+        {home.categories.length > 0 ? (
+          <section aria-labelledby="insights-explore" className="border-t border-line/60 bg-cream/60 py-12 lg:py-14">
+            <Container>
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+                <div className="max-w-md">
+                  <h2 id="insights-explore" className="font-display text-2xl tracking-tight text-ink sm:text-3xl">
+                    Explore remedies by health concern
+                  </h2>
+                  <p className="mt-1.5 text-sm text-muted-ink">
+                    Talk to a practitioner first, then browse what we stock.
+                  </p>
+                </div>
+                <ul className="flex flex-wrap gap-2 lg:justify-end">
+                  {home.categories.map((category) => (
+                    <li key={category.slug}>
+                      <Link
+                        href={`/products?category=${encodeURIComponent(category.slug)}`}
+                        className="inline-flex min-h-10 items-center rounded-full border border-line bg-ivory px-4 text-sm text-ink transition-colors hover:border-forest/35 hover:text-forest"
+                      >
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Container>
+          </section>
+        ) : null}
       </main>
+      <DemoContentNotice />
       <SiteFooter />
     </>
   );
