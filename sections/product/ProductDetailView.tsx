@@ -325,7 +325,7 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
         {product.related.length > 0 ? (
           <section aria-labelledby="related-heading" className="mt-16 border-t border-line/70 pt-12 lg:mt-24 lg:pt-16">
             <div className="mb-6 flex items-end justify-between gap-4">
-              <h2 id="related-heading" className="font-display text-2xl tracking-tight text-ink sm:text-3xl">
+              <h2 id="related-heading" className="dh-title-block text-ink">
                 You may also consider
               </h2>
               <Link href="/products" className="text-sm font-semibold text-forest underline-offset-4 hover:underline">

@@ -1,14 +1,14 @@
 "use client";
 
-import { useOptimistic, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useOptimistic, useRef, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpDown, ChevronLeft, ChevronRight, SearchX, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, SearchX, SlidersHorizontal, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -331,26 +331,89 @@ function SortSelect({
   onChange: (sort: ApiListingSort) => void;
   className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const currentLabel = SORT_OPTIONS.find((o) => o.value === value)?.label ?? "Relevance";
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
   return (
-    <div className={cn("items-center gap-2.5", className)}>
+    <div ref={containerRef} className={cn("relative z-30 flex items-center gap-2.5", className)}>
       <span id="sort-label" className="text-sm whitespace-nowrap text-muted-ink">
         Sort by
       </span>
-      <Select value={value} onValueChange={(next) => onChange(next as ApiListingSort)}>
-        <SelectTrigger
+      <div className="relative">
+        <button
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
           aria-labelledby="sort-label"
-          className="h-10! min-w-48 cursor-pointer rounded-full border-line bg-cream pr-3 pl-4 text-sm font-medium text-ink hover:border-forest/35"
+          onClick={() => setOpen((prev) => !prev)}
+          className="flex h-10 min-w-48 cursor-pointer items-center justify-between gap-3 rounded-full border border-line bg-cream pr-3.5 pl-4 text-sm font-medium text-ink transition-all hover:border-forest/40 hover:bg-paper focus:outline-none focus:ring-2 focus:ring-forest/20"
         >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent position="popper" align="end" className="rounded-xl border-line bg-cream">
-          {SORT_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value} className="cursor-pointer rounded-lg py-2">
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <span className="truncate">{currentLabel}</span>
+          <ChevronDown
+            className={cn(
+              "size-4 shrink-0 text-muted-ink transition-transform duration-200",
+              open && "rotate-180 text-forest",
+            )}
+          />
+        </button>
+
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.98 }}
+              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+              role="listbox"
+              className="absolute right-0 top-full z-50 mt-2 min-w-52 overflow-hidden rounded-2xl border border-line-soft bg-paper p-1.5 shadow-[0_16px_40px_-8px_rgba(13,90,67,0.16),0_6px_16px_-4px_rgba(0,0,0,0.06)] ring-1 ring-ink/5"
+            >
+              {SORT_OPTIONS.map((option) => {
+                const isSelected = option.value === value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      onChange(option.value);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      "flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm transition-colors duration-150",
+                      isSelected
+                        ? "bg-forest/10 font-semibold text-forest"
+                        : "text-ink hover:bg-forest/6 hover:text-forest",
+                    )}
+                  >
+                    <span>{option.label}</span>
+                    {isSelected && <Check className="size-4 shrink-0 text-forest" />}
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

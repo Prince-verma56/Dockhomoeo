@@ -201,7 +201,7 @@ export function CheckoutView() {
 
   if (placed) {
     return (
-      <section className="pt-24 pb-24 sm:pt-28" role="status">
+      <section className="dh-page-top dh-section-b" role="status">
         <Container className="flex flex-col items-center text-center">
           <Loader2 aria-hidden className="size-8 text-forest motion-safe:animate-spin" />
           <p className="mt-4 text-base text-ink">Taking you to your order confirmation…</p>
@@ -212,7 +212,7 @@ export function CheckoutView() {
 
   if (!cart.hydrated) {
     return (
-      <section className="pt-24 pb-24 sm:pt-28" role="status">
+      <section className="dh-page-top dh-section-b" role="status">
         <span className="sr-only">Loading checkout…</span>
         <Container>
           <div aria-hidden className="h-12 w-56 rounded-md bg-cream-sunk motion-safe:animate-pulse" />
@@ -227,14 +227,14 @@ export function CheckoutView() {
 
   if (lines.length === 0) {
     return (
-      <section aria-labelledby="checkout-heading" className="pt-24 pb-24 sm:pt-28">
+      <section aria-labelledby="checkout-heading" className="dh-page-top dh-section-b">
         <Container>
           <CartBreadcrumb current="Checkout" via={{ label: "Cart", href: "/cart" }} />
           <div className="mx-auto mt-6 max-w-lg text-center">
             <span className="mx-auto grid size-16 place-items-center rounded-full bg-sage-tint text-forest">
               <ShoppingBag aria-hidden className="size-7" strokeWidth={1.6} />
             </span>
-            <h1 id="checkout-heading" className="mt-5 font-display text-3xl tracking-tight text-ink sm:text-4xl">
+            <h1 id="checkout-heading" className="dh-title-section mt-5 text-ink">
               There&apos;s nothing to check out
             </h1>
             <p className="mt-3 text-muted-ink">Your cart is empty. Add something first and come back here.</p>
@@ -258,10 +258,10 @@ export function CheckoutView() {
 
   return (
     <>
-      <section aria-labelledby="checkout-heading" className="pt-24 pb-14 sm:pt-28 lg:pb-20">
+      <section aria-labelledby="checkout-heading" className="dh-page-top dh-section-b">
         <Container>
           <CartBreadcrumb current="Checkout" via={{ label: "Cart", href: "/cart" }} />
-          <h1 id="checkout-heading" className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
+          <h1 id="checkout-heading" className="dh-title-page text-ink">
             Checkout
           </h1>
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-ink">

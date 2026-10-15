@@ -21,13 +21,13 @@ export default function NotFound() {
     <>
       <SiteHeader />
       <main id="main" className="flex-1 bg-canvas">
-        <Container className="grid min-h-[70vh] place-items-center pt-28 pb-20 text-center sm:pt-32">
+        <Container className="grid min-h-[70vh] place-items-center dh-page-top dh-section-b text-center">
           <div className="max-w-md">
             <span aria-hidden className="mx-auto grid size-14 place-items-center rounded-full bg-sage-tint text-forest">
               <Compass className="size-6" strokeWidth={1.6} />
             </span>
             <p className="dh-eyebrow mt-6 text-muted-ink">Error 404</p>
-            <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            <h1 className="dh-title-section mt-3 text-ink">
               We couldn&rsquo;t find that page
             </h1>
             <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-ink">

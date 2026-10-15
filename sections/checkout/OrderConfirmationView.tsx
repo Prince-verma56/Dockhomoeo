@@ -64,7 +64,7 @@ function NoConfirmation() {
       <span className="mx-auto grid size-16 place-items-center rounded-full bg-cream-sunk text-muted-ink">
         <PackageSearch aria-hidden className="size-7" strokeWidth={1.6} />
       </span>
-      <h1 className="mt-6 font-display text-3xl tracking-tight text-ink sm:text-4xl">No order confirmation to show</h1>
+      <h1 className="dh-title-section mt-6 text-ink">No order confirmation to show</h1>
       <p className="mt-3 text-base leading-relaxed text-muted-ink">
         This page shows your confirmation straight after you place an order. If you have placed one, you can find it with
         your orders.
@@ -124,7 +124,7 @@ function Confirmation({ order }: { order: OrderConfirmation }) {
         >
           <Icon aria-hidden className="size-8" strokeWidth={1.6} />
         </motion.span>
-        <h1 className="mt-6 font-display text-3xl tracking-tight text-ink sm:text-4xl">{headline.title}</h1>
+        <h1 className="dh-title-section mt-6 text-ink">{headline.title}</h1>
         <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-muted-ink">{headline.lead}</p>
       </div>
 

@@ -71,7 +71,7 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
       <SiteHeader />
       <main id="main" className="flex-1 overflow-x-clip bg-canvas">
         <article>
-          <header className={cn("dh-head-arc pt-24 sm:pt-28", insight.coverImageUrl && "dh-head-arc--overlap")}>
+          <header className={cn("dh-head-arc dh-page-top", insight.coverImageUrl && "dh-head-arc--overlap")}>
             <Container width="narrow">
               <PageBreadcrumb
                 items={[
@@ -87,11 +87,11 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
                     {insight.category.name}
                   </Link>
                 ) : null}
-                <h1 className="mt-4 font-display text-4xl leading-[1.06] tracking-tight text-ink sm:text-5xl lg:text-[3.75rem]">
+                <h1 className="dh-title-page mt-4 text-ink">
                   {insight.title}
                 </h1>
                 {insight.excerpt ? (
-                  <p className="mt-5 text-lg leading-relaxed text-muted-ink sm:text-xl">{insight.excerpt}</p>
+                  <p className="dh-lede mt-5">{insight.excerpt}</p>
                 ) : null}
                 <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-ink">
                   {insight.authorName ? <span className="font-medium text-ink">By {insight.authorName}</span> : null}
@@ -164,7 +164,7 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
           <RisePanel aria-labelledby="keep-reading" settle className="pt-14 pb-16 lg:pt-20 lg:pb-24">
             <Container>
               <div className="mb-8 flex items-end justify-between gap-4">
-                <h2 id="keep-reading" className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
+                <h2 id="keep-reading" className="dh-title-section text-ink">
                   Keep reading
                 </h2>
                 <Link href="/insights" className="text-sm font-semibold text-forest hover:underline">

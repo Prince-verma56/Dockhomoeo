@@ -20,7 +20,7 @@ export default function AboutPage() {
         {/* Hero Section */}
         <section className="dh-band-sage relative isolate overflow-hidden pt-28 pb-20 md:pt-40 md:pb-28">
           <Container width="narrow" className="relative z-10 text-center">
-            <h1 className="font-display text-5xl leading-tight tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-8xl">
+            <h1 className="dh-title-hero text-ink">
               Bringing clarity to <span className="italic text-forest-deep">natural healing.</span>
             </h1>
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-ink md:text-2xl">

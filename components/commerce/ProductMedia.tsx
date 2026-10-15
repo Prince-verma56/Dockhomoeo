@@ -4,10 +4,15 @@ import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ProductPackshot } from "@/components/commerce/ProductPackshot";
+import { productPhotoFor } from "@/data/productImagery";
 import type { Product } from "@/types/product";
 
 type ProductMediaProps = {
-  product: Pick<Product, "form" | "mediaLabel" | "name"> & { image?: string | null; brand?: string | null };
+  product: Pick<Product, "form" | "mediaLabel" | "name"> & {
+    image?: string | null;
+    brand?: string | null;
+    slug?: string | null;
+  };
   className?: string;
   /** Sizing utility for the frame, e.g. "aspect-[4/5]". */
   ratio?: string;
@@ -37,17 +42,19 @@ export function ProductMedia({
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px",
 }: ProductMediaProps) {
   const [failed, setFailed] = useState(false);
-  const showPhoto = Boolean(product.image) && !failed;
+  const resolvedPhoto = product.slug ? productPhotoFor(product.slug, product.form) : undefined;
+  const imageSrc = product.image ?? resolvedPhoto?.src ?? null;
+  const showPhoto = Boolean(imageSrc) && !failed;
 
   return (
     <div
       data-product-media
       className={cn("relative isolate overflow-hidden bg-cream-sunk", ratio, rounded, className)}
     >
-      {showPhoto ? (
+      {showPhoto && imageSrc ? (
         <Image
-          src={product.image!}
-          alt={product.mediaLabel}
+          src={imageSrc}
+          alt={product.mediaLabel || resolvedPhoto?.alt || product.name}
           fill
           loading={eager ? "eager" : undefined}
           fetchPriority={eager ? "high" : undefined}

@@ -20,7 +20,7 @@ export default function GlobalError({
     <main className="grid min-h-[60vh] place-items-center bg-canvas px-5 py-20 text-center">
       <div className="max-w-md">
         <AlertCircle aria-hidden className="mx-auto size-8 text-forest" strokeWidth={1.6} />
-        <h1 className="mt-4 font-display text-3xl text-ink">We could not load this page</h1>
+        <h1 className="dh-title-section mt-4 text-ink">We could not load this page</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-ink">
           Please check your connection and try again. This is different from a catalogue search with no matching products.
         </p>

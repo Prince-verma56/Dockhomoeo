@@ -7,8 +7,7 @@ import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
-import { SplitHeading } from "@/components/shared/SplitHeading";
-import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { PageHead, HeadStats } from "@/components/shared/PageHead";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { DepthImage } from "@/components/shared/DepthImage";
@@ -71,7 +70,6 @@ export default async function BrandsPage() {
   const featuredRanges = featured.map((brand) => rangeOf.get(brand.slug)!);
   const photos = pickMakerPhotos(
     featuredRanges.map((range) => ({ items: range.items, forms: range.facets.forms.map((form) => form.value) })),
-    featured.map((_, i) => (i === 0 ? 2 : 1)),
   );
 
   const makers: FeaturedMaker[] = featured.map((brand, i) => {
@@ -93,7 +91,7 @@ export default async function BrandsPage() {
       origin: brandOrigin(brand.slug),
       summary: summary ? `${summary}.` : "",
       categories,
-      photos: photos[i],
+      photo: photos[i],
     };
   });
 
@@ -103,57 +101,27 @@ export default async function BrandsPage() {
     <>
       <SiteHeader />
       <main id="main" className="flex-1 overflow-x-clip bg-canvas">
-        {/* Page head: ends in a shallow arc that the featured makers sit across. */}
-        <section aria-labelledby="brands-heading" className="dh-head-arc dh-head-arc--overlap pt-28 sm:pt-32">
-          <Container>
-            <PageBreadcrumb items={[{ name: "Brands", href: "/brands" }]} className="mb-6" />
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <Reveal as="div" y={10} start="top 95%">
-                  <Eyebrow className="mb-3">Authentic manufacturers</Eyebrow>
-                </Reveal>
-                <SplitHeading
-                  as="h1"
-                  id="brands-heading"
-                  immediate
-                  className="text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
-                  lines={[
-                    <span key="line">
-                      Discover <span className="italic text-forest-deep">trusted</span> makers.
-                    </span>,
-                  ]}
-                />
-                <Reveal
-                  as="p"
-                  y={12}
-                  delay={0.16}
-                  start="top 95%"
-                  className="mt-4 max-w-xl text-base leading-relaxed text-muted-ink sm:text-lg"
-                >
-                  Licensed homoeopathic laboratories, and the full range of remedies we carry from each.
-                </Reveal>
-              </div>
-
-              <Reveal
-                as="dl"
-                y={14}
-                delay={0.24}
-                start="top 95%"
-                className="flex divide-x divide-forest/15 text-sm text-muted-ink"
-              >
-                {[
-                  [brands.length, brands.length === 1 ? "manufacturer" : "manufacturers"],
-                  [productTotal, "remedies stocked"],
-                ].map(([value, label]) => (
-                  <div key={String(label)} className="flex flex-col-reverse px-6 first:pl-0 last:pr-0">
-                    <dt>{label}</dt>
-                    <dd className="font-display text-3xl text-ink sm:text-4xl">{value}</dd>
-                  </div>
-                ))}
-              </Reveal>
-            </div>
-          </Container>
-        </section>
+        <PageHead
+          id="brands-heading"
+          crumbs={[{ name: "Brands", href: "/brands" }]}
+          eyebrow="Authentic manufacturers"
+          animate
+          title={
+            <>
+              Discover <span className="pe-[0.06em] italic text-forest-deep">trusted</span> makers.
+            </>
+          }
+          description="Licensed homoeopathic laboratories, and the full range of remedies we carry from each."
+          aside={
+            <HeadStats
+              items={[
+                [brands.length, brands.length === 1 ? "manufacturer" : "manufacturers"],
+                [productTotal, "remedies stocked"],
+              ]}
+            />
+          }
+          overlap={makers.length > 0}
+        />
 
         {makers.length > 0 ? (
           <section aria-labelledby="featured-brands" className="dh-overlap-up">
@@ -168,29 +136,29 @@ export default async function BrandsPage() {
 
         {/* The index rises from the canvas and tucks under the cards above,
             then settles back into the canvas after the health concerns. */}
-        <RisePanel aria-labelledby="brand-directory" tuck settle className="pb-20 lg:pb-28">
+        <RisePanel aria-labelledby="brand-directory" tuck={makers.length > 0} settle className="dh-section-b">
           <Container>
             <BrandDirectory brands={brands} ranges={formLines} headingId="brand-directory" />
           </Container>
 
           {home.categories.length > 0 ? (
-            <Container className="mt-20 lg:mt-28">
+            <Container className="mt-(--dh-space-section)">
               <section
                 aria-labelledby="brands-goals"
-                className="grid items-center gap-8 overflow-hidden rounded-[1.75rem] bg-paper shadow-soft lg:grid-cols-12 lg:gap-0"
+                className="grid overflow-hidden rounded-[1.5rem] border border-line-soft bg-paper shadow-soft lg:grid-cols-2"
               >
                 <DepthImage
                   src={SCENE_MEDIA.apothecary.src}
                   position={SCENE_MEDIA.apothecary.position}
-                  sizes="(min-width: 1024px) 620px, 100vw"
-                  className="aspect-video lg:col-span-6 lg:aspect-auto lg:h-full lg:min-h-88"
+                  sizes="(min-width: 1024px) 640px, 100vw"
+                  className="aspect-video lg:aspect-auto lg:h-full lg:min-h-96"
                 />
-                <Reveal as="div" y={14} className="px-6 pb-8 sm:px-10 lg:col-span-6 lg:px-12 lg:py-12">
+                <Reveal as="div" y={14} className="dh-pad-card-lg flex flex-col justify-center">
                   <Eyebrow rule>Across every maker</Eyebrow>
-                  <h2 id="brands-goals" className="mt-3 font-display text-3xl tracking-tight text-ink sm:text-4xl">
+                  <h2 id="brands-goals" className="dh-title-section mt-3 text-ink">
                     Or start from a health concern
                   </h2>
-                  <p className="mt-3 max-w-md text-[0.9375rem] leading-relaxed text-muted-ink">
+                  <p className="dh-body mt-2.5">
                     See remedies for one concern side by side, whichever laboratory makes them.
                   </p>
                   <ul className="mt-6 flex flex-wrap gap-2">
@@ -198,7 +166,7 @@ export default async function BrandsPage() {
                       <li key={category.slug}>
                         <Link
                           href={`/products?category=${encodeURIComponent(category.slug)}`}
-                          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-line-soft bg-canvas px-4 text-sm text-ink transition-colors hover:border-forest/40 hover:text-forest"
+                          className="inline-flex h-10 items-center gap-2 rounded-full border border-line-soft bg-canvas px-4 text-sm text-ink transition-colors hover:border-forest/40 hover:text-forest"
                         >
                           {category.name}
                           <span className="text-xs text-muted-ink">
@@ -211,7 +179,7 @@ export default async function BrandsPage() {
                   </ul>
                   <Link
                     href="/categories"
-                    className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-forest transition-colors hover:text-forest-deep"
+                    className="group mt-6 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-forest transition-colors hover:text-forest-deep"
                   >
                     All categories
                     <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-1" />

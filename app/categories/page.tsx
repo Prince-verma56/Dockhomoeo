@@ -8,14 +8,15 @@ import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
-import { SplitHeading } from "@/components/shared/SplitHeading";
-import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { PageHead, HeadStats } from "@/components/shared/PageHead";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { DepthImage } from "@/components/shared/DepthImage";
 import { CategoryCard } from "@/components/commerce/CategoryCard";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { SearchCombobox } from "@/components/search/SearchCombobox";
+import { OrbitalImageWheel, type OrbitalImageWheelItem } from "@/components/unlumen-ui/primitives/orbital-image-wheel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { mapApiCardToProduct } from "@/lib/adapters/product";
@@ -34,10 +35,10 @@ export const metadata: Metadata = {
 };
 
 const productHref = (params: Record<string, string>) => `/products?${new URLSearchParams(params)}`;
-
 const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+const productCount = (count: number) => `${count} ${count === 1 ? "product" : "products"}`;
 
-/** After the featured category, this many get the large image-led card; the rest are compact. */
+/** After the featured category, this many get the large card; the rest are compact. */
 const PROMINENT_COUNT = 2;
 
 export default async function CategoriesPage() {
@@ -55,45 +56,42 @@ export default async function CategoriesPage() {
   const productTotal = catalogue.total;
   const featuredMedia = featured ? categoryMedia(featured.slug, featured.imageUrl) : null;
 
+  const formItems: OrbitalImageWheelItem[] = forms.map((form) => ({
+    id: form.value,
+    label: formLabel(form.value),
+    href: productHref({ form: form.value }),
+    src: FORM_MEDIA[form.value]?.src,
+    position: FORM_MEDIA[form.value]?.position,
+    meta: productCount(form.count),
+  }));
+
   return (
     <>
       <SiteHeader />
       <main id="main" className="flex-1 overflow-x-clip bg-canvas">
-        {/* Page head: the featured category's photograph sits across its arc. */}
-        <section aria-labelledby="categories-heading" className="dh-head-arc dh-head-arc--overlap pt-28 sm:pt-32">
-          <Container>
-            <PageBreadcrumb items={[{ name: "Categories", href: "/categories" }]} className="mb-6" />
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <SplitHeading
-                  as="h1"
-                  id="categories-heading"
-                  immediate
-                  className="text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
-                  lines={[<span key="line">Find your <span className="italic text-forest-deep">natural care.</span></span>]}
-                />
-                <Reveal as="p" y={12} delay={0.14} start="top 95%" className="mt-4 text-base leading-relaxed text-muted-ink sm:text-lg">
-                  Browse remedies by the health concern they are used for, by category, or by the
-                  form you prefer.
-                </Reveal>
-              </div>
-              <Reveal as="dl" y={14} delay={0.22} start="top 95%" className="flex divide-x divide-forest/15 text-sm text-muted-ink">
-                {[
-                  [categories.length, "categories"],
-                  [productTotal, "products"],
-                  [forms.length, "forms"],
-                ].map(([value, label]) => (
-                  <div key={String(label)} className="flex flex-col-reverse px-6 first:pl-0 last:pr-0">
-                    <dt>{label}</dt>
-                    <dd className="font-display text-3xl text-ink sm:text-4xl">{value}</dd>
-                  </div>
-                ))}
-              </Reveal>
-            </div>
-          </Container>
-        </section>
+        <PageHead
+          id="categories-heading"
+          crumbs={[{ name: "Categories", href: "/categories" }]}
+          animate
+          title={
+            <>
+              Find your <span className="pe-[0.06em] italic text-forest-deep">natural care.</span>
+            </>
+          }
+          description="Browse remedies by the health concern they are used for, by category, or by the form you prefer."
+          aside={
+            <HeadStats
+              items={[
+                [categories.length, "categories"],
+                [productTotal, "products"],
+                [forms.length, "forms"],
+              ]}
+            />
+          }
+          overlap={Boolean(featured)}
+        />
 
-        {/* Featured category: a full photograph with the copy set over its edge. */}
+        {/* Featured category: the photograph, with the copy panel set over its edge. */}
         {featured ? (
           <section aria-labelledby="featured-category" className="dh-overlap-up">
             <Container>
@@ -103,15 +101,15 @@ export default async function CategoriesPage() {
                     <DepthImage
                       src={featuredMedia.src}
                       position={featuredMedia.position}
-                      sizes="(min-width: 1024px) 900px, 100vw"
+                      sizes="(min-width: 1024px) 880px, 100vw"
                       preload
-                      speed={-10}
-                      className="aspect-[4/3] rounded-[1.75rem] shadow-lift sm:aspect-[16/10] lg:aspect-auto lg:h-[34rem]"
+                      speed={-8}
+                      className="aspect-4/3 rounded-[1.75rem] shadow-lift sm:aspect-16/10 lg:aspect-auto lg:h-[30rem]"
                     />
                   ) : (
-                    <div className="dh-study relative aspect-[4/3] overflow-hidden rounded-[1.75rem] sm:aspect-[16/10] lg:aspect-auto lg:h-[34rem]">
+                    <div className="dh-study relative aspect-4/3 overflow-hidden rounded-[1.75rem] sm:aspect-16/10 lg:aspect-auto lg:h-[30rem]">
                       {featuredMedia ? (
-                        <Image src={featuredMedia.src} alt="" fill preload sizes="(min-width: 1024px) 900px, 100vw" className="object-contain p-[6%]" />
+                        <Image src={featuredMedia.src} alt="" fill preload sizes="(min-width: 1024px) 880px, 100vw" className="object-contain p-[6%]" />
                       ) : null}
                     </div>
                   )}
@@ -119,37 +117,37 @@ export default async function CategoriesPage() {
 
                 <Reveal
                   as="div"
-                  y={24}
-                  delay={0.12}
-                  className="relative z-10 mx-4 -mt-16 flex flex-col gap-5 rounded-[1.5rem] border border-line-soft bg-paper p-6 shadow-float sm:mx-10 sm:-mt-24 sm:p-9 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:mx-0 lg:mt-0 lg:p-10"
+                  y={20}
+                  delay={0.1}
+                  className="dh-pad-card-lg relative z-10 mx-4 -mt-14 rounded-[1.5rem] border border-line-soft bg-paper shadow-float sm:mx-8 sm:-mt-20 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:mx-0 lg:mt-0"
                 >
                   <Eyebrow rule>Most stocked concern</Eyebrow>
-                  <h2 id="featured-category" className="font-display text-4xl leading-none tracking-tight text-ink sm:text-5xl">
+                  <h2 id="featured-category" className="dh-title-page mt-4 text-ink">
                     {featured.name}
                   </h2>
-                  <dl className="grid grid-cols-3 gap-3 border-y border-line-soft py-4 text-xs text-muted-ink">
+                  <dl className="mt-5 grid grid-cols-3 gap-3 border-y border-line-soft py-4">
                     {[
                       [featured.productCount, featured.productCount === 1 ? "product" : "products"],
                       [featured.forms.length, featured.forms.length === 1 ? "form" : "forms"],
                       [featured.brands.length, featured.brands.length === 1 ? "maker" : "makers"],
                     ].map(([value, label]) => (
-                      <div key={String(label)} className="flex flex-col-reverse">
-                        <dt>{label}</dt>
-                        <dd className="font-display text-2xl text-ink">{value}</dd>
+                      <div key={String(label)} className="flex flex-col-reverse gap-0.5">
+                        <dt className="dh-meta">{label}</dt>
+                        <dd className="font-display text-2xl leading-none text-ink">{value}</dd>
                       </div>
                     ))}
                   </dl>
-                  <p className="text-[0.9375rem] leading-relaxed text-muted-ink">
+                  <p className="dh-body mt-4">
                     {capitalise(describeForms(featured.forms))}, from {describeNames(featured.brands)}.
                   </p>
 
                   {featured.forms.length > 1 ? (
-                    <ul aria-label={`Shop ${featured.name} by form`} className="flex flex-wrap gap-2">
+                    <ul aria-label={`Shop ${featured.name} by form`} className="mt-4 flex flex-wrap gap-2">
                       {featured.forms.map((form) => (
                         <li key={form}>
                           <Link
                             href={productHref({ category: featured.slug, form })}
-                            className="inline-flex min-h-9 items-center rounded-full border border-line-soft bg-canvas px-3.5 text-[0.8125rem] font-medium text-ink transition-colors hover:border-forest/40 hover:text-forest"
+                            className="inline-flex h-9 items-center rounded-full border border-line-soft bg-canvas px-3.5 text-[0.8125rem] font-medium text-ink transition-colors hover:border-forest/40 hover:text-forest"
                           >
                             {formLabel(form)}
                           </Link>
@@ -158,7 +156,7 @@ export default async function CategoriesPage() {
                     </ul>
                   ) : null}
 
-                  <Button asChild variant="brand" size="xl" className="mt-1 w-fit">
+                  <Button asChild variant="brand" size="xl" className="mt-6">
                     <Link href={productHref({ category: featured.slug })}>
                       Shop {featured.name}
                       <ArrowRight aria-hidden />
@@ -170,30 +168,21 @@ export default async function CategoriesPage() {
           </section>
         ) : null}
 
-        {/* Every other category: the next most stocked large and image-led,
-            the rest compact. */}
+        {/* The rest: the next two most stocked at 16:10, the others as 4:3 tiles. */}
         {rest.length > 0 ? (
-          <section aria-labelledby="all-categories" className="pt-16 pb-16 lg:pt-24 lg:pb-24">
+          <section aria-labelledby="all-categories" className="dh-section">
             <Container>
-              <div className="mb-8 flex items-end justify-between gap-4">
-                <div>
-                  <Eyebrow>By health concern</Eyebrow>
-                  <h2 id="all-categories" className="mt-1.5 font-display text-3xl tracking-tight text-ink sm:text-4xl">
-                    All categories
-                  </h2>
-                </div>
-                <p className="text-sm text-muted-ink">{categories.length} with products</p>
-              </div>
+              <SectionHeader
+                id="all-categories"
+                eyebrow="By health concern"
+                title="All categories"
+                action={<p className="dh-meta">{categories.length} with products</p>}
+              />
 
               {prominent.length > 0 ? (
-                <Reveal
-                  as="ul"
-                  stagger=":scope > li"
-                  y={22}
-                  className={cn("grid gap-5 lg:gap-6", prominent.length > 1 && "md:grid-cols-12")}
-                >
-                  {prominent.map((category, index) => (
-                    <li key={category.slug} className={cn(prominent.length > 1 && (index === 0 ? "md:col-span-7" : "md:col-span-5"))}>
+                <Reveal as="ul" stagger=":scope > li" y={20} className={cn("grid gap-5 lg:gap-6", prominent.length > 1 && "md:grid-cols-2")}>
+                  {prominent.map((category) => (
+                    <li key={category.slug}>
                       <CategoryCard category={category} variant="feature" />
                     </li>
                   ))}
@@ -201,12 +190,7 @@ export default async function CategoriesPage() {
               ) : null}
 
               {compact.length > 0 ? (
-                <Reveal
-                  as="ul"
-                  stagger=":scope > li"
-                  y={16}
-                  className="mt-5 grid gap-4 sm:grid-cols-2 lg:mt-6 lg:grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] lg:gap-5"
-                >
+                <Reveal as="ul" stagger=":scope > li" y={16} className="mt-5 grid grid-cols-2 gap-4 lg:mt-6 lg:grid-cols-4 lg:gap-6">
                   {compact.map((category) => (
                     <li key={category.slug}>
                       <CategoryCard category={category} variant="compact" />
@@ -218,80 +202,50 @@ export default async function CategoriesPage() {
           </section>
         ) : null}
 
-        {/* Forms rise on a sage surface that settles back into the canvas. */}
+        {/* Forms: an orbit that turns form by form as the page scrolls, then
+            releases; a plain rail on phones, short screens and reduced motion. */}
         {forms.length > 0 ? (
-          <RisePanel aria-labelledby="by-form" tone="sage" settle className="pt-14 pb-20 lg:pt-20 lg:pb-28">
+          <RisePanel aria-labelledby="by-form" tone="sage" settle className="dh-section-t pb-(--dh-space-section-sm)">
             <Container>
-              <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div className="max-w-xl">
-                  <Eyebrow>Shop by form</Eyebrow>
-                  <h2 id="by-form" className="mt-1.5 font-display text-3xl tracking-tight text-ink sm:text-4xl">
-                    Browse by form
-                  </h2>
-                </div>
-                <p className="text-muted-ink">Already know how you take your remedies? Start there.</p>
-              </div>
-              {/* A swipeable rail on phones, one row from large screens up. */}
-              <Reveal
-                as="ul"
-                stagger=":scope > li"
-                y={18}
-                className="dh-no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-5 lg:gap-5 lg:overflow-visible lg:px-0"
-              >
-                {forms.map((form, index) => {
-                  const media = FORM_MEDIA[form.value];
-                  return (
-                    <li key={form.value} className={cn("w-[58%] shrink-0 snap-start sm:w-[34%] lg:w-auto", index % 2 === 1 && "lg:mt-10")}>
-                      <Link href={productHref({ form: form.value })} className="group block">
-                        <div className="relative aspect-[4/5] overflow-hidden rounded-[1.25rem] bg-paper shadow-soft transition-shadow duration-500 group-hover:shadow-lift">
-                          {media ? (
-                            <Image
-                              src={media.src}
-                              alt=""
-                              fill
-                              sizes="(min-width: 1024px) 250px, 58vw"
-                              style={media.position ? { objectPosition: media.position } : undefined}
-                              className="object-cover transition-transform duration-[1.2s] ease-premium group-hover:scale-[1.05]"
-                            />
-                          ) : null}
-                        </div>
-                        <div className="flex items-baseline justify-between gap-3 px-1 pt-3">
-                          <p className="text-[0.9375rem] font-semibold text-ink transition-colors group-hover:text-forest">
-                            {formLabel(form.value)}
-                          </p>
-                          <p className="shrink-0 text-xs text-muted-ink">
-                            {form.count} {form.count === 1 ? "product" : "products"}
-                          </p>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </Reveal>
+              <SectionHeader
+                id="by-form"
+                eyebrow="Shop by form"
+                title="Browse by form"
+                description="Already know how you take your remedies? Start there."
+                className="mb-0"
+              />
             </Container>
+            <OrbitalImageWheel
+              label="Dosage forms"
+              items={formItems}
+              actionLabel="Shop {label}"
+              fallback={
+                <Container className="mt-(--dh-space-head)">
+                  <FormRail items={formItems} />
+                </Container>
+              }
+            />
           </RisePanel>
         ) : null}
 
-        {/* Featured category products */}
         {featured && featuredProducts && featuredProducts.items.length > 0 ? (
-          <section aria-labelledby="featured-products" className="pb-14 lg:pb-20">
+          <section aria-labelledby="featured-products" className="dh-section-b pt-(--dh-space-section-sm)">
             <Container>
-              <div className="mb-8 flex items-end justify-between gap-4">
-                <div>
-                  <Eyebrow>From the featured category</Eyebrow>
-                  <h2 id="featured-products" className="mt-1.5 font-display text-3xl tracking-tight text-ink sm:text-4xl">
-                    Shop {featured.name}
-                  </h2>
-                </div>
-                <Link
-                  href={productHref({ category: featured.slug })}
-                  className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-forest"
-                >
-                  View all {featured.productCount}
-                  <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
-              <Reveal as="ul" stagger=":scope > li" y={18} className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+              <SectionHeader
+                id="featured-products"
+                eyebrow="From the featured category"
+                title={`Shop ${featured.name}`}
+                action={
+                  <Link
+                    href={productHref({ category: featured.slug })}
+                    className="group inline-flex items-center gap-1.5 text-sm font-semibold text-forest hover:text-forest-deep"
+                  >
+                    View all {featured.productCount}
+                    <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                }
+              />
+              <Reveal as="ul" stagger=":scope > li" y={18} className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
                 {featuredProducts.items.map((item) => (
                   <li key={item.id}>
                     <ProductCard product={mapApiCardToProduct(item)} />
@@ -302,15 +256,14 @@ export default async function CategoriesPage() {
           </section>
         ) : null}
 
-        {/* Search, as a closing line rather than another card. */}
-        <section aria-labelledby="category-search" className="pb-16 lg:pb-24">
+        <section aria-labelledby="category-search" className="dh-section-b">
           <Container>
             <div className="flex flex-col gap-5 border-t border-line-soft pt-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
               <div>
-                <h2 id="category-search" className="font-display text-2xl tracking-tight text-ink">
+                <h2 id="category-search" className="dh-title-block text-ink">
                   Know what you are looking for?
                 </h2>
-                <p className="mt-1 text-sm text-muted-ink">Search by medicine name, brand or health concern.</p>
+                <p className="dh-meta mt-1.5">Search by medicine name, brand or health concern.</p>
               </div>
               <SearchCombobox className="lg:max-w-md" />
             </div>
@@ -320,5 +273,37 @@ export default async function CategoriesPage() {
       <DemoContentNotice />
       <SiteFooter />
     </>
+  );
+}
+
+/** The forms as a swipeable rail (phones) or a five-up row: the orbit's fallback. */
+function FormRail({ items }: { items: OrbitalImageWheelItem[] }) {
+  return (
+    <ul className="dh-no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-5 lg:gap-6 lg:overflow-visible lg:px-0">
+      {items.map((item) => (
+        <li key={item.id} className="w-[62%] shrink-0 snap-start sm:w-[36%] lg:w-auto">
+          <Link href={item.href} className="group block">
+            <div className="relative aspect-4/5 overflow-hidden rounded-[1.25rem] bg-sage-wash shadow-soft transition-shadow duration-500 group-hover:shadow-lift">
+              {item.src ? (
+                <Image
+                  src={item.src}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 250px, 62vw"
+                  style={item.position ? { objectPosition: item.position } : undefined}
+                  className="object-cover transition-transform duration-[1.2s] ease-premium group-hover:scale-[1.05]"
+                />
+              ) : (
+                <span className="grid h-full place-items-center p-4 text-center font-display text-lg text-forest-deep">{item.label}</span>
+              )}
+            </div>
+            <div className="mt-3 flex items-baseline justify-between gap-3 px-1">
+              <p className="text-[0.9375rem] font-semibold text-ink transition-colors group-hover:text-forest">{item.label}</p>
+              <p className="dh-meta shrink-0">{item.meta}</p>
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

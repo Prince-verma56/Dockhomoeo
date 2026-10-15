@@ -19,7 +19,7 @@ export default function ContactPage() {
           <Container width="default" className="relative z-10">
             {/* Header */}
             <div className="mb-16 text-center md:mb-24">
-              <h1 className="font-display text-5xl leading-tight text-ink sm:text-6xl md:text-7xl lg:text-8xl">
+              <h1 className="dh-title-hero text-ink">
                 How can we <span className="italic text-forest-deep">help?</span>
               </h1>
               <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-ink md:text-2xl">

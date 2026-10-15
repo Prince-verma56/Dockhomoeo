@@ -35,11 +35,11 @@ export function CartView() {
 
   return (
     <>
-      <section aria-labelledby="cart-heading" className="pt-24 pb-14 sm:pt-28 lg:pb-20">
+      <section aria-labelledby="cart-heading" className="dh-page-top dh-section-b">
         <Container>
           <CartBreadcrumb current="Cart" />
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <h1 id="cart-heading" className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
+            <h1 id="cart-heading" className="dh-title-page text-ink">
               Your cart
             </h1>
             <p className="text-sm text-muted-ink">
@@ -242,14 +242,14 @@ function CartRow({
 
 function EmptyCart({ dropped }: { dropped: number }) {
   return (
-    <section aria-labelledby="cart-heading" className="pt-24 pb-20 sm:pt-28 lg:pb-28">
+    <section aria-labelledby="cart-heading" className="dh-page-top dh-section-b">
       <Container>
         <CartBreadcrumb current="Cart" />
         <div className="mx-auto mt-6 max-w-xl text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
           <span className="mx-auto grid size-20 place-items-center rounded-full bg-sage-tint text-forest">
             <ShoppingBag aria-hidden className="size-8" strokeWidth={1.6} />
           </span>
-          <h1 id="cart-heading" className="mt-6 font-display text-4xl tracking-tight text-ink sm:text-5xl">
+          <h1 id="cart-heading" className="dh-title-page mt-6 text-ink">
             Your cart is empty
           </h1>
           <p className="mt-3 text-base leading-relaxed text-muted-ink">
@@ -280,7 +280,7 @@ function EmptyCart({ dropped }: { dropped: number }) {
 
 function CartSkeleton() {
   return (
-    <section className="pt-24 pb-20 sm:pt-28" role="status">
+    <section className="dh-page-top dh-section-b" role="status">
       <span className="sr-only">Loading your cart…</span>
       <Container>
         <div aria-hidden className="h-5 w-32 rounded-md bg-cream-sunk motion-safe:animate-pulse" />

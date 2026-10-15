@@ -7,10 +7,10 @@ import { repositories } from "@/lib/repositories";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
-import { Eyebrow } from "@/components/shared/Eyebrow";
-import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { PageHead } from "@/components/shared/PageHead";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
-import { BrandCard } from "@/components/commerce/BrandCard";
+import { BrandCard, brandOrigin } from "@/components/commerce/BrandCard";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { cn } from "@/lib/utils";
 import { describeForms, getBrandDirectory } from "@/lib/catalogue";
@@ -84,81 +84,72 @@ export default async function BrandPage({ params, searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-canvas">
-        <section aria-labelledby="brand-heading" className="dh-head-arc pt-28 sm:pt-32">
-          <Container>
-            <PageBreadcrumb
-              items={[
-                { name: "Brands", href: "/brands" },
-                { name: brand.name, href: `/brands/${brand.slug}` },
-              ]}
-              className="mb-6"
-            />
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-              <div className="flex items-center gap-5">
-                <div>
-                  <Eyebrow>Brand</Eyebrow>
-                  <h1 id="brand-heading" className="mt-1 font-display text-4xl leading-tight tracking-tight text-ink sm:text-5xl">
-                    {brand.name}
-                  </h1>
-                  <p role="status" className="mt-1 text-sm text-muted-ink">
-                    <ResultCount result={result} filtered={activeFilterCount(state) > 0} />
-                    {forms.length > 0 && activeFilterCount(state) === 0 ? (
-                      <span className="first-letter:uppercase"> · {describeForms(forms)}</span>
-                    ) : null}
-                  </p>
-                </div>
-              </div>
-
-              {categories.length > 1 ? (
-                <nav aria-label={`${brand.name} by category`} className="lg:max-w-xl">
-                  <ul className="flex flex-wrap gap-2 lg:justify-end">
-                    {categories.map((category) => {
-                      const active = state.category === category.slug;
-                      return (
-                        <li key={category.slug}>
-                          <Link
-                            href={href({ category: active ? null : category.slug })}
-                            scroll={false}
-                            aria-current={active ? "page" : undefined}
-                            className={cn(
-                              "inline-flex min-h-9 items-center gap-2 rounded-full border px-3.5 text-[0.8125rem] font-medium transition-colors",
-                              active
-                                ? "border-forest-deep bg-forest-deep text-cream"
-                                : "border-line bg-cream text-ink hover:border-forest/35 hover:text-forest",
-                            )}
-                          >
-                            {category.name}
-                            <span className={cn("text-xs", active ? "text-cream/70" : "text-muted-ink")}>
-                              {category.count}
-                              <span className="sr-only"> products</span>
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
-              ) : null}
-            </div>
-          </Container>
-        </section>
+      <main id="main" className="flex-1 overflow-x-clip bg-canvas">
+        <PageHead
+          id="brand-heading"
+          crumbs={[
+            { name: "Brands", href: "/brands" },
+            { name: brand.name, href: `/brands/${brand.slug}` },
+          ]}
+          eyebrow={brandOrigin(brand.slug) ? `Brand · ${brandOrigin(brand.slug)}` : "Brand"}
+          title={brand.name}
+          description={
+            <p role="status">
+              <ResultCount result={result} filtered={activeFilterCount(state) > 0} />
+              {forms.length > 0 && activeFilterCount(state) === 0 ? <> · {describeForms(forms)}</> : null}
+            </p>
+          }
+          aside={
+            categories.length > 1 ? (
+              <nav aria-label={`${brand.name} by category`} className="lg:max-w-xl">
+                <ul className="flex flex-wrap gap-2 lg:justify-end">
+                  {categories.map((category) => {
+                    const active = state.category === category.slug;
+                    return (
+                      <li key={category.slug}>
+                        <Link
+                          href={href({ category: active ? null : category.slug })}
+                          scroll={false}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "inline-flex h-9 items-center gap-2 rounded-full border px-3.5 text-[0.8125rem] font-medium transition-colors",
+                            active
+                              ? "border-forest-deep bg-forest-deep text-cream"
+                              : "border-line bg-paper text-ink hover:border-forest/35 hover:text-forest",
+                          )}
+                        >
+                          {category.name}
+                          <span className={cn("text-xs", active ? "text-cream/70" : "text-muted-ink")}>
+                            {category.count}
+                            <span className="sr-only"> products</span>
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            ) : null
+          }
+        />
 
         <BrandListing slug={brand.slug} brandName={brand.name} state={state} result={result} />
 
         {otherBrands.length > 0 ? (
-          <RisePanel aria-labelledby="other-brands" settle className="pt-12 pb-14 lg:pt-14 lg:pb-20">
+          <RisePanel aria-labelledby="other-brands" settle className="dh-section-sm">
             <Container>
-              <div className="mb-5 flex items-end justify-between gap-4">
-                <h2 id="other-brands" className="font-display text-2xl tracking-tight text-ink sm:text-3xl">
-                  More brands
-                </h2>
-                <Link href="/brands" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
-                  All brands
-                  <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <SectionHeader
+                id="other-brands"
+                size="block"
+                title="More brands"
+                action={
+                  <Link href="/brands" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
+                    All brands
+                    <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                }
+              />
+              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
                 {otherBrands.map((other) => (
                   <li key={other.slug}>
                     <BrandCard brand={other} />

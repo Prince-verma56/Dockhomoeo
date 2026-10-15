@@ -60,8 +60,8 @@ export function ShopView({ state, result }: ShopViewProps) {
             </div>
 
             {forms.length > 1 || onlyForm ? (
-              <nav aria-label="Shop by form" className="lg:max-w-xl">
-                <ul className="flex flex-wrap gap-2 lg:justify-end">
+              <nav aria-label="Shop by form" className="self-start lg:self-end">
+                <ul className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-line-soft bg-paper/95 p-1.5 shadow-xs backdrop-blur-sm sm:gap-2">
                   {forms.map((form) => {
                     const active = onlyForm === form.value;
                     return (
@@ -71,14 +71,19 @@ export function ShopView({ state, result }: ShopViewProps) {
                           scroll={false}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "inline-flex min-h-9 items-center gap-2 rounded-full border px-3.5 text-[0.8125rem] font-medium transition-colors",
+                            "inline-flex h-9 items-center gap-2 rounded-xl px-3.5 text-[0.8125rem] font-medium transition-all duration-200",
                             active
-                              ? "border-forest-deep bg-forest-deep text-cream"
-                              : "border-line bg-cream text-ink hover:border-forest/35 hover:text-forest",
+                              ? "bg-forest font-semibold text-white shadow-xs"
+                              : "text-ink/80 hover:bg-forest/8 hover:text-forest",
                           )}
                         >
-                          {formLabel(form.value)}
-                          <span className={cn("text-xs tabular-nums", active ? "text-cream/70" : "text-muted-ink")}>
+                          <span>{formLabel(form.value)}</span>
+                          <span
+                            className={cn(
+                              "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] tabular-nums font-semibold",
+                              active ? "bg-white/25 text-white" : "bg-forest/10 text-forest",
+                            )}
+                          >
                             {form.count}
                             <span className="sr-only"> products</span>
                           </span>

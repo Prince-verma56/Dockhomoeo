@@ -456,19 +456,19 @@
                    edge. RisePanel adds the scroll-linked opening.
   */
   :root {
-    --dh-overlap: clamp(3.5rem, 7vw, 6.5rem);
-    --dh-arc-depth: clamp(1.25rem, 4.5vw, 4rem);
+    --dh-overlap: clamp(3rem, 5vw, 4.5rem);
+    --dh-arc-depth: clamp(1rem, 3.5vw, 3rem);
     --dh-rise-radius: clamp(1.75rem, 4vw, 3.25rem);
   }
 
   .dh-head-arc {
     position: relative;
     isolation: isolate;
-    padding-bottom: calc(var(--dh-arc-depth) + 2.5rem);
+    padding-bottom: calc(var(--dh-arc-depth) + 2rem);
   }
 
   .dh-head-arc--overlap {
-    padding-bottom: calc(var(--dh-overlap) + var(--dh-arc-depth) + 2.5rem);
+    padding-bottom: calc(var(--dh-overlap) + var(--dh-arc-depth) + 1.5rem);
   }
 
   .dh-head-arc::before {
@@ -504,11 +504,12 @@
 
   .dh-rise--tuck {
     margin-top: calc(-1 * var(--dh-overlap));
-    padding-top: calc(var(--dh-overlap) + clamp(3.5rem, 7vw, 6rem));
+    padding-top: calc(var(--dh-overlap) + var(--dh-space-section-sm));
   }
 
   .dh-rise--settle {
-    background-image: linear-gradient(180deg, transparent 72%, var(--dh-canvas) 100%);
+    /* A fixed-length fade, so a tall panel does not change colour mid-way. */
+    background-image: linear-gradient(180deg, transparent calc(100% - 14rem), var(--dh-canvas) 100%);
   }
 
   /* Studio studies on a white sweep (the health-goal artwork) take on the
@@ -522,8 +523,8 @@
     mix-blend-mode: multiply;
     /* The sweep is not pure white and has a soft vignette; feather the
        artwork's edge so its square never shows against the tint. */
-    -webkit-mask-image: radial-gradient(circle closest-side, #000 64%, transparent 100%);
-    mask-image: radial-gradient(circle closest-side, #000 64%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle closest-side, #000 46%, transparent 84%);
+    mask-image: radial-gradient(circle closest-side, #000 46%, transparent 84%);
   }
 
   /* Inset grouped panel — white card surface with a gentle inner shadow so it
@@ -673,6 +674,145 @@
 }
 
 /* -----------------------------------------------------------------------------
+   Layout and type scale (interior routes)
+
+   One vertical rhythm, in four steps, each with a job:
+     --dh-space-section     between page sections
+     --dh-space-section-sm  between a section and a closely related one
+     --dh-space-head        from a section header to its content
+     --dh-pad-card(-lg)     inside cards and panels
+   and one type scale: page title, section title, block title, card title,
+   lede, body, meta. Sizes are fluid between a phone and a 1440px desktop,
+   so no breakpoint jumps; headings balance their lines, copy avoids orphans.
+   -------------------------------------------------------------------------- */
+:root {
+  --dh-space-section: clamp(4rem, 2.75rem + 4vw, 6.5rem);
+  --dh-space-section-sm: clamp(3rem, 2.25rem + 2.5vw, 4.5rem);
+  --dh-space-head: clamp(1.75rem, 1.4rem + 1vw, 2.5rem);
+  --dh-pad-card: clamp(1.25rem, 1rem + 0.75vw, 1.75rem);
+  --dh-pad-card-lg: clamp(1.5rem, 0.9rem + 2vw, 2.75rem);
+  /* Clears the fixed site header on every interior route. */
+  --dh-page-top: clamp(6.75rem, 6rem + 2vw, 8rem);
+}
+
+@utility dh-section {
+  padding-block: var(--dh-space-section);
+}
+
+@utility dh-section-sm {
+  padding-block: var(--dh-space-section-sm);
+}
+
+@utility dh-section-t {
+  padding-top: var(--dh-space-section);
+}
+
+@utility dh-section-b {
+  padding-bottom: var(--dh-space-section);
+}
+
+@utility dh-head-gap {
+  margin-bottom: var(--dh-space-head);
+}
+
+@utility dh-pad-card {
+  padding: var(--dh-pad-card);
+}
+
+@utility dh-pad-card-lg {
+  padding: var(--dh-pad-card-lg);
+}
+
+@utility dh-page-top {
+  padding-top: var(--dh-page-top);
+}
+
+/* Marketing heroes (about, contact, quality): the largest type on the site. */
+@utility dh-title-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.75rem, 1.7rem + 4vw, 4.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+@utility dh-title-page {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.25rem, 1.6rem + 2.3vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+@utility dh-title-section {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.375rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+@utility dh-title-block {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+@utility dh-title-card {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.1875rem, 1.08rem + 0.35vw, 1.4375rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+@utility dh-lede {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.65;
+  color: var(--dh-muted);
+  max-width: 60ch;
+  text-wrap: pretty;
+}
+
+@utility dh-body {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--dh-muted);
+  max-width: 58ch;
+  text-wrap: pretty;
+}
+
+@utility dh-meta {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--dh-muted);
+}
+
+/* Browse-by-form orbit: shown only with JS running, motion allowed and room
+   for it (dh-motion is set before paint by app/layout.tsx under exactly those
+   first two conditions). Everywhere else the plain rail is the section. */
+.dh-orbit-wheel {
+  display: none;
+}
+
+@media (min-width: 768px) and (min-height: 560px) {
+  .dh-motion .dh-orbit-wheel {
+    display: block;
+  }
+
+  .dh-motion .dh-orbit-fallback {
+    display: none;
+  }
+}
+
+/* -----------------------------------------------------------------------------
    Focus ring — deliberately NOT inside a cascade layer.
    shadcn's primitives carry `outline-none` plus a `focus-visible:ring-*`
    box-shadow, and in this build that ring composites to transparent, which left
@@ -693,6 +833,41 @@ footer :focus-visible {
   outline-color: var(--dh-surface);
 }
 
+/* -----------------------------------------------------------------------------
+   Accordion Transitions & Animations
+   -------------------------------------------------------------------------- */
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.animate-accordion-down,
+[data-slot="accordion-content"][data-state="open"] {
+  animation: accordion-down 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-accordion-up,
+[data-slot="accordion-content"][data-state="closed"] {
+  animation: accordion-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Reduced motion: strip transforms and scroll choreography, keep every
    control functional and every string readable (brain/11_ANIMATION_SPEC). */
 @media (prefers-reduced-motion: reduce) {
@@ -705,3 +880,4 @@ footer :focus-visible {
     scroll-behavior: auto !important;
   }
 }
+

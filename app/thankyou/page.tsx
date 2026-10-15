@@ -22,7 +22,7 @@ export default async function ThankYouPage({ searchParams }: PageProps<"/thankyo
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-canvas pt-28 pb-20 sm:pt-32 lg:pb-28">
+      <main id="main" className="dh-page-top dh-section-b flex-1 bg-canvas">
         <OrderConfirmationView orderId={Number.isInteger(id) && id > 0 ? id : null} />
       </main>
       <SiteFooter />

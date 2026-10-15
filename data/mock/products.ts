@@ -429,7 +429,7 @@ const catalogue: Product[] = [
  * illustrated pack rather than borrowing another product’s photograph.
  */
 export const mockProducts: Product[] = catalogue.map((product) => {
-  const photo = productPhotoFor(product.slug);
+  const photo = productPhotoFor(product.slug, product.form);
   return photo ? { ...product, image: photo.src, mediaLabel: photo.alt } : product;
 });
 

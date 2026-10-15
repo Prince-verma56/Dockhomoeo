@@ -66,11 +66,11 @@ export function FavouritesView() {
 
   return (
     <>
-      <section aria-labelledby="favourites-heading" className="pt-24 pb-14 sm:pt-28 lg:pb-20">
+      <section aria-labelledby="favourites-heading" className="dh-page-top dh-section-b">
         <Container>
           <CartBreadcrumb current="Favourites" />
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <h1 id="favourites-heading" className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
+            <h1 id="favourites-heading" className="dh-title-page text-ink">
               Your favourites
             </h1>
             {hydrated && slugs.length > 0 ? (

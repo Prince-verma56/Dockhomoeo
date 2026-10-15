@@ -263,7 +263,7 @@ function OptionCount({ count }: { count: number }) {
   );
 }
 
-const rowClass = "flex min-h-10 items-center gap-3 rounded-lg px-2 transition-colors hover:bg-ink/4";
+const rowClass = "flex min-h-10 items-center gap-3 rounded-xl px-2.5 transition-[background-color,color] duration-200 hover:bg-forest/6";
 
 function RadioList({
   name,
@@ -292,10 +292,10 @@ function RadioList({
               checked={checked}
               aria-label={option.text}
               onChange={() => onSelect(option.value)}
-              className="size-4 shrink-0 cursor-pointer accent-forest"
+              className="size-4 shrink-0 cursor-pointer accent-forest transition-transform duration-150 active:scale-95"
             />
             <label htmlFor={inputId} className="flex flex-1 cursor-pointer items-center justify-between gap-3 py-2 text-sm">
-              <span className={cn(checked ? "font-semibold text-ink" : "text-muted-ink")}>{option.label}</span>
+              <span className={cn("transition-colors duration-200", checked ? "font-semibold text-forest" : "text-ink/80 hover:text-forest")}>{option.label}</span>
               {option.count !== null ? <OptionCount count={option.count} /> : null}
             </label>
           </div>
@@ -336,7 +336,7 @@ function CheckboxList({
               className="cursor-pointer border-line bg-cream data-checked:border-forest data-checked:bg-forest"
             />
             <label htmlFor={inputId} className="flex flex-1 cursor-pointer items-center justify-between gap-3 py-2 text-sm">
-              <span className={cn(checked ? "font-semibold text-ink" : "text-muted-ink")}>{option.label}</span>
+              <span className={cn("transition-colors duration-200", checked ? "font-semibold text-forest" : "text-ink/80 hover:text-forest")}>{option.label}</span>
               {option.count !== null ? <OptionCount count={option.count} /> : null}
             </label>
           </div>

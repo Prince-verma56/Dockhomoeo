@@ -58,16 +58,16 @@ export function InsightCard({ insight, featured = false }: { insight: ApiInsight
 
   if (featured) {
     return (
-      <article className="group relative grid overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-soft transition-shadow duration-400 hover:shadow-lift lg:grid-cols-12">
-        <ClipReveal from="left" className="relative aspect-16/10 overflow-hidden lg:col-span-7 lg:aspect-auto lg:min-h-110">
+      <article className="group relative grid overflow-hidden rounded-[1.5rem] border border-line-soft bg-paper shadow-soft transition-shadow duration-400 hover:shadow-lift lg:grid-cols-[1.15fr_1fr]">
+        <ClipReveal from="left" className="relative aspect-16/10 overflow-hidden lg:aspect-auto lg:min-h-104">
           {cover}
         </ClipReveal>
-        <div className="flex flex-col justify-center gap-4 p-7 sm:p-10 lg:col-span-5 lg:p-12">
+        <div className="dh-pad-card-lg flex flex-col justify-center">
           <p className="dh-eyebrow text-forest">{topic}</p>
-          <h2 className="font-display text-3xl leading-[1.1] tracking-tight text-ink sm:text-4xl">{link}</h2>
-          {insight.excerpt ? <p className="text-base leading-relaxed text-muted-ink">{insight.excerpt}</p> : null}
-          {meta.length ? <p className="text-sm text-muted-ink">{meta.join(" · ")}</p> : null}
-          <div className="mt-2">{readMore}</div>
+          <h2 className="dh-title-section mt-4 text-ink">{link}</h2>
+          {insight.excerpt ? <p className="dh-body mt-4">{insight.excerpt}</p> : null}
+          {meta.length ? <p className="dh-meta mt-3">{meta.join(" · ")}</p> : null}
+          <div className="mt-7">{readMore}</div>
         </div>
       </article>
     );
@@ -76,17 +76,17 @@ export function InsightCard({ insight, featured = false }: { insight: ApiInsight
   return (
     <article
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-soft",
+        "group relative flex h-full flex-col overflow-hidden rounded-[1.25rem] border border-line-soft bg-paper shadow-soft",
         "transition-[border-color,box-shadow,transform] duration-400 ease-premium hover:-translate-y-0.5 hover:border-forest/25 hover:shadow-lift",
       )}
     >
       <div className="relative aspect-16/10 overflow-hidden bg-cream-sunk">{cover}</div>
-      <div className="flex flex-1 flex-col gap-2.5 p-6">
-        <p className="dh-eyebrow text-[0.66rem] text-forest">{topic}</p>
-        <h3 className="font-display text-xl leading-snug tracking-tight text-ink sm:text-[1.375rem]">{link}</h3>
-        {insight.excerpt ? <p className="line-clamp-3 text-sm leading-relaxed text-muted-ink">{insight.excerpt}</p> : null}
-        {meta.length ? <p className="text-xs text-muted-ink">{meta.join(" · ")}</p> : null}
-        <div className="mt-auto pt-3">{readMore}</div>
+      <div className="dh-pad-card flex flex-1 flex-col">
+        <p className="dh-eyebrow text-forest">{topic}</p>
+        <h3 className="dh-title-card mt-3 text-ink">{link}</h3>
+        {insight.excerpt ? <p className="dh-meta mt-2.5 line-clamp-3 text-[0.875rem] leading-relaxed">{insight.excerpt}</p> : null}
+        {meta.length ? <p className="dh-meta mt-2">{meta.join(" · ")}</p> : null}
+        <div className="mt-auto pt-5">{readMore}</div>
       </div>
     </article>
   );

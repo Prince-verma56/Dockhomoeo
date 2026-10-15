@@ -42,9 +42,9 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
       
       <main id="main" className="flex-1 pb-24">
         {/* The same page-head band as every interior route. */}
-        <div className="dh-band-sage mb-8 pt-28 pb-10 sm:pt-32 md:mb-12 lg:pb-12">
+        <div className="dh-head-arc dh-page-top mb-8 md:mb-12">
           <Container width="wide">
-            <h1 className="font-display text-4xl tracking-tight text-ink sm:text-5xl">My account</h1>
+            <h1 className="dh-title-page text-ink">My account</h1>
             <p className="mt-3 text-base text-muted-ink sm:text-lg">Manage your orders, delivery addresses and profile.</p>
           </Container>
         </div>

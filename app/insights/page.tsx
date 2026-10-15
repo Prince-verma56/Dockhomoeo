@@ -7,8 +7,8 @@ import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
-import { SplitHeading } from "@/components/shared/SplitHeading";
-import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { PageHead } from "@/components/shared/PageHead";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { InsightCard } from "@/components/content/InsightCard";
 import { RisePanel } from "@/components/shared/RisePanel";
@@ -78,93 +78,81 @@ export default async function InsightsPage({ searchParams }: Props) {
 
   const pill = (active: boolean) =>
     cn(
-      "inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
+      "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
       active
         ? "border-forest-deep bg-forest-deep text-cream"
-        : "border-line bg-cream text-ink hover:border-forest/35 hover:text-forest",
+        : "border-line bg-paper text-ink hover:border-forest/35 hover:text-forest",
     );
 
   return (
     <>
       <SiteHeader />
       <main id="main" className="flex-1 overflow-x-clip bg-canvas">
-        <section
-          aria-labelledby="insights-heading"
-          className={cn("dh-head-arc pt-28 sm:pt-32", featured && "dh-head-arc--overlap")}
+        <PageHead
+          id="insights-heading"
+          crumbs={[
+            { name: "Health insights", href: "/insights" },
+            ...(activeTopic
+              ? [{ name: activeTopic.name, href: `/insights?category=${encodeURIComponent(activeTopic.slug)}` }]
+              : []),
+          ]}
+          animate
+          title={
+            <>
+              Health <span className="pe-[0.06em] italic text-forest-deep">insights</span>
+            </>
+          }
+          description="Reading on homoeopathy, natural wellness and family care — written to help you prepare questions for your practitioner, not to replace a consultation."
+          overlap={Boolean(featured)}
         >
-          <Container>
-            <PageBreadcrumb
-              items={[
-                { name: "Health insights", href: "/insights" },
-                ...(activeTopic
-                  ? [{ name: activeTopic.name, href: `/insights?category=${encodeURIComponent(activeTopic.slug)}` }]
-                  : []),
-              ]}
-              className="mb-6"
-            />
-            <div className="max-w-2xl">
-              <SplitHeading
-                as="h1"
-                id="insights-heading"
-                immediate
-                className="text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
-                lines={[<span key="line">Health <span className="italic text-forest-deep">insights</span></span>]}
-              />
-              <p className="mt-4 text-base leading-relaxed text-muted-ink sm:text-lg">
-                Reading on homoeopathy, natural wellness and family care — written to help you
-                prepare questions for your practitioner, not to replace a consultation.
-              </p>
-            </div>
-
-            {topics.length > 1 ? (
-              <nav aria-label="Article topics" className="mt-8">
-                <ul className="flex flex-wrap gap-2">
-                  <li>
-                    <Link href="/insights" aria-current={activeTopic ? undefined : "page"} className={pill(!activeTopic)}>
-                      All topics
-                      <span className="text-xs opacity-70">{total}</span>
-                    </Link>
-                  </li>
-                  {topics.map((topic) => {
-                    const active = topic.slug === activeTopic?.slug;
-                    return (
-                      <li key={topic.slug}>
-                        <Link
-                          href={`/insights?category=${encodeURIComponent(topic.slug)}`}
-                          aria-current={active ? "page" : undefined}
-                          className={pill(active)}
-                        >
-                          {topic.name}
-                          <span className="text-xs opacity-70">
-                            {topic.count}
-                            <span className="sr-only"> {topic.count === 1 ? "article" : "articles"}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </nav>
-            ) : null}
-          </Container>
-        </section>
+          {topics.length > 1 ? (
+            <nav aria-label="Article topics">
+              <ul className="flex flex-wrap gap-2">
+                <li>
+                  <Link href="/insights" aria-current={activeTopic ? undefined : "page"} className={pill(!activeTopic)}>
+                    All topics
+                    <span className="text-xs opacity-70">{total}</span>
+                  </Link>
+                </li>
+                {topics.map((topic) => {
+                  const active = topic.slug === activeTopic?.slug;
+                  return (
+                    <li key={topic.slug}>
+                      <Link
+                        href={`/insights?category=${encodeURIComponent(topic.slug)}`}
+                        aria-current={active ? "page" : undefined}
+                        className={pill(active)}
+                      >
+                        {topic.name}
+                        <span className="text-xs opacity-70">
+                          {topic.count}
+                          <span className="sr-only"> {topic.count === 1 ? "article" : "articles"}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          ) : null}
+        </PageHead>
 
         {/* The lead article sits across the head's arc. */}
-        <section aria-label="Articles" className={cn("pb-16 lg:pb-24", featured ? "dh-overlap-up" : "pt-12 lg:pt-16")}>
+        <section aria-label="Articles" className={cn("dh-section-b", featured ? "dh-overlap-up" : "pt-(--dh-space-section-sm)")}>
           <Container>
             {featured ? (
               <>
                 <InsightCard insight={featured} featured />
                 {latest.length > 0 ? (
-                  <div className="mt-12 lg:mt-16">
-                    <div className="mb-6 flex items-end justify-between gap-4">
-                      <h2 className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
-                        {activeTopic ? `More on ${activeTopic.name.toLowerCase()}` : "Latest articles"}
-                      </h2>
-                      <p className="text-sm text-muted-ink">
-                        {latest.length} more {latest.length === 1 ? "article" : "articles"}
-                      </p>
-                    </div>
+                  <div className="mt-(--dh-space-section)">
+                    <SectionHeader
+                      title={activeTopic ? `More on ${activeTopic.name.toLowerCase()}` : "Latest articles"}
+                      action={
+                        <p className="dh-meta">
+                          {latest.length} more {latest.length === 1 ? "article" : "articles"}
+                        </p>
+                      }
+                    />
                     <Reveal as="ul" stagger=":scope > li" y={18} className={cn("grid gap-5 lg:gap-6", gridColumns(latest.length))}>
                       {latest.map((insight) => (
                         <li key={insight.id}>
@@ -176,9 +164,9 @@ export default async function InsightsPage({ searchParams }: Props) {
                 ) : null}
               </>
             ) : (
-              <div className="rounded-card border border-dashed border-line bg-cream/60 px-6 py-14 text-center">
-                <h2 className="text-xl font-semibold text-ink">No articles in this topic yet</h2>
-                <p className="mx-auto mt-2 max-w-sm text-sm text-muted-ink">New reading is added regularly.</p>
+              <div className="rounded-[1.5rem] border border-dashed border-line bg-paper/70 px-6 py-14 text-center">
+                <h2 className="dh-title-block text-ink">No articles in this topic yet</h2>
+                <p className="dh-body mx-auto mt-2 max-w-sm">New reading is added regularly.</p>
                 <Link href="/insights" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
                   See all articles
                   <ArrowRight aria-hidden className="size-4" />
@@ -188,24 +176,23 @@ export default async function InsightsPage({ searchParams }: Props) {
           </Container>
         </section>
 
+        {/* Same twelve-column grid as the article cards above it. */}
         {home.categories.length > 0 ? (
-          <RisePanel aria-labelledby="insights-explore" settle className="pt-14 pb-16 lg:pt-16 lg:pb-20">
+          <RisePanel aria-labelledby="insights-explore" settle className="dh-section-sm">
             <Container>
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-                <div className="max-w-md">
-                  <h2 id="insights-explore" className="font-display text-2xl tracking-tight text-ink sm:text-3xl">
+              <div className="grid gap-6 lg:grid-cols-12 lg:items-center lg:gap-6">
+                <div className="lg:col-span-4">
+                  <h2 id="insights-explore" className="dh-title-block text-ink">
                     Explore remedies by health concern
                   </h2>
-                  <p className="mt-1.5 text-sm text-muted-ink">
-                    Talk to a practitioner first, then browse what we stock.
-                  </p>
+                  <p className="dh-body mt-2">Talk to a practitioner first, then browse what we stock.</p>
                 </div>
-                <ul className="flex flex-wrap gap-2 lg:justify-end">
+                <ul className="flex flex-wrap gap-2 lg:col-span-8 lg:justify-end">
                   {home.categories.map((category) => (
                     <li key={category.slug}>
                       <Link
                         href={`/products?category=${encodeURIComponent(category.slug)}`}
-                        className="inline-flex min-h-10 items-center rounded-full border border-line bg-paper px-4 text-sm text-ink transition-colors hover:border-forest/35 hover:text-forest"
+                        className="inline-flex h-10 items-center rounded-full border border-line bg-paper px-4 text-sm text-ink transition-colors hover:border-forest/35 hover:text-forest"
                       >
                         {category.name}
                       </Link>

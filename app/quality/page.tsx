@@ -47,7 +47,7 @@ export default function QualityPage() {
               <ShieldCheck className="size-4" />
               Our Commitment
             </div>
-            <h1 className="font-display text-5xl leading-tight tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-8xl">
+            <h1 className="dh-title-hero text-ink">
               Quality & <span className="italic text-forest-deep">Transparency</span>
             </h1>
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-ink md:text-2xl">

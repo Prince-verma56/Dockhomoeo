@@ -5,6 +5,14 @@ import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/animation/gsap";
 import { prefersReducedMotion } from "@/lib/animation/motion";
 
+let activeLenis: Lenis | null = null;
+
+/**
+ * The running Lenis instance, or null under reduced motion / before mount.
+ * Programmatic scrolls go through it so they do not fight its smoothing.
+ */
+export const getLenis = () => activeLenis;
+
 /**
  * The single smooth-scroll instance for the app shell (brain/02_TRD.md).
  *
@@ -69,6 +77,8 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       syncTouch: false,
     });
 
+    activeLenis = lenis;
+
     const onScroll = () => ScrollTrigger.update();
     lenis.on("scroll", onScroll);
 
@@ -86,6 +96,7 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       gsap.ticker.remove(raf);
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();
+      activeLenis = null;
     };
   }, []);
 

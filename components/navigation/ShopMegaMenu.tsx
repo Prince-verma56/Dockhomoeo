@@ -173,23 +173,23 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
             <motion.div
               ref={panelRef}
               onKeyDown={onPanelKeyDown}
-              initial={reducedMotion ? false : { opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -6 }}
+              initial={reducedMotion ? false : { opacity: 0, y: -6, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -6, scale: 0.99 }}
               transition={{ duration: DURATION.fast, ease: EASE_PREMIUM_BEZIER }}
-              className="w-[520px] rounded-3xl border border-white/40 bg-white/85 p-5 shadow-[0_16px_42px_rgba(0,0,0,0.08),inset_0_1px_1.5px_rgba(255,255,255,0.8)] backdrop-blur-2xl"
+              className="w-[520px] overflow-hidden rounded-3xl border border-line-soft bg-paper p-6 shadow-[0_24px_60px_-12px_rgba(13,90,67,0.18),0_10px_28px_-6px_rgba(0,0,0,0.08)] ring-1 ring-ink/5"
             >
-              <div className="grid grid-cols-2 gap-x-6">
+              <div className="grid grid-cols-2 gap-x-8">
                 <MenuColumn title="By form" links={shopMenu.byForm} onNavigate={() => close()} />
                 <MenuColumn title="By health goal" links={shopMenu.byGoal} onNavigate={() => close()} />
               </div>
-              <ul className="mt-4 flex items-center justify-between border-t border-line/60 pt-4">
+              <ul className="-mx-6 -mb-6 mt-6 flex items-center justify-between border-t border-line/75 bg-cream/70 px-6 py-3.5">
                 {shopMenu.more.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
                       onClick={() => close()}
-                      className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[0.8125rem] font-semibold text-forest transition-colors hover:bg-forest/6"
+                      className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-semibold text-forest transition-colors hover:bg-forest/8"
                     >
                       {link.label}
                       <ArrowRight
@@ -220,16 +220,16 @@ function MenuColumn({
   const headingId = useId();
   return (
     <div>
-      <p id={headingId} className="dh-eyebrow mb-2.5 px-3 text-muted-ink">
+      <span id={headingId} className="mb-2.5 inline-block rounded-full bg-forest/8 px-2.5 py-0.5 text-[11px] font-semibold tracking-wider text-forest uppercase">
         {title}
-      </p>
-      <ul aria-labelledby={headingId} className="flex flex-col">
+      </span>
+      <ul aria-labelledby={headingId} className="flex flex-col gap-0.5">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
               onClick={onNavigate}
-              className="block rounded-xl px-3 py-2.5 text-[0.875rem] font-medium text-ink/80 transition-colors duration-200 hover:bg-forest/6 hover:text-forest"
+              className="block rounded-xl px-3 py-2 text-[0.875rem] font-medium text-ink transition-[background-color,color,transform] duration-200 hover:bg-forest/8 hover:text-forest hover:translate-x-1"
             >
               {link.label}
             </Link>
