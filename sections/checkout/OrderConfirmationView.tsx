@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight, CheckCircle2, Clock, FlaskConical, PackageSearch, XCircle } from "lucide-react";
 import { Container } from "@/components/shared/Container";
@@ -132,9 +132,9 @@ function Confirmation({ order }: { order: OrderConfirmation }) {
         initial={reducedMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1, ease: EASE_PREMIUM_BEZIER }}
-        className="mt-10 overflow-hidden rounded-card border border-line/70 bg-cream"
+        className="mt-10 overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-soft"
       >
-        <dl className="grid gap-x-6 gap-y-4 border-b border-line/70 p-6 text-sm sm:grid-cols-3">
+        <dl className="grid gap-x-6 gap-y-4 border-b border-line-soft p-6 text-sm sm:grid-cols-3">
           <div>
             <dt className="text-muted-ink">{order.preview ? "Preview reference" : "Order number"}</dt>
             <dd className="mt-0.5 font-semibold text-ink">{order.orderNumber}</dd>
@@ -162,9 +162,7 @@ function Confirmation({ order }: { order: OrderConfirmation }) {
           <ul className="mt-4 space-y-3">
             {order.items.map((item) => (
               <li key={item.id} className="flex items-center gap-3">
-                <span className="relative size-12 shrink-0 overflow-hidden rounded-xl border border-line/70 bg-cream-sunk">
-                  {item.imageUrl ? <Image src={item.imageUrl} alt="" fill sizes="48px" className="object-cover" /> : null}
-                </span>
+                <ProductThumb imageUrl={item.imageUrl} name={item.productName} sizes="48px" className="size-12" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-ink">{item.productName}</span>
                   <span className="block text-xs text-muted-ink">
@@ -176,7 +174,7 @@ function Confirmation({ order }: { order: OrderConfirmation }) {
             ))}
           </ul>
 
-          <dl className="mt-5 space-y-2 border-t border-line/70 pt-4 text-sm">
+          <dl className="mt-5 space-y-2 border-t border-line-soft pt-4 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted-ink">Items</dt>
               <dd className="tabular-nums text-ink">{formatRupees(order.totals.subtotal)}</dd>

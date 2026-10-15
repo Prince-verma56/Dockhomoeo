@@ -20,7 +20,7 @@ export default function NotFound() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
+      <main id="main" className="flex-1 bg-canvas">
         <Container className="grid min-h-[70vh] place-items-center pt-28 pb-20 text-center sm:pt-32">
           <div className="max-w-md">
             <span aria-hidden className="mx-auto grid size-14 place-items-center rounded-full bg-sage-tint text-forest">

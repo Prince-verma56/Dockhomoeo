@@ -39,7 +39,7 @@ export function SearchView({ state, result, suggestions }: SearchViewProps) {
     <>
       <section
         aria-labelledby="search-heading"
-        className="border-b border-line/60 bg-ivory pt-24 pb-8 sm:pt-28 lg:pb-10"
+        className="dh-band-sage pt-28 pb-8 sm:pt-32 lg:pb-10"
       >
         <Container>
           <Breadcrumb className="mb-5">

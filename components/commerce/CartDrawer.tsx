@@ -1,210 +1,208 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
+import { ArrowRight, ShoppingBag, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useCart } from "@/components/providers/CartProvider";
 import { buildCartView } from "@/lib/cart/cartView";
 import { formatRupees } from "@/lib/formatters/price";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
+import { QuantityStepper } from "@/components/commerce/QuantityStepper";
 
+/**
+ * The cart sheet. Built on the shared shadcn Sheet (Radix Dialog), so focus
+ * moves into it, Escape and the overlay close it, and the page behind is
+ * inert while it is open.
+ *
+ * Every figure comes from lib/cart/cartView — the same numbers the cart and
+ * checkout pages show. Each line's thumbnail carries `data-cart-thumb`, the
+ * landing spot for the add-to-cart flight (lib/cart/flyToCart).
+ */
 export function CartDrawer() {
-  const { isOpen, setIsOpen, quote, quoteIsCurrent, items, updateQuantity, removeItem, isQuoteLoading } = useCart();
-  // The same figures as the cart and checkout pages (lib/cart/cartView).
+  const {
+    isOpen,
+    setIsOpen,
+    quote,
+    quoteIsCurrent,
+    items,
+    hydrated,
+    updateQuantity,
+    removeItem,
+    isQuoteLoading,
+    flightVariantId,
+  } = useCart();
   const { lines, totals } = buildCartView(items, quote, quoteIsCurrent);
-  const drawerRef = useRef<HTMLDivElement>(null);
-
-  // Close on Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, setIsOpen]);
-
-  // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  const close = () => setIsOpen(false);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-        onClick={() => setIsOpen(false)}
-        aria-hidden="true"
-      />
-      
-      {/* Drawer */}
-      <div 
-        ref={drawerRef}
-        className="relative w-full max-w-md bg-[#faf9f6] shadow-2xl h-full flex flex-col animate-in slide-in-from-right duration-300"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Shopping Cart"
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetContent
+        side="right"
+        showCloseButton={false}
+        className="gap-0 border-line bg-canvas p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-108"
       >
-        <div className="flex items-center justify-between p-6 border-b border-black/5 bg-white">
-          <h2 className="text-xl font-bold text-[#0a2015] flex items-center gap-2">
-            <ShoppingBag className="size-5" />
-            Your Cart
-          </h2>
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="p-2 -mr-2 rounded-full hover:bg-black/5 transition-colors text-[#4b6b5a]"
-            aria-label="Close cart"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
+        <SheetHeader className="flex-row items-center justify-between gap-3 border-b border-line/70 bg-cream px-5 py-4 sm:px-6">
+          <div className="min-w-0">
+            <SheetTitle className="flex items-center gap-2 font-display text-xl text-ink">
+              <ShoppingBag aria-hidden className="size-5 text-forest" strokeWidth={1.8} />
+              Your cart
+            </SheetTitle>
+            <SheetDescription className="mt-0.5 text-[0.8125rem] text-muted-ink">
+              {totals.itemCount === 0
+                ? "Nothing added yet"
+                : `${totals.itemCount} ${totals.itemCount === 1 ? "item" : "items"}`}
+            </SheetDescription>
+          </div>
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon-lg" className="rounded-full text-muted-ink hover:text-ink" aria-label="Close cart">
+              <X aria-hidden className="size-5" />
+            </Button>
+          </SheetClose>
+        </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          {items.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center text-[#4b6b5a] space-y-4">
-              <div className="size-20 rounded-full bg-black/5 flex items-center justify-center mb-2">
-                <ShoppingBag className="size-10 text-black/20" />
-              </div>
-              <p className="text-lg font-medium text-[#0a2015]">Your cart is empty</p>
-              <p className="text-sm">Looks like you haven&apos;t added anything yet.</p>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="mt-4 px-6 py-3 rounded-full bg-[#1b7a54]/10 text-[#1b7a54] font-semibold hover:bg-[#1b7a54]/20 transition-colors"
-              >
-                Continue Shopping
-              </button>
+        {/* data-lenis-prevent: wheel scrolling here belongs to the list, not the page. */}
+        <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+          {lines.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center px-4 text-center">
+              <span className="grid size-16 place-items-center rounded-full bg-sage-tint text-forest">
+                <ShoppingBag aria-hidden className="size-7" strokeWidth={1.5} />
+              </span>
+              <p className="mt-5 font-display text-xl text-ink">{hydrated ? "Your cart is empty" : "Loading your cart…"}</p>
+              {hydrated ? (
+                <p className="mt-1.5 max-w-xs text-sm text-muted-ink">
+                  Browse remedies by concern, brand or form, and add what you need.
+                </p>
+              ) : null}
+              <Button asChild variant="brand" size="xl" className="mt-7">
+                <Link href="/products" onClick={close}>
+                  Browse remedies
+                  <ArrowRight aria-hidden />
+                </Link>
+              </Button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {lines.map((line) => {
-                const item = line;
-                const title = line.name;
-                const variantTitle = line.variantTitle;
-                const image = line.imageUrl;
-                const mrp = line.mrp;
-                
-                return (
-                  <div key={item.variantId} className="flex gap-4 p-4 bg-white rounded-2xl border border-black/5">
-                    <div className="relative size-20 rounded-xl bg-[#f4f7f5] overflow-hidden shrink-0 flex items-center justify-center">
-                      {image ? (
-                        <Image src={image} alt={title} fill className="object-contain p-2" />
-                      ) : (
-                        <span className="font-serif text-2xl text-[#0a2015] opacity-20">{title.charAt(0)}</span>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start gap-2">
-                          <h3 className="font-semibold text-[#0a2015] leading-tight text-sm line-clamp-2">
-                            {title}
-                          </h3>
-                          <button 
-                            onClick={() => removeItem(item.variantId)}
-                            className="text-black/30 hover:text-red-500 transition-colors p-1 -mt-1 -mr-1"
-                            aria-label={`Remove ${title} from cart`}
-                          >
-                            <X className="size-4" />
-                          </button>
-                        </div>
-                        {variantTitle && (
-                          <p className="text-xs text-[#4b6b5a] mt-1">{variantTitle}</p>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center bg-[#f4f7f5] rounded-lg p-0.5 border border-black/5">
-                          <button 
-                            aria-label={`Decrease quantity of ${title}`}
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                            className="size-7 flex items-center justify-center rounded-md hover:bg-white text-[#0a2015] transition-colors"
-                          >
-                            <Minus className="size-3" />
-                          </button>
-                          <span className="w-8 text-center text-sm font-semibold text-[#0a2015]">
-                            {item.quantity}
-                          </span>
-                          <button 
-                            aria-label={`Increase quantity of ${title}`}
-                            disabled={item.quantity >= line.maxQuantity}
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            className="size-7 flex items-center justify-center rounded-md hover:bg-white text-[#0a2015] transition-colors"
-                          >
-                            <Plus className="size-3" />
-                          </button>
-                        </div>
-                        
-                        <div className="text-right">
-                          <div className="font-bold text-[#0a2015]">{formatRupees(line.lineTotal)}</div>
-                          {mrp > line.unitPrice && (
-                            <div className="text-xs text-[#4b6b5a] line-through">{formatRupees(mrp * item.quantity)}</div>
+            <ul className="space-y-3">
+              {lines.map((line) => (
+                <li
+                  key={line.variantId}
+                  className="flex gap-3.5 rounded-2xl border border-line-soft bg-paper shadow-2xs p-3 sm:gap-4"
+                >
+                  <ProductThumb
+                    data-cart-thumb={line.variantId}
+                    data-flight-pending={flightVariantId === line.variantId ? "" : undefined}
+                    imageUrl={line.imageUrl}
+                    name={line.name}
+                    form={line.form}
+                    className="size-20 transition-opacity duration-200 data-flight-pending:opacity-0"
+                  />
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        {line.brand ? (
+                          <p className="text-[0.6875rem] font-semibold tracking-wider text-muted-ink uppercase">{line.brand}</p>
+                        ) : null}
+                        <h3 className="text-sm leading-snug font-semibold text-ink">
+                          {line.slug ? (
+                            <Link href={`/product/${line.slug}`} onClick={close} className="hover:text-forest">
+                              {line.name}
+                            </Link>
+                          ) : (
+                            line.name
                           )}
-                        </div>
+                        </h3>
+                        {line.variantTitle ? <p className="mt-0.5 text-xs text-muted-ink">{line.variantTitle}</p> : null}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => removeItem(line.variantId)}
+                        aria-label={`Remove ${line.name} from cart`}
+                        className="-mt-1 -mr-1 rounded-full text-muted-ink hover:bg-destructive/8 hover:text-destructive"
+                      >
+                        <X aria-hidden className="size-4" />
+                      </Button>
+                    </div>
+                    <div className="mt-auto flex items-end justify-between gap-2 pt-2.5">
+                      <QuantityStepper
+                        value={line.quantity}
+                        min={Math.max(1, line.minQuantity)}
+                        max={Math.max(line.quantity, line.maxQuantity)}
+                        label={line.name}
+                        onChange={(quantity) => updateQuantity(line.variantId, quantity)}
+                        className="h-9 [&_button]:size-9"
+                      />
+                      <div className="text-right">
+                        <p className="text-[0.9375rem] font-semibold text-ink tabular-nums">{formatRupees(line.lineTotal)}</p>
+                        {line.mrp > line.unitPrice ? (
+                          <p className="text-xs text-muted-ink tabular-nums line-through">{formatRupees(line.mrp * line.quantity)}</p>
+                        ) : null}
                       </div>
                     </div>
+                    {line.problem ? <p className="mt-2 text-xs font-medium text-destructive">{line.problem}</p> : null}
                   </div>
-                );
-              })}
-            </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
 
-        {items.length > 0 && (
-          <div className="p-6 bg-white border-t border-black/5">
-            <div className="space-y-3 mb-6 text-sm text-[#4b6b5a]">
+        {lines.length > 0 ? (
+          <SheetFooter className="gap-0 border-t border-line/70 bg-cream px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6">
+            <dl className="space-y-2 text-sm text-muted-ink">
               <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span className="font-medium text-[#0a2015]">{formatRupees(totals.subtotal)}</span>
+                <dt>Subtotal</dt>
+                <dd className="font-medium text-ink tabular-nums">{formatRupees(totals.subtotal)}</dd>
               </div>
               {totals.coupon ? (
-                <div className="flex justify-between text-emerald-600">
-                  <span>Coupon {totals.coupon.code}</span>
-                  <span>−{formatRupees(totals.coupon.discount)}</span>
+                <div className="flex justify-between text-forest">
+                  <dt>Coupon {totals.coupon.code}</dt>
+                  <dd className="tabular-nums">−{formatRupees(totals.coupon.discount)}</dd>
                 </div>
               ) : null}
               {totals.shipping !== null ? (
                 <div className="flex justify-between">
-                  <span>Delivery</span>
-                  <span>{totals.shipping === 0 ? <span className="text-emerald-600 font-medium">Free</span> : formatRupees(totals.shipping)}</span>
+                  <dt>Delivery</dt>
+                  <dd className={cn("tabular-nums", totals.shipping === 0 && "font-medium text-forest")}>
+                    {totals.shipping === 0 ? "Free" : formatRupees(totals.shipping)}
+                  </dd>
                 </div>
               ) : null}
-              <div className="flex justify-between text-base font-bold text-[#0a2015] pt-3 border-t border-black/5">
-                <span>Estimated total</span>
-                <span>{isQuoteLoading ? "Updating…" : formatRupees(totals.total)}</span>
+              <div className="flex items-baseline justify-between border-t border-line/70 pt-3 text-base font-semibold text-ink">
+                <dt>Estimated total</dt>
+                <dd aria-live="polite" className="tabular-nums">
+                  {isQuoteLoading ? <span className="text-sm font-medium text-muted-ink">Updating…</span> : formatRupees(totals.total)}
+                </dd>
               </div>
-              {totals.savings > 0 ? <p className="text-xs">Includes {formatRupees(totals.savings)} off MRP.</p> : null}
+            </dl>
+            {totals.savings > 0 ? (
+              <p className="mt-1.5 text-xs text-forest">You save {formatRupees(totals.savings)} on MRP.</p>
+            ) : null}
+            <div className="mt-4 grid grid-cols-[auto_1fr] gap-2.5">
+              <Button asChild variant="brandOutline" size="xl" className="px-5">
+                <Link href="/cart" onClick={close}>
+                  View cart
+                </Link>
+              </Button>
+              <Button asChild variant="brand" size="xl">
+                <Link href="/checkout" onClick={close}>
+                  Checkout
+                  <ArrowRight aria-hidden />
+                </Link>
+              </Button>
             </div>
-            
-            <div className="space-y-3">
-              <Link 
-                href="/cart"
-                onClick={() => setIsOpen(false)}
-                className="w-full h-12 flex items-center justify-center rounded-xl border border-[#0a2015] text-[#0a2015] font-semibold hover:bg-[#0a2015]/5 transition-colors"
-              >
-                View Cart
-              </Link>
-              <Link 
-                href="/checkout"
-                onClick={() => setIsOpen(false)}
-                className="w-full h-14 flex items-center justify-center gap-2 rounded-xl bg-[#0a2015] text-white font-semibold hover:bg-[#153a27] transition-all shadow-lg shadow-[#0a2015]/20"
-              >
-                Checkout <ArrowRight className="size-4" />
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+          </SheetFooter>
+        ) : null}
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -1,158 +1,178 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, CreditCard, Loader2, MapPin, Package, SearchX } from "lucide-react";
 import { repositories } from "@/lib/repositories";
-import { ApiOrder } from "@/types/api/account";
+import { formatRupees } from "@/lib/formatters/price";
+import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Package, MapPin, CreditCard } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-// import { OrderTimeline } from "@/components/commerce/OrderTimeline";
+import { Button } from "@/components/ui/button";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
+import type { ApiOrderDetail } from "@/types/api/cart";
 
+const PAYMENT_LABELS: Record<string, string> = { COD: "Pay on delivery", ONLINE: "Online", CREDIT: "Wholesale credit" };
+const statusLabel = (status: string) => status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ");
+
+/**
+ * One order, read through the same contract as the confirmation page
+ * (GET /api/me/orders/:id via the cart repository), so an order placed at
+ * checkout opens here with the same lines and totals.
+ */
 export default function OrderDetailPage() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [order, setOrder] = useState<ApiOrder | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams<{ id: string }>();
+  const orderId = Number.parseInt(id, 10);
+  const validId = Number.isInteger(orderId) && orderId > 0;
+  const [state, setState] = useState<{ status: "loading" } | { status: "missing" } | { status: "ready"; order: ApiOrderDetail }>({
+    status: "loading",
+  });
 
   useEffect(() => {
-    async function fetchOrder() {
-      try {
-        const data = await repositories.account.getOrderById(id as string);
-        if (data) setOrder(data);
-        else router.push("/account/orders");
-      } catch (e) {
-        console.error(e);
-        router.push("/account/orders");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchOrder();
-  }, [id, router]);
+    if (!validId) return;
+    let active = true;
+    repositories.cart
+      .getOrder(orderId)
+      .then((order) => active && setState(order ? { status: "ready", order } : { status: "missing" }))
+      .catch(() => active && setState({ status: "missing" }));
+    return () => {
+      active = false;
+    };
+  }, [orderId, validId]);
 
-  if (loading || !order) {
+  if (state.status === "loading" && validId) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-[2rem] bg-white border border-forest-abyss/5">
-        <Loader2 className="size-8 animate-spin text-forest-deep" />
+      <div role="status" className="flex h-64 items-center justify-center rounded-[2rem] border border-line/70 bg-cream">
+        <Loader2 aria-hidden className="size-7 animate-spin text-forest" />
+        <span className="sr-only">Loading order…</span>
       </div>
     );
   }
 
+  if (state.status !== "ready") {
+    return (
+      <div className="flex flex-col items-center rounded-[2rem] border border-line/70 bg-cream p-12 text-center">
+        <span className="grid size-14 place-items-center rounded-full bg-sage-tint text-forest">
+          <SearchX aria-hidden className="size-6" strokeWidth={1.6} />
+        </span>
+        <h2 className="mt-5 font-display text-xl text-ink">We couldn’t find that order</h2>
+        <p className="mt-2 max-w-sm text-sm text-muted-ink">It may belong to another account, or the link is incomplete.</p>
+        <Button asChild variant="brand" size="xl" className="mt-6">
+          <Link href="/account/orders">Back to my orders</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const { order } = state;
+  const count = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6">
       <div>
-        <Link
-          href="/account/orders"
-          className="inline-flex items-center text-sm font-medium text-muted-ink hover:text-forest-deep transition-colors mb-4"
-        >
-          <ArrowLeft className="mr-2 size-4" />
-          Back to Orders
+        <Link href="/account/orders" className="mb-4 inline-flex items-center text-sm font-medium text-muted-ink transition-colors hover:text-forest">
+          <ArrowLeft aria-hidden className="mr-2 size-4" />
+          Back to orders
         </Link>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <h2 className="font-display text-2xl font-bold text-ink">Order {order.orderNumber}</h2>
+            <h2 className="font-display text-2xl text-ink">Order {order.orderNumber}</h2>
             <p className="mt-1 text-sm text-muted-ink">Placed on {formatDate(order.placedAt)}</p>
           </div>
-          <Badge variant={order.status === "DELIVERED" ? "default" : "secondary"} className="text-sm px-3 py-1">
-            {order.status}
+          <Badge variant={order.status === "DELIVERED" ? "default" : "secondary"} className="w-fit px-3 py-1 text-sm">
+            {statusLabel(order.status)}
           </Badge>
         </div>
       </div>
 
-      {/* Order Status Timeline */}
-      <div className="rounded-[2rem] bg-white p-6 sm:p-8 shadow-sm border border-forest-abyss/5">
-        <h3 className="font-display text-lg font-bold text-ink mb-6">Tracking</h3>
-        {/* <OrderTimeline status={order.status} /> */}
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left Column: Items */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-[2rem] bg-white p-6 sm:p-8 shadow-sm border border-forest-abyss/5">
-            <h3 className="font-display text-lg font-bold text-ink mb-6 flex items-center">
-              <Package className="mr-2 size-5 text-forest-deep" />
-              Order Items
-            </h3>
-            
-            <div className="space-y-6">
-              {order.items.map((item, i) => (
-                <div key={item.id}>
-                  <div className="flex items-start gap-4">
-                    <div className="size-20 shrink-0 rounded-2xl bg-black/5" />
-                    <div className="flex flex-1 flex-col sm:flex-row justify-between gap-4">
-                      <div>
-                        <h4 className="font-semibold text-ink">{item.productName}</h4>
-                        <p className="text-sm text-muted-ink mt-1">{item.variantName}</p>
-                        <p className="text-sm font-medium text-ink mt-2">Qty: {item.quantity}</p>
-                      </div>
-                      <div className="text-right font-bold text-ink">
-                        {formatCurrency(item.price * item.quantity)}
-                      </div>
-                    </div>
+        <section aria-labelledby="items-heading" className="rounded-[1.75rem] border border-line/70 bg-cream p-6 sm:p-7 lg:col-span-2">
+          <h3 id="items-heading" className="mb-5 flex items-center font-display text-lg text-ink">
+            <Package aria-hidden className="mr-2 size-5 text-forest" />
+            {count} {count === 1 ? "item" : "items"}
+          </h3>
+          <ul className="divide-y divide-line/70">
+            {order.items.map((item) => (
+              <li key={item.id} className="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
+                <ProductThumb imageUrl={item.imageUrl} name={item.productName} className="size-16" />
+                <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 sm:flex-row">
+                  <div className="min-w-0">
+                    {item.brandName ? <p className="text-[0.6875rem] font-semibold tracking-wider text-muted-ink uppercase">{item.brandName}</p> : null}
+                    <p className="font-semibold text-ink">
+                      {item.slug ? (
+                        <Link href={`/product/${item.slug}`} className="hover:text-forest">
+                          {item.productName}
+                        </Link>
+                      ) : (
+                        item.productName
+                      )}
+                    </p>
+                    <p className="mt-0.5 text-sm text-muted-ink">
+                      {[item.variantTitle, `Qty ${item.quantity}`, `${formatRupees(item.unitPrice)} each`].filter(Boolean).join(" · ")}
+                    </p>
                   </div>
-                  {i < order.items.length - 1 && <Separator className="mt-6" />}
+                  <p className="font-semibold text-ink tabular-nums sm:text-right">{formatRupees(item.lineTotal)}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-        {/* Right Column: Summary, Address, Payment */}
         <div className="space-y-6">
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-forest-abyss/5">
-            <h3 className="font-display text-lg font-bold text-ink mb-4">Summary</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-muted-ink">
-                <span>Subtotal</span>
-                <span className="text-ink font-medium">{formatCurrency(order.subtotal)}</span>
+          <section aria-labelledby="summary-heading" className="rounded-[1.75rem] border border-line/70 bg-cream p-6">
+            <h3 id="summary-heading" className="mb-4 font-display text-lg text-ink">Summary</h3>
+            <dl className="space-y-2.5 text-sm text-muted-ink">
+              <div className="flex justify-between">
+                <dt>Subtotal</dt>
+                <dd className="font-medium text-ink tabular-nums">{formatRupees(order.subtotal)}</dd>
               </div>
-              <div className="flex justify-between text-muted-ink">
-                <span>Shipping</span>
-                <span className="text-ink font-medium">{order.shipping === 0 ? "Free" : formatCurrency(order.shipping)}</span>
+              {order.couponDiscount > 0 ? (
+                <div className="flex justify-between">
+                  <dt>Coupon {order.couponCode}</dt>
+                  <dd className="text-forest tabular-nums">−{formatRupees(order.couponDiscount)}</dd>
+                </div>
+              ) : null}
+              <div className="flex justify-between">
+                <dt>Delivery</dt>
+                <dd className="font-medium text-ink tabular-nums">{order.shippingCharge === 0 ? "Free" : formatRupees(order.shippingCharge)}</dd>
               </div>
-              <div className="flex justify-between text-muted-ink">
-                <span>Tax</span>
-                <span className="text-ink font-medium">{formatCurrency(order.tax)}</span>
+              {order.codCharge > 0 ? (
+                <div className="flex justify-between">
+                  <dt>Pay-on-delivery fee</dt>
+                  <dd className="font-medium text-ink tabular-nums">{formatRupees(order.codCharge)}</dd>
+                </div>
+              ) : null}
+              <div className="flex justify-between border-t border-line/70 pt-3 text-base font-semibold text-ink">
+                <dt>Total</dt>
+                <dd className="tabular-nums">{formatRupees(order.grandTotal)}</dd>
               </div>
-              <Separator className="my-2" />
-              <div className="flex justify-between font-bold text-lg text-ink">
-                <span>Total</span>
-                <span>{formatCurrency(order.grandTotal)}</span>
-              </div>
-            </div>
-          </div>
+            </dl>
+          </section>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-forest-abyss/5">
-            <h3 className="font-display text-lg font-bold text-ink mb-4 flex items-center">
-              <MapPin className="mr-2 size-5 text-forest-deep" />
-              Shipping Address
+          <section aria-labelledby="address-heading" className="rounded-[1.75rem] border border-line/70 bg-cream p-6">
+            <h3 id="address-heading" className="mb-3 flex items-center font-display text-lg text-ink">
+              <MapPin aria-hidden className="mr-2 size-5 text-forest" />
+              Delivery address
             </h3>
-            <address className="not-italic text-sm text-muted-ink space-y-1">
-              <p className="font-medium text-ink">{order.shippingAddress.fullName}</p>
-              <p>{order.shippingAddress.line1}</p>
-              {order.shippingAddress.landmark && <p>{order.shippingAddress.landmark}</p>}
-              <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}</p>
-              <p className="mt-2">Phone: {order.shippingAddress.phone}</p>
+            <address className="space-y-0.5 text-sm text-muted-ink not-italic">
+              <p className="font-medium text-ink">{order.customerName}</p>
+              <p>{order.shippingAddress}</p>
+              <p>
+                {order.shippingCity}, {order.shippingState} {order.shippingPincode}
+              </p>
             </address>
-          </div>
+          </section>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-forest-abyss/5">
-            <h3 className="font-display text-lg font-bold text-ink mb-4 flex items-center">
-              <CreditCard className="mr-2 size-5 text-forest-deep" />
-              Payment Information
+          <section aria-labelledby="payment-heading" className="rounded-[1.75rem] border border-line/70 bg-cream p-6">
+            <h3 id="payment-heading" className="mb-3 flex items-center font-display text-lg text-ink">
+              <CreditCard aria-hidden className="mr-2 size-5 text-forest" />
+              Payment
             </h3>
-            <div className="text-sm space-y-1">
-              <p className="text-muted-ink">
-                Method: <span className="font-medium text-ink">{order.paymentMethod}</span>
-              </p>
-              <p className="text-muted-ink">
-                Status: <span className="font-medium text-ink">{order.paymentStatus}</span>
-              </p>
-            </div>
-          </div>
+            <p className="text-sm text-muted-ink">
+              {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod} ·{" "}
+              <span className="font-medium text-ink">{statusLabel(order.paymentStatus)}</span>
+            </p>
+          </section>
         </div>
       </div>
     </div>

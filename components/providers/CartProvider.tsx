@@ -1,9 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { repositories } from "@/lib/repositories";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { cartStore, getServerSnapshot, getSnapshot, subscribe, type CartItem } from "@/lib/cart/cartStore";
+import { flyToCart, type Flight } from "@/lib/cart/flyToCart";
+import { prefersReducedMotion } from "@/lib/animation/motion";
 import type { ApiPaymentMethod, ApiQuote } from "@/types/api/cart";
 
 export type { CartItem };
@@ -40,7 +42,15 @@ interface CartContextType {
   droppedCount: number;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  addItem: (item: CartItem) => void;
+  /**
+   * Adds the line once and opens the cart sheet. With a `source` (the product
+   * image that was clicked) the image flies into the sheet; reduced motion
+   * skips the flight. Returns false when the same pack was added a moment ago
+   * and the click was absorbed, so a double click never adds twice.
+   */
+  addItem: (item: CartItem, options?: { source?: HTMLElement | null }) => boolean;
+  /** The pack whose image is in flight; its cart thumbnail waits for it. */
+  flightVariantId: number | null;
   updateQuantity: (variantId: number, quantity: number) => void;
   removeItem: (variantId: number) => void;
   clearCart: () => void;
@@ -60,6 +70,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [lastQuote, setLastQuote] = useState<{ key: string; quote: ApiQuote } | null>(null);
   const [failure, setFailure] = useState<{ key: string; message: string } | null>(null);
   const [droppedCount, setDroppedCount] = useState(0);
+  const [flightVariantId, setFlightVariantId] = useState<number | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  // Packs added in the last moment. A ref, not state: it gates clicks and
+  // must not re-render the whole tree.
+  const recentlyAdded = useRef(new Set<number>());
+  const flight = useRef<Flight | null>(null);
+
+  useEffect(() => () => flight.current?.cancel(), []);
+
+  const addItem = useCallback((item: CartItem, options?: { source?: HTMLElement | null }) => {
+    const { variantId } = item;
+    if (recentlyAdded.current.has(variantId)) return false;
+    recentlyAdded.current.add(variantId);
+
+    // The store is the cart: it changes here, once, before any animation.
+    cartStore.add(item);
+    setIsOpen(true);
+    setAnnouncement(`${item.title} added to your cart`);
+
+    const release = () => recentlyAdded.current.delete(variantId);
+    const source = options?.source;
+    if (!source || prefersReducedMotion()) {
+      window.setTimeout(release, 400);
+      return true;
+    }
+
+    // One flight at a time: a newer add finishes the previous one instantly.
+    flight.current?.cancel();
+    const current = flyToCart(source, variantId);
+    flight.current = current;
+    setFlightVariantId(variantId);
+    void current.done.then(() => {
+      release();
+      if (flight.current === current) {
+        flight.current = null;
+        setFlightVariantId(null);
+      }
+    });
+    return true;
+  }, []);
 
   const lines = cart.items.map(({ variantId, quantity }) => ({ variantId, quantity }));
   const requestKey = JSON.stringify({ lines, couponCode, paymentMethod });
@@ -123,10 +173,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     droppedCount,
     isOpen,
     setIsOpen,
-    addItem: (item) => {
-      cartStore.add(item);
-      setIsOpen(true);
-    },
+    addItem,
+    flightVariantId,
     updateQuantity: (variantId, quantity) => cartStore.setQuantity(variantId, quantity),
     removeItem: (variantId) => cartStore.remove(variantId),
     clearCart: () => {
@@ -136,7 +184,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     },
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      {/* Announces adds for screen readers; the sheet's own focus move says the rest. */}
+      <p role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {

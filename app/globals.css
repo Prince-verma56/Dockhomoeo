@@ -27,6 +27,21 @@
   --dh-accent-warm: #c98e55;
   --dh-accent-warm-soft: #e8c9a3;
 
+  /* --- interior surfaces (Phase 17) ---
+     The homepage keeps --dh-bg: its section seams are drawn to that exact
+     ivory. Every other route sits on a brighter porcelain canvas, and uses
+     these four surfaces with one job each:
+       canvas     — the page itself (warm white)
+       paper      — cards, panels, form fields (pure white)
+       sage-wash  — page heads and feature bands (pale sage)
+       mist       — secondary bands: related items, directories (neutral) */
+  --dh-canvas: #fbfaf7;
+  --dh-paper: #ffffff;
+  --dh-sage-wash: #edf3ea;
+  --dh-sage-wash-deep: #dfe9db;
+  --dh-mist: #f3f4ef;
+  --dh-line-soft: #e6e9e1;
+
   /* --- motion tokens --- */
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
@@ -120,6 +135,12 @@
   --color-muted-ink: var(--dh-muted);
   --color-warm: var(--dh-accent-warm);
   --color-warm-soft: var(--dh-accent-warm-soft);
+  --color-canvas: var(--dh-canvas);
+  --color-paper: var(--dh-paper);
+  --color-sage-wash: var(--dh-sage-wash);
+  --color-sage-wash-deep: var(--dh-sage-wash-deep);
+  --color-mist: var(--dh-mist);
+  --color-line-soft: var(--dh-line-soft);
 
   /* typography */
   --font-sans: var(--font-sans-main), ui-sans-serif, system-ui, sans-serif;
@@ -190,6 +211,24 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Tailwind v4 resets buttons to the default cursor. Anything that acts
+     gets the pointer; anything disabled says it cannot be used. Utilities
+     still override either. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary,
+  label[for],
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   body {
     @apply bg-background text-foreground;
     /* The page is an art-directed composition; no section may create a
@@ -228,6 +267,30 @@
   .dh-motion [data-motion-gate] [data-reveal-line] {
     opacity: 0;
     transform: translateY(108%);
+  }
+
+  /* Page head band for interior routes: pale sage lit from the top right,
+     settling into the canvas, with one hairline below. Gives each page a
+     clear opening without a hard colour change. */
+  .dh-band-sage {
+    background-color: var(--dh-sage-wash);
+    background-image:
+      radial-gradient(56rem 20rem at 88% -12%, rgba(255, 255, 255, 0.85), transparent 70%),
+      linear-gradient(180deg, var(--dh-sage-wash) 0%, #f3f7f1 100%);
+    border-bottom: 1px solid var(--dh-line-soft);
+  }
+
+  /* Secondary band: separates a supporting section from the main content. */
+  .dh-band-mist {
+    background-color: var(--dh-mist);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  /* The one card surface for interior routes: white, hairline, soft lift on hover. */
+  .dh-card {
+    background-color: var(--dh-paper);
+    border: 1px solid var(--dh-line-soft);
+    box-shadow: 0 1px 2px rgba(20, 37, 31, 0.04);
   }
 
   /* Display heading face, matching the bold modern hero typography everywhere. */
@@ -355,6 +418,97 @@
     .dh-section-blend-top {
       height: 5.5rem;
     }
+  }
+
+  /* ---- Phase 17 section transition utilities --------------------------------
+
+     These utilities create the sense of one continuous surface across the page
+     by softening the boundary between the sage page-head and the white canvas
+     below it. No hard horizontal line, no gradient blob — just a very soft
+     scallop that reads as depth rather than decoration.
+
+     dh-band-sage-into-canvas: replaces the hairline border of dh-band-sage
+     with a gentle curve that dips into the canvas background. Use on the
+     opening section of interior routes.
+
+     dh-inset-panel: a slightly inset, bordered panel that sits *inside* the
+     canvas without introducing a new background surface — creates visual
+     grouping without another colored band.
+
+     dh-feature-bleed: used on image containers that should run edge-to-edge
+     on mobile and break out of the card frame on desktop — clips properly
+     so overflow is controlled.
+  */
+
+  /* Sage header that tapers softly into the page canvas instead of a hairline. */
+  .dh-band-sage-flowing {
+    background-color: var(--dh-sage-wash);
+    background-image:
+      radial-gradient(56rem 20rem at 88% -12%, rgba(255, 255, 255, 0.85), transparent 70%),
+      linear-gradient(180deg, var(--dh-sage-wash) 0%, #f3f7f1 78%, var(--dh-canvas) 100%);
+    padding-bottom: 3rem;
+  }
+
+  @media (min-width: 1024px) {
+    .dh-band-sage-flowing {
+      padding-bottom: 4rem;
+    }
+  }
+
+  /* Inset grouped panel — white card surface with a gentle inner shadow so it
+     reads as recessed into the page rather than floating above it. */
+  .dh-inset-panel {
+    background-color: var(--dh-paper);
+    border: 1px solid var(--dh-line-soft);
+    box-shadow:
+      inset 0 1px 3px rgba(20, 37, 31, 0.03),
+      0 1px 2px rgba(20, 37, 31, 0.04),
+      0 8px 24px -12px rgba(20, 37, 31, 0.09);
+    border-radius: 1.5rem;
+  }
+
+  /* Image that bleeds to the edge of its cell, no padding, covers the frame. */
+  .dh-img-bleed {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Asymmetric editorial card: image on the left side, copy on the right.
+     On mobile it stacks naturally (image top, copy bottom). */
+  .dh-editorial-card {
+    display: grid;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    border: 1px solid var(--dh-line-soft);
+    background: var(--dh-paper);
+    box-shadow: 0 1px 2px rgba(20, 37, 31, 0.04), 0 8px 24px -12px rgba(20, 37, 31, 0.1);
+    transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.3s ease;
+  }
+
+  .dh-editorial-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(20, 37, 31, 0.05), 0 20px 48px -20px rgba(20, 37, 31, 0.18);
+    border-color: rgba(13, 90, 67, 0.2);
+  }
+
+  /* Brand monogram fallback — rendered as a typographic seal rather than a
+     letter monogram. Pairs with the green ring for a certified-maker look. */
+  .dh-brand-seal {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--dh-sage-wash);
+    border: 1.5px solid var(--dh-line-soft);
+    font-weight: 700;
+    color: var(--dh-primary);
+    font-size: 0.875rem;
+    letter-spacing: -0.02em;
   }
 
   /* ------------------------------------------------------------- canvas

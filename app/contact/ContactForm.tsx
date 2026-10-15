@@ -23,7 +23,7 @@ export function ContactForm() {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-[2rem] bg-[#f6f2ea] p-10 text-center border border-forest-abyss/5">
+      <div className="flex flex-col items-center justify-center rounded-[2rem] bg-canvas p-10 text-center border border-forest-abyss/5">
         <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-forest-deep text-white">
           <CheckCircle2 className="size-8" />
         </div>

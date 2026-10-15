@@ -85,7 +85,7 @@ export function CouponField() {
           maxLength={40}
           aria-invalid={refusal ? true : undefined}
           aria-describedby={refusal ? errorId : undefined}
-          className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-ivory px-3.5 text-sm uppercase text-ink placeholder:normal-case placeholder:text-muted-ink/80 aria-invalid:border-destructive"
+          className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3.5 text-sm uppercase text-ink placeholder:normal-case placeholder:text-muted-ink/80 aria-invalid:border-destructive"
           placeholder="Enter code"
         />
         <button

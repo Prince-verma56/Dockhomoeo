@@ -18,64 +18,68 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 
 /**
- * SiteHeader
- * 
- * Requirements implemented:
- * 1. On Hero Section:
- *    - Completely transparent background (no background color or card wrapper)
- *    - Text & navigation links clearly visible with crisp contrast
- *    - Appears first at 5 seconds
- * 2. On Other Sections (scrolled past hero):
- *    - Has sleek background color (bg-white/95 with backdrop blur and subtle border/shadow)
- *    - Smart scroll animation:
- *      * Scroll DOWN: navbar hides smoothly (-translate-y-full)
- *      * Scroll UP: navbar reappears (translate-y-0) with background color
- *      * Scroll back to hero top: smoothly returns to transparent without background color
+ * SiteHeader — one header for every route.
+ *
+ * At the top of a page it is transparent (over the homepage hero video it
+ * also waits for HeroPlaybackProvider before appearing). As the page scrolls
+ * it settles, continuously, into a softly frosted light bar: one passive,
+ * rAF-throttled scroll listener writes a 0–1 progress value to `--nav-p`, and
+ * background opacity, blur, hairline and shadow are all derived from it in
+ * CSS. React only re-renders when the header crosses the halfway point.
+ *
+ * The header never changes height or hides on scroll, so nothing below it
+ * shifts and sticky elements (the shop's filter sidebar) can rely on it.
  */
+const NAV_SURFACE = {
+  backgroundColor: "rgb(255 255 255 / calc(var(--nav-p, 0) * 0.82))",
+  backdropFilter: "blur(calc(var(--nav-p, 0) * 14px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
+  WebkitBackdropFilter: "blur(calc(var(--nav-p, 0) * 14px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
+  borderBottomColor: "rgb(20 37 31 / calc(var(--nav-p, 0) * 0.08))",
+  boxShadow: "0 12px 32px -22px rgb(20 37 31 / calc(var(--nav-p, 0) * 0.28))",
+} as const;
+
 export function SiteHeader() {
   const [isPastHero, setIsPastHero] = useState(false);
-  const [isScrollingDown, setIsScrollingDown] = useState(false);
-  const lastScrollY = useRef(0);
+  const headerRef = useRef<HTMLElement>(null);
 
   const heroPlayback = useHeroPlayback();
   const isNavVisible = heroPlayback ? heroPlayback.navVisible : true;
-  
+
   const pathname = usePathname();
   const { itemCount, setIsOpen } = useCart();
   const { count: savedCount } = useFavourites();
   const { status, isAuthenticated } = useAuth();
+  // Over the hero video the bar stays clear until the hero is mostly behind it.
+  const isHome = pathname === "/";
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      const heroThreshold = 460; // Hero section boundary
+    const header = headerRef.current;
+    if (!header) return;
+    const [start, end] = isHome ? [340, 540] : [0, 96];
+    let frame = 0;
+    let past: boolean | null = null;
 
-      if (currentY <= heroThreshold) {
-        // We are on the hero section:
-        // Always transparent, always shown once unlocked at 5s
-        setIsPastHero(false);
-        setIsScrollingDown(false);
-      } else {
-        // We are past the hero section on other sections:
-        setIsPastHero(true);
-
-        const delta = currentY - lastScrollY.current;
-        if (delta > 8 && currentY > 520) {
-          // Scrolling downwards -> hide navbar
-          setIsScrollingDown(true);
-        } else if (delta < -8) {
-          // Scrolling upwards -> reveal navbar with background color
-          setIsScrollingDown(false);
-        }
+    const update = () => {
+      frame = 0;
+      const progress = Math.min(1, Math.max(0, (window.scrollY - start) / (end - start)));
+      header.style.setProperty("--nav-p", progress.toFixed(3));
+      const nowPast = progress >= 0.5;
+      if (nowPast !== past) {
+        past = nowPast;
+        setIsPastHero(nowPast);
       }
-
-      lastScrollY.current = currentY;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
     };
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [isHome]);
 
   const navItemClass = cn(
     "inline-flex h-9 items-center rounded-full bg-transparent px-3.5 text-[0.875rem] font-semibold transition-colors",
@@ -83,21 +87,15 @@ export function SiteHeader() {
     !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]",
   );
 
-  // Determine visibility & translate classes
-  const isHidden = !isNavVisible || (isPastHero && isScrollingDown);
-
   return (
     <header
+      ref={headerRef}
+      style={NAV_SURFACE}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-400 ease-out",
-        // Position & visibility animations
-        isHidden ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100 pointer-events-auto",
-        // Background color logic:
-        // NO background color on the hero section!
-        !isPastHero
-          ? "bg-transparent border-b border-transparent shadow-none py-3.5 sm:py-4 px-4 sm:px-8"
-          // Applied background color only when on other sections (glassy):
-          : "bg-white/40 backdrop-blur-2xl border-b border-white/30 shadow-[0_8px_32px_rgba(20,37,31,0.08)] py-2.5 px-4 sm:px-8"
+        "fixed inset-x-0 top-0 z-50 border-b px-4 py-3 sm:px-8",
+        "transition-[translate,opacity] duration-500 ease-premium",
+        // Only the homepage hides it, until the hero video hands over.
+        isNavVisible ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0",
       )}
     >
       <div className="mx-auto flex h-[58px] sm:h-[62px] max-w-[1400px] items-center gap-3 sm:gap-6">

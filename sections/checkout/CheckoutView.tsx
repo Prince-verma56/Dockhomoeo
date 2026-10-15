@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -315,7 +315,7 @@ export function CheckoutView() {
                 {auth.status === "loading" ? (
                   <div aria-hidden className="h-14 rounded-xl bg-cream-sunk motion-safe:animate-pulse" />
                 ) : signedIn && auth.user ? (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line/70 bg-cream px-4 py-3.5 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-soft bg-paper shadow-2xs px-4 py-3.5 text-sm">
                     <span className="flex items-center gap-2 text-ink">
                       <CheckCircle2 aria-hidden className="size-4 text-forest" />
                       Signed in as <strong className="font-semibold">+91 {auth.user.phone}</strong>
@@ -479,7 +479,7 @@ function CheckoutSection({ step, title, icon, children }: { step: number; title:
   return (
     <section
       aria-labelledby={id}
-      className="border-t border-line/70 pt-6 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:fill-mode-both"
+      className="border-t border-line-soft pt-6 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:fill-mode-both"
       style={{ animationDelay: `${(step - 1) * 60}ms`, animationDuration: "var(--duration-medium)" }}
     >
       <h2 id={id} className="mb-4 flex items-center gap-3 text-lg font-semibold text-ink">
@@ -529,7 +529,7 @@ function Label({ htmlFor, field, required }: { htmlFor: string; field: CheckoutF
 }
 
 const inputClass =
-  "h-12 rounded-xl border-line bg-cream px-3.5 text-[0.9375rem] text-ink shadow-none placeholder:text-muted-ink/70 aria-invalid:border-destructive";
+  "h-12 rounded-xl border-line-soft bg-paper px-3.5 text-[0.9375rem] text-ink shadow-2xs placeholder:text-muted-ink/70 aria-invalid:border-destructive";
 
 function TextField({ field, form, errors, onChange, required, hint, className, multiline, prefix, type = "text", inputMode, autoComplete }: FieldProps) {
   const id = `checkout-${field}`;
@@ -614,7 +614,7 @@ function StateField({
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => onChange("state", event.target.value)}
-          className="h-12 w-full appearance-none rounded-xl border border-line bg-cream pr-10 pl-3.5 text-[0.9375rem] text-ink aria-invalid:border-destructive"
+          className="h-12 w-full appearance-none rounded-xl border border-line-soft bg-paper pr-10 pl-3.5 text-[0.9375rem] text-ink shadow-2xs aria-invalid:border-destructive"
         >
           <option value="">Choose a state</option>
           {INDIAN_STATES.map((state) => (
@@ -691,7 +691,7 @@ function PaymentChoice({
                 key={option.value}
                 className={cn(
                   "flex cursor-pointer items-start gap-3.5 rounded-xl border px-4 py-3.5 transition-colors",
-                  selected ? "border-forest bg-forest/6" : "border-line bg-cream hover:border-forest/35",
+                  selected ? "border-forest bg-forest/8 shadow-2xs" : "border-line-soft bg-paper hover:border-forest/35",
                 )}
               >
                 <input
@@ -724,8 +724,8 @@ function OrderLines({ lines }: { lines: CartLineView[] }) {
     <ul className="space-y-3 border-b border-line/70 pb-4">
       {lines.map((line) => (
         <li key={line.variantId} className="flex items-center gap-3">
-          <span className="relative size-12 shrink-0 overflow-hidden rounded-xl border border-line/70 bg-cream-sunk">
-            {line.imageUrl ? <Image src={line.imageUrl} alt="" fill sizes="48px" className="object-cover" /> : null}
+          <span className="relative shrink-0">
+            <ProductThumb imageUrl={line.imageUrl} name={line.name} form={line.form} sizes="48px" className="size-12" />
             <span className="absolute -top-0.5 -right-0.5 grid min-w-5 place-items-center rounded-full bg-forest-deep px-1 text-[0.6875rem] leading-5 font-semibold text-cream">
               <span className="sr-only">Quantity </span>
               {line.quantity}

@@ -7,7 +7,9 @@ import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { InsightCard } from "@/components/content/InsightCard";
-import { ChevronRight, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { SafeRichText } from "@/components/shared/SafeRichText";
 import { Button } from "@/components/ui/button";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 
@@ -35,153 +37,140 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   };
 }
 
+/** Minutes at ~220 words a minute, counted from the article's own text. */
+function readingMinutes(content: string) {
+  const words = content.replace(/<[^>]*>/g, " ").split(/s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
+}
+
 export default async function InsightDetailPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const insight = await repositories.insight.getBySlug(params.slug);
-  
+
   if (!insight) {
     notFound();
   }
 
-  const related = await repositories.insight.getRelated(params.slug);
+  const [related, remedies] = await Promise.all([
+    repositories.insight.getRelated(params.slug),
+    // Only point at a product category when the shop has products in it.
+    insight.category ? repositories.search.search({ category: insight.category.slug, pageSize: 1 }) : null,
+  ]);
+  const remediesHref = insight.category && remedies && remedies.total > 0 ? `/products?category=${encodeURIComponent(insight.category.slug)}` : "/categories";
 
-  const formattedDate = insight.publishedAt 
-    ? new Intl.DateTimeFormat("en-IN", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }).format(new Date(insight.publishedAt))
+  const formattedDate = insight.publishedAt
+    ? new Intl.DateTimeFormat("en-IN", { month: "long", day: "numeric", year: "numeric" }).format(new Date(insight.publishedAt))
     : null;
+  const topicHref = insight.category ? `/insights?category=${encodeURIComponent(insight.category.slug)}` : "/insights";
 
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-[#f6f2ea]">
+      <main id="main" className="flex-1 bg-canvas">
         <article>
-          {/* Article Header */}
-          <header className="relative pt-28 pb-20 md:pt-36 md:pb-32 border-b border-forest-abyss/5">
-            <Container width="narrow" className="relative z-10 text-center">
-              {/* Breadcrumb */}
-              <nav className="mb-10 flex items-center justify-center space-x-2 text-sm font-medium text-muted-ink">
-                <Link href="/insights" className="hover:text-forest-deep transition-colors">Insights</Link>
-                <ChevronRight className="size-4" />
-                <Link href={`/insights?category=${insight.category?.name || "Topic"}`} className="hover:text-forest-deep transition-colors">
-                  {insight.category?.name || "Topic"}
-                </Link>
-              </nav>
-              
-              <h1 className="font-display text-5xl leading-tight tracking-tight text-ink sm:text-6xl md:text-7xl lg:text-8xl">
-                {insight.title}
-              </h1>
-              
-              <p className="mx-auto mt-10 max-w-3xl text-xl leading-relaxed text-muted-ink md:text-2xl">
-                {insight.excerpt}
-              </p>
-
-              <div className="mt-12 flex items-center justify-center gap-4 text-sm font-bold text-muted-ink uppercase tracking-widest">
-                {insight.authorName && (
-                  <span className="text-ink">By {insight.authorName}</span>
-                )}
-                {formattedDate && (
-                  <>
-                    <span className="size-1.5 rounded-full bg-forest-abyss/20" />
-                    <span>{formattedDate}</span>
-                  </>
-                )}
+          <header className="pt-24 pb-10 sm:pt-28 lg:pb-14">
+            <Container width="narrow">
+              <PageBreadcrumb
+                items={[
+                  { name: "Health insights", href: "/insights" },
+                  ...(insight.category ? [{ name: insight.category.name, href: topicHref }] : []),
+                  { name: insight.title, href: `/insights/${insight.slug}` },
+                ]}
+                className="mb-8"
+              />
+              <div className="max-w-3xl">
+                {insight.category ? (
+                  <Link href={topicHref} className="dh-eyebrow text-forest hover:underline">
+                    {insight.category.name}
+                  </Link>
+                ) : null}
+                <h1 className="mt-4 font-display text-4xl leading-[1.06] tracking-tight text-ink sm:text-5xl lg:text-[3.75rem]">
+                  {insight.title}
+                </h1>
+                {insight.excerpt ? (
+                  <p className="mt-5 text-lg leading-relaxed text-muted-ink sm:text-xl">{insight.excerpt}</p>
+                ) : null}
+                <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-ink">
+                  {insight.authorName ? <span className="font-medium text-ink">By {insight.authorName}</span> : null}
+                  {formattedDate ? <time dateTime={insight.publishedAt ?? undefined}>{formattedDate}</time> : null}
+                  <span>{readingMinutes(insight.content)} min read</span>
+                </p>
               </div>
             </Container>
-            <div className="absolute top-0 right-0 -z-10 h-full w-full max-w-3xl bg-gradient-to-bl from-forest-deep/10 to-transparent blur-3xl opacity-60" />
           </header>
 
-          {/* Hero Image */}
-          {insight.coverImageUrl && (
-            <div className="bg-[#f6f2ea] -mt-12 relative z-20">
-              <Container width="wide">
-                <div className="relative aspect-[21/9] w-full overflow-hidden rounded-[2rem] bg-forest-abyss/5 shadow-xl border border-forest-abyss/5">
-                  <Image
-                    src={insight.coverImageUrl}
-                    alt={insight.title}
-                    fill
-                    priority
-                    sizes="100vw"
-                    className="object-cover"
-                  />
-                </div>
-              </Container>
-            </div>
-          )}
-
-          <div className="py-20 md:py-32 bg-white relative z-10">
+          {insight.coverImageUrl ? (
             <Container width="narrow">
-              {/* Article Body */}
-              <div 
-                className="text-lg leading-[2] text-ink [&>h2]:mt-20 [&>h2]:mb-8 [&>h2]:font-display [&>h2]:text-4xl [&>h2]:text-ink [&>h3]:mt-12 [&>h3]:mb-6 [&>h3]:font-display [&>h3]:text-3xl [&>h3]:text-ink [&>p]:mb-8 [&>p]:text-muted-ink [&>ul]:mb-8 [&>ul]:list-disc [&>ul]:pl-6 [&>ul>li]:mb-4 [&>ul>li]:text-muted-ink [&>a]:text-forest-deep [&>a]:font-bold [&>a]:underline hover:[&>a]:text-forest-abyss max-w-[720px] mx-auto"
-                dangerouslySetInnerHTML={{ __html: insight.content }}
+              <div className="relative aspect-[16/8] w-full overflow-hidden rounded-[1.75rem] border border-line/70 bg-cream-sunk">
+                <Image src={insight.coverImageUrl} alt="" fill loading="eager" fetchPriority="high" sizes="(max-width: 1100px) 100vw, 1040px" className="object-cover" />
+              </div>
+            </Container>
+          ) : null}
+
+          <Container width="narrow" className="py-12 lg:py-16">
+            <div className="mx-auto max-w-[42rem]">
+              <SafeRichText
+                content={insight.content}
+                className="space-y-6 text-[1.0625rem] leading-[1.8] text-ink/85 [&_h2]:pt-6 [&_h2]:text-[1.75rem] [&_h3]:text-xl"
               />
 
-              <hr className="my-16 border-forest-abyss/10 max-w-[720px] mx-auto" />
+              <aside className="mt-12 flex gap-3 rounded-2xl bg-sage-tint/60 p-5 text-sm leading-relaxed text-forest-deep">
+                <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+                <p>
+                  Health insights are general reading to help you prepare questions for a practitioner. They are not a
+                  diagnosis or a substitute for professional medical advice.
+                </p>
+              </aside>
 
-              {/* Author Bio */}
-              {insight.authorBio && (
-                <div className="rounded-[2rem] bg-[#f6f2ea] p-10 md:p-14 flex flex-col sm:flex-row items-center sm:items-start gap-8 border border-forest-abyss/5 max-w-[720px] mx-auto">
+              {insight.authorBio ? (
+                <div className="mt-8 flex flex-col items-center gap-6 rounded-[1.75rem] border border-line/70 bg-cream p-8 sm:flex-row sm:items-start">
                   {insight.authorImageUrl ? (
-                    <div className="relative size-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-sm">
-                      <Image src={insight.authorImageUrl} alt={insight.authorName || "Author"} fill className="object-cover" />
+                    <div className="relative size-20 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-sm">
+                      <Image src={insight.authorImageUrl} alt="" fill sizes="80px" className="object-cover" />
                     </div>
-                  ) : (
-                    <div className="flex size-24 shrink-0 items-center justify-center rounded-full border-4 border-white bg-forest-deep/10 text-4xl font-display text-forest-deep shadow-sm">
-                      {insight.authorName ? insight.authorName[0] : "A"}
-                    </div>
-                  )}
+                  ) : null}
                   <div className="text-center sm:text-left">
-                    <h4 className="font-display text-3xl text-ink mb-3">{insight.authorName}</h4>
-                    <p className="text-muted-ink leading-relaxed text-lg">{insight.authorBio}</p>
+                    <p className="font-display text-xl text-ink">{insight.authorName}</p>
+                    <p className="mt-2 leading-relaxed text-muted-ink">{insight.authorBio}</p>
                   </div>
                 </div>
-              )}
-            </Container>
-          </div>
-        </article>
+              ) : null}
 
-        {/* Contextual CTA */}
-        <section className="py-24 text-center border-t border-forest-abyss/5 bg-forest-abyss">
-          <Container width="narrow">
-            <h2 className="mb-6 font-display text-4xl text-white">
-              Support Your {insight.category?.name || "Health"} Journey
-            </h2>
-            <p className="mx-auto mb-10 max-w-2xl text-xl text-white/70">
-              Discover trusted homoeopathic remedies related to this topic.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-[#f6f2ea] h-14 px-10 text-lg font-bold">
-                <Link href={insight.category ? `/products?category=${insight.category.slug}` : "/products"}>
-                  Explore Remedies
-                  <ArrowRight className="ml-3 size-5" />
+              <div className="mt-10 flex flex-col gap-3 border-t border-line/70 pt-8 sm:flex-row sm:items-center sm:justify-between">
+                <Link href="/insights" className="inline-flex items-center gap-2 text-sm font-semibold text-forest hover:underline">
+                  <ArrowLeft aria-hidden className="size-4" />
+                  All health insights
                 </Link>
-              </Button>
+                <Button asChild variant="brand" size="xl">
+                  <Link href={remediesHref}>
+                    {remediesHref === "/categories" ? "Browse remedies by concern" : `Browse ${insight.category?.name.toLowerCase()} remedies`}
+                    <ArrowRight aria-hidden />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </Container>
-        </section>
+        </article>
 
-        {/* Related Content */}
-        {related && related.items.length > 0 && (
-          <section className="py-20 md:py-32 bg-[#f6f2ea] border-t border-forest-abyss/5">
-            <Container width="wide">
-              <div className="mb-16 flex items-end justify-between border-b border-forest-abyss/10 pb-6">
-                <h3 className="font-display text-4xl md:text-5xl text-ink">Keep Reading</h3>
-                <Link href="/insights" className="text-sm font-bold uppercase tracking-wider text-forest-deep hover:text-ink transition-colors pb-2">
-                  View all &rarr;
+        {related.items.length > 0 ? (
+          <section aria-labelledby="keep-reading" className="border-t border-line/70 bg-cream/50 py-14 lg:py-20">
+            <Container>
+              <div className="mb-8 flex items-end justify-between gap-4">
+                <h2 id="keep-reading" className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
+                  Keep reading
+                </h2>
+                <Link href="/insights" className="text-sm font-semibold text-forest hover:underline">
+                  View all
                 </Link>
               </div>
-              
-              <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 xl:gap-8 ${related.items.length > 2 ? "lg:grid-cols-3" : ""}`}>
+              <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${related.items.length > 2 ? "lg:grid-cols-3" : ""}`}>
                 {related.items.map((item) => (
                   <InsightCard key={item.id} insight={item} />
                 ))}
               </div>
             </Container>
           </section>
-        )}
+        ) : null}
       </main>
       <DemoContentNotice />
       <SiteFooter />

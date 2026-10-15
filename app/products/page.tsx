@@ -22,12 +22,12 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#faf9f6]">
+    <>
       <SiteHeader />
-      <main id="main" className="flex-1 pt-[72px]">
+      <main id="main" className="flex-1 bg-canvas">
         <ShopView state={state} result={result} />
       </main>
       <SiteFooter />
-    </div>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { repositories } from "@/lib/repositories";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { ProductDetailView } from "@/sections/product/ProductDetailView";
+import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -38,12 +39,13 @@ export default async function ProductPage(props: PageProps) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#faf9f6]">
+    <>
       <SiteHeader />
-      <main className="flex-1 pt-[72px]">
+      <main id="main" className="flex-1 bg-canvas">
         <ProductDetailView product={product} />
       </main>
+      <DemoContentNotice />
       <SiteFooter />
-    </div>
+    </>
   );
 }

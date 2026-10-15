@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, X, Loader2, ArrowRight } from "lucide-react";
 import { repositories } from "@/lib/repositories";
 import { ApiSuggestResponse } from "@/types/api/search";
-import Image from "next/image";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 
 export function GlobalSearch() {
@@ -109,13 +109,7 @@ export function GlobalSearch() {
                         onClick={() => setIsOpen(false)}
                         className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#f4f7f5] transition-colors"
                       >
-                        <div className="size-12 rounded-lg bg-white border border-black/5 flex items-center justify-center shrink-0 overflow-hidden relative">
-                          {p.imageUrl ? (
-                            <Image src={p.imageUrl} alt={p.name} fill className="object-contain p-2" />
-                          ) : (
-                            <span className="font-serif text-[#0a2015]/30 text-lg">{p.name.charAt(0)}</span>
-                          )}
-                        </div>
+                        <ProductThumb imageUrl={p.imageUrl} name={p.name} sizes="48px" className="size-12 rounded-lg" />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-semibold text-[#0a2015] truncate">{p.name}</div>
                           {p.brandName && (

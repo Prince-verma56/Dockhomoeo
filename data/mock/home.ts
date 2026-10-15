@@ -1,4 +1,4 @@
-import { mockVariantIdForSlug } from "@/data/mock/products";
+import { mockProducts, mockVariantIdForSlug } from "@/data/mock/products";
 import type {
   HealthGoal,
   Product,
@@ -124,134 +124,27 @@ export const healthGoals: HealthGoal[] = [
 /* Products                                                                    */
 /* -------------------------------------------------------------------------- */
 
-const bestsellingProductData: Product[] = [
-  {
-    id: "p-001",
-    slug: "immunity-support-30-ch",
-    name: "Immunity Support 30 CH",
-    brand: "DOC HOMEO",
-    form: "tablets",
-    variant: "30 CH · 25 g pellets",
-    price: { amount: 85, currency: "INR" },
-    compareAtPrice: { amount: 100, currency: "INR" },
-    rating: { value: 4.8, count: 120 },
-    badge: "bestseller",
-    tone: "clear",
-    mediaLabel: "Immunity Support 30 CH bottle on stone pedestal",
-    image: "/Images/Products/lords-kali-phos.webp",
-  },
-  {
-    id: "p-002",
-    slug: "digestive-care-drops",
-    name: "Digestive Care Drops",
-    brand: "DOC HOMEO",
-    form: "drops",
-    variant: "22 ml dropper bottle",
-    price: { amount: 235, currency: "INR" },
-    compareAtPrice: { amount: 260, currency: "INR" },
-    rating: { value: 4.7, count: 89 },
-    badge: "popular",
-    tone: "amber",
-    mediaLabel: "Digestive Care Drops amber bottle on stone pedestal",
-    image: "/Images/Products/reckeweg-r41.webp",
-  },
-  {
-    id: "p-003",
-    slug: "arnica-pellets-200",
-    name: "Arnica Pellets 200",
-    brand: "DOC HOMEO",
-    form: "tablets",
-    variant: "200 CH · 4 g tube",
-    price: { amount: 75, currency: "INR" },
-    compareAtPrice: { amount: 95, currency: "INR" },
-    rating: { value: 4.5, count: 77 },
-    badge: "for-pain",
-    tone: "clear",
-    mediaLabel: "Arnica Pellets 200 on stone pedestal",
-    image: "/Images/Products/lords-kali-phos.webp",
-  },
-  {
-    id: "p-004",
-    slug: "arnica-massage-oil",
-    name: "Arnica Massage Oil",
-    brand: "DOC HOMEO",
-    form: "oil",
-    variant: "100 ml bottle",
-    price: { amount: 149, currency: "INR" },
-    compareAtPrice: { amount: 195, currency: "INR" },
-    rating: { value: 4.5, count: 210 },
-    badge: "trending",
-    tone: "amber",
-    mediaLabel: "Arnica Massage Oil bottle on stone pedestal",
-    image: "/Images/Products/bakson-arnica-oil.webp",
-  },
-  {
-    id: "p-005",
-    slug: "kali-phos-6x",
-    name: "Kali Phos 6X",
-    brand: "DOC HOMEO",
-    form: "tablets",
-    variant: "200 tablets",
-    price: { amount: 65, currency: "INR" },
-    compareAtPrice: { amount: 85, currency: "INR" },
-    rating: { value: 4.6, count: 73 },
-    badge: "new",
-    tone: "clear",
-    mediaLabel: "Kali Phos 6X bottle on stone pedestal",
-    image: "/Images/Products/lords-kali-phos.webp",
-  },
-  {
-    id: "p-006",
-    slug: "respiratory-care-drops",
-    name: "Respiratory Care Drops",
-    brand: "DOC HOMEO",
-    form: "drops",
-    variant: "30 ml dropper bottle",
-    price: { amount: 310, currency: "INR" },
-    compareAtPrice: { amount: 360, currency: "INR" },
-    rating: { value: 4.8, count: 102 },
-    badge: "trending",
-    tone: "amber",
-    mediaLabel: "Respiratory Care Drops bottle on stone pedestal",
-    image: "/Images/Products/reckeweg-r41.webp",
-  },
-  {
-    id: "p-007",
-    slug: "calendula-cream",
-    name: "Calendula Cream",
-    brand: "DOC HOMEO",
-    form: "cream",
-    variant: "50 g cream",
-    price: { amount: 195, currency: "INR" },
-    compareAtPrice: { amount: 240, currency: "INR" },
-    rating: { value: 4.5, count: 64 },
-    badge: "for-skin",
-    tone: "clear",
-    mediaLabel: "Calendula Cream jar on stone pedestal",
-    image: "/Images/Products/boiron-arnica.webp",
-  },
-  {
-    id: "p-008",
-    slug: "hair-care-drops",
-    name: "Hair Care Drops",
-    brand: "DOC HOMEO",
-    form: "drops",
-    variant: "30 ml dropper bottle",
-    price: { amount: 90, currency: "INR" },
-    compareAtPrice: { amount: 120, currency: "INR" },
-    rating: { value: 4.4, count: 58 },
-    badge: "popular",
-    tone: "amber",
-    mediaLabel: "Hair Care Drops bottle on stone pedestal",
-    image: "/Images/Products/reckeweg-r41.webp",
-  },
-];
+/**
+ * The homepage row shows catalogue products rather than copies of them, so a
+ * card here has the same id, brand, price and imagery as /products, the
+ * product page and the cart quote. Only the selection and order live here.
+ */
+const BESTSELLER_SLUGS = [
+  "immunity-support-30-ch",
+  "digestive-care-drops",
+  "arnica-pellets-200",
+  "arnica-massage-oil",
+  "kali-phos-6x",
+  "respiratory-care-drops",
+  "calendula-cream",
+  "hair-care-drops",
+] as const;
 
-/** Each card's "Add" needs the pack the shop sells; it comes from the catalogue by slug. */
-export const bestsellingProducts: Product[] = bestsellingProductData.map((product) => ({
-  ...product,
-  variantId: mockVariantIdForSlug(product.slug),
-}));
+/** Each card’s "Add" needs the pack the shop sells; it comes from the catalogue by slug. */
+export const bestsellingProducts: Product[] = BESTSELLER_SLUGS.flatMap((slug) => {
+  const product = mockProducts.find((item) => item.slug === slug);
+  return product ? [{ ...product, variantId: mockVariantIdForSlug(slug) }] : [];
+});
 
 /** Tabs in the bestsellers section map to these dosage forms. */
 export const productFilters = [

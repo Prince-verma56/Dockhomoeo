@@ -85,7 +85,7 @@ function LoginContent() {
       </div>
 
       {/* Form Side */}
-      <div className="flex w-full flex-1 flex-col items-center justify-center p-6 sm:p-12 lg:p-24 bg-[#f6f2ea]">
+      <div className="flex w-full flex-1 flex-col items-center justify-center p-6 sm:p-12 lg:p-24 bg-canvas">
         <div className="lg:hidden w-full max-w-sm mb-12">
           <Wordmark tone="light" />
         </div>
@@ -223,7 +223,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f2ea]">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <Loader2 className="size-8 animate-spin text-forest-deep" />
       </div>
     }>

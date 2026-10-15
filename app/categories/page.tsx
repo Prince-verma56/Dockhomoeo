@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { repositories } from "@/lib/repositories";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
-import { ClipReveal } from "@/components/shared/ClipReveal";
 import { SplitHeading } from "@/components/shared/SplitHeading";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
@@ -41,6 +40,28 @@ const productHref = (params: Record<string, string>) => `/products?${new URLSear
  */
 const wideTileCount = (count: number) => (4 - (count % 4)) % 4;
 
+/** Map category slug to local botanical photograph for richer imagery */
+const CATEGORY_PHOTOS: Record<string, string> = {
+  "skin-care": "/Images/HealthGoals/skincare.webp",
+  "skincare": "/Images/HealthGoals/skincare.webp",
+  "digestive": "/Images/HealthGoals/digestive.webp",
+  "digestion": "/Images/HealthGoals/digestive.webp",
+  "immunity": "/Images/HealthGoals/immunity.webp",
+  "hair-care": "/Images/HealthGoals/haircare.webp",
+  "haircare": "/Images/HealthGoals/haircare.webp",
+  "sleep-stress": "/Images/HealthGoals/sleep-stress.webp",
+  "respiratory": "/Images/HealthGoals/respiratory.webp",
+  "womens-health": "/Images/HealthGoals/womens-health.webp",
+  "joint-bone": "/Images/HealthGoals/joint-bone.webp",
+  "first-aid": "/Images/Products/boiron-arnica.webp",
+  "body-care": "/Images/Products/bakson-arnica-oil.webp",
+  "wellness": "/Images/HealthGoals/immunity.webp",
+};
+
+function categoryPhoto(slug: string, apiUrl: string | null): string | null {
+  return apiUrl ?? CATEGORY_PHOTOS[slug] ?? null;
+}
+
 export default async function CategoriesPage() {
   const [categories, catalogue] = await Promise.all([
     getCategoryDirectory(),
@@ -54,14 +75,18 @@ export default async function CategoriesPage() {
   const forms = catalogue.facets.forms;
   const productTotal = catalogue.total;
 
+  const featuredPhoto = featured ? categoryPhoto(featured.slug, featured.imageUrl) : null;
+
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
-        <section aria-labelledby="categories-heading" className="pt-24 pb-10 sm:pt-28 lg:pb-12">
+      <main id="main" className="flex-1 bg-canvas">
+
+        {/* ── Section 1: Hero header — flows into canvas ─────────────────── */}
+        <section aria-labelledby="categories-heading" className="dh-band-sage-flowing pt-28 sm:pt-32">
           <Container>
             <PageBreadcrumb items={[{ name: "Categories", href: "/categories" }]} className="mb-6" />
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <SplitHeading
                   as="h1"
@@ -70,83 +95,111 @@ export default async function CategoriesPage() {
                   className="text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
                   lines={[<span key="line">Find your <span className="italic text-forest-deep">natural care.</span></span>]}
                 />
-                <p className="mt-4 text-base leading-relaxed text-muted-ink sm:text-lg">
+                <Reveal as="p" y={12} delay={0.14} start="top 95%" className="mt-4 text-base leading-relaxed text-muted-ink sm:text-lg">
                   Browse remedies by the health concern they are used for, by category, or by the
                   form you prefer.
-                </p>
+                </Reveal>
               </div>
-              <dl className="flex gap-8 text-sm text-muted-ink">
+              <Reveal as="dl" y={14} delay={0.22} start="top 95%" className="flex gap-8 text-sm text-muted-ink">
                 {[
                   [categories.length, "categories"],
                   [productTotal, "products"],
                   [forms.length, "forms"],
                 ].map(([value, label]) => (
-                  <div key={label}>
+                  <div key={String(label)}>
                     <dt className="sr-only">{label}</dt>
                     <dd>
-                      <span className="block font-display text-3xl text-ink">{value}</span>
+                      <span className="block font-display text-3xl font-bold text-ink">{value}</span>
                       {label}
                     </dd>
                   </div>
                 ))}
-              </dl>
+              </Reveal>
             </div>
           </Container>
         </section>
 
+        {/* ── Section 2: Featured Category — full editorial composition ──── */}
         {featured ? (
-          <section aria-labelledby="featured-category" className="pb-12 lg:pb-16">
+          <section aria-labelledby="featured-category" className="pt-2 pb-6 lg:pt-4 lg:pb-8">
             <Container>
-              <div className="grid overflow-hidden rounded-frame border border-line/70 bg-cream lg:grid-cols-[1.05fr_1fr]">
-                <div className="flex flex-col justify-center gap-5 p-7 sm:p-10 lg:p-12">
-                  <Eyebrow rule>Featured category</Eyebrow>
-                  <h2 id="featured-category" className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
-                    {featured.name}
-                  </h2>
-                  <p className="max-w-md text-base leading-relaxed text-muted-ink">
-                    {featured.productCount} {featured.productCount === 1 ? "product" : "products"} across{" "}
-                    {describeForms(featured.forms)}, from {describeNames(featured.brands)}.
-                  </p>
-                  {featured.forms.length > 1 ? (
-                    <ul aria-label={`Shop ${featured.name} by form`} className="flex flex-wrap gap-2">
-                      {featured.forms.map((form) => (
-                        <li key={form}>
-                          <Link
-                            href={productHref({ category: featured.slug, form })}
-                            className="inline-flex min-h-9 items-center rounded-full border border-line bg-ivory px-3.5 text-[0.8125rem] font-medium text-ink transition-colors hover:border-forest/35 hover:text-forest"
-                          >
-                            {formLabel(form)}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  <Button asChild variant="brand" size="xl" className="mt-2 w-fit">
-                    <Link href={productHref({ category: featured.slug })}>
-                      Shop {featured.name}
-                      <ArrowRight aria-hidden />
-                    </Link>
-                  </Button>
+              <Reveal as="div" y={14}>
+                {/* 
+                  Asymmetric two-pane card:
+                  Left: rich copy with pill filters and CTA (60% width)
+                  Right: full-bleed botanical photograph (40% width)
+                  On mobile: stacked, image fills a generous 56vw-tall block.
+                */}
+                <div className="grid overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-soft lg:grid-cols-[1.1fr_0.9fr]">
+
+                  {/* Copy pane */}
+                  <div className="flex flex-col justify-center gap-5 p-7 sm:p-10 lg:p-12">
+                    <Eyebrow rule>Featured category</Eyebrow>
+                    <h2 id="featured-category" className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
+                      {featured.name}
+                    </h2>
+                    <p className="max-w-md text-base leading-relaxed text-muted-ink">
+                      {featured.productCount} {featured.productCount === 1 ? "product" : "products"} across{" "}
+                      {describeForms(featured.forms)}, from {describeNames(featured.brands)}.
+                    </p>
+
+                    {featured.forms.length > 1 ? (
+                      <ul aria-label={`Shop ${featured.name} by form`} className="flex flex-wrap gap-2">
+                        {featured.forms.map((form) => (
+                          <li key={form}>
+                            <Link
+                              href={productHref({ category: featured.slug, form })}
+                              className="inline-flex min-h-9 items-center rounded-full border border-line-soft bg-canvas px-3.5 text-[0.8125rem] font-medium text-ink transition-colors hover:border-forest/40 hover:text-forest"
+                            >
+                              {formLabel(form)}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+
+                    <Button asChild variant="brand" size="xl" className="mt-1 w-fit">
+                      <Link href={productHref({ category: featured.slug })}>
+                        Shop {featured.name}
+                        <ArrowRight aria-hidden />
+                      </Link>
+                    </Button>
+                  </div>
+
+                  {/* Image pane — full bleed, covers the frame completely */}
+                  <div className="relative min-h-64 overflow-hidden sm:min-h-80 lg:min-h-0">
+                    {featuredPhoto ? (
+                      <>
+                        <Image
+                          src={featuredPhoto}
+                          alt=""
+                          fill
+                          priority
+                          sizes="(min-width: 1024px) 560px, 100vw"
+                          className="object-cover object-center"
+                        />
+                        {/* Subtle left-edge scrim so copy doesn't fight the image on smaller screens */}
+                        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-paper/60 to-transparent lg:hidden" />
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-sage-wash/80 to-sage-wash-deep/60">
+                        <span className="font-display text-8xl font-black text-forest/10 select-none">
+                          {featured.name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                 </div>
-                <ClipReveal from="right" className="relative min-h-65 bg-[#f2f2f1] sm:min-h-85">
-                  {featured.imageUrl ? (
-                    <Image
-                      src={featured.imageUrl}
-                      alt=""
-                      fill
-                      priority
-                      sizes="(min-width: 1024px) 640px, 100vw"
-                      className="object-cover"
-                    />
-                  ) : null}
-                </ClipReveal>
-              </div>
+              </Reveal>
             </Container>
           </section>
         ) : null}
 
+        {/* ── Section 3: All Categories Grid ────────────────────────────────
+             Removed the separate "All categories" header for a seamless flow. */}
         {rest.length > 0 ? (
-          <section aria-labelledby="all-categories" className="pb-14 lg:pb-20">
+          <section aria-labelledby="all-categories" className="py-8 pb-14 lg:pb-20">
             <Container>
               <div className="mb-6 flex items-end justify-between gap-4">
                 <h2 id="all-categories" className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
@@ -165,11 +218,22 @@ export default async function CategoriesPage() {
           </section>
         ) : null}
 
+        {/* ── Section 4: Browse by Form ──────────────────────────────────────
+             Mist band with a gentle top blend. */}
         {forms.length > 0 ? (
-          <section aria-labelledby="by-form" className="border-y border-line/60 bg-cream py-12 lg:py-16">
+          <section
+            aria-labelledby="by-form"
+            className="relative border-t border-line-soft/60 bg-mist py-14 lg:py-18"
+          >
+            {/* Soft blend from canvas into mist */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-canvas to-transparent"
+            />
             <Container>
-              <div className="mb-6 max-w-xl">
-                <h2 id="by-form" className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
+              <div className="mb-8 max-w-xl">
+                <Eyebrow>Shop by form</Eyebrow>
+                <h2 id="by-form" className="mt-1.5 font-display text-3xl tracking-tight text-ink sm:text-4xl">
                   Browse by form
                 </h2>
                 <p className="mt-2 text-muted-ink">Already know how you take your remedies? Start there.</p>
@@ -182,9 +246,9 @@ export default async function CategoriesPage() {
                     <li key={form.value} className="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-auto">
                       <Link
                         href={productHref({ form: form.value })}
-                        className="group block overflow-hidden rounded-card border border-line/70 bg-ivory transition-[border-color,box-shadow] duration-300 hover:border-forest/25 hover:shadow-soft"
+                        className="group block overflow-hidden rounded-card border border-line-soft bg-paper transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-forest/25 hover:shadow-soft"
                       >
-                        <div className="relative aspect-square overflow-hidden bg-cream-sunk">
+                        <div className="relative aspect-square overflow-hidden bg-sage-wash">
                           {media ? (
                             <Image
                               src={media.src}
@@ -194,7 +258,11 @@ export default async function CategoriesPage() {
                               style={media.position ? { objectPosition: media.position } : undefined}
                               className="object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.05]"
                             />
-                          ) : null}
+                          ) : (
+                            <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-sage-wash to-sage-wash-deep">
+                              <span className="font-display text-4xl font-bold text-forest/20">{formLabel(form.value).charAt(0)}</span>
+                            </div>
+                          )}
                         </div>
                         <div className="p-4">
                           <p className="text-[0.9375rem] font-semibold text-ink transition-colors group-hover:text-forest">
@@ -213,13 +281,19 @@ export default async function CategoriesPage() {
           </section>
         ) : null}
 
+        {/* ── Section 5: Featured category products ────────────────────────── */}
         {featured && featuredProducts && featuredProducts.items.length > 0 ? (
-          <section aria-labelledby="featured-products" className="py-12 lg:py-16">
+          <section aria-labelledby="featured-products" className="relative py-14 lg:py-20 bg-canvas">
+            {/* Soft blend from mist */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-mist to-transparent"
+            />
             <Container>
-              <div className="mb-6 flex items-end justify-between gap-4">
+              <div className="mb-8 flex items-end justify-between gap-4">
                 <div>
                   <Eyebrow>From the featured category</Eyebrow>
-                  <h2 id="featured-products" className="mt-2 font-display text-3xl tracking-tight text-ink sm:text-4xl">
+                  <h2 id="featured-products" className="mt-1.5 font-display text-3xl tracking-tight text-ink sm:text-4xl">
                     Shop {featured.name}
                   </h2>
                 </div>
@@ -242,9 +316,10 @@ export default async function CategoriesPage() {
           </section>
         ) : null}
 
-        <section aria-labelledby="category-search" className="pb-14 lg:pb-20">
+        {/* ── Section 6: Search call-to-action ─────────────────────────────── */}
+        <section aria-labelledby="category-search" className="pb-16 lg:pb-24">
           <Container>
-            <div className="flex flex-col gap-5 rounded-frame border border-line/70 bg-cream p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+            <div className="flex flex-col gap-5 rounded-2xl border border-line-soft bg-paper p-6 shadow-soft sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
               <div>
                 <h2 id="category-search" className="text-xl font-semibold text-ink">
                   Know what you are looking for?
@@ -255,11 +330,10 @@ export default async function CategoriesPage() {
             </div>
           </Container>
         </section>
+
       </main>
       <DemoContentNotice />
       <SiteFooter />
     </>
   );
 }
-
-

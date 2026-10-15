@@ -25,6 +25,14 @@ export type Product = {
   form: ProductForm;
   /** Potency or pack size, shown as the card's secondary line. */
   variant: string;
+  /**
+   * The potency printed on the pack ("30C", "6X", "Q"), when the product has
+   * one. Combination remedies, creams and oils have none. Feeds the listing's
+   * potency facet, as a variant's `potency` does in the shop API.
+   */
+  potency?: string;
+  /** The pack size as sold ("30 ml", "200 tablets"). Feeds the pack facet. */
+  packSize?: string;
   price: Price;
   /** Strike-through reference price. Absent when the product is not discounted. */
   compareAtPrice?: Price;

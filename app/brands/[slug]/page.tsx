@@ -11,7 +11,6 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { BrandCard } from "@/components/commerce/BrandCard";
-import { BrandMark } from "@/components/commerce/BrandMark";
 import { cn } from "@/lib/utils";
 import { describeForms, getBrandDirectory } from "@/lib/catalogue";
 import {
@@ -84,8 +83,8 @@ export default async function BrandPage({ params, searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
-        <section aria-labelledby="brand-heading" className="border-b border-line/60 pt-24 pb-8 sm:pt-28 lg:pb-10">
+      <main id="main" className="flex-1 bg-canvas">
+        <section aria-labelledby="brand-heading" className="dh-band-sage pt-28 pb-8 sm:pt-32 lg:pb-10">
           <Container>
             <PageBreadcrumb
               items={[
@@ -96,7 +95,6 @@ export default async function BrandPage({ params, searchParams }: Props) {
             />
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
               <div className="flex items-center gap-5">
-                <BrandMark name={brand.name} logoUrl={brand.logoUrl} size="lg" />
                 <div>
                   <Eyebrow>Brand</Eyebrow>
                   <h1 id="brand-heading" className="mt-1 font-display text-4xl leading-tight tracking-tight text-ink sm:text-5xl">
@@ -148,7 +146,7 @@ export default async function BrandPage({ params, searchParams }: Props) {
         <BrandListing slug={brand.slug} brandName={brand.name} state={state} result={result} />
 
         {otherBrands.length > 0 ? (
-          <section aria-labelledby="other-brands" className="border-t border-line/60 py-12 lg:py-14">
+          <section aria-labelledby="other-brands" className="dh-band-mist py-12 lg:py-14">
             <Container>
               <div className="mb-5 flex items-end justify-between gap-4">
                 <h2 id="other-brands" className="font-display text-2xl tracking-tight text-ink sm:text-3xl">
@@ -162,7 +160,7 @@ export default async function BrandPage({ params, searchParams }: Props) {
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {otherBrands.map((other) => (
                   <li key={other.slug}>
-                    <BrandCard brand={other} variant="row" thumbnails={other.thumbnails} />
+                    <BrandCard brand={other} variant="row" />
                   </li>
                 ))}
               </ul>

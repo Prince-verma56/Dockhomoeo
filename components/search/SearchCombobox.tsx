@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useId, useRef, useState, useTransition } from "react";
-import Image from "next/image";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Factory, LayoutGrid, Loader2, Search, X } from "lucide-react";
@@ -407,15 +407,7 @@ function SuggestionOption({
         </>
       ) : option.kind === "product" ? (
         <>
-          <span className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-lg border border-line/70 bg-white">
-            {option.image ? (
-              <Image src={option.image} alt="" fill sizes="44px" className="object-cover" />
-            ) : (
-              <span aria-hidden className="text-base font-semibold text-ink/30">
-                {option.label.charAt(0)}
-              </span>
-            )}
-          </span>
+          <ProductThumb imageUrl={option.image} name={option.label} sizes="44px" className="size-11 rounded-lg" />
           <span className="min-w-0 flex-1">
             <span className="block truncate font-semibold">{option.label}</span>
             {option.brand ? (

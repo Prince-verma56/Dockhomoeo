@@ -12,18 +12,16 @@ import { Container } from "@/components/shared/Container";
  */
 export function DemoContentNotice() {
   return (
-    <div className="border-t border-line bg-cream-sunk py-4">
+    <aside aria-label="Development catalogue notice" className="border-t border-line-soft bg-canvas py-2.5">
       <Container>
-        <p className="flex items-start gap-2.5 text-xs leading-relaxed text-muted-ink">
-          <Info aria-hidden className="mt-px size-4 shrink-0" strokeWidth={1.6} />
+        <p className="flex items-center justify-center gap-2 text-center text-[0.75rem] leading-normal text-muted-ink/80">
+          <Info aria-hidden className="size-3.5 shrink-0 opacity-70" strokeWidth={1.5} />
           <span>
-            <strong className="font-medium text-ink">Demo content.</strong>{" "}
-            Products, brands, prices, ratings, doctors, availability and patient
-            quotes on this page are placeholder data for design review, not real
-            listings or medical advice.
+            <span className="font-medium text-ink/90">Development catalogue:</span>{" "}
+            Sample products, prices, and ratings are demonstration data for interface review.
           </span>
         </p>
       </Container>
-    </div>
+    </aside>
   );
 }

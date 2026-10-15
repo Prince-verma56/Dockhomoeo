@@ -343,13 +343,8 @@ The routes were checked in headless Chrome at 1440, 1024, 768, 390 and 375px:
 
 ### Known limitations
 
-- **Homepage data:** the homepage reads `data/mock/home` directly (§16 step 4). Its bestseller cards also carry their own prices and brands, which differ from the catalogue: "Digestive Care Drops" shows DOC HOMEO ₹235 on the homepage and Dr. Reckeweg ₹220 on its product page. This resolves once the homepage reads the home rail.
-- **Product photography:** only 4 distinct photos exist for 25 mock products, so imagery repeats. Mock images are assigned per dosage form in `data/mock/products.ts`. As of 2026-10-15, four products show a different form's photo: `arnica-montana-30c`, `nux-vomica-30c` and `gelsemium-30c` (drops) show the pellet jar, and `berberis-vulgaris-tincture` shows the oil bottle. Real per-product images will come from the API (`imageUrl`).
-- **Duplicate assets** in `public/`:
-  - byte-identical product files: `reckeweg-r89` = `reckeweg-r41`, `schwabe-alfalfa` = `bakson-arnica-oil`, and `sbl-calc-carb` = `sbl-natrum` = `lords-kali-phos`; the duplicates are no longer referenced
-  - `journal_*.webp` files that are really JPEGs, duplicates of `journal_*.jpg`
-  - an unused `Videos/HeroVideo.mp4` (6 MB)
-
-  None of these were deleted.
-- **PDP fields not displayed yet:** `manufacturer`, `countryOfOrigin`, `requiresPrescription`, `reviews[]`, the image gallery beyond the first image.
+- **Homepage data:** the homepage still reads `data/mock/home` directly (§16 step 4), but since Phase 16 its bestseller cards are a slug selection from the catalogue, so ids, brands and prices match the shop, product page and cart quote.
+- **Product photography:** since Phase 16, products get a photograph only through `data/productImagery.ts`, and only when the photo shows that same remedy and form; every other product renders the illustrated pack (`ProductPackshot`). Real per-product images will come from the API (`imageUrl`). See DOCHOMO-PHASE16-UI-UX-REFINEMENT.md §2.
+- **Duplicate assets:** removed in Phase 16 (byte-identical product photos, `journal_*.jpg`, unused `Videos/HeroVideo.mp4`); `journal_*.webp` re-encoded as real WebP.
+- **PDP fields:** since Phase 16 the product page shows `manufacturer`, `countryOfOrigin`, `requiresPrescription`, potency, pack size and the image gallery when supplied; `reviews[]` is still not displayed.
 - **Dev-only console message:** on `notFound()` routes Next re-renders the root layout on the client, and React warns about the inline motion-gate `<script>` in `app/layout.tsx`. This does not occur in production. The script must stay inline to run before first paint.

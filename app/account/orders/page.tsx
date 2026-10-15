@@ -5,7 +5,7 @@ import Link from "next/link";
 import { repositories } from "@/lib/repositories";
 import { ApiOrderSummary } from "@/types/api/account";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, Eye, FileText } from "lucide-react";
+import { Loader2, Package, Eye } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function OrdersPage() {
@@ -41,17 +41,17 @@ export default function OrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[2rem] bg-white border border-forest-abyss/5 p-16 text-center shadow-sm">
-          <div className="rounded-full bg-forest-abyss/5 p-4 mb-4">
-            <Package className="size-8 text-muted-ink" />
+        <div className="flex flex-col items-center justify-center rounded-2xl bg-paper border border-line-soft p-14 text-center shadow-soft">
+          <div className="rounded-full bg-sage-wash p-4 mb-4 text-forest-deep">
+            <Package className="size-8 text-forest" />
           </div>
           <h3 className="font-display text-xl font-bold text-ink">No orders yet</h3>
-          <p className="mt-2 text-muted-ink max-w-md">
+          <p className="mt-2 text-muted-ink max-w-md text-sm">
             Looks like you haven&rsquo;t placed any orders yet. Start exploring our natural remedies.
           </p>
           <Link
             href="/products"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-forest-deep px-8 text-sm font-semibold text-white shadow-sm hover:bg-forest-abyss transition-colors"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-forest px-8 text-sm font-semibold text-cream shadow-xs hover:bg-forest-deep transition-colors"
           >
             Start Shopping
           </Link>
@@ -61,20 +61,20 @@ export default function OrdersPage() {
           {orders.map((order) => (
             <div
               key={order.id}
-              className="group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[2rem] bg-white p-6 shadow-sm border border-forest-abyss/5 hover:border-forest-deep/20 transition-all duration-300"
+              className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-2xl bg-paper p-6 shadow-soft border border-line-soft hover:border-forest/30 hover:shadow-lift transition-all duration-300"
             >
               <div className="flex items-start gap-4">
-                <div className="rounded-2xl bg-forest-deep/5 p-3 text-forest-deep mt-1 sm:mt-0">
+                <div className="rounded-xl bg-sage-wash p-3 text-forest-deep mt-1 sm:mt-0">
                   <Package className="size-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="font-bold text-ink">{order.orderNumber}</span>
                     <Badge variant={order.status === "DELIVERED" ? "default" : "secondary"} className="rounded-md">
-                      {order.status}
+                      {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
                     </Badge>
                   </div>
-                  <div className="mt-1 flex items-center gap-4 text-sm text-muted-ink">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-ink">
                     <span>{formatDate(order.placedAt)}</span>
                     <span className="hidden sm:inline">•</span>
                     <span>{order.itemCount} item{order.itemCount !== 1 ? 's' : ''}</span>
@@ -83,20 +83,14 @@ export default function OrdersPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex w-full sm:w-auto items-center gap-2 pt-2 sm:pt-0">
+              <div className="flex w-full md:w-auto items-center gap-2 pt-2 md:pt-0">
                 <Link
                   href={`/account/orders/${order.id}`}
-                  className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-forest-abyss/10 bg-white px-4 text-sm font-medium text-ink hover:bg-black/5 hover:border-transparent transition-colors"
+                  className="flex-1 md:flex-none inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-line-soft bg-paper px-4 text-sm font-medium text-ink hover:border-forest/40 hover:text-forest transition-colors shadow-2xs"
                 >
                   <Eye className="size-4 text-muted-ink" />
                   View Details
                 </Link>
-                {order.status === "DELIVERED" && (
-                  <button className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-forest-abyss/10 bg-white px-4 text-sm font-medium text-ink hover:bg-black/5 hover:border-transparent transition-colors">
-                    <FileText className="size-4 text-muted-ink" />
-                    Invoice
-                  </button>
-                )}
               </div>
             </div>
           ))}
