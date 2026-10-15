@@ -41,7 +41,7 @@ export function TrustSection() {
             </h2>
             
             <p className="text-[#8ba99a] text-lg mb-10 leading-relaxed">
-              We understand that when it comes to medicine, authenticity and care are non-negotiable. That's why we've built a platform that puts pharmaceutical integrity first.
+              We understand that when it comes to medicine, authenticity and care are non-negotiable. That&rsquo;s why we&rsquo;ve built a platform that puts pharmaceutical integrity first.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-8">

@@ -7,19 +7,54 @@ import React, {
   useRef,
   useEffect,
   useCallback,
+  useSyncExternalStore,
 } from "react";
+
+/**
+ * The hero video plays at double speed. Every timing below is measured in
+ * wall-clock seconds against that effective length (10 s of footage → 5 s on
+ * screen), so the copy reveal stays in step with what the visitor sees.
+ */
+export const HERO_PLAYBACK_RATE = 2;
+
+/**
+ * How long before the video's last frame the hero copy starts revealing. The
+ * headline transitions run ~1.1–1.4 s, so it lands as the footage settles.
+ */
+const REVEAL_LEAD_SECONDS = 1;
+
+/** Playback never started (slow network, autoplay refused): show the copy anyway. */
+const START_TIMEOUT_MS = 4000;
+
+/** Playback stalled mid-way while buffering: show the copy rather than wait on the network. */
+const STALL_TIMEOUT_MS = 2500;
+
+const SEEN_KEY = "dochomoeo_hero_seen";
+
+/**
+ * Whether this visit skips the intro: the tab has already watched it, or the
+ * visitor prefers reduced motion. SEEN_KEY is only written when the page is
+ * left (see below), so the answer cannot change while the hero is on screen.
+ */
+const getIntroSkipped = () => {
+  try {
+    if (sessionStorage.getItem(SEEN_KEY) === "true") return true;
+  } catch {
+    // Storage unavailable (private mode): treat as a first visit.
+  }
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+const getServerIntroSkipped = () => false;
+const subscribeNever = () => () => {};
 
 interface HeroPlaybackContextValue {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  currentTime: number;
-  duration: number;
   isPlaying: boolean;
   isMuted: boolean;
   isCompleted: boolean;
   navVisible: boolean;
   contentVisible: boolean;
   hasSkipped: boolean;
-  isMounted: boolean;
   togglePlay: () => void;
   toggleMute: () => void;
   skipIntro: () => void;
@@ -28,103 +63,183 @@ interface HeroPlaybackContextValue {
 
 const HeroPlaybackContext = createContext<HeroPlaybackContextValue | null>(null);
 
+const applyRate = (video: HTMLVideoElement) => {
+  // defaultPlaybackRate survives a reload of the media; playbackRate is the live value.
+  video.defaultPlaybackRate = HERO_PLAYBACK_RATE;
+  video.playbackRate = HERO_PLAYBACK_RATE;
+};
+
+const showLastFrame = (video: HTMLVideoElement) => {
+  if (Number.isFinite(video.duration) && video.duration > 0) {
+    video.currentTime = Math.max(0, video.duration - 0.05);
+  }
+  video.pause();
+};
+
+/**
+ * Owns the homepage hero video and the moment its copy appears.
+ *
+ * - First visit in a tab: the video plays once at 2×; the copy reveals
+ *   REVEAL_LEAD_SECONDS before the last frame, on `ended`, on scroll, or via
+ *   the start/stall fallbacks — whichever comes first. The video then rests
+ *   on its final frame.
+ * - Returning visit (sessionStorage) or reduced motion: no intro. The video
+ *   is parked on its final frame and the copy is shown without transitions.
+ *
+ * Only state that consumers read is kept here; time updates are handled in
+ * the event listener, so the hero does not re-render four times a second.
+ */
 export function HeroPlaybackProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(10);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const revealedRef = useRef(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [skippedByVisitor, setSkippedByVisitor] = useState(false);
   // Nav is always visible now as per user request
-  const [navVisible, setNavVisible] = useState(true);
-  
-  // Initialize with false for SSR, then update on mount to avoid hydration mismatch
-  const [hasSkipped, setHasSkipped] = useState(false);
-  const [contentVisible, setContentVisible] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const navVisible = true;
 
-  useEffect(() => {
-    setIsMounted(true);
-    if (typeof window !== "undefined") {
-      const seen = sessionStorage.getItem("dochomoeo_hero_seen") === "true";
-      if (seen) {
-        setHasSkipped(true);
-        setContentVisible(true);
-      }
-    }
+  // False on the server and during hydration, so the markup matches; React
+  // re-renders with the browser's answer straight after.
+  const skippedAtLoad = useSyncExternalStore(subscribeNever, getIntroSkipped, getServerIntroSkipped);
+  const hasSkipped = skippedAtLoad || skippedByVisitor;
+  const contentVisible = hasSkipped || revealed;
+
+  const reveal = useCallback(() => {
+    if (revealedRef.current) return;
+    revealedRef.current = true;
+    setRevealed(true);
   }, []);
 
-  // Skip function to immediately trigger content
   const skipIntro = useCallback(() => {
-    setHasSkipped(true);
-    setContentVisible(true);
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("dochomoeo_hero_seen", "true");
-    }
-  }, []);
+    setSkippedByVisitor(true);
+    reveal();
+    const video = videoRef.current;
+    if (video) showLastFrame(video);
+  }, [reveal]);
 
-  // Time trigger for sequential appearance closer to the end of the video
   useEffect(() => {
-    if (contentVisible || hasSkipped) return;
+    const video = videoRef.current;
+    // Read directly: on a returning visit the hook above still holds the
+    // hydration value here, and the video must not start playing.
+    const skip = getIntroSkipped();
+    if (skip) revealedRef.current = true;
 
-    // Trigger after 8.5 seconds to give the video time to play out
-    // (If the user meant the video is 5 seconds long, we also use a fallback of duration - 0.5)
-    const triggerTime = (duration > 0 && duration < 9) ? duration - 0.5 : 8.5;
-
-    if (currentTime >= triggerTime || isCompleted) {
-      setContentVisible(true);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("dochomoeo_hero_seen", "true");
-      }
-    }
-  }, [currentTime, contentVisible, hasSkipped, duration, isCompleted]);
-
-  // Fallback: if video fails to play or user scrolls down, reveal after 9s or on scroll
-  useEffect(() => {
-    const fallbackTimer = setTimeout(() => {
-      setContentVisible(true);
-    }, 9000);
-
-    const onScroll = () => {
-      if (window.scrollY > 80 && !contentVisible) {
-        setContentVisible(true);
+    // The intro counts as seen once its copy has been shown; it is recorded on
+    // the way out so this visit's answer above stays fixed.
+    const remember = () => {
+      if (!revealedRef.current) return;
+      try {
+        sessionStorage.setItem(SEEN_KEY, "true");
+      } catch {
+        // Storage unavailable: the intro simply plays again next time.
       }
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pagehide", remember);
+
+    if (!video) {
+      const timer = setTimeout(reveal, 0);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("pagehide", remember);
+        remember();
+      };
+    }
+
+    let startTimer: ReturnType<typeof setTimeout> | undefined;
+    let stallTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const onLoadedMetadata = () => {
+      if (skip) showLastFrame(video);
+    };
+    const onPlaying = () => {
+      setIsPlaying(true);
+      clearTimeout(startTimer);
+      clearTimeout(stallTimer);
+    };
+    const onPause = () => setIsPlaying(false);
+    const onWaiting = () => {
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(reveal, STALL_TIMEOUT_MS);
+    };
+    const onTimeUpdate = () => {
+      if (revealedRef.current || !(video.duration > 0)) return;
+      const remaining = (video.duration - video.currentTime) / (video.playbackRate || 1);
+      if (remaining <= REVEAL_LEAD_SECONDS) reveal();
+    };
+    const onEnded = () => {
+      // The element rests on its final frame once ended; nothing to seek.
+      setIsCompleted(true);
+      setIsPlaying(false);
+      reveal();
+    };
+
+    video.addEventListener("loadedmetadata", onLoadedMetadata);
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("waiting", onWaiting);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("ended", onEnded);
+    video.addEventListener("error", reveal);
+
+    if (skip) {
+      if (video.readyState >= 1) showLastFrame(video);
+    } else {
+      applyRate(video);
+      startTimer = setTimeout(reveal, START_TIMEOUT_MS);
+      video.play().catch(reveal);
+    }
 
     return () => {
-      clearTimeout(fallbackTimer);
-      window.removeEventListener("scroll", onScroll);
+      clearTimeout(startTimer);
+      clearTimeout(stallTimer);
+      video.removeEventListener("loadedmetadata", onLoadedMetadata);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("error", reveal);
+      window.removeEventListener("pagehide", remember);
+      // Client-side navigation away from the homepage.
+      remember();
     };
-  }, [contentVisible]);
+  }, [reveal]);
+
+  // Scrolling past the top reveals the copy straight away.
+  useEffect(() => {
+    if (contentVisible) return;
+    const onScroll = () => {
+      if (window.scrollY > 80) reveal();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [contentVisible, reveal]);
 
   // Play / Pause toggle
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (video.ended || isCompleted) {
+    applyRate(video);
+    if (video.ended) {
       video.currentTime = 0;
-      video.play().then(() => {
-        setIsPlaying(true);
-        setIsCompleted(false);
-      }).catch(() => {});
+      setIsCompleted(false);
+      video.play().catch(() => {});
       return;
     }
 
     if (video.paused) {
-      video.play().then(() => {
-        setIsPlaying(true);
-      }).catch(() => {});
+      video.play().catch(() => {});
     } else {
       video.pause();
-      setIsPlaying(false);
     }
-  }, [isCompleted]);
+  }, []);
 
   // Audio toggle
   const toggleMute = useCallback(() => {
@@ -139,69 +254,30 @@ export function HeroPlaybackProvider({
   const replay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
+    applyRate(video);
     video.currentTime = 0;
-    video.play().then(() => {
-      setIsPlaying(true);
-      setIsCompleted(false);
-    }).catch(() => {});
+    setIsCompleted(false);
+    video.play().catch(() => {});
   }, []);
 
   return (
     <HeroPlaybackContext.Provider
       value={{
         videoRef,
-        currentTime,
-        duration,
         isPlaying,
         isMuted,
         isCompleted,
         navVisible,
         contentVisible,
         hasSkipped,
-        isMounted,
         togglePlay,
         toggleMute,
         skipIntro,
         replay,
       }}
     >
-      {/* Expose setters via video element handlers in HomeHero */}
-      <HeroPlaybackInternalRegister
-        setCurrentTime={setCurrentTime}
-        setDuration={setDuration}
-        setIsPlaying={setIsPlaying}
-        setIsCompleted={setIsCompleted}
-      />
       {children}
     </HeroPlaybackContext.Provider>
-  );
-}
-
-// Internal listener attached to video events
-const InternalContext = createContext<{
-  setCurrentTime: (t: number) => void;
-  setDuration: (d: number) => void;
-  setIsPlaying: (p: boolean) => void;
-  setIsCompleted: (c: boolean) => void;
-} | null>(null);
-
-function HeroPlaybackInternalRegister({
-  setCurrentTime,
-  setDuration,
-  setIsPlaying,
-  setIsCompleted,
-}: {
-  setCurrentTime: (t: number) => void;
-  setDuration: (d: number) => void;
-  setIsPlaying: (p: boolean) => void;
-  setIsCompleted: (c: boolean) => void;
-}) {
-  return (
-    <InternalContext.Provider
-      value={{ setCurrentTime, setDuration, setIsPlaying, setIsCompleted }}
-    >
-      <span className="sr-only" aria-hidden />
-    </InternalContext.Provider>
   );
 }
 

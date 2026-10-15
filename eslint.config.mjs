@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Not part of this Next.js app: the read-only reference clone (also
+    // excluded in tsconfig.json and .gitignore) and the Express backend, a
+    // separate package with its own tooling.
+    "docohomo-prince/**",
+    "backend/**",
   ]),
 ]);
 

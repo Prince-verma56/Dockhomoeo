@@ -32,6 +32,9 @@ export const usingMockData = true;
 // Dependency Injection Container
 // The UI only imports from this file, ensuring that swapping to
 // API-based repositories in the future requires exactly zero UI changes.
+// Ready replacements for home, product, search, cart and serviceability live
+// in ./api (Api*Repository); the swap order is in
+// DOCHOMO-FINAL-FRONTEND-HANDOFF.md.
 
 export const repositories = {
   home: new LocalHomeRepository() as IHomeRepository,

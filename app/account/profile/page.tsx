@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { repositories } from "@/lib/repositories";
 import { ApiAccountProfile } from "@/types/api/account";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Loader2, Save, User } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -48,7 +48,7 @@ export default function ProfilePage() {
         });
       }
       setMessage({ type: "success", text: "Profile updated successfully." });
-    } catch (e) {
+    } catch {
       setMessage({ type: "error", text: "Failed to update profile. Please try again." });
     } finally {
       setSaving(false);

@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, LayoutGrid, X } from "lucide-react";
+import { SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, LayoutGrid, X, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,102 +16,145 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ProductCard } from "@/components/commerce/ProductCard";
-import { ApiProductListingResponse, ApiFacetOption } from "@/types/api/search";
-import { ProductBadgeKind, ProductForm } from "@/types/product";
+import { mapApiCardToProduct } from "@/lib/adapters/product";
+import {
+  NO_FILTERS,
+  SORT_OPTIONS,
+  activeFilterCount,
+  formLabel,
+  listingHref,
+  type SearchState,
+} from "@/lib/search/searchState";
+import { useListingNavigation } from "@/sections/listing/ProductResults";
+import type { ApiListingSort, ApiProductListingResponse } from "@/types/api/search";
 
 interface ShopViewProps {
+  /** The /products URL, parsed by lib/search/searchState (as /search and brand pages are). */
+  state: SearchState;
   result: ApiProductListingResponse;
-  searchQuery?: string;
 }
 
-export function ShopView({ result, searchQuery }: ShopViewProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+const shopHref = (state: SearchState) => listingHref("/products", state);
 
-  // Helper to construct URLs for pagination and filtering
-  const createQueryString = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(name, value);
-    if (name !== 'page') params.delete('page'); // Reset page on filter
-    return params.toString();
+type FacetOption = { value: string; label: string; count: number };
+
+/**
+ * /products. The URL is the listing state: it is parsed and written through
+ * lib/search/searchState, and cards come through the shared API adapter, so
+ * this page, /search and brand pages send the repository the same filters.
+ */
+export function ShopView({ state, result }: ShopViewProps) {
+  const { view, isPending, go, refine } = useListingNavigation(state, shopHref);
+
+  const toggleFilter = (group: "brand" | "form", value: string) => {
+    const current = view[group];
+    refine({
+      [group]: current.includes(value) ? current.filter((v) => v !== value) : [...current, value],
+    });
   };
 
-  const toggleFilter = (group: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const current = params.getAll(group);
-    
-    if (current.includes(value)) {
-      const filtered = current.filter(v => v !== value);
-      params.delete(group);
-      filtered.forEach(v => params.append(group, v));
-    } else {
-      params.append(group, value);
-    }
-    
-    params.delete('page');
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
+  const clearFilters = () => refine(NO_FILTERS);
 
-  const clearFilters = () => {
-    router.push(searchQuery ? `?q=${searchQuery}` : '?');
-  };
+  const filterCount = activeFilterCount(view);
+  const brandOptions: FacetOption[] = result.facets.brands.map((b) => ({
+    value: b.value,
+    label: b.label ?? b.value,
+    count: b.count,
+  }));
+  const formOptions: FacetOption[] = result.facets.forms.map((f) => ({
+    value: f.value,
+    label: formLabel(f.value),
+    count: f.count,
+  }));
 
-  const activeFilterCount = Array.from(searchParams.keys()).filter(k => k !== 'page' && k !== 'sort' && k !== 'q').length;
+  const filterGroups = (
+    <div className="space-y-6">
+      <FilterGroup
+        title="Brands"
+        options={brandOptions}
+        onToggle={(val) => toggleFilter("brand", val)}
+        selected={view.brand}
+      />
+      <div className="h-px bg-black/5" />
+      <FilterGroup
+        title="Forms & Formulations"
+        options={formOptions}
+        onToggle={(val) => toggleFilter("form", val)}
+        selected={view.form}
+      />
+    </div>
+  );
+
+  const first = result.items.length > 0 ? (result.page - 1) * result.pageSize + 1 : 0;
+  const last = Math.min(result.page * result.pageSize, result.total);
 
   return (
-    <div className="py-8 lg:py-12">
+    <div className="py-6 lg:py-10">
       <Container>
-        
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-6">
+          <ol className="flex items-center space-x-2 text-xs font-medium text-[#4b6b5a]">
+            <li>
+              <Link href="/" className="hover:text-[#1b7a54] transition-colors">Home</Link>
+            </li>
+            <li>
+              <ChevronRight className="size-3 text-black/20" />
+            </li>
+            <li>
+              <span className="text-[#0a2015] font-semibold" aria-current="page">Shop All Products</span>
+            </li>
+          </ol>
+        </nav>
+
         {/* Header Section */}
-        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-black/5">
           <div>
-            {searchQuery ? (
-              <h1 className="text-3xl lg:text-4xl font-bold text-[#0a2015] tracking-tight mb-2">
-                Search Results for &quot;{searchQuery}&quot;
-              </h1>
-            ) : result.category ? (
-              <h1 className="text-3xl lg:text-4xl font-bold text-[#0a2015] tracking-tight mb-2">
-                {result.category.name}
-              </h1>
-            ) : (
-              <h1 className="text-3xl lg:text-4xl font-bold text-[#0a2015] tracking-tight mb-2">
-                All Products
-              </h1>
-            )}
-            <p className="text-[#4b6b5a]">
-              Showing {result.items.length > 0 ? (result.page - 1) * result.pageSize + 1 : 0} - {Math.min(result.page * result.pageSize, result.total)} of {result.total} products
+            <span className="inline-block text-[0.72rem] font-bold text-[#1b7a54] uppercase tracking-widest mb-1.5">
+              DocHomoeo Apothecary
+            </span>
+            <h1 className="text-3xl lg:text-4xl font-bold text-[#0a2015] tracking-tight mb-2">
+              {state.q
+                ? <>Search Results for &ldquo;{state.q}&rdquo;</>
+                : result.category?.name ?? "All Products"}
+            </h1>
+            <p className="text-sm text-[#4b6b5a] max-w-xl">
+              Authentic homoeopathic dilutions, mother tinctures, biocombinations, and wellness remedies direct from licensed labs.
             </p>
           </div>
-          
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Sort Dropdown */}
             <div className="relative">
-              <select 
-                className="appearance-none bg-white border border-black/10 rounded-full h-10 pl-4 pr-10 text-sm font-medium text-[#0a2015] focus:outline-none focus:ring-2 focus:ring-[#1b7a54]/20 cursor-pointer"
-                value={result.sort || "relevance"}
-                onChange={(e) => router.push(`?${createQueryString('sort', e.target.value)}`)}
+              <label htmlFor="shop-sort" className="sr-only">Sort products</label>
+              <select
+                id="shop-sort"
+                aria-label="Sort by"
+                className="appearance-none bg-white border border-[#d9ddd3] hover:border-[#1b7a54]/50 rounded-full h-11 pl-4 pr-10 text-xs sm:text-sm font-semibold text-[#0a2015] focus:outline-none focus:ring-2 focus:ring-[#1b7a54]/20 shadow-xs cursor-pointer transition-colors"
+                value={view.sort}
+                onChange={(e) => refine({ sort: e.target.value as ApiListingSort })}
               >
-                <option value="relevance">Relevance</option>
-                <option value="popular">Most Popular</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="newest">Newest Arrivals</option>
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-[#4b6b5a] pointer-events-none" />
+              <ChevronDown aria-hidden className="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-[#4b6b5a] pointer-events-none" />
             </div>
-            
-            {/* Mobile filters: the same groups as the sidebar, in a sheet.
-                Each tick applies at once, as it does on desktop. */}
+
+            {/* Mobile filters button */}
             <Sheet>
               <SheetTrigger asChild>
                 <button
                   type="button"
-                  aria-label={activeFilterCount > 0 ? `Filters, ${activeFilterCount} active` : "Filters"}
-                  className="lg:hidden relative flex items-center justify-center size-10 rounded-full bg-white border border-black/10 text-[#0a2015]"
+                  aria-label={filterCount > 0 ? `Filters, ${filterCount} active` : "Filters"}
+                  className="lg:hidden relative flex items-center justify-center gap-2 h-11 px-4 rounded-full bg-white border border-[#d9ddd3] text-xs font-semibold text-[#0a2015] shadow-xs hover:border-[#1b7a54]/50 transition-colors"
                 >
-                  <SlidersHorizontal className="size-4" />
-                  {activeFilterCount > 0 && (
-                    <span aria-hidden className="absolute -top-1 -right-1 grid size-4.5 place-items-center rounded-full bg-[#1b7a54] text-[0.625rem] font-bold text-white">
-                      {activeFilterCount}
+                  <SlidersHorizontal aria-hidden className="size-4" />
+                  <span>Filters</span>
+                  {filterCount > 0 && (
+                    <span aria-hidden className="grid size-5 place-items-center rounded-full bg-[#1b7a54] text-[0.65rem] font-bold text-white">
+                      {filterCount}
                     </span>
                   )}
                 </button>
@@ -122,24 +164,11 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
                   <SheetTitle className="text-lg font-bold text-[#0a2015]">Filters</SheetTitle>
                   <SheetDescription className="sr-only">Each choice applies immediately.</SheetDescription>
                 </SheetHeader>
-                <div className="min-h-0 flex-1 space-y-8 overflow-y-auto overscroll-contain px-5 py-6">
-                  <FilterGroup
-                    title="Brands"
-                    options={result.facets.brands}
-                    groupKey="brand"
-                    onToggle={(val) => toggleFilter("brand", val)}
-                    selected={searchParams.getAll("brand")}
-                  />
-                  <FilterGroup
-                    title="Forms"
-                    options={result.facets.forms}
-                    groupKey="form"
-                    onToggle={(val) => toggleFilter("form", val)}
-                    selected={searchParams.getAll("form")}
-                  />
+                <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-6">
+                  {filterGroups}
                 </div>
                 <SheetFooter className="flex-row gap-3 border-t border-black/5 p-4">
-                  {activeFilterCount > 0 && (
+                  {filterCount > 0 && (
                     <Button type="button" variant="brandOutline" size="xl" onClick={clearFilters}>
                       Clear all
                     </Button>
@@ -155,196 +184,239 @@ export function ShopView({ result, searchQuery }: ShopViewProps) {
           </div>
         </div>
 
-        <div className="flex gap-8 items-start">
-          
-          {/* Desktop Filter Sidebar */}
-          <aside className="hidden lg:block w-64 shrink-0 sticky top-28">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-bold text-[#0a2015] flex items-center gap-2">
-                <SlidersHorizontal className="size-4" />
-                Filters
-              </h2>
-              {activeFilterCount > 0 && (
-                <button 
-                  onClick={clearFilters}
-                  className="text-xs font-semibold text-[#1b7a54] hover:underline"
+        {/* Active Filters Bar */}
+        {filterCount > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-white rounded-2xl border border-black/5 shadow-xs">
+            <span className="text-xs font-bold text-[#0a2015] uppercase tracking-wider mr-1">Active Filters:</span>
+            {view.brand.map((b) => {
+              const label = brandOptions.find((o) => o.value === b)?.label || b;
+              return (
+                <button
+                  key={`brand-${b}`}
+                  type="button"
+                  onClick={() => toggleFilter("brand", b)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#1b7a54]/10 text-[#1b7a54] hover:bg-[#1b7a54]/20 transition-colors"
                 >
-                  Clear all
+                  <span>{label}</span>
+                  <X className="size-3" />
                 </button>
-              )}
-            </div>
-            
-            <div className="space-y-8">
-              <FilterGroup 
-                title="Brands" 
-                options={result.facets.brands} 
-                groupKey="brand"
-                onToggle={(val) => toggleFilter("brand", val)} 
-                selected={searchParams.getAll("brand")}
-              />
-              <FilterGroup 
-                title="Forms" 
-                options={result.facets.forms} 
-                groupKey="form"
-                onToggle={(val) => toggleFilter("form", val)} 
-                selected={searchParams.getAll("form")}
-              />
+              );
+            })}
+            {view.form.map((f) => {
+              const label = formOptions.find((o) => o.value === f)?.label || formLabel(f);
+              return (
+                <button
+                  key={`form-${f}`}
+                  type="button"
+                  onClick={() => toggleFilter("form", f)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#1b7a54]/10 text-[#1b7a54] hover:bg-[#1b7a54]/20 transition-colors"
+                >
+                  <span>{label}</span>
+                  <X className="size-3" />
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-xs font-semibold text-[#a63d2f] hover:underline ml-2"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
+
+        <div className="flex gap-8 items-start">
+          {/* Desktop Filter Sidebar Card */}
+          <aside aria-labelledby="shop-filters-heading" className="hidden lg:block w-72 shrink-0 sticky top-28">
+            <div className="bg-white rounded-3xl border border-[#d9ddd3]/80 p-6 shadow-xs">
+              <div className="flex items-center justify-between pb-4 mb-5 border-b border-black/5">
+                <h2 id="shop-filters-heading" className="font-bold text-[#0a2015] flex items-center gap-2 text-base">
+                  <SlidersHorizontal aria-hidden className="size-4 text-[#1b7a54]" />
+                  Filter Remedies
+                  {filterCount > 0 && (
+                    <span className="size-5 rounded-full bg-[#1b7a54] text-[0.65rem] font-bold text-white flex items-center justify-center">
+                      {filterCount}
+                    </span>
+                  )}
+                </h2>
+                {filterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="text-xs font-semibold text-[#1b7a54] hover:underline"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+
+              {filterGroups}
             </div>
           </aside>
 
           {/* Product Grid */}
-          <div className="flex-1 min-w-0">
+          <div
+            aria-busy={isPending}
+            className={cn("flex-1 min-w-0 transition-opacity duration-200", isPending && "opacity-60")}
+          >
+            {/* Results count text */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-medium text-[#4b6b5a]" aria-live="polite">
+                Showing <strong className="font-semibold text-[#0a2015]">{first}–{last}</strong> of <strong className="font-semibold text-[#0a2015]">{result.total}</strong> remedies
+              </p>
+            </div>
+
             {result.items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-black/10 rounded-3xl bg-white/50">
-                <div className="size-16 rounded-full bg-[#f4f7f5] flex items-center justify-center text-[#a7c5b6] mb-4">
+              <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-black/10 rounded-3xl bg-white/70">
+                <div aria-hidden className="size-16 rounded-full bg-[#f4f7f5] flex items-center justify-center text-[#1b7a54] mb-4">
                   <LayoutGrid className="size-8" />
                 </div>
-                <h3 className="text-xl font-bold text-[#0a2015] mb-2">No products found</h3>
-                <p className="text-[#4b6b5a] max-w-sm mb-6">
-                  We couldn&apos;t find any products matching your current filters. Try adjusting them or clearing your search.
+                <h2 className="text-xl font-bold text-[#0a2015] mb-2">No products found</h2>
+                <p className="text-[#4b6b5a] max-w-sm mb-6 text-sm">
+                  We couldn&apos;t find any remedies matching your current filter criteria. Try clearing some filters.
                 </p>
-                <button 
-                  onClick={clearFilters}
-                  className="h-10 px-6 rounded-full bg-[#0a2015] text-white text-sm font-medium hover:bg-[#153a27] transition-colors"
-                >
-                  Clear all filters
-                </button>
+                {filterCount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="h-11 px-6 rounded-full bg-[#0a2015] text-white text-sm font-semibold hover:bg-[#153a27] transition-colors shadow-sm"
+                  >
+                    Clear all filters
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => go("/products")}
+                    className="h-11 px-6 rounded-full bg-[#0a2015] text-white text-sm font-semibold hover:bg-[#153a27] transition-colors shadow-sm"
+                  >
+                    View all remedies
+                  </button>
+                )}
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                  {result.items.map((apiItem) => {
-                    const productViewModel = {
-                      id: String(apiItem.id),
-                      slug: apiItem.slug,
-                      name: apiItem.name,
-                      brand: apiItem.brandName || "DocHomo",
-                      form: (apiItem.form as ProductForm) || "drops",
-                      variant: "Standard Pack",
-                      price: { amount: apiItem.price, currency: "INR" as const },
-                      compareAtPrice: apiItem.mrp > apiItem.price ? { amount: apiItem.mrp, currency: "INR" as const } : undefined,
-                      rating: { value: apiItem.rating, count: apiItem.ratingCount },
-                      badge: (apiItem.sold > 300 ? "bestseller" : undefined) as ProductBadgeKind | undefined,
-                      tone: "amber" as const,
-                      mediaLabel: apiItem.name,
-                      image: apiItem.imageUrl || undefined,
-                      // Lets the card's "Add" put this pack in the shared cart.
-                      variantId: apiItem.variantId,
-                    };
-
-                    return (
-                      <ProductCard 
-                        key={apiItem.id} 
-                        product={productViewModel} 
-                        mediaRatio="aspect-[4/5]"
-                        className="bg-white rounded-[20px] sm:rounded-3xl border border-black/5 hover:border-[#1b7a54]/30 shadow-sm hover:shadow-xl hover:shadow-[#1b7a54]/5 transition-all duration-300"
-                      />
-                    );
-                  })}
+                  {result.items.map((item, index) => (
+                    <ProductCard key={item.id} product={mapApiCardToProduct(item)} eager={index < 4} />
+                  ))}
                 </div>
 
-                {/* Pagination */}
-                {result.pageCount > 1 && (
-                  <div className="mt-16 flex items-center justify-center gap-2">
-                    <button 
-                      onClick={() => router.push(`?${createQueryString('page', String(result.page - 1))}`)}
-                      disabled={result.page === 1}
-                      className="size-10 rounded-full border border-black/10 flex items-center justify-center text-[#0a2015] hover:bg-white disabled:opacity-30 transition-all"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
-                    
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, result.pageCount) }).map((_, i) => {
-                        // Simple sliding window for pagination
-                        let pageNum = i + 1;
-                        if (result.pageCount > 5 && result.page > 3) {
-                          pageNum = result.page - 2 + i;
-                          if (pageNum > result.pageCount) return null;
-                        }
-                        
-                        const isActive = pageNum === result.page;
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => router.push(`?${createQueryString('page', String(pageNum))}`)}
-                            className={`size-10 rounded-full text-sm font-medium transition-all ${
-                              isActive 
-                                ? "bg-[#0a2015] text-white shadow-md" 
-                                : "text-[#4b6b5a] hover:bg-white hover:text-[#0a2015]"
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    
-                    <button 
-                      onClick={() => router.push(`?${createQueryString('page', String(result.page + 1))}`)}
-                      disabled={result.page === result.pageCount}
-                      className="size-10 rounded-full border border-black/10 flex items-center justify-center text-[#0a2015] hover:bg-white disabled:opacity-30 transition-all"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                )}
+                <Pagination state={state} result={result} />
               </>
             )}
           </div>
-          
         </div>
       </Container>
     </div>
   );
 }
 
-function FilterGroup({ 
-  title, 
-  options, 
-  groupKey, 
-  onToggle, 
-  selected 
-}: { 
-  title: string, 
-  options: ApiFacetOption<string>[], 
-  groupKey: string,
-  onToggle: (val: string) => void,
-  selected: string[]
-}) {
-  if (!options || options.length === 0) return null;
-  
+function Pagination({ state, result }: { state: SearchState; result: ApiProductListingResponse }) {
+  if (result.pageCount <= 1) return null;
+  const { page, pageCount } = result;
+  const start = Math.max(1, Math.min(page - 2, pageCount - 4));
+  const pages = Array.from({ length: Math.min(5, pageCount) }, (_, i) => start + i);
+  const stepClass =
+    "size-10 rounded-full border border-black/10 flex items-center justify-center text-[#0a2015] transition-all";
+
+  const step = (target: number, label: string, icon: React.ReactNode) =>
+    target < 1 || target > pageCount ? (
+      <span aria-hidden className={cn(stepClass, "opacity-30")}>
+        {icon}
+      </span>
+    ) : (
+      <Link href={shopHref({ ...state, page: target })} aria-label={label} className={cn(stepClass, "hover:bg-white")}>
+        {icon}
+      </Link>
+    );
+
   return (
-    <div>
-      <h3 className="text-sm font-semibold text-[#0a2015] mb-3">{title}</h3>
-      <div className="space-y-2">
-        {options.map((opt) => (
-          <label key={String(opt.value)} className="flex items-center gap-3 cursor-pointer group">
-            {/* The input carries state and keyboard support; the box beside it
-                is the existing visual. */}
-            <input
-              type="checkbox"
-              className="peer sr-only"
-              checked={selected.includes(String(opt.value))}
-              onChange={() => onToggle(String(opt.value))}
-            />
-            <div aria-hidden className={`size-4 rounded-[4px] border flex items-center justify-center transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#1b7a54] ${
-              selected.includes(String(opt.value))
-                ? 'bg-[#1b7a54] border-[#1b7a54]'
-                : 'border-black/20 group-hover:border-[#1b7a54]'
-            }`}>
-              {selected.includes(String(opt.value)) && (
-                <svg viewBox="0 0 14 14" fill="none" className="size-3 text-white">
-                  <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
-            </div>
-            <span className={`text-sm ${selected.includes(String(opt.value)) ? 'font-medium text-[#0a2015]' : 'text-[#4b6b5a] group-hover:text-[#0a2015]'}`}>
-              {opt.label || opt.value} <span className="text-black/30 ml-1">({opt.count})</span>
-            </span>
-          </label>
+    <nav aria-label="Result pages" className="mt-16 flex items-center justify-center gap-2">
+      {step(page - 1, "Previous page", <ChevronLeft aria-hidden className="size-4" />)}
+      <div className="flex items-center gap-1">
+        {pages.map((n) => (
+          <Link
+            key={n}
+            href={shopHref({ ...state, page: n })}
+            aria-label={`Page ${n}`}
+            aria-current={n === page ? "page" : undefined}
+            className={cn(
+              "grid size-10 place-items-center rounded-full text-sm font-medium transition-all",
+              n === page
+                ? "bg-[#0a2015] text-white shadow-md"
+                : "text-[#4b6b5a] hover:bg-white hover:text-[#0a2015]",
+            )}
+          >
+            {n}
+          </Link>
         ))}
       </div>
-    </div>
+      {step(page + 1, "Next page", <ChevronRight aria-hidden className="size-4" />)}
+    </nav>
+  );
+}
+
+function FilterGroup({
+  title,
+  options,
+  onToggle,
+  selected,
+}: {
+  title: string;
+  options: FacetOption[];
+  onToggle: (val: string) => void;
+  selected: string[];
+}) {
+  if (options.length === 0) return null;
+
+  return (
+    <fieldset>
+      <legend className="text-xs font-bold text-[#0a2015] uppercase tracking-wider mb-3">{title}</legend>
+      <div className="space-y-1">
+        {options.map((opt) => {
+          const checked = selected.includes(opt.value);
+          return (
+            <label
+              key={opt.value}
+              className={`flex items-center justify-between gap-3 px-2.5 py-2 -mx-2.5 rounded-xl cursor-pointer transition-colors ${
+                checked ? "bg-[#1b7a54]/5 font-medium" : "hover:bg-[#f6f2ea]/80"
+              }`}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={checked}
+                  onChange={() => onToggle(opt.value)}
+                />
+                <div
+                  aria-hidden
+                  className={`size-4.5 rounded-[5px] border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#1b7a54] ${
+                    checked
+                      ? "bg-[#1b7a54] border-[#1b7a54]"
+                      : "border-black/20 group-hover:border-[#1b7a54] bg-white"
+                  }`}
+                >
+                  {checked && (
+                    <svg viewBox="0 0 14 14" fill="none" className="size-3 text-white">
+                      <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+                <span className={`text-xs sm:text-sm truncate ${checked ? "text-[#0a2015] font-semibold" : "text-[#4b6b5a]"}`}>
+                  {opt.label}
+                </span>
+              </div>
+              <span className={`text-[0.7rem] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                checked ? "bg-[#1b7a54]/15 text-[#1b7a54]" : "bg-[#f4efe4] text-[#66716c]"
+              }`}>
+                {opt.count}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }

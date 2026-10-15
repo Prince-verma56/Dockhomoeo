@@ -5,9 +5,6 @@ import { Container } from "@/components/shared/Container";
 import { SplitHeading } from "@/components/shared/SplitHeading";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
-import { Parallax } from "@/components/shared/Parallax";
-import { ProductStage } from "@/components/shared/ProductStage";
-import { ProductGlyph } from "@/components/commerce/ProductGlyph";
 import { ICONS } from "@/lib/icons";
 import { offerCampaign } from "@/data/mock/home";
 

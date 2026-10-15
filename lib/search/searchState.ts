@@ -50,7 +50,8 @@ const list = (value: string | string[] | undefined) => [
 ];
 
 export function parseSearchState(raw: RawParams): SearchState {
-  const sort = first(raw.sort);
+  // Older /products links spell the price sorts with an underscore (price_asc).
+  const sort = first(raw.sort)?.replace("_", "-");
   const page = Number.parseInt(first(raw.page) ?? "", 10);
   return {
     q: (first(raw.q) ?? "").trim().slice(0, MAX_QUERY_LENGTH),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -21,7 +21,8 @@ import { gsap } from "@/lib/animation/gsap";
  * HomeHero
  * 
  * Features:
- * 1. Background video from /Videos/HeroVideo.mp4 playing cleanly without clutter
+ * 1. Background video from /Videos/HeroVideo2.mp4 at 2× (HeroPlaybackProvider owns
+ *    playback and decides when the copy reveals)
  * 2. Bottom play/mute UI removed completely
  * 3. Masked parallax reveal animation on headline, copy, and trust elements
  * 4. Subparagraph and bottom proof bar encased in subtle frosted glass for 100% legibility
@@ -37,8 +38,6 @@ export function HomeHero() {
 
   // Sync ref with context
   const videoRef = playback?.videoRef ?? localVideoRef;
-
-  const [currentTime, setCurrentTime] = useState(0);
 
   // Appearance state from context
   const contentVisible = playback ? playback.contentVisible : true;
@@ -60,21 +59,6 @@ export function HomeHero() {
 
   // Guard to ensure entrance triggers only once
   const hasEnteredRef = useRef(false);
-
-  // Handle video time update
-  const handleTimeUpdate = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    setCurrentTime(video.currentTime);
-  }, [videoRef]);
-
-  // Handle video ending - pause cleanly on the last frame
-  const handleEnded = useCallback(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-    }
-  }, [videoRef]);
 
   // 1. Set initial off-screen positions for directional corner entrance
   useEffect(() => {
@@ -100,32 +84,6 @@ export function HomeHero() {
   useEffect(() => {
     if (!contentVisible || hasEnteredRef.current) return;
     hasEnteredRef.current = true;
-
-    // Handle video state manually since we removed autoPlay to prevent flickering
-    if (videoRef.current) {
-      const video = videoRef.current;
-      
-      if (playback?.hasSkipped) {
-        // Jump the video to the end instantly
-        const setEndOfVideo = () => {
-          if (video.duration && video.duration > 0 && !isNaN(video.duration)) {
-            video.currentTime = video.duration - 0.1;
-          } else {
-            video.currentTime = 9.9; 
-          }
-          video.pause();
-        };
-
-        if (video.readyState >= 1) {
-          setEndOfVideo();
-        } else {
-          video.addEventListener("loadedmetadata", setEndOfVideo, { once: true });
-        }
-      } else {
-        // Play the video normally since it's their first time
-        video.play().catch(() => {});
-      }
-    }
 
     const timer = setTimeout(() => {
       // Left leaf glides in smoothly from bottom-left corner
@@ -154,7 +112,7 @@ export function HomeHero() {
     }, playback?.hasSkipped ? 0 : 280);
 
     return () => clearTimeout(timer);
-  }, [contentVisible, playback?.hasSkipped, videoRef]);
+  }, [contentVisible, playback?.hasSkipped]);
 
   // 3. Scroll-tracked scrub animation (Outer layer) & Ambient Yoyo Sway (Inner layer)
   useEffect(() => {
@@ -262,11 +220,12 @@ export function HomeHero() {
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
           src="/Videos/HeroVideo2.mp4"
+          // No autoPlay: the provider sets the 2× rate before starting playback,
+          // so the first frames never run at 1× while the page hydrates.
           muted
           playsInline
-          autoPlay
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={handleEnded}
+          preload="auto"
+          aria-hidden="true"
           className="h-full w-full object-cover object-center scale-[1.01]"
         />
 

@@ -67,6 +67,7 @@ export function GlobalSearch() {
         />
         <input
           type="search"
+          aria-label="Search medicines, brands or ailments"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -129,7 +130,7 @@ export function GlobalSearch() {
                   </>
                 ) : (
                   <div className="p-4 text-center text-sm text-[#4b6b5a]">
-                    No medicines found for "{query}"
+                    No medicines found for &ldquo;{query}&rdquo;
                   </div>
                 )}
               </div>
@@ -142,7 +143,7 @@ export function GlobalSearch() {
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-center gap-2 w-full p-2 text-sm font-semibold text-[#1b7a54] hover:bg-[#e7f0ec] rounded-xl transition-colors"
             >
-              See all results for "{query}"
+              See all results for &ldquo;{query}&rdquo;
               <ArrowRight className="size-4" />
             </Link>
           </div>

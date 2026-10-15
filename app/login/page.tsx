@@ -2,7 +2,6 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { ArrowLeft, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +36,7 @@ function LoginContent() {
       } else {
         setError(res.message || "Failed to send OTP");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -60,7 +59,7 @@ function LoginContent() {
       } else {
         setError(res.message || "Invalid OTP");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -73,9 +72,9 @@ function LoginContent() {
       <div className="hidden lg:flex w-full flex-1 flex-col justify-between bg-forest-abyss p-12 text-white/90">
         <Wordmark tone="dark" />
         <div className="max-w-md">
-          <h1 className="font-display text-4xl leading-tight sm:text-5xl lg:text-6xl text-cream">
+          <p className="font-display text-4xl leading-tight sm:text-5xl lg:text-6xl text-cream">
             Heal Naturally
-          </h1>
+          </p>
           <p className="mt-6 text-lg text-cream/70">
             Sign in to access your prescriptions, track orders, and connect with expert homoeopathic doctors.
           </p>
@@ -94,9 +93,9 @@ function LoginContent() {
         <div className="w-full max-w-sm">
           {step === "PHONE" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="font-display text-3xl font-bold text-ink">
+              <h1 className="font-display text-3xl font-bold text-ink">
                 Welcome back
-              </h2>
+              </h1>
               <p className="mt-2 text-[0.9375rem] text-muted-ink">
                 Enter your mobile number to sign in or create an account.
               </p>
@@ -109,6 +108,9 @@ function LoginContent() {
                   <Input
                     id="phone"
                     type="tel"
+                    autoComplete="tel-national"
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? "login-error" : undefined}
                     placeholder="Enter 10-digit mobile number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -116,7 +118,7 @@ function LoginContent() {
                     className="h-12 rounded-xl bg-white text-base shadow-sm border-forest-abyss/10 focus-visible:ring-forest-deep"
                     required
                   />
-                  {error && <p className="text-sm text-red-600">{error}</p>}
+                  {error && <p id="login-error" role="alert" className="text-sm text-red-600">{error}</p>}
                 </div>
 
                 <Button
@@ -150,14 +152,14 @@ function LoginContent() {
                 Change number
               </button>
 
-              <h2 className="font-display text-3xl font-bold text-ink">
+              <h1 className="font-display text-3xl font-bold text-ink">
                 Verify OTP
-              </h2>
+              </h1>
               <p className="mt-2 text-[0.9375rem] text-muted-ink">
-                We've sent a code to <strong className="text-ink">{phone}</strong>
+                We&rsquo;ve sent a code to <strong className="text-ink">{phone}</strong>
               </p>
               <p className="mt-1 text-xs text-muted-ink">
-                (Demo: any code except "000000" will work)
+                (Demo: any code except &ldquo;000000&rdquo; will work)
               </p>
 
               <form onSubmit={handleOtpSubmit} className="mt-8 space-y-6">
@@ -168,6 +170,10 @@ function LoginContent() {
                   <Input
                     id="otp"
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? "login-error" : undefined}
                     placeholder="Enter 6-digit code"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
@@ -176,7 +182,7 @@ function LoginContent() {
                     maxLength={6}
                     required
                   />
-                  {error && <p className="text-sm text-red-600">{error}</p>}
+                  {error && <p id="login-error" role="alert" className="text-sm text-red-600">{error}</p>}
                 </div>
 
                 <Button

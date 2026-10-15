@@ -40,7 +40,8 @@ const mapToApiProductCard = (p: Product, index: number): ApiProductCard => ({
   rating: p.rating?.value || 0,
   ratingCount: p.rating?.count || 0,
   inStock: true,
-  sold: Math.floor(Math.random() * 500) + 10,
+  // Review count stands in for units sold, so "Most Popular" orders the same on every run.
+  sold: p.rating?.count ?? 0,
   // Same id scheme as LocalProductRepository's default variant.
   variantId: mockVariantId(index),
   variantTitle: p.variant,
@@ -48,7 +49,7 @@ const mapToApiProductCard = (p: Product, index: number): ApiProductCard => ({
 
 const mockApiCards = mockProducts.map(mapToApiProductCard);
 
-// Search mirrors the verified backend (docohomo-prince shop.routes.ts and
+// Search mirrors the verified official backend (backend/src/modules/shop.routes.ts and
 // catalog-index.ts): every typed word must appear in one lower-cased string per
 // product, and matches rank by where the query lands in the name. Health goals
 // stand in for the backend's product tags.

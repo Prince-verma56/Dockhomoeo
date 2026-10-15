@@ -16,7 +16,7 @@ export const mockProducts: Product[] = [
     badge: "bestseller",
     tone: "amber",
     mediaLabel: "Arnica 30C bottle",
-    image: "/Images/Products/boiron-arnica.webp",
+    image: "/Images/Products/sbl-natrum.webp",
   },
   {
     id: "p-002",
@@ -50,7 +50,7 @@ export const mockProducts: Product[] = [
     badge: "for-pain",
     tone: "clear",
     mediaLabel: "Arnica Pellets",
-    image: "/Images/Products/boiron-arnica.webp",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-004",
@@ -101,7 +101,7 @@ export const mockProducts: Product[] = [
     badge: "trending",
     tone: "amber",
     mediaLabel: "Respiratory Care Drops",
-    image: "/Images/Products/reckeweg-r89.webp",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "p-007",
@@ -118,7 +118,7 @@ export const mockProducts: Product[] = [
     badge: "for-skin",
     tone: "clear",
     mediaLabel: "Calendula Cream",
-    image: "/Images/Products/sbl-calc-carb.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-008",
@@ -135,7 +135,7 @@ export const mockProducts: Product[] = [
     badge: "popular",
     tone: "amber",
     mediaLabel: "Hair Care Drops",
-    image: "/Images/Products/schwabe-alfalfa.webp",
+    image: "/Images/Products/reckeweg-r89.webp",
   },
   {
     id: "p-009",
@@ -150,7 +150,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.6, count: 120 },
     tone: "amber",
     mediaLabel: "Nux Vomica 30C",
-    image: "/Images/Products/sbl-natrum.webp",
+    image: "/Images/Products/sbl-calc-carb.webp",
   },
   {
     id: "p-010",
@@ -165,7 +165,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.3, count: 45 },
     tone: "clear",
     mediaLabel: "Bryonia Alba",
-    image: "/Images/Products/sbl-calc-carb.webp",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-011",
@@ -198,7 +198,7 @@ export const mockProducts: Product[] = [
     badge: "for-pain",
     tone: "clear",
     mediaLabel: "Rhus Tox Ointment",
-    image: "/Images/Products/bakson-arnica-oil.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-013",
@@ -308,7 +308,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.3, count: 75 },
     tone: "clear",
     mediaLabel: "Thuja Cream",
-    image: "/Images/Products/bakson-arnica-oil.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-020",
@@ -323,7 +323,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.5, count: 92 },
     tone: "clear",
     mediaLabel: "Aesculus Ointment",
-    image: "/Images/Products/sbl-calc-carb.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-021",
@@ -355,7 +355,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.8, count: 140 },
     tone: "amber",
     mediaLabel: "Spongia Tosta",
-    image: "/Images/Products/reckeweg-r89.webp",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "p-023",
@@ -370,7 +370,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.7, count: 210 },
     tone: "clear",
     mediaLabel: "Cantharis Ointment",
-    image: "/Images/Products/bakson-arnica-oil.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-024",
@@ -385,6 +385,7 @@ export const mockProducts: Product[] = [
     rating: { value: 4.6, count: 130 },
     tone: "clear",
     mediaLabel: "Calcarea Phos 6X",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     // Shown on the homepage bestseller row; listed here so its card links to
@@ -403,7 +404,7 @@ export const mockProducts: Product[] = [
     badge: "bestseller",
     tone: "clear",
     mediaLabel: "Immunity Support 30 CH bottle",
-    image: "/Images/Products/sbl-natrum.webp",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
 ];
 

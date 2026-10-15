@@ -76,10 +76,12 @@ export function ContactForm() {
         </label>
         <select 
           id="purpose"
+          name="purpose"
+          defaultValue=""
           className="flex h-12 w-full items-center justify-between rounded-xl border border-forest-abyss/10 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-forest-deep/30 disabled:cursor-not-allowed disabled:opacity-50"
           required
         >
-          <option value="" disabled selected hidden>Select a topic...</option>
+          <option value="" disabled hidden>Select a topic...</option>
           <option value="general">General Enquiry</option>
           <option value="product">Product Enquiry</option>
           <option value="order">Order Support</option>

@@ -6,7 +6,7 @@ import { useSyncExternalStore } from "react";
  * Saved products, kept on this device.
  *
  * The shop API has no wishlist or favourites contract (checked in
- * docohomo-prince, read-only), so nothing is synced to an account. Only
+ * the official backend), so nothing is synced to an account. Only
  * product slugs are stored; the favourites page asks the catalogue for
  * current details, so a saved item never shows a stale price.
  *

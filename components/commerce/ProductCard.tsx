@@ -28,6 +28,8 @@ type ProductCardProps = {
    * a row vary card width without going ragged along the bottom.
    */
   mediaRatio?: string;
+  /** First-row cards: load the photo immediately, it is likely the LCP element. */
+  eager?: boolean;
 };
 
 /**
@@ -42,6 +44,7 @@ export function ProductCard({
   className,
   variant = "default",
   mediaRatio = "aspect-[4/5]",
+  eager = false,
 }: ProductCardProps) {
   const favourites = useFavourites();
   const favourited = favourites.isFavourite(product.slug);
@@ -53,7 +56,8 @@ export function ProductCard({
   return (
     <Card
       className={cn(
-        "group relative flex h-full flex-col gap-0 overflow-hidden rounded-card border-line/70 bg-cream p-0 shadow-none transition-[box-shadow,transform,border-color] duration-400 ease-premium",
+        // @container: the price row adapts to the card's own width, not the viewport's.
+        "@container group relative flex h-full flex-col gap-0 overflow-hidden rounded-card border-line/70 bg-cream p-0 shadow-none transition-[box-shadow,transform,border-color] duration-400 ease-premium",
         "hover:-translate-y-1 hover:border-line hover:shadow-lift",
         className,
       )}
@@ -64,6 +68,7 @@ export function ProductCard({
           ratio={mediaRatio}
           glyphSize={isFeatured ? "lg" : "md"}
           rounded="rounded-none"
+          eager={eager}
         />
 
         {product.badge ? (
@@ -166,10 +171,12 @@ export function ProductCard({
                       brand: product.brand,
                     })
             }
-            className="relative z-3 h-8 rounded-lg bg-forest px-3 text-[0.76rem] font-semibold text-white hover:bg-forest-deep shadow-xs inline-flex items-center gap-1.5 transition-all active:scale-95"
+            className="relative z-3 h-8 shrink-0 rounded-lg bg-forest px-3 text-[0.76rem] font-semibold text-white hover:bg-forest-deep shadow-xs inline-flex items-center gap-1.5 transition-all active:scale-95 @max-[11.5rem]:w-8 @max-[11.5rem]:px-0"
           >
-            <ShoppingCart className="size-3.5" strokeWidth={2} />
-            <span>Add</span>
+            <ShoppingCart aria-hidden className="size-3.5" strokeWidth={2} />
+            {/* Two-up cards on a phone leave no room for the word; the
+                button keeps its accessible name either way. */}
+            <span className="@max-[11.5rem]:sr-only">Add</span>
           </Button>
         </div>
       </div>

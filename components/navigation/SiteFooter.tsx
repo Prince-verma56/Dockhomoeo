@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import {
   Accordion,
   AccordionContent,
@@ -17,7 +16,37 @@ import {
   XMark,
   YoutubeMark,
 } from "@/components/shared/SocialIcons";
-const footerGroups = [{ id: "shop", label: "Shop", links: [{ label: "All Products", href: "/products" },{ label: "Brands", href: "/brands" },{ label: "Categories", href: "/categories" }, { label: "Health Insights", href: "/insights" }]},{ id: "about", label: "About", links: [{ label: "Our Story", href: "/about" },{ label: "Quality Standards", href: "/quality" }]},{ id: "support", label: "Support", links: [{ label: "Contact Us", href: "/contact" },{ label: "Track Order", href: "/account/orders" }]}]; const paymentMarks = ["Visa", "Mastercard", "Amex", "UPI"];
+
+const footerGroups = [
+  {
+    id: "shop",
+    label: "Shop",
+    links: [
+      { label: "All Products", href: "/products" },
+      { label: "Brands", href: "/brands" },
+      { label: "Categories", href: "/categories" },
+      { label: "Health Insights", href: "/insights" },
+    ],
+  },
+  {
+    id: "about",
+    label: "About",
+    links: [
+      { label: "Our Story", href: "/about" },
+      { label: "Quality Standards", href: "/quality" },
+    ],
+  },
+  {
+    id: "support",
+    label: "Support",
+    links: [
+      { label: "Contact Us", href: "/contact" },
+      { label: "Track Order", href: "/account/orders" },
+    ],
+  },
+];
+
+const paymentMarks = ["Visa", "Mastercard", "Amex", "UPI"];
 
 const SOCIALS = [
   { label: "Facebook", href: "https://facebook.com", Icon: FacebookMark },
@@ -26,29 +55,35 @@ const SOCIALS = [
   { label: "X", href: "https://x.com", Icon: XMark },
 ] as const;
 
+const FOCUS_RING =
+  "focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:outline-none";
+
 /**
  * The footer: dense information architecture, visually calm.
  *
- * Desktop lays the link groups out as columns. Below `md` the same groups
- * become an accordion so the footer stays scannable instead of running to four
- * screens of links (brain/21_RESPONSIVE_SPEC.md). Both treatments render the
- * same markup source, so there is no duplicated link list to drift.
+ * Desktop lays brand, link groups and newsletter out in one row; tablet puts
+ * brand beside the newsletter with the link columns beneath. Below `md` the
+ * same groups become an accordion so the footer stays scannable instead of
+ * running to four screens of links (brain/21_RESPONSIVE_SPEC.md). Every
+ * treatment renders the same link source, so there is no duplicated list to
+ * drift. Copyright, build credit and tagline share a single closing bar.
  */
 export function SiteFooter() {
   return (
-    <footer className="bg-forest-abyss text-cream">
-      <Container width="wide" className="py-14 md:py-16">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)_minmax(0,1.1fr)] lg:gap-14">
+    // The top hairline separates the footer from pages that end on a dark section.
+    <footer className="border-t border-white/10 bg-forest-abyss text-cream">
+      <Container width="wide" className="pt-12 pb-7 md:pt-14 md:pb-8">
+        <div className="grid gap-10 md:grid-cols-2 md:gap-x-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)_minmax(0,1.2fr)] lg:gap-x-14">
           {/* --------------------------------------------------- brand area */}
           <div>
             <Wordmark tone="dark" />
 
-            <p className="mt-5 max-w-[34ch] text-[0.875rem] leading-relaxed text-cream/60">
+            <p className="mt-4 max-w-[36ch] text-[0.875rem] leading-relaxed text-cream/60">
               India&rsquo;s trusted platform for homoeopathic medicines and
               expert care — for a healthier, happier you.
             </p>
 
-            <ul className="mt-7 flex items-center gap-2.5">
+            <ul className="mt-6 flex items-center gap-2.5">
               {SOCIALS.map(({ label, href, Icon }) => (
                 <li key={label}>
                   <a
@@ -56,7 +91,7 @@ export function SiteFooter() {
                     target="_blank"
                     rel="noreferrer noopener"
                     aria-label={`DocHomoeo on ${label}`}
-                    className="grid size-10 place-items-center rounded-full border border-white/12 text-cream/70 transition-colors duration-200 hover:border-white/30 hover:text-cream"
+                    className={`grid size-10 place-items-center rounded-full border border-white/12 text-cream/70 transition-colors duration-200 hover:border-white/30 hover:text-cream ${FOCUS_RING}`}
                   >
                     <Icon className="size-[18px]" />
                   </a>
@@ -66,18 +101,21 @@ export function SiteFooter() {
           </div>
 
           {/* --------------------------------------------------- link groups */}
-          <nav aria-label="Footer">
-            {/* Desktop: columns. */}
-            <div className="hidden gap-10 md:grid md:grid-cols-3">
+          <nav
+            aria-label="Footer"
+            className="md:order-last md:col-span-2 lg:order-0 lg:col-span-1"
+          >
+            {/* Tablet and up: columns. */}
+            <div className="hidden gap-8 md:grid md:grid-cols-3">
               {footerGroups.map((group) => (
                 <div key={group.id}>
                   <h2 className="dh-eyebrow text-cream/50">{group.label}</h2>
-                  <ul className="mt-5 flex flex-col gap-3">
+                  <ul className="mt-4 flex flex-col gap-2.5">
                     {group.links.map((link) => (
                       <li key={link.href}>
                         <Link
                           href={link.href}
-                          className="text-[0.875rem] text-cream/70 transition-colors hover:text-cream"
+                          className={`rounded-sm text-[0.875rem] text-cream/70 transition-colors hover:text-cream ${FOCUS_RING}`}
                         >
                           {link.label}
                         </Link>
@@ -99,11 +137,11 @@ export function SiteFooter() {
                   value={group.id}
                   className="border-b border-white/10"
                 >
-                  <AccordionTrigger className="py-4 text-[0.9375rem] text-cream hover:no-underline">
+                  <AccordionTrigger className="py-3.5 text-[0.9375rem] text-cream hover:no-underline">
                     {group.label}
                   </AccordionTrigger>
                   <AccordionContent>
-                    <ul className="flex flex-col gap-3 pb-4">
+                    <ul className="flex flex-col gap-3 pb-3">
                       {group.links.map((link) => (
                         <li key={link.href}>
                           <Link
@@ -126,11 +164,11 @@ export function SiteFooter() {
             <h2 className="dh-eyebrow text-cream/50">
               Subscribe to our newsletter
             </h2>
-            <p className="mt-4 text-[0.875rem] leading-relaxed text-cream/60">
+            <p className="mt-3 text-[0.875rem] leading-relaxed text-cream/60">
               Health tips, new arrivals and exclusive offers.
             </p>
 
-            <form className="mt-5 flex items-center gap-2" suppressHydrationWarning>
+            <form className="mt-4 flex max-w-md items-center gap-2" suppressHydrationWarning>
               <label htmlFor="newsletter-email" className="sr-only">
                 Email address
               </label>
@@ -141,26 +179,26 @@ export function SiteFooter() {
                 autoComplete="email"
                 required
                 placeholder="Enter your email"
-                className="h-12 flex-1 rounded-xl border-white/15 bg-white/6 text-sm text-cream placeholder:text-cream/40"
+                className="h-11 flex-1 rounded-xl border-white/15 bg-white/6 text-sm text-cream placeholder:text-cream/40"
                 suppressHydrationWarning
               />
               <Button
                 type="submit"
                 size="icon-xl"
                 aria-label="Subscribe to the newsletter"
-                className="size-12 shrink-0 rounded-xl bg-cream text-forest-deep hover:bg-white"
+                className="size-11 shrink-0 rounded-xl bg-cream text-forest-deep hover:bg-white"
               >
                 <ArrowRight className="size-[18px]" strokeWidth={1.8} />
               </Button>
             </form>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <h3 className="dh-eyebrow text-cream/50">We accept</h3>
-              <ul className="mt-4 flex flex-wrap items-center gap-2">
+              <ul className="mt-3 flex flex-wrap items-center gap-2">
                 {paymentMarks.map((mark) => (
                   <li
                     key={mark}
-                    className="rounded-lg border border-white/12 bg-white/5 px-3 py-2 text-[0.6875rem] font-medium tracking-wide text-cream/70"
+                    className="rounded-lg border border-white/12 bg-white/5 px-3 py-1.5 text-[0.6875rem] font-medium tracking-wide text-cream/70"
                   >
                     {mark}
                   </li>
@@ -170,30 +208,29 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <Separator className="my-10 bg-white/10" />
-
-        {/* Build credit. Sits above the legal line, quiet enough that it reads
-            as a signature rather than a second footer row. */}
-        <p className="flex items-center justify-center gap-1.5 text-[0.6875rem] tracking-[0.18em] text-cream/35 uppercase">
-          <span>Made with</span>
-          <span aria-hidden className="text-[0.8125rem] leading-none">&#128293;</span>
-          <span className="sr-only">fire</span>
-          <span>by</span>
-          <a
-            href="https://labs.theangaarbatch.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-sm text-cream/60 underline decoration-cream/20 decoration-from-font underline-offset-4 transition-colors duration-300 hover:text-cream hover:decoration-cream/50 focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-abyss focus-visible:outline-none"
-          >
-            The Angaar Labs
-          </a>
-        </p>
-
-        <div className="mt-8 flex flex-col gap-3 text-xs text-cream/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>
+        {/* Closing bar: copyright left, build credit centred, tagline right on
+            desktop; stacked and centred below lg, where three columns cramp. */}
+        <div className="mt-10 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center text-xs text-cream/50 md:mt-12 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-6 lg:text-left">
+          <p className="lg:justify-self-start">
             &copy; {new Date().getFullYear()} DocHomoeo. All rights reserved.
           </p>
-          <p>Designed for a healthier tomorrow.</p>
+
+          <p className="flex items-center gap-1.5 text-[0.6875rem] tracking-[0.16em] uppercase lg:justify-self-center">
+            <span>Made with</span>
+            <span aria-hidden className="text-[0.8125rem] leading-none">&#128293;</span>
+            <span className="sr-only">fire</span>
+            <span>by</span>
+            <a
+              href="https://labs.theangaarbatch.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-sm text-cream/75 underline decoration-cream/25 decoration-from-font underline-offset-4 transition-colors duration-300 hover:text-cream hover:decoration-cream/60 focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-abyss focus-visible:outline-none"
+            >
+              The Angaar Labs
+            </a>
+          </p>
+
+          <p className="lg:justify-self-end">Designed for a healthier tomorrow.</p>
         </div>
       </Container>
     </footer>

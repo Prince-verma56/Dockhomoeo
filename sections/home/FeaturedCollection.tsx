@@ -80,7 +80,9 @@ export function FeaturedCollection() {
                             src={collection.image}
                             alt={collection.mediaLabel || ""}
                             fill
+                            sizes="(max-width: 1024px) 50vw, 300px"
                             className="object-cover"
+                            style={collection.imagePosition ? { objectPosition: collection.imagePosition } : undefined}
                           />
                         </div>
                       ) : (

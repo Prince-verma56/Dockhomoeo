@@ -47,7 +47,7 @@ export default function OrdersPage() {
           </div>
           <h3 className="font-display text-xl font-bold text-ink">No orders yet</h3>
           <p className="mt-2 text-muted-ink max-w-md">
-            Looks like you haven't placed any orders yet. Start exploring our natural remedies.
+            Looks like you haven&rsquo;t placed any orders yet. Start exploring our natural remedies.
           </p>
           <Link
             href="/products"

@@ -1,4 +1,4 @@
-import type { ApiAddress } from "@/types/api/cart";
+import type { ApiCheckoutAddress } from "@/types/api/cart";
 
 /**
  * The checkout form and its rules. Limits and messages follow the backend's
@@ -80,7 +80,7 @@ export function validateCheckoutForm(form: CheckoutForm): FieldErrors {
   return errors;
 }
 
-export function toApiAddress(form: CheckoutForm): ApiAddress {
+export function toApiAddress(form: CheckoutForm): ApiCheckoutAddress {
   return {
     fullName: form.fullName.trim(),
     phone: normalisePhone(form.phone),

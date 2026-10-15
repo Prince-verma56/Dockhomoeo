@@ -36,7 +36,7 @@ export function Wordmark({
           viewBox="0 0 32 32"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="size-6 text-[#0d5a43]"
+          className={cn("size-6", isDark ? "text-sage" : "text-[#0d5a43]")}
         >
           {/* Left leaf */}
           <path
@@ -69,7 +69,7 @@ export function Wordmark({
             isDark ? "text-cream" : "text-[#14251f]"
           )}
         >
-          Doc<span className="text-[#0d5a43]">Homoeo</span>
+          Doc<span className={isDark ? "text-sage" : "text-[#0d5a43]"}>Homoeo</span>
         </span>
         {showTagline ? (
           <span

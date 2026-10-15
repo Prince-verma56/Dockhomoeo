@@ -18,7 +18,7 @@ const accountNav = [
 ];
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
-  const { status, isAuthenticated, logout } = useAuth();
+  const { status, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 

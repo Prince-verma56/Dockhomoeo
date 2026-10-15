@@ -40,6 +40,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             stripped, so the page degrades to plain visible content instead of
             staying blank. */}
         <script
+          // suppressHydrationWarning suppresses the React 19 dev-only console
+          // note about script tags; the script itself executes correctly.
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var d=document.documentElement;if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;d.classList.add("dh-motion");setTimeout(function(){if(!d.hasAttribute("data-motion-ready"))d.classList.remove("dh-motion")},4000)}catch(e){}})()`,
           }}

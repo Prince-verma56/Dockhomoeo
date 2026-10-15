@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { InsightCard } from "@/components/content/InsightCard";
-import { ArrowLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 

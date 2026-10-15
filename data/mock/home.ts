@@ -138,7 +138,7 @@ const bestsellingProductData: Product[] = [
     badge: "bestseller",
     tone: "clear",
     mediaLabel: "Immunity Support 30 CH bottle on stone pedestal",
-    image: "/Images/Products/sbl-natrum.webp",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-002",
@@ -168,14 +168,14 @@ const bestsellingProductData: Product[] = [
     badge: "for-pain",
     tone: "clear",
     mediaLabel: "Arnica Pellets 200 on stone pedestal",
-    image: "/Images/Products/boiron-arnica.webp",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "p-004",
     slug: "arnica-massage-oil",
     name: "Arnica Massage Oil",
     brand: "DOC HOMEO",
-    form: "drops",
+    form: "oil",
     variant: "100 ml bottle",
     price: { amount: 149, currency: "INR" },
     compareAtPrice: { amount: 195, currency: "INR" },
@@ -213,7 +213,7 @@ const bestsellingProductData: Product[] = [
     badge: "trending",
     tone: "amber",
     mediaLabel: "Respiratory Care Drops bottle on stone pedestal",
-    image: "/Images/Products/reckeweg-r89.webp",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
   {
     id: "p-007",
@@ -228,7 +228,7 @@ const bestsellingProductData: Product[] = [
     badge: "for-skin",
     tone: "clear",
     mediaLabel: "Calendula Cream jar on stone pedestal",
-    image: "/Images/Products/sbl-calc-carb.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
   {
     id: "p-008",
@@ -243,7 +243,7 @@ const bestsellingProductData: Product[] = [
     badge: "popular",
     tone: "amber",
     mediaLabel: "Hair Care Drops bottle on stone pedestal",
-    image: "/Images/Products/schwabe-alfalfa.webp",
+    image: "/Images/Products/reckeweg-r41.webp",
   },
 ];
 
@@ -281,7 +281,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 200,
     tone: "clear",
     mediaLabel: "Glass pellet jar with the lid resting beside it",
-    image: "/Images/Products/boiron-arnica.webp",
+    image: "/Images/Products/lords-kali-phos.webp",
   },
   {
     id: "c-tinctures",
@@ -291,7 +291,9 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 90,
     tone: "forest",
     mediaLabel: "Tincture bottle among pressed botanical leaves",
-    image: "/Images/Products/sbl-natrum.webp",
+    image: "/Images/SeasonalEditBG.webp",
+    // The scene's amber tincture bottle sits right of centre (as in FORM_MEDIA).
+    imagePosition: "78% 60%",
   },
   {
     id: "c-creams",
@@ -301,7 +303,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 80,
     tone: "cobalt",
     mediaLabel: "Cream tube on a folded linen cloth, top-down light",
-    image: "/Images/Products/sbl-calc-carb.webp",
+    image: "/Images/Products/boiron-arnica.webp",
   },
 ];
 

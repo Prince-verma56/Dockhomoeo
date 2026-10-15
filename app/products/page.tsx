@@ -1,5 +1,7 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { repositories } from "@/lib/repositories";
+import { listingHref, parseSearchState, toSearchFilters } from "@/lib/search/searchState";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { ShopView } from "@/sections/shop/ShopView";
@@ -9,46 +11,21 @@ export const metadata: Metadata = {
   description: "Browse our premium selection of authentic homoeopathic medicines and products.",
 };
 
-type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+export default async function ProductsPage({ searchParams }: PageProps<"/products">) {
+  // URL → listing state → repository filters: the same path /search and brand pages take.
+  const state = parseSearchState(await searchParams);
+  const result = await repositories.search.search(toSearchFilters(state));
 
-export default async function ProductsPage(props: PageProps) {
-  const searchParams = await props.searchParams;
-  
-  // Parse search params for filters
-  const page = typeof searchParams.page === "string" ? parseInt(searchParams.page, 10) : 1;
-  const sort = typeof searchParams.sort === "string" ? searchParams.sort : undefined;
-  const category = typeof searchParams.category === "string" ? searchParams.category : undefined;
-  const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
-  
-  const brand = typeof searchParams.brand === "string" 
-    ? [searchParams.brand] 
-    : Array.isArray(searchParams.brand) ? searchParams.brand : undefined;
-    
-  const form = typeof searchParams.form === "string" 
-    ? [searchParams.form] 
-    : Array.isArray(searchParams.form) ? searchParams.form : undefined;
-
-  const inStock = searchParams.inStock === "true";
-  
-  // Fetch data
-  const result = await repositories.search.search({
-    q,
-    category,
-    brand,
-    form,
-    inStock,
-    sort,
-    page,
-    pageSize: 24,
-  });
+  // A page past the end (an old link, a narrowed filter) goes to the last real one.
+  if (result.items.length === 0 && result.total > 0) {
+    redirect(listingHref("/products", { ...state, page: result.pageCount }));
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#faf9f6]">
       <SiteHeader />
-      <main className="flex-1 pt-[72px]">
-        <ShopView result={result} searchQuery={q} />
+      <main id="main" className="flex-1 pt-[72px]">
+        <ShopView state={state} result={result} />
       </main>
       <SiteFooter />
     </div>

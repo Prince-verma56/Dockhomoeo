@@ -49,3 +49,10 @@ docohomo-prince/
 
 # Local audit / implementation reports (not committed)
 project-docs/
+
+# Database and SQL migrations
+migrations/
+**/migrations/
+*.sql
+migration.sql
+

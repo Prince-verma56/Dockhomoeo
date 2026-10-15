@@ -11,6 +11,8 @@ type ProductMediaProps = {
   surface?: MediaTone;
   glyphSize?: "sm" | "md" | "lg";
   rounded?: string;
+  /** Above-the-fold cards load their photo at once instead of lazily (likely LCP). */
+  eager?: boolean;
 };
 
 /**
@@ -26,6 +28,7 @@ export function ProductMedia({
   surface = "cream",
   glyphSize = "md",
   rounded,
+  eager = false,
 }: ProductMediaProps) {
   return (
     <MediaPlaceholder
@@ -43,6 +46,7 @@ export function ProductMedia({
           src={product.image}
           alt={product.mediaLabel}
           fill
+          loading={eager ? "eager" : undefined}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
         />

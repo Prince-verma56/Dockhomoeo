@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const API_URL = process.env.API_URL ?? "http://localhost:4000";
+
 const nextConfig: NextConfig = {
   images: {
     // The hero's social-proof avatars are remote placeholders. next/image
@@ -7,6 +9,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
+  },
+  // Proxy API and upload calls to the backend on port 4000
+  async rewrites() {
+    return [
+      { source: "/api/:path*", destination: `${API_URL}/api/:path*` },
+      { source: "/uploads/:path*", destination: `${API_URL}/uploads/:path*` },
+    ];
   },
 };
 

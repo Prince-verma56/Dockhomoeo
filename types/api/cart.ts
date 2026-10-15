@@ -64,7 +64,8 @@ export interface ApiQuote {
   onlineTest: boolean;
 }
 
-export interface ApiAddress {
+/** The delivery address sent with an order (backend addressSchema). Not a saved address: see ApiAddress in ./account. */
+export interface ApiCheckoutAddress {
   fullName: string;
   phone: string;
   line1: string;
@@ -75,7 +76,7 @@ export interface ApiAddress {
 }
 
 export interface ApiCheckoutPayload extends ApiQuoteInput {
-  address: ApiAddress;
+  address: ApiCheckoutAddress;
   saveAddress?: boolean;
   note?: string | null;
   expectedTotal?: number;

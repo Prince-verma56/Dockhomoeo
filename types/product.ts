@@ -58,6 +58,8 @@ export type ProductCollection = {
   tone: GlassTone;
   mediaLabel: string;
   image?: string;
+  /** CSS object-position when the subject is not centred in the photograph. */
+  imagePosition?: string;
 };
 
 /** A health goal entry in the category explorer. */

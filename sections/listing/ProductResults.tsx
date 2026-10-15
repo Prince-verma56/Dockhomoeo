@@ -193,7 +193,7 @@ export function ProductResults({
                       animationTimingFunction: "var(--ease-premium)",
                     }}
                   >
-                    <ProductCard product={mapApiCardToProduct(item)} />
+                    <ProductCard product={mapApiCardToProduct(item)} eager={index < 4} />
                   </li>
                 ))}
               </ul>
