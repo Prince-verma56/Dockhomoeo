@@ -12,6 +12,9 @@ import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { SafeRichText } from "@/components/shared/SafeRichText";
 import { Button } from "@/components/ui/button";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
+import { DepthImage } from "@/components/shared/DepthImage";
+import { RisePanel } from "@/components/shared/RisePanel";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const params = await props.params;
@@ -66,9 +69,9 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-canvas">
+      <main id="main" className="flex-1 overflow-x-clip bg-canvas">
         <article>
-          <header className="pt-24 pb-10 sm:pt-28 lg:pb-14">
+          <header className={cn("dh-head-arc pt-24 sm:pt-28", insight.coverImageUrl && "dh-head-arc--overlap")}>
             <Container width="narrow">
               <PageBreadcrumb
                 items={[
@@ -100,10 +103,15 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
           </header>
 
           {insight.coverImageUrl ? (
-            <Container width="narrow">
-              <div className="relative aspect-[16/8] w-full overflow-hidden rounded-[1.75rem] border border-line/70 bg-cream-sunk">
-                <Image src={insight.coverImageUrl} alt="" fill loading="eager" fetchPriority="high" sizes="(max-width: 1100px) 100vw, 1040px" className="object-cover" />
-              </div>
+            // The cover sits across the head's arc, drifting slightly inside its frame.
+            <Container width="narrow" className="dh-overlap-up">
+              <DepthImage
+                src={insight.coverImageUrl}
+                sizes="(max-width: 1100px) 100vw, 1040px"
+                preload
+                speed={-6}
+                className="aspect-[16/8] w-full rounded-[1.75rem] bg-cream-sunk shadow-lift"
+              />
             </Container>
           ) : null}
 
@@ -153,7 +161,7 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
         </article>
 
         {related.items.length > 0 ? (
-          <section aria-labelledby="keep-reading" className="border-t border-line/70 bg-cream/50 py-14 lg:py-20">
+          <RisePanel aria-labelledby="keep-reading" settle className="pt-14 pb-16 lg:pt-20 lg:pb-24">
             <Container>
               <div className="mb-8 flex items-end justify-between gap-4">
                 <h2 id="keep-reading" className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
@@ -169,7 +177,7 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
                 ))}
               </div>
             </Container>
-          </section>
+          </RisePanel>
         ) : null}
       </main>
       <DemoContentNotice />

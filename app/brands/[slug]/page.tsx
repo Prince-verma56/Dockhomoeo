@@ -11,6 +11,7 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { BrandCard } from "@/components/commerce/BrandCard";
+import { RisePanel } from "@/components/shared/RisePanel";
 import { cn } from "@/lib/utils";
 import { describeForms, getBrandDirectory } from "@/lib/catalogue";
 import {
@@ -84,7 +85,7 @@ export default async function BrandPage({ params, searchParams }: Props) {
     <>
       <SiteHeader />
       <main id="main" className="flex-1 bg-canvas">
-        <section aria-labelledby="brand-heading" className="dh-band-sage pt-28 pb-8 sm:pt-32 lg:pb-10">
+        <section aria-labelledby="brand-heading" className="dh-head-arc pt-28 sm:pt-32">
           <Container>
             <PageBreadcrumb
               items={[
@@ -146,7 +147,7 @@ export default async function BrandPage({ params, searchParams }: Props) {
         <BrandListing slug={brand.slug} brandName={brand.name} state={state} result={result} />
 
         {otherBrands.length > 0 ? (
-          <section aria-labelledby="other-brands" className="dh-band-mist py-12 lg:py-14">
+          <RisePanel aria-labelledby="other-brands" settle className="pt-12 pb-14 lg:pt-14 lg:pb-20">
             <Container>
               <div className="mb-5 flex items-end justify-between gap-4">
                 <h2 id="other-brands" className="font-display text-2xl tracking-tight text-ink sm:text-3xl">
@@ -160,12 +161,12 @@ export default async function BrandPage({ params, searchParams }: Props) {
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {otherBrands.map((other) => (
                   <li key={other.slug}>
-                    <BrandCard brand={other} variant="row" />
+                    <BrandCard brand={other} />
                   </li>
                 ))}
               </ul>
             </Container>
-          </section>
+          </RisePanel>
         ) : null}
       </main>
       <DemoContentNotice />

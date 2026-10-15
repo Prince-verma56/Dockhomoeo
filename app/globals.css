@@ -440,19 +440,90 @@
      so overflow is controlled.
   */
 
-  /* Sage header that tapers softly into the page canvas instead of a hairline. */
-  .dh-band-sage-flowing {
-    background-color: var(--dh-sage-wash);
-    background-image:
-      radial-gradient(56rem 20rem at 88% -12%, rgba(255, 255, 255, 0.85), transparent 70%),
-      linear-gradient(180deg, var(--dh-sage-wash) 0%, #f3f7f1 78%, var(--dh-canvas) 100%);
-    padding-bottom: 3rem;
+  /* ---- Section transition system (interior routes) ------------------------
+     Three moves, used selectively rather than on every boundary:
+
+     dh-head-arc   the page head: pale sage ending in a shallow arc instead of
+                   a ruled line. With --overlap, it reserves room for the next
+                   section to sit across the arc (pair with dh-overlap-up).
+     dh-overlap-up pulls a section up across the arc above it, so the first
+                   content block is shared by both surfaces.
+     dh-rise       a surface that rises out of the canvas with rounded top
+                   corners (mist by default, --sage for a tinted one). With
+                   --tuck, it slides under the section above so that section's
+                   cards straddle the seam; with --settle, its colour eases
+                   back into the canvas at the bottom, so it ends without an
+                   edge. RisePanel adds the scroll-linked opening.
+  */
+  :root {
+    --dh-overlap: clamp(3.5rem, 7vw, 6.5rem);
+    --dh-arc-depth: clamp(1.25rem, 4.5vw, 4rem);
+    --dh-rise-radius: clamp(1.75rem, 4vw, 3.25rem);
   }
 
-  @media (min-width: 1024px) {
-    .dh-band-sage-flowing {
-      padding-bottom: 4rem;
-    }
+  .dh-head-arc {
+    position: relative;
+    isolation: isolate;
+    padding-bottom: calc(var(--dh-arc-depth) + 2.5rem);
+  }
+
+  .dh-head-arc--overlap {
+    padding-bottom: calc(var(--dh-overlap) + var(--dh-arc-depth) + 2.5rem);
+  }
+
+  .dh-head-arc::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--dh-sage-wash);
+    background-image:
+      radial-gradient(56rem 22rem at 88% -12%, rgba(255, 255, 255, 0.85), transparent 70%),
+      radial-gradient(42rem 18rem at 0% 100%, rgba(13, 90, 67, 0.05), transparent 70%),
+      linear-gradient(180deg, var(--dh-sage-wash) 0%, #f2f6ef 100%);
+    border-bottom-left-radius: 50% var(--dh-arc-depth);
+    border-bottom-right-radius: 50% var(--dh-arc-depth);
+  }
+
+  .dh-overlap-up {
+    position: relative;
+    z-index: 1;
+    margin-top: calc(-1 * var(--dh-overlap));
+  }
+
+  .dh-rise {
+    position: relative;
+    background-color: var(--dh-rise-bg, var(--dh-mist));
+    border-radius: var(--dh-rise-radius) var(--dh-rise-radius) 0 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .dh-rise--sage {
+    --dh-rise-bg: var(--dh-sage-wash);
+  }
+
+  .dh-rise--tuck {
+    margin-top: calc(-1 * var(--dh-overlap));
+    padding-top: calc(var(--dh-overlap) + clamp(3.5rem, 7vw, 6rem));
+  }
+
+  .dh-rise--settle {
+    background-image: linear-gradient(180deg, transparent 72%, var(--dh-canvas) 100%);
+  }
+
+  /* Studio studies on a white sweep (the health-goal artwork) take on the
+     surface behind them, so the subject fills a tinted frame instead of
+     floating in a white box. */
+  .dh-study {
+    background-color: var(--dh-sage-wash);
+  }
+
+  .dh-study img {
+    mix-blend-mode: multiply;
+    /* The sweep is not pure white and has a soft vignette; feather the
+       artwork's edge so its square never shows against the tint. */
+    -webkit-mask-image: radial-gradient(circle closest-side, #000 64%, transparent 100%);
+    mask-image: radial-gradient(circle closest-side, #000 64%, transparent 100%);
   }
 
   /* Inset grouped panel — white card surface with a gentle inner shadow so it
