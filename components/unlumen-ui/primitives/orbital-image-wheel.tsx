@@ -59,6 +59,7 @@ const HEADER_CLEARANCE = 96;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /**
  * A ring of cards turning past a focus point at the top of the screen as the
@@ -98,6 +99,7 @@ export function OrbitalImageWheel({
 
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const captionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const [active, setActive] = useState(0);
 
@@ -121,15 +123,22 @@ export function OrbitalImageWheel({
       const measure = () => {
         const width = stage.clientWidth;
         const height = stage.clientHeight;
-        const cardH = clamp(height * 0.4, 220, 360);
+        const cardH = clamp(height * 0.44, 220, 400);
         const cardW = Math.round(cardH * 0.78);
+        // An ellipse rather than a circle: wide enough to put two cards either
+        // side of the focus across the screen, shallow enough that the outer
+        // ones stay above the caption. Never so tight that neighbours collide.
+        const rx = Math.max(width * 0.5, cardW * 1.95);
         return {
+          width,
+          height,
           cardW,
           cardH,
-          radius: clamp(width * 0.4, 400, 760),
+          rx,
+          ry: rx * 0.42,
           // The focused card's centre: high enough to leave the caption room,
           // low enough to clear the fixed header.
-          focusY: Math.max(height * 0.42, HEADER_CLEARANCE + cardH / 2),
+          focusY: Math.max(height * 0.4, HEADER_CLEARANCE + cardH / 2),
         };
       };
 
@@ -138,29 +147,42 @@ export function OrbitalImageWheel({
       const applySize = () => gsap.set(cards, { width: geometry.cardW, height: geometry.cardH });
       applySize();
       let focused = -1;
-      const state = { step: 0 };
+      // step: position on the ring. enter / leave: 0..1 as the section scrolls
+      // into place and out again, for the entrance and exit choreography.
+      const state = { step: 0, enter: 1, leave: 0 };
 
       const render = () => {
-        const { cardW, cardH, radius, focusY } = geometry;
+        const { height, cardW, cardH, rx, ry, focusY } = geometry;
+        const enter = easeOutCubic(state.enter);
+        const leave = easeInOutCubic(state.leave);
+        // Arriving, the ring opens out from the centre and rises into place;
+        // leaving, it widens and sinks as it fades.
+        const spread = (0.55 + 0.45 * enter) * (1 + 0.3 * leave);
+        const lift = (1 - enter) * height * 0.28 + leave * height * 0.12;
+        const presence = enter * (1 - leave * 0.9);
+
         cards.forEach((card, slot) => {
           const raw = (slot - state.step) * slotAngle;
           const theta = Math.atan2(Math.sin(raw), Math.cos(raw)); // -π..π, 0 at the top
           const angle = Math.abs(theta);
-          const away = Math.min(1, angle / (slotAngle * 1.6));
-          // Full strength at the focus, fading out by the second neighbour so
-          // the outer cards never sit over the caption.
-          const fade = 1 - clamp((angle - slotAngle * 0.6) / (slotAngle * 1.4), 0, 1);
-          const onScreen = fade > 0.01;
+          const away = Math.min(1, angle / (slotAngle * 2.5));
+          // Full strength at the focus, the next card each side close behind,
+          // the one after that faint, then gone.
+          const fade = 1 - clamp((angle - slotAngle * 0.5) / (slotAngle * 2.2), 0, 1);
+          const opacity = fade * presence;
           gsap.set(card, {
-            x: radius * Math.sin(theta) - cardW / 2,
-            y: focusY + radius * (1 - Math.cos(theta)) - cardH / 2,
-            rotation: theta * (180 / Math.PI) * 0.3,
-            scale: 1 - away * 0.16,
-            opacity: fade,
-            visibility: onScreen ? "visible" : "hidden",
+            x: rx * Math.sin(theta) * spread - cardW / 2,
+            y: focusY + ry * (1 - Math.cos(theta)) + lift - cardH / 2,
+            rotation: theta * (180 / Math.PI) * 0.18,
+            scale: (1 - away * 0.25) * (1 - leave * 0.08),
+            opacity,
+            visibility: opacity > 0.01 ? "visible" : "hidden",
             zIndex: Math.round((1 - away) * 100),
           });
         });
+
+        const caption = captionRef.current;
+        if (caption) gsap.set(caption, { opacity: clamp(state.enter * 1.6 - 0.6, 0, 1) * (1 - state.leave), y: leave * 24 });
 
         const next = (((Math.round(state.step) % slotCount) + slotCount) % slotCount) % count;
         if (next !== focused) {
@@ -200,7 +222,31 @@ export function OrbitalImageWheel({
       });
       triggerRef.current = trigger;
 
+      // Entrance: while the stage travels up the screen to pin.
+      const entrance = ScrollTrigger.create({
+        trigger: root,
+        start: "top bottom",
+        end: "top top",
+        onUpdate: (self) => {
+          state.enter = self.progress;
+          render();
+        },
+      });
+
+      // Exit: while the stage scrolls away after the last item.
+      const exit = ScrollTrigger.create({
+        trigger: root,
+        start: "bottom bottom",
+        end: "bottom 35%",
+        onUpdate: (self) => {
+          state.leave = self.progress;
+          render();
+        },
+      });
+
       state.step = toStep(trigger.progress);
+      state.enter = entrance.progress;
+      state.leave = exit.progress;
       render();
 
       const observer = new ResizeObserver(() => {
@@ -264,7 +310,7 @@ export function OrbitalImageWheel({
             ))}
 
             {current ? (
-              <div className="absolute inset-x-0 bottom-0 z-[200] flex flex-col items-center gap-4 px-6 pb-[max(1.75rem,5svh)] text-center">
+              <div ref={captionRef} className="absolute inset-x-0 bottom-0 z-[200] flex flex-col items-center gap-4 px-6 pb-[max(1.75rem,5svh)] text-center">
                 <div role="group" aria-label={label} className="flex flex-wrap justify-center gap-2">
                   {items.map((item, index) => (
                     <button

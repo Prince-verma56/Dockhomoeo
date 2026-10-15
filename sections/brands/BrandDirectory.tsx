@@ -157,7 +157,7 @@ export function BrandDirectory({
               <span aria-hidden className="pt-4 font-display text-3xl leading-none text-forest/30 sm:pt-5 sm:text-4xl">
                 {key}
               </span>
-              <ul className="grid lg:grid-cols-2 lg:gap-x-10">
+              <ul className="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-10">
                 {group.map((brand) => (
                   <li key={brand.slug} className="border-t border-line-soft first:border-t-0 lg:[&:nth-child(2)]:border-t-0">
                     <IndexRow brand={brand} range={ranges[brand.slug]} />
