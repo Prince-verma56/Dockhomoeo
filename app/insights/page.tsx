@@ -11,6 +11,7 @@ import { SplitHeading } from "@/components/shared/SplitHeading";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { InsightCard } from "@/components/content/InsightCard";
+import { RisePanel } from "@/components/shared/RisePanel";
 import { cn } from "@/lib/utils";
 
 type Props = PageProps<"/insights">;
@@ -86,8 +87,11 @@ export default async function InsightsPage({ searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-canvas">
-        <section aria-labelledby="insights-heading" className="dh-band-sage-flowing pt-28 sm:pt-32">
+      <main id="main" className="flex-1 overflow-x-clip bg-canvas">
+        <section
+          aria-labelledby="insights-heading"
+          className={cn("dh-head-arc pt-28 sm:pt-32", featured && "dh-head-arc--overlap")}
+        >
           <Container>
             <PageBreadcrumb
               items={[
@@ -145,7 +149,8 @@ export default async function InsightsPage({ searchParams }: Props) {
           </Container>
         </section>
 
-        <section aria-label="Articles" className="py-12 lg:py-16">
+        {/* The lead article sits across the head's arc. */}
+        <section aria-label="Articles" className={cn("pb-16 lg:pb-24", featured ? "dh-overlap-up" : "pt-12 lg:pt-16")}>
           <Container>
             {featured ? (
               <>
@@ -184,7 +189,7 @@ export default async function InsightsPage({ searchParams }: Props) {
         </section>
 
         {home.categories.length > 0 ? (
-          <section aria-labelledby="insights-explore" className="dh-band-mist py-12 lg:py-14">
+          <RisePanel aria-labelledby="insights-explore" settle className="pt-14 pb-16 lg:pt-16 lg:pb-20">
             <Container>
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
                 <div className="max-w-md">
@@ -209,7 +214,7 @@ export default async function InsightsPage({ searchParams }: Props) {
                 </ul>
               </div>
             </Container>
-          </section>
+          </RisePanel>
         ) : null}
       </main>
       <DemoContentNotice />
