@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Check, Heart, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,21 +24,24 @@ type ProductCardProps = {
    */
   variant?: "default" | "featured";
   /**
-   * Sizing utility for the media box. Rows pass a fixed height rather than an
-   * aspect ratio so cards of differing widths still line up, which is what lets
-   * a row vary card width without going ragged along the bottom.
+   * Sizing utility for the media box. Every grid uses the default so cards
+   * line up; a homepage row may pass its own to suit its layout.
    */
   mediaRatio?: string;
   /** First-row cards: load the photo immediately, it is likely the LCP element. */
   eager?: boolean;
 };
 
+/** How long the button says "Added" after a successful add. */
+const ADDED_MS = 1400;
+
 /**
  * The commerce card: media-dominant, predictable controls, one add-to-cart.
  *
- * "Add" hands the card's pack to the cart provider when the product carries a
- * `variantId` (listing data does). The heart saves the product to favourites
- * on this device (lib/favourites) — the shop has no wishlist contract yet.
+ * "Add" hands the card's pack to the cart provider with the card's image as
+ * the flight's starting point, so the image travels into the cart sheet. The
+ * heart saves the product to favourites on this device (lib/favourites) — the
+ * shop has no wishlist contract yet.
  */
 export function ProductCard({
   product,
@@ -52,24 +56,46 @@ export function ProductCard({
   const reducedMotion = useReducedMotion();
   const { addItem } = useCart();
   const { variantId } = product;
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(addedTimer.current), []);
+
+  const onAdd = (event: MouseEvent<HTMLButtonElement>) => {
+    if (variantId === undefined) return;
+    const source = event.currentTarget
+      .closest<HTMLElement>("[data-product-card]")
+      ?.querySelector<HTMLElement>("[data-product-media]");
+    const accepted = addItem(
+      {
+        variantId,
+        quantity: 1,
+        title: product.name,
+        price: product.price.amount,
+        imageUrl: product.image,
+        brand: product.brand,
+        form: product.form,
+      },
+      { source },
+    );
+    if (!accepted) return;
+    setAdded(true);
+    window.clearTimeout(addedTimer.current);
+    addedTimer.current = window.setTimeout(() => setAdded(false), ADDED_MS);
+  };
 
   return (
     <Card
+      data-product-card
       className={cn(
         // @container: the price row adapts to the card's own width, not the viewport's.
-        "@container group relative flex h-full flex-col gap-0 overflow-hidden rounded-card border-line/70 bg-cream p-0 shadow-none transition-[box-shadow,transform,border-color] duration-400 ease-premium",
-        "hover:-translate-y-1 hover:border-line hover:shadow-lift",
+        "@container group relative flex h-full flex-col gap-0 overflow-hidden rounded-2xl border border-line-soft bg-paper p-0 shadow-soft transition-[box-shadow,transform,border-color] duration-400 ease-premium",
+        "hover:-translate-y-1 hover:border-forest/25 hover:shadow-lift focus-within:border-forest/30",
         className,
       )}
     >
       <div className="relative overflow-hidden">
-        <ProductMedia
-          product={product}
-          ratio={mediaRatio}
-          glyphSize={isFeatured ? "lg" : "md"}
-          rounded="rounded-none"
-          eager={eager}
-        />
+        <ProductMedia product={product} ratio={mediaRatio} eager={eager} />
 
         {product.badge ? (
           <div className="absolute top-3 left-3 z-3">
@@ -87,9 +113,9 @@ export function ProductCard({
               : `Save ${product.name} to favourites`
           }
           className={cn(
-            "absolute top-2.5 right-2.5 z-3 grid size-9 place-items-center rounded-full bg-cream/85 text-ink/55 backdrop-blur-[2px] transition-all duration-200",
+            "absolute top-2.5 right-2.5 z-3 grid size-9 cursor-pointer place-items-center rounded-full bg-cream/90 text-ink/55 shadow-xs backdrop-blur-[2px] transition-all duration-200",
             "hover:scale-105 hover:bg-cream hover:text-forest",
-            favourited && "text-[#a63d2f]",
+            favourited && "text-[#a63d2f] hover:text-[#a63d2f]",
           )}
         >
           {/* Motion owns this one interaction because it is a state change,
@@ -120,15 +146,16 @@ export function ProductCard({
 
       <div
         className={cn(
-          "flex flex-1 flex-col gap-1.5 border-t border-line/50 p-3.5 sm:p-4 bg-white",
+          "flex flex-1 flex-col gap-1 border-t border-line/50 bg-white p-3.5 sm:p-4",
           isFeatured && "gap-2 p-5",
         )}
       >
-        <p className="text-[0.68rem] tracking-wider text-[#7a8882] uppercase font-semibold">{product.brand}</p>
+        <p className="truncate text-[0.68rem] font-semibold tracking-wider text-[#5f6f68] uppercase">{product.brand}</p>
 
         <h3
           className={cn(
-            "leading-snug font-semibold text-ink line-clamp-1",
+            // Two lines reserved, so names of any length keep rows aligned.
+            "line-clamp-2 min-h-[2.6em] leading-[1.3] font-semibold text-ink",
             isFeatured ? "text-[1.0625rem]" : "text-[0.92rem]",
           )}
         >
@@ -136,19 +163,25 @@ export function ProductCard({
               itself is not a nested interactive element. */}
           <Link
             href={`/product/${product.slug}`}
-            className="before:absolute before:inset-0 before:content-[''] hover:text-forest transition-colors"
+            className="transition-colors before:absolute before:inset-0 before:content-[''] hover:text-forest"
           >
             {product.name}
           </Link>
         </h3>
 
-        <p className="text-xs text-[#5f6f68] line-clamp-1">{product.variant}</p>
+        {/* Side by side when the card is wide enough; stacked on two-up phone
+            cards, so the pack size is never cut short. */}
+        <div className="flex min-w-0 items-center gap-2 text-xs text-[#5f6f68] @max-[13rem]:flex-col @max-[13rem]:items-start @max-[13rem]:gap-1">
+          <span className="truncate @max-[13rem]:max-w-full">{product.variant}</span>
+          {product.rating ? (
+            <>
+              <span aria-hidden className="text-line @max-[13rem]:hidden">•</span>
+              <Rating value={product.rating.value} count={product.rating.count} className="shrink-0 text-xs" />
+            </>
+          ) : null}
+        </div>
 
-        {product.rating ? (
-          <Rating value={product.rating.value} count={product.rating.count} />
-        ) : null}
-
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-line/40">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-line/40 pt-2.5">
           <ProductPrice
             price={product.price}
             compareAtPrice={product.compareAtPrice}
@@ -157,26 +190,31 @@ export function ProductCard({
 
           <Button
             size="sm"
-            aria-label={`Add ${product.name} to cart`}
-            onClick={
+            type="button"
+            aria-label={
               variantId === undefined
-                ? undefined
-                : () =>
-                    addItem({
-                      variantId,
-                      quantity: 1,
-                      title: product.name,
-                      price: product.price.amount,
-                      imageUrl: product.image,
-                      brand: product.brand,
-                    })
+                ? `${product.name} is not available to add`
+                : added
+                  ? `${product.name} added to cart`
+                  : `Add ${product.name} to cart`
             }
-            className="relative z-3 h-8 shrink-0 rounded-lg bg-forest px-3 text-[0.76rem] font-semibold text-white hover:bg-forest-deep shadow-xs inline-flex items-center gap-1.5 transition-all active:scale-95 @max-[11.5rem]:w-8 @max-[11.5rem]:px-0"
+            disabled={variantId === undefined}
+            onClick={onAdd}
+            className={cn(
+              "relative z-3 inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-forest px-3 text-[0.76rem] font-semibold text-white shadow-xs transition-all hover:bg-forest-deep active:scale-95",
+              "disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink/50",
+              "@max-[11.5rem]:w-8 @max-[11.5rem]:px-0",
+              added && "bg-forest-deep",
+            )}
           >
-            <ShoppingCart aria-hidden className="size-3.5" strokeWidth={2} />
+            {added ? (
+              <Check aria-hidden className="size-3.5" strokeWidth={2.4} />
+            ) : (
+              <ShoppingCart aria-hidden className="size-3.5" strokeWidth={2} />
+            )}
             {/* Two-up cards on a phone leave no room for the word; the
                 button keeps its accessible name either way. */}
-            <span className="@max-[11.5rem]:sr-only">Add</span>
+            <span className="@max-[11.5rem]:sr-only">{added ? "Added" : "Add"}</span>
           </Button>
         </div>
       </div>

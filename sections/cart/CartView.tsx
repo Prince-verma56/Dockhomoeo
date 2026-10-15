@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef } from "react";
+import { ProductThumb } from "@/components/commerce/ProductThumb";
 import Link from "next/link";
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AlertCircle, ArrowLeft, ArrowRight, RotateCw, ShoppingBag, Trash2 } from "lucide-react";
 import { Container } from "@/components/shared/Container";
@@ -48,7 +48,7 @@ export function CartView() {
           </div>
 
           {cart.droppedCount > 0 ? (
-            <p role="status" className="mt-5 flex items-start gap-2 rounded-xl border border-line bg-cream px-4 py-3 text-sm text-ink">
+            <p role="status" className="mt-5 flex items-start gap-2 rounded-xl border border-line-soft bg-paper shadow-2xs px-4 py-3 text-sm text-ink">
               <AlertCircle aria-hidden className="mt-0.5 size-4 shrink-0 text-warm" />
               {cart.droppedCount === 1 ? "An item is" : `${cart.droppedCount} items are`} no longer sold and{" "}
               {cart.droppedCount === 1 ? "was" : "were"} removed from your cart.
@@ -60,7 +60,7 @@ export function CartView() {
               <h2 ref={itemsHeadingRef} tabIndex={-1} className="sr-only">
                 Items in your cart
               </h2>
-              <ul className="border-t border-line/70">
+              <ul className="border-t border-line-soft">
                 <AnimatePresence initial={false}>
                   {lines.map((line) => (
                     <CartRow
@@ -173,18 +173,10 @@ function CartRow({
       animate={{ opacity: 1, y: 0 }}
       exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, height: 0 }}
       transition={{ duration: DURATION.fast, ease: EASE_PREMIUM_BEZIER }}
-      className="overflow-hidden border-b border-line/70"
+      className="overflow-hidden border-b border-line-soft"
     >
       <div className="flex gap-4 py-5 sm:gap-5">
-        <div className="relative size-20 shrink-0 overflow-hidden rounded-2xl border border-line/70 bg-cream-sunk sm:size-24">
-          {line.imageUrl ? (
-            <Image src={line.imageUrl} alt="" fill sizes="96px" className="object-cover" />
-          ) : (
-            <span aria-hidden className="absolute inset-0 grid place-items-center font-display text-2xl text-ink/25">
-              {line.name.charAt(0)}
-            </span>
-          )}
-        </div>
+        <ProductThumb imageUrl={line.imageUrl} name={line.name} form={line.form} className="size-20 rounded-2xl sm:size-24" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-6">

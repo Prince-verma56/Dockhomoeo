@@ -13,7 +13,7 @@ export default function CheckoutPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
+      <main id="main" className="flex-1 bg-canvas">
         <CheckoutView />
       </main>
       <SiteFooter />

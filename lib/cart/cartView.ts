@@ -22,6 +22,8 @@ export type CartLineView = {
   brand: string | null;
   variantTitle: string | null;
   imageUrl: string | null;
+  /** Dosage form as added, for the illustrated pack when there is no photo. */
+  form: string | null;
   quantity: number;
   unitPrice: number;
   mrp: number;
@@ -69,6 +71,7 @@ export function buildCartView(
       brand: line?.brandName ?? item.brand ?? null,
       variantTitle: line?.variantTitle ?? null,
       imageUrl: line?.imageUrl ?? item.imageUrl ?? null,
+      form: item.form ?? null,
       quantity: item.quantity,
       unitPrice,
       mrp: Math.max(line?.mrp ?? unitPrice, unitPrice),

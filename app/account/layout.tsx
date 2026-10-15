@@ -30,25 +30,22 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
   if (status === "loading" || status === "unauthenticated") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f2ea]">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <div className="size-8 animate-spin rounded-full border-2 border-forest-deep border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f6f2ea]">
+    <div className="flex min-h-screen flex-col bg-canvas">
       <SiteHeader />
       
-      <main className="flex-1 pt-[80px] sm:pt-[100px] pb-24">
-        <div className="bg-forest-abyss py-12 md:py-16 lg:py-20 text-cream mb-8 md:mb-12">
+      <main id="main" className="flex-1 pb-24">
+        {/* The same page-head band as every interior route. */}
+        <div className="dh-band-sage mb-8 pt-28 pb-10 sm:pt-32 md:mb-12 lg:pb-12">
           <Container width="wide">
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-white drop-shadow-sm">
-              My Account
-            </h1>
-            <p className="mt-4 text-cream/70 text-lg">
-              Manage your orders, prescriptions, and profile.
-            </p>
+            <h1 className="font-display text-4xl tracking-tight text-ink sm:text-5xl">My account</h1>
+            <p className="mt-3 text-base text-muted-ink sm:text-lg">Manage your orders, delivery addresses and profile.</p>
           </Container>
         </div>
 

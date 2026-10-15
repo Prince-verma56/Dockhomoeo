@@ -1,58 +1,71 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { MediaPlaceholder, type MediaTone } from "@/components/shared/MediaPlaceholder";
-import { ProductGlyph } from "@/components/commerce/ProductGlyph";
+import { ProductPackshot } from "@/components/commerce/ProductPackshot";
 import type { Product } from "@/types/product";
 
 type ProductMediaProps = {
-  product: Pick<Product, "form" | "tone" | "mediaLabel"> & { image?: string };
+  product: Pick<Product, "form" | "mediaLabel" | "name"> & { image?: string | null; brand?: string | null };
   className?: string;
+  /** Sizing utility for the frame, e.g. "aspect-[4/5]". */
   ratio?: string;
-  surface?: MediaTone;
-  glyphSize?: "sm" | "md" | "lg";
   rounded?: string;
   /** Above-the-fold cards load their photo at once instead of lazily (likely LCP). */
   eager?: boolean;
+  /** Passed to next/image so the browser picks a fitting width. */
+  sizes?: string;
 };
 
 /**
- * The product image slot.
+ * The product image slot, shared by cards, the product page and rails.
  *
- * Renders real product photography when available, or a graceful lit placeholder
- * frame with a CSS product silhouette glyph as fallback.
+ * A photograph is shown only when the data supplies one (the local catalogue
+ * only pairs a product with a photo of that same product; see
+ * data/productImagery). Otherwise — or if the photo fails to load — the
+ * illustrated pack stands in, so no frame is ever blank or broken.
+ *
+ * `data-product-media` marks the element the add-to-cart flight lifts off from.
  */
 export function ProductMedia({
   product,
   className,
   ratio = "aspect-[4/5]",
-  surface = "cream",
-  glyphSize = "md",
-  rounded,
+  rounded = "rounded-none",
   eager = false,
+  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px",
 }: ProductMediaProps) {
+  const [failed, setFailed] = useState(false);
+  const showPhoto = Boolean(product.image) && !failed;
+
   return (
-    <MediaPlaceholder
-      label={product.mediaLabel}
-      tone={surface}
-      ratio={ratio}
-      rounded={rounded}
-      className={cn(
-        "transition-transform duration-500 ease-premium group-hover:scale-[1.03] relative overflow-hidden",
-        className,
-      )}
+    <div
+      data-product-media
+      className={cn("relative isolate overflow-hidden bg-cream-sunk", ratio, rounded, className)}
     >
-      {product.image ? (
+      {showPhoto ? (
         <Image
-          src={product.image}
+          src={product.image!}
           alt={product.mediaLabel}
           fill
           loading={eager ? "eager" : undefined}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+          fetchPriority={eager ? "high" : undefined}
+          sizes={sizes}
+          onError={() => setFailed(true)}
+          className="object-cover object-center transition-transform duration-700 ease-premium group-hover:scale-[1.04]"
         />
       ) : (
-        <ProductGlyph form={product.form} tone={product.tone} size={glyphSize} />
+        <ProductPackshot
+          name={product.name}
+          brand={product.brand}
+          form={product.form}
+          label={`${product.name}, illustrated pack`}
+          className="transition-transform duration-700 ease-premium group-hover:scale-[1.03]"
+        />
       )}
-    </MediaPlaceholder>
+      {/* Inner hairline so photos and packs share one edge treatment. */}
+      <span aria-hidden className="pointer-events-none absolute inset-0 z-2 rounded-[inherit] ring-1 ring-ink/6 ring-inset" />
+    </div>
   );
 }

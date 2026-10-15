@@ -77,3 +77,83 @@ export function BrandMark({
     </span>
   );
 }
+
+/**
+ * Panel palettes for the wordmark: the brand's surface and its ink. Pale and
+ * close to the page palette, so a grid of brands reads as one family.
+ */
+const PANELS = [
+  { panel: "bg-sage-wash", ink: "text-forest-deep", rule: "bg-forest/30" },
+  { panel: "bg-[#f3ebe0]", ink: "text-[#5e3b1c]", rule: "bg-[#5e3b1c]/30" },
+  { panel: "bg-[#f4e6df]", ink: "text-[#7a3520]", rule: "bg-[#7a3520]/30" },
+  { panel: "bg-mist", ink: "text-ink", rule: "bg-ink/25" },
+  { panel: "bg-forest-deep", ink: "text-cream", rule: "bg-cream/35" },
+] as const;
+
+const panelFor = (name: string) => {
+  let hash = 5381;
+  for (const char of name) hash = ((hash * 33) ^ char.charCodeAt(0)) >>> 0;
+  return PANELS[hash % PANELS.length];
+};
+
+/**
+ * A brand's identity panel: its licensed logo when the data supplies one,
+ * otherwise its full name set as a wordmark in the display face — a
+ * typographic treatment of our own, never an imitation of the brand's logo
+ * and never a product photo standing in for one. Decorative: the name is
+ * always repeated as text beside it.
+ */
+export function BrandWordmark({
+  name,
+  logoUrl,
+  size = "md",
+  className,
+}: {
+  name: string;
+  logoUrl: string | null;
+  size?: "md" | "lg";
+  className?: string;
+}) {
+  if (logoUrl) {
+    return (
+      <span aria-hidden className={cn("relative block overflow-hidden bg-white", className)}>
+        <Image src={logoUrl} alt="" fill sizes="320px" className="object-contain p-6" />
+      </span>
+    );
+  }
+
+  const tone = panelFor(name);
+  const compact = name.replace(/[^A-Za-z0-9]/g, "");
+  // Short all-caps names (SBL) are letter-spaced like a seal; longer names set tight.
+  const acronym = compact.length <= 4 && compact === compact.toUpperCase();
+  const type =
+    size === "lg"
+      ? acronym
+        ? "text-[2.5rem] tracking-[0.18em]"
+        : name.length > 11
+          ? "text-[1.75rem] tracking-[-0.01em]"
+          : "text-[2.125rem] tracking-[-0.015em]"
+      : acronym
+        ? "text-[1.75rem] tracking-[0.16em]"
+        : name.length > 11
+          ? "text-[1.25rem] tracking-[-0.01em]"
+          : "text-[1.5rem] tracking-[-0.015em]";
+
+  return (
+    <span
+      aria-hidden
+      className={cn("relative flex flex-col items-center justify-center gap-2.5 overflow-hidden px-5 text-center", tone.panel, className)}
+    >
+      <span
+        className={cn(
+          "relative leading-none font-display transition-transform duration-500 ease-premium group-hover:scale-[1.03]",
+          tone.ink,
+          type,
+        )}
+      >
+        {name}
+      </span>
+      <span className={cn("relative h-px w-8", tone.rule)} />
+    </span>
+  );
+}

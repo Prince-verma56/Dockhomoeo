@@ -17,7 +17,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <main className="grid min-h-[60vh] place-items-center bg-ivory px-5 py-20 text-center">
+    <main className="grid min-h-[60vh] place-items-center bg-canvas px-5 py-20 text-center">
       <div className="max-w-md">
         <AlertCircle aria-hidden className="mx-auto size-8 text-forest" strokeWidth={1.6} />
         <h1 className="mt-4 font-display text-3xl text-ink">We could not load this page</h1>

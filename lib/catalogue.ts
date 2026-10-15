@@ -29,12 +29,6 @@ export type BrandSummary = {
   slug: string;
   productCount: number;
   logoUrl: string | null;
-  /**
-   * Up to 3 image URLs from real products belonging to this brand, derived
-   * from the product listing at build/request time. Empty when no product has
-   * an image. Never invented — only what the data returns.
-   */
-  thumbnails: string[];
 };
 
 export async function getCategoryDirectory(): Promise<CategorySummary[]> {
@@ -55,7 +49,7 @@ export async function getCategoryDirectory(): Promise<CategorySummary[]> {
     .sort((a, b) => b.productCount - a.productCount);
 }
 
-/** Every brand that has products, A–Z, with up to 3 product thumbnails each. */
+/** Every brand that has products, A–Z. */
 export async function getBrandDirectory(): Promise<BrandSummary[]> {
   const [home, catalogue] = await Promise.all([
     repositories.home.getHomeData(),
@@ -63,7 +57,7 @@ export async function getBrandDirectory(): Promise<BrandSummary[]> {
   ]);
   const logos = new Map(home.brands.map((brand) => [brand.slug, brand.logoUrl]));
 
-  const rawBrands = catalogue.facets.brands
+  return catalogue.facets.brands
     .map((brand) => ({
       name: brand.label ?? brand.value,
       slug: brand.value,
@@ -71,22 +65,6 @@ export async function getBrandDirectory(): Promise<BrandSummary[]> {
       logoUrl: logos.get(brand.value) ?? null,
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
-
-  // Fetch a small set of products per brand to collect real thumbnails. Using
-  // pageSize=3 so we get up to 3 unique images without over-fetching.
-  const listings = await Promise.all(
-    rawBrands.map((brand) => repositories.search.search({ brand: [brand.slug], pageSize: 3 })),
-  );
-
-  return rawBrands.map((brand, i) => {
-    const thumbnails = listings[i].items
-      .map((item) => item.imageUrl)
-      .filter((url): url is string => Boolean(url))
-      // Deduplicate: some brands reuse the same product image across variants.
-      .filter((url, index, arr) => arr.indexOf(url) === index)
-      .slice(0, 3);
-    return { ...brand, thumbnails };
-  });
 }
 
 export async function getBrand(slug: string): Promise<BrandSummary | null> {

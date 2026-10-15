@@ -86,8 +86,8 @@ export default async function InsightsPage({ searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
-        <section aria-labelledby="insights-heading" className="pt-24 pb-8 sm:pt-28 lg:pb-10">
+      <main id="main" className="flex-1 bg-canvas">
+        <section aria-labelledby="insights-heading" className="dh-band-sage-flowing pt-28 sm:pt-32">
           <Container>
             <PageBreadcrumb
               items={[
@@ -145,7 +145,7 @@ export default async function InsightsPage({ searchParams }: Props) {
           </Container>
         </section>
 
-        <section aria-label="Articles" className="pb-14 lg:pb-20">
+        <section aria-label="Articles" className="py-12 lg:py-16">
           <Container>
             {featured ? (
               <>
@@ -184,7 +184,7 @@ export default async function InsightsPage({ searchParams }: Props) {
         </section>
 
         {home.categories.length > 0 ? (
-          <section aria-labelledby="insights-explore" className="border-t border-line/60 bg-cream/60 py-12 lg:py-14">
+          <section aria-labelledby="insights-explore" className="dh-band-mist py-12 lg:py-14">
             <Container>
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
                 <div className="max-w-md">
@@ -200,7 +200,7 @@ export default async function InsightsPage({ searchParams }: Props) {
                     <li key={category.slug}>
                       <Link
                         href={`/products?category=${encodeURIComponent(category.slug)}`}
-                        className="inline-flex min-h-10 items-center rounded-full border border-line bg-ivory px-4 text-sm text-ink transition-colors hover:border-forest/35 hover:text-forest"
+                        className="inline-flex min-h-10 items-center rounded-full border border-line bg-paper px-4 text-sm text-ink transition-colors hover:border-forest/35 hover:text-forest"
                       >
                         {category.name}
                       </Link>

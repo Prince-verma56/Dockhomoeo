@@ -58,7 +58,7 @@ export function InsightCard({ insight, featured = false }: { insight: ApiInsight
 
   if (featured) {
     return (
-      <article className="group relative grid overflow-hidden rounded-frame border border-line/70 bg-cream transition-shadow duration-400 hover:shadow-lift lg:grid-cols-12">
+      <article className="group relative grid overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-soft transition-shadow duration-400 hover:shadow-lift lg:grid-cols-12">
         <ClipReveal from="left" className="relative aspect-16/10 overflow-hidden lg:col-span-7 lg:aspect-auto lg:min-h-110">
           {cover}
         </ClipReveal>
@@ -76,7 +76,7 @@ export function InsightCard({ insight, featured = false }: { insight: ApiInsight
   return (
     <article
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-card border border-line/70 bg-cream",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-soft",
         "transition-[border-color,box-shadow,transform] duration-400 ease-premium hover:-translate-y-0.5 hover:border-forest/25 hover:shadow-lift",
       )}
     >

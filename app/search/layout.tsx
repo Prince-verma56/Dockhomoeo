@@ -9,7 +9,7 @@ export default function SearchLayout({ children }: LayoutProps<"/search">) {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-ivory">
+      <main id="main" className="flex-1 bg-canvas">
         {children}
       </main>
       <SiteFooter />

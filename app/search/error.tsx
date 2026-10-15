@@ -15,7 +15,7 @@ export default function SearchError({ retry }: { error: Error & { digest?: strin
   const query = useSearchParams().get("q")?.trim() ?? "";
 
   return (
-    <section className="bg-ivory pt-24 pb-16 sm:pt-28 lg:pb-24">
+    <section className="bg-canvas pt-24 pb-16 sm:pt-28 lg:pb-24">
       <Container>
         <div role="alert" className="max-w-2xl">
           <h1 className="font-display text-3xl leading-tight tracking-tight text-ink sm:text-4xl">

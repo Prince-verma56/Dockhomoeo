@@ -39,7 +39,7 @@ export function OrderSummary({
       : null;
 
   return (
-    <section aria-labelledby="order-summary-heading" className={cn("rounded-card border border-line/70 bg-cream p-6", className)}>
+    <section aria-labelledby="order-summary-heading" className={cn("rounded-2xl border border-line-soft bg-paper shadow-soft p-6", className)}>
       <Heading id="order-summary-heading" className="text-lg font-semibold text-ink">
         {heading}
       </Heading>

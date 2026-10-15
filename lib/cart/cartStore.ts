@@ -10,6 +10,8 @@ export interface CartItem extends ApiQuoteLineInput {
   price: number;
   imageUrl?: string;
   brand?: string;
+  /** Dosage form, so the cart can draw the right pack when there is no photo. */
+  form?: string;
 }
 
 export type CartSnapshot = {

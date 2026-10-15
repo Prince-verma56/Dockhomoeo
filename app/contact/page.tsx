@@ -14,8 +14,8 @@ export default function ContactPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-[#f6f2ea]">
-        <section className="relative overflow-hidden pt-28 pb-20 md:pt-40 md:pb-32 border-b border-forest-abyss/5">
+      <main id="main" className="flex-1 bg-canvas">
+        <section className="dh-band-sage relative overflow-hidden pt-28 pb-20 md:pt-40 md:pb-28">
           <Container width="default" className="relative z-10">
             {/* Header */}
             <div className="mb-16 text-center md:mb-24">
@@ -29,7 +29,7 @@ export default function ContactPage() {
 
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px] lg:gap-24">
               {/* Form Column */}
-              <div className="rounded-[2.5rem] bg-white p-10 shadow-xl sm:p-12 md:p-14 border border-forest-abyss/5">
+              <div className="rounded-2xl bg-paper p-8 sm:p-10 md:p-12 border border-line-soft shadow-soft">
                 <h2 className="mb-8 font-display text-3xl text-ink sm:text-4xl">
                   Send us a message
                 </h2>
@@ -39,7 +39,7 @@ export default function ContactPage() {
               {/* Info Column */}
               <div className="flex flex-col gap-12 lg:pt-12">
                 <div>
-                  <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-[#f6f2ea] text-forest-deep">
+                  <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-wash text-forest-deep">
                     <MessageSquare className="size-8" />
                   </div>
                   <h3 className="mb-3 font-display text-2xl text-ink">Order Support</h3>
@@ -49,7 +49,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-[#f6f2ea] text-forest-deep">
+                  <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-wash text-forest-deep">
                     <Mail className="size-8" />
                   </div>
                   <h3 className="mb-3 font-display text-2xl text-ink">General Enquiries</h3>
@@ -60,7 +60,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-[#f6f2ea] text-forest-deep">
+                  <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-wash text-forest-deep">
                     <MapPin className="size-8" />
                   </div>
                   <h3 className="mb-3 font-display text-2xl text-ink">Corporate Office</h3>

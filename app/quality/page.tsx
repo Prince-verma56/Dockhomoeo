@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, FileText, Factory, Search, ShieldCheck } from "lucide-react";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
@@ -38,9 +39,9 @@ export default function QualityPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="flex-1 bg-[#f6f2ea]">
+      <main id="main" className="flex-1 bg-canvas">
         {/* Header */}
-        <section className="relative overflow-hidden pt-28 pb-20 md:pt-40 md:pb-32 border-b border-forest-abyss/5">
+        <section className="dh-band-sage relative isolate overflow-hidden pt-28 pb-20 md:pt-40 md:pb-28">
           <Container width="narrow" className="text-center relative z-10">
             <div className="mb-6 mx-auto flex w-fit items-center gap-2 rounded-full border border-forest-deep/20 bg-forest-deep/5 px-4 py-1.5 text-sm font-bold tracking-wide text-forest-deep uppercase">
               <ShieldCheck className="size-4" />
@@ -53,27 +54,33 @@ export default function QualityPage() {
               We believe that access to healthcare products should be built on a foundation of clear information, reliable sourcing, and responsible presentation.
             </p>
           </Container>
-          <div className="absolute top-0 right-0 -z-10 h-full w-full max-w-3xl bg-gradient-to-bl from-forest-deep/10 to-transparent blur-3xl opacity-60" />
+          {/* The brand's own scene photography (sunlit stone and sage, no
+              product in shot), veiled toward the page so the copy stays crisp. */}
+          <Image src="/Images/TestimonialsBg.webp" alt="" fill loading="eager" sizes="100vw" className="-z-10 object-cover object-[40%_50%]" />
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(251,250,247,0.5)_0%,rgba(251,250,247,0.72)_55%,var(--dh-canvas)_100%)]"
+          />
         </section>
 
         {/* Principles Grid */}
-        <section className="py-20 md:py-32 bg-white">
+        <section className="py-16 md:py-24 bg-canvas">
           <Container width="wide">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-10">
               {principles.map((principle) => {
                 const Icon = principle.icon;
                 return (
                   <div 
                     key={principle.title} 
-                    className="group flex flex-col rounded-[2rem] bg-white p-10 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border border-forest-abyss/5 hover:border-forest-deep/20 sm:p-12"
+                    className="group flex flex-col rounded-2xl bg-paper p-8 sm:p-10 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift border border-line-soft hover:border-forest/30"
                   >
-                    <div className="mb-8 flex size-20 items-center justify-center rounded-2xl bg-[#f6f2ea] text-forest-deep transition-colors duration-300 group-hover:bg-forest-deep group-hover:text-white">
+                    <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-wash text-forest-deep transition-colors duration-300 group-hover:bg-forest-deep group-hover:text-white">
                       <Icon className="size-8" />
                     </div>
-                    <h3 className="mb-4 font-display text-3xl text-ink">
+                    <h3 className="mb-3 font-display text-2xl text-ink">
                       {principle.title}
                     </h3>
-                    <p className="text-muted-ink leading-relaxed text-lg">
+                    <p className="text-muted-ink leading-relaxed text-base">
                       {principle.description}
                     </p>
                   </div>
@@ -84,9 +91,9 @@ export default function QualityPage() {
         </section>
 
         {/* Disclaimer / Responsible Info section */}
-        <section className="py-20 md:py-32 bg-[#f6f2ea] border-t border-forest-abyss/5">
+        <section className="py-16 md:py-24 bg-canvas border-t border-line-soft">
           <Container width="narrow">
-            <div className="rounded-[2.5rem] bg-white p-10 sm:p-14 md:p-16 border border-forest-abyss/5 shadow-sm text-center">
+            <div className="rounded-2xl bg-paper p-8 sm:p-12 border border-line-soft shadow-soft text-center">
               <h2 className="mb-8 font-display text-4xl text-ink sm:text-5xl">
                 Responsible Health Information
               </h2>
@@ -112,7 +119,7 @@ export default function QualityPage() {
               Trust in every step
             </h2>
             <div className="flex justify-center">
-              <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-[#f6f2ea] h-14 px-10 text-lg font-bold">
+              <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-sage-wash h-14 px-10 text-lg font-bold">
                 <Link href="/brands">
                   View Our Brands
                   <ArrowRight className="ml-3 size-5" />

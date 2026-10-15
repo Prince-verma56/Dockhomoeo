@@ -108,6 +108,19 @@ const matchesBrand = (brandName: string | null, values: string[]) =>
 // The backend's sort keys, plus the underscore spellings /products already sends.
 const SORT_ALIASES: Record<string, string> = { price_asc: "price-asc", price_desc: "price-desc" };
 
+const MOCK_MAX_QUANTITY = 20; // backend: min(stock, maxOrderQuantity ?? 20)
+
+// The backend's facet steps and price bands (shop.routes.ts), word for word.
+const DISCOUNT_STEPS = [10, 20, 30, 40];
+const RATING_STEPS = [4, 3];
+const PRICE_BANDS = [
+  { key: "0-100", label: "Under ₹100", min: 0, max: 100 },
+  { key: "100-250", label: "₹100 to ₹250", min: 100, max: 250 },
+  { key: "250-500", label: "₹250 to ₹500", min: 250, max: 500 },
+  { key: "500-1000", label: "₹500 to ₹1,000", min: 500, max: 1000 },
+  { key: "1000-", label: "Above ₹1,000", min: 1000, max: null as number | null },
+];
+
 export class LocalHomeRepository implements IHomeRepository {
   async getHomeData(): Promise<ApiHomeResponse> {
     await delay(300);
@@ -158,70 +171,99 @@ export class LocalHomeRepository implements IHomeRepository {
   }
 }
 
+/**
+ * Related cards as the backend chooses them (shop.routes.ts): other in-stock
+ * products in the same category, then — because the mock catalogue is small —
+ * ones that share a health concern, then the same dosage form.
+ */
+function relatedCards(product: Product, card: ApiProductCard): ApiProductCard[] {
+  const others = mockApiCards.filter((c) => c.id !== card.id && c.inStock);
+  const bySlug = (c: ApiProductCard) => productBySlug.get(c.slug);
+  const goals = new Set(product.healthGoals ?? []);
+  const tiers = [
+    others.filter((c) => product.category !== undefined && bySlug(c)?.category === product.category),
+    others.filter((c) => (bySlug(c)?.healthGoals ?? []).some((goal) => goals.has(goal))),
+    others.filter((c) => c.form === card.form),
+  ];
+  const chosen: ApiProductCard[] = [];
+  for (const tier of tiers) for (const c of tier) if (chosen.length < 4 && !chosen.includes(c)) chosen.push(c);
+  return chosen;
+}
+
 export class LocalProductRepository implements IProductRepository {
   async getBySlug(slug: string): Promise<ApiProductDetail | null> {
     await delay(300);
-    const card = mockApiCards.find((p) => p.slug === slug);
-    const p = mockProducts.find((p) => p.slug === slug);
+    const index = mockApiCards.findIndex((p) => p.slug === slug);
+    const card = mockApiCards[index];
+    const p = productBySlug.get(slug);
     if (!card || !p) return null;
+    const brandName = card.brandName ?? null;
 
     return {
       id: card.id,
       name: card.name,
       slug: card.slug,
       form: card.form,
-      shortDescription: `A premium homoeopathic ${card.form} for your health goals.`,
-      description: `Detailed description for ${card.name} by ${card.brandName}. Formulated according to classical homoeopathic principles.`,
+      // The mock catalogue holds no manufacturer copy. Rather than write
+      // descriptions, indications, dosing or safety text for medicines, these
+      // stay empty and the page shows only what the data knows. The shop API
+      // fills them from the product record.
+      shortDescription: null,
+      description: null,
       composition: null,
-      indications: "General indications...",
-      directions: "Take 5 drops in water 3 times a day or as prescribed.",
-      safetyInfo: "Keep out of reach of children. Consult a physician before use.",
-      manufacturer: card.brandName,
-      countryOfOrigin: "India",
+      indications: null,
+      directions: null,
+      safetyInfo: null,
+      manufacturer: brandName,
+      countryOfOrigin: null,
       requiresPrescription: false,
       ratingAverage: card.rating,
       ratingCount: card.ratingCount,
-      brand: { name: card.brandName || "Generic", slug: (card.brandName || "generic").toLowerCase(), logoUrl: null },
-      images: card.imageUrl ? [{ url: card.imageUrl, altText: card.name, variantId: 1 }] : [],
+      brand: brandName ? { name: brandName, slug: slugify(brandName), logoUrl: null } : null,
+      images: card.imageUrl ? [{ url: card.imageUrl, altText: p.mediaLabel, variantId: null }] : [],
       variants: [
         {
-          id: card.id * 1000 + 1,
+          // Same id scheme as the listing card's variantId, so "Add" on a card
+          // and on this page add the same line.
+          id: mockVariantId(index),
           sku: `${p.id}-VAR-1`,
           title: p.variant,
-          packSize: null,
-          potency: null,
+          packSize: p.packSize ?? null,
+          potency: p.potency ?? null,
           isDefault: true,
           mrp: card.mrp,
           price: card.price,
           discountPercent: card.discountPercent,
-          inStock: true,
-          stockLeft: 50,
+          inStock: card.inStock,
+          // The backend only reports stock when it is low (five or fewer).
+          stockLeft: null,
           minQuantity: 1,
-          maxQuantity: 10,
+          maxQuantity: MOCK_MAX_QUANTITY,
           wholesale: null,
-        }
+        },
       ],
       reviews: [],
       seo: {
         // The backend's productSeo shape: the full title, site name included.
         title: `${card.name} - Buy Online | DocHomoeo`,
-        description: `Buy ${card.name} online.`,
+        description: `Buy ${card.name}${brandName ? ` by ${brandName}` : ""} online at DocHomoeo.`,
         path: `/product/${card.slug}`,
         image: card.imageUrl,
       },
       trail: [
         { name: "Home", slug: "" },
         { name: "Products", slug: "products" },
-        { name: card.name, slug: card.slug }
+        { name: card.name, slug: card.slug },
       ],
-      related: mockApiCards.filter((c) => c.id !== card.id).slice(0, 4),
+      related: relatedCards(p, card),
       wholesale: false,
     };
   }
 
   async getRelated(productId: number): Promise<ApiProductDetail[]> {
+    void productId;
     await delay(200);
-    return []; // For now, handled within getBySlug
+    return []; // Related cards arrive inside getBySlug, as from the backend.
   }
 }
 
@@ -247,67 +289,104 @@ export class LocalSearchRepository implements ISearchRepository {
     // Facets follow the backend (shop.routes.ts): each filter group is checked
     // on its own, and a product that fails exactly one group still counts
     // towards that group's numbers — so "Brand" shows what ticking another
-    // brand would give within the chosen category and form.
-    type Group = "category" | "brand" | "form";
-    const checks: [Group, (p: ApiProductCard) => boolean][] = [
-      ["category", (p) => !filters.category || inCategory(productBySlug.get(p.slug), filters.category)],
+    // brand would give within everything else that is chosen.
+    type Group = "category" | "brand" | "form" | "potency" | "pack" | "price" | "discount" | "rating";
+    const potencies = new Set(filters.potency ?? []);
+    const packs = new Set(filters.pack ?? []);
+    const checks: [Group, (p: ApiProductCard, product: Product | undefined) => boolean][] = [
+      ["category", (p, product) => !filters.category || inCategory(product, filters.category)],
       ["brand", (p) => !filters.brand?.length || matchesBrand(p.brandName, filters.brand)],
       ["form", (p) => !filters.form?.length || (p.form !== null && filters.form.includes(p.form))],
+      ["potency", (p, product) => potencies.size === 0 || (product?.potency !== undefined && potencies.has(product.potency))],
+      ["pack", (p, product) => packs.size === 0 || (product?.packSize !== undefined && packs.has(product.packSize))],
+      [
+        "price",
+        (p) =>
+          (filters.minPrice === undefined || p.price >= filters.minPrice) &&
+          (filters.maxPrice === undefined || p.price <= filters.maxPrice),
+      ],
+      ["discount", (p) => filters.discount === undefined || p.discountPercent >= filters.discount],
+      ["rating", (p) => filters.rating === undefined || p.rating >= filters.rating],
     ];
-    const categoryCounts = new Map<string, number>();
-    const brandCounts = new Map<string, number>();
-    const formCounts = new Map<string, number>();
-    const bump = (map: Map<string, number>, key: string) => map.set(key, (map.get(key) ?? 0) + 1);
+    const count = {
+      category: new Map<string, number>(),
+      brand: new Map<string, number>(),
+      form: new Map<string, number>(),
+      potency: new Map<string, number>(),
+      pack: new Map<string, number>(),
+      price: new Map<string, number>(),
+      discount: new Map<number, number>(),
+      rating: new Map<number, number>(),
+    };
+    const bump = <K,>(map: Map<K, number>, key: K) => map.set(key, (map.get(key) ?? 0) + 1);
+    let lowest = Infinity;
+    let highest = 0;
 
     const results: ApiProductCard[] = [];
     for (const p of mockApiCards) {
       // typed text and "in stock only" are not facet groups: they always apply
       if (!matchesQuery(p) || (filters.inStock && !p.inStock)) continue;
-      const failed = checks.filter(([, passes]) => !passes(p)).map(([group]) => group);
+      const product = productBySlug.get(p.slug);
+      const failed = checks.filter(([, passes]) => !passes(p, product)).map(([group]) => group);
       if (failed.length > 1) continue;
       const counts = (group: Group) => failed.length === 0 || failed[0] === group;
-      const category = productBySlug.get(p.slug)?.category;
-      if (counts("category") && category) bump(categoryCounts, category);
-      if (counts("brand") && p.brandName) bump(brandCounts, p.brandName);
-      if (counts("form") && p.form) bump(formCounts, p.form);
+      if (counts("category") && product?.category) bump(count.category, product.category);
+      if (counts("brand") && p.brandName) bump(count.brand, p.brandName);
+      if (counts("form") && p.form) bump(count.form, p.form);
+      if (counts("potency") && product?.potency) bump(count.potency, product.potency);
+      if (counts("pack") && product?.packSize) bump(count.pack, product.packSize);
+      if (counts("price")) {
+        const band = PRICE_BANDS.find((b) => p.price >= b.min && (b.max === null || p.price < b.max));
+        if (band) bump(count.price, band.key);
+        lowest = Math.min(lowest, p.price);
+        highest = Math.max(highest, p.price);
+      }
+      if (counts("discount")) for (const step of DISCOUNT_STEPS) if (p.discountPercent >= step) bump(count.discount, step);
+      if (counts("rating")) for (const step of RATING_STEPS) if (p.rating >= step) bump(count.rating, step);
       if (failed.length === 0) results.push(p);
     }
 
+    // Chosen values first, then the most stocked — the backend's facetOptions order.
+    const options = (map: Map<string, number>, chosen: Set<string>) =>
+      [...map.entries()]
+        .map(([value, n]) => ({ value, count: n, selected: chosen.has(value) }))
+        .sort((a, b) => Number(b.selected) - Number(a.selected) || b.count - a.count);
+
     const facets = {
-      categories: [...categoryCounts.entries()]
-        .map(([name, count]) => ({
+      categories: [...count.category.entries()]
+        .map(([name, n]) => ({
           id: catalogueCategories.indexOf(name) + 1,
           parentId: null,
           name,
           slug: slugify(name),
-          count,
+          count: n,
         }))
         .sort((a, b) => b.count - a.count),
-      brands: [...brandCounts.entries()]
-        .map(([name, count]) => ({ value: slugify(name), label: name, count }))
-        .sort((a, b) => b.count - a.count),
-      forms: [...formCounts.entries()]
-        .map(([value, count]) => ({ value, count }))
-        .sort((a, b) => b.count - a.count),
-      potencies: [],
-      packs: [],
-      prices: [],
-      priceRange: { min: 0, max: 2000 },
-      discounts: [],
-      ratings: [],
+      brands: [...count.brand.entries()]
+        .map(([name, n]) => ({ value: slugify(name), label: name, count: n, selected: matchesBrand(name, filters.brand ?? []) }))
+        .sort((a, b) => Number(b.selected) - Number(a.selected) || b.count - a.count),
+      forms: options(count.form, new Set(filters.form ?? [])),
+      potencies: options(count.potency, potencies),
+      packs: options(count.pack, packs),
+      prices: PRICE_BANDS.map((band) => ({ ...band, count: count.price.get(band.key) ?? 0 })).filter((band) => band.count > 0),
+      priceRange: { min: lowest === Infinity ? 0 : Math.floor(lowest), max: Math.ceil(highest) },
+      discounts: DISCOUNT_STEPS.map((step) => ({ value: step, count: count.discount.get(step) ?? 0 })).filter((d) => d.count > 0),
+      ratings: RATING_STEPS.map((step) => ({ value: step, count: count.rating.get(step) ?? 0 })).filter((r) => r.count > 0),
     };
 
-    // Sorting
-    const sort = SORT_ALIASES[filters.sort ?? ""] ?? filters.sort ?? "relevance";
+    // Sorting, as the backend: with nothing typed, "relevance" means most popular.
+    const requested = SORT_ALIASES[filters.sort ?? ""] ?? filters.sort ?? "relevance";
+    const sort = requested === "relevance" && words.length === 0 ? "popular" : requested;
+    const inStockFirst = (a: ApiProductCard, b: ApiProductCard) => Number(b.inStock) - Number(a.inStock);
     if (sort === "price-asc") results.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") results.sort((a, b) => b.price - a.price);
     else if (sort === "newest") results.sort((a, b) => b.id - a.id);
-    else if (sort === "popular") results.sort((a, b) => b.sold - a.sold);
-    else if (sort === "discount") results.sort((a, b) => b.discountPercent - a.discountPercent);
+    else if (sort === "popular")
+      results.sort((a, b) => inStockFirst(a, b) || b.sold - a.sold || a.name.localeCompare(b.name));
+    else if (sort === "discount") results.sort((a, b) => b.discountPercent - a.discountPercent || b.sold - a.sold);
     else if (sort === "rating") results.sort((a, b) => b.rating - a.rating || b.ratingCount - a.ratingCount);
     else if (sort === "name") results.sort((a, b) => a.name.localeCompare(b.name));
-    // relevance: best match first when there is a query, catalogue order otherwise
-    else if (words.length) results.sort((a, b) => (scores.get(b.id) ?? 0) - (scores.get(a.id) ?? 0));
+    else results.sort((a, b) => (scores.get(b.id) ?? 0) - (scores.get(a.id) ?? 0) || inStockFirst(a, b) || b.sold - a.sold);
 
     const page = filters.page || 1;
     const pageSize = filters.pageSize || 24;
@@ -321,7 +400,7 @@ export class LocalSearchRepository implements ISearchRepository {
       page,
       pageSize,
       pageCount,
-      sort: filters.sort || "relevance",
+      sort,
       category: filters.category
         ? {
             name: categoryName(filters.category),
@@ -371,12 +450,92 @@ export class LocalSearchRepository implements ISearchRepository {
  *   - shipping: no shipping rules → no delivery charge, pay on delivery allowed;
  *   - coupons: none can be checked, so every code is refused, saying why;
  *   - online payment: off (paymentsMode "off"), so only pay on delivery is offered.
- * Orders it accepts are previews: a "DEV-" reference, kept in memory for this
- * tab only, never charged and never sent anywhere.
+ * Orders it accepts are previews: a "DEV-" reference, kept in this tab's
+ * sessionStorage only (see the order store below), never charged and never sent anywhere.
  */
-const MOCK_MAX_QUANTITY = 20; // backend: min(stock, maxOrderQuantity ?? 20)
-const previewOrders = new Map<number, ApiOrderDetail>();
-let previewSequence = 0;
+/**
+ * Orders the mock shop knows: one delivered sample order, priced from the
+ * catalogue, plus every preview placed in this tab. Previews are kept in
+ * sessionStorage so the confirmation page and the account's order routes
+ * still find them after a reload; they never leave the browser.
+ *
+ * One store serves GET /me/orders (list) and GET /me/orders/:id (detail), so an
+ * order placed at checkout is the same record the account pages show.
+ */
+const ORDERS_KEY = "dochomo_preview_orders";
+
+function sampleOrder(): ApiOrderDetail {
+  const line = (slug: string, quantity: number, id: number) => {
+    const card = mockApiCards.find((c) => c.slug === slug)!;
+    const product = productBySlug.get(slug)!;
+    return {
+      id,
+      productName: card.name,
+      variantTitle: product.variant,
+      brandName: card.brandName,
+      imageUrl: card.imageUrl,
+      quantity,
+      mrp: card.mrp,
+      unitPrice: card.price,
+      lineTotal: roundMoney(card.price * quantity),
+      slug,
+    };
+  };
+  const items = [line("arnica-montana-30c", 2, 1), line("calendula-ointment", 1, 2)];
+  const subtotal = roundMoney(items.reduce((sum, item) => sum + item.lineTotal, 0));
+  return {
+    id: 1,
+    orderNumber: "DH-1001",
+    channel: "D2C",
+    status: "DELIVERED",
+    paymentMethod: "COD",
+    paymentStatus: "PAID",
+    placedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+    estimatedDelivery: null,
+    subtotal,
+    couponCode: null,
+    couponDiscount: 0,
+    shippingCharge: 0,
+    codCharge: 0,
+    grandTotal: subtotal,
+    customerName: "Test User",
+    customerPhone: "9876543210",
+    shippingAddress: "123 Health Ave, Near Park",
+    shippingCity: "Mumbai",
+    shippingState: "Maharashtra",
+    shippingPincode: "400001",
+    items,
+    canCancel: false,
+    canPay: false,
+  };
+}
+
+const memoryOrders: ApiOrderDetail[] = [];
+
+function readPreviewOrders(): ApiOrderDetail[] {
+  if (typeof window === "undefined") return memoryOrders;
+  try {
+    const parsed: unknown = JSON.parse(window.sessionStorage.getItem(ORDERS_KEY) ?? "[]");
+    return Array.isArray(parsed) ? (parsed as ApiOrderDetail[]) : [];
+  } catch {
+    return memoryOrders;
+  }
+}
+
+function savePreviewOrder(order: ApiOrderDetail) {
+  const orders = [...readPreviewOrders().filter((o) => o.id !== order.id), order];
+  memoryOrders.splice(0, memoryOrders.length, ...orders);
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  } catch {
+    // Storage blocked: the order still lives in memory for this page.
+  }
+}
+
+/** Newest first, like the account's order list. */
+const allOrders = (): ApiOrderDetail[] =>
+  [...readPreviewOrders(), sampleOrder()].sort((a, b) => b.placedAt.localeCompare(a.placedAt));
 
 const roundMoney = (value: number) => Math.round(value * 100) / 100;
 
@@ -464,12 +623,12 @@ export class LocalCartRepository implements ICartRepository {
     if (paymentMethod === "ONLINE") throw new CheckoutError("Online payment is not connected yet. Choose pay on delivery.", 501);
     if (paymentMethod === "CREDIT") throw new CheckoutError("Buying on credit is only for wholesale accounts", 400);
 
-    previewSequence += 1;
-    const id = previewSequence;
+    // Preview ids start above the sample order and never repeat within a tab.
+    const id = Math.max(1, ...readPreviewOrders().map((order) => order.id)) + 1;
     const stamp = new Date().toISOString().slice(2, 10).replace(/-/g, "");
     const orderNumber = `DEV-${stamp}-${String(id).padStart(4, "0")}`;
     const { address } = payload;
-    previewOrders.set(id, {
+    savePreviewOrder({
       id,
       orderNumber,
       channel: "D2C",
@@ -510,7 +669,7 @@ export class LocalCartRepository implements ICartRepository {
 
   async getOrder(orderId: number): Promise<ApiOrderDetail | null> {
     await delay(250);
-    return previewOrders.get(orderId) ?? null;
+    return allOrders().find((order) => order.id === orderId) ?? null;
   }
 }
 
@@ -596,7 +755,7 @@ export class LocalInsightRepository implements IInsightRepository {
 
 import { IAuthRepository, IAccountRepository } from "./interfaces";
 import { ApiAuthResponse, ApiUser } from "@/types/api/auth";
-import { ApiAccountProfile, ApiAddress, ApiOrder, ApiOrderSummary } from "@/types/api/account";
+import { ApiAccountProfile, ApiAddress, ApiOrder, ApiOrderSummary, type OrderStatus } from "@/types/api/account";
 
 export class LocalAuthRepository implements IAuthRepository {
   async requestOtp(phone: string): Promise<{ success: boolean; message?: string }> {
@@ -651,24 +810,44 @@ const mockAddresses: ApiAddress[] = [
   }
 ];
 
-const mockOrders: ApiOrder[] = [
-  {
-    id: "ord_1",
-    orderNumber: "DH-1001",
-    status: "DELIVERED",
-    placedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-    subtotal: 450,
-    shipping: 50,
+const ORDER_STATUSES = new Set<OrderStatus>(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"]);
+
+/** The account's older order shape, filled from the same store as GET /me/orders/:id. */
+function toAccountOrder(order: ApiOrderDetail): ApiOrder {
+  const [fullName, line1] = [order.customerName, order.shippingAddress];
+  return {
+    id: String(order.id),
+    orderNumber: order.orderNumber,
+    status: ORDER_STATUSES.has(order.status as OrderStatus) ? (order.status as OrderStatus) : "PENDING",
+    placedAt: order.placedAt,
+    subtotal: order.subtotal,
+    shipping: order.shippingCharge,
     tax: 0,
-    grandTotal: 500,
-    items: [
-      { id: "item_1", productId: 1, productName: "Arnica Montana", variantId: 1, variantName: "30 CH", quantity: 2, price: 225 }
-    ],
-    shippingAddress: mockAddresses[0],
-    paymentMethod: "UPI",
-    paymentStatus: "PAID",
-  }
-];
+    grandTotal: order.grandTotal,
+    items: order.items.map((item) => ({
+      id: String(item.id),
+      productId: mockApiCards.find((c) => c.slug === item.slug)?.id ?? 0,
+      productName: item.productName,
+      variantId: 0,
+      variantName: item.variantTitle,
+      quantity: item.quantity,
+      price: item.unitPrice,
+      imageUrl: item.imageUrl ?? undefined,
+    })),
+    shippingAddress: {
+      id: `order-${order.id}`,
+      fullName,
+      phone: order.customerPhone,
+      line1,
+      city: order.shippingCity,
+      state: order.shippingState,
+      pincode: order.shippingPincode,
+      isDefault: false,
+    },
+    paymentMethod: order.paymentMethod,
+    paymentStatus: order.paymentStatus === "PAID" ? "PAID" : order.paymentStatus === "FAILED" ? "FAILED" : "PENDING",
+  };
+}
 
 export class LocalAccountRepository implements IAccountRepository {
   async getProfile(): Promise<ApiAccountProfile | null> {
@@ -731,19 +910,22 @@ export class LocalAccountRepository implements IAccountRepository {
   
   async getOrders(): Promise<ApiOrderSummary[]> {
     await delay(500);
-    return mockOrders.map(o => ({
-      id: Number(o.id.split('_')[1]),
-      orderNumber: o.orderNumber,
-      status: o.status,
-      grandTotal: o.grandTotal,
-      placedAt: o.placedAt,
-      itemCount: o.items.length
+    return allOrders().map((order) => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      grandTotal: order.grandTotal,
+      placedAt: order.placedAt,
+      itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
     }));
   }
   
   async getOrderById(id: string): Promise<ApiOrder | null> {
     await delay(500);
-    return mockOrders.find(o => o.id === id || o.orderNumber === id) || null;
+    // The order list links by numeric id (as GET /me/orders does); an order
+    // number is accepted too.
+    const order = allOrders().find((o) => String(o.id) === id || o.orderNumber === id);
+    return order ? toAccountOrder(order) : null;
   }
 }
 
@@ -764,17 +946,14 @@ export class LocalServiceabilityRepository implements IServiceabilityRepository 
   }
 }
 
-const mockPrescriptions: ApiPrescription[] = [
-  {
-    id: "rx_1",
-    patientId: 1,
-    fileName: "prescription_oct_2023.pdf",
-    fileUrl: "/mocks/prescription.pdf",
-    status: "VERIFIED",
-    uploadedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-    notes: "For recurring hair fall treatment"
-  }
-];
+/**
+ * No prescriptions in the local data. The backend has no prescription upload:
+ * prescriptions are issued by a DocHomoeo doctor after a consultation
+ * (GET /api/me/prescriptions, ISSUED only, numeric ids) and can be ordered from
+ * (POST /api/me/prescriptions/:id/order, or prescriptionId on checkout). A
+ * mock "uploaded PDF" would imply a flow that does not exist, so none is shown.
+ */
+const mockPrescriptions: ApiPrescription[] = [];
 
 export class LocalPrescriptionRepository implements IPrescriptionRepository {
   async getPrescriptions(): Promise<ApiPrescription[]> {

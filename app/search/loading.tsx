@@ -10,7 +10,7 @@ export default function SearchLoading() {
     <div role="status">
       <span className="sr-only">Loading search results…</span>
 
-      <section className="border-b border-line/60 bg-ivory pt-24 pb-8 sm:pt-28 lg:pb-10">
+      <section className="border-b border-line/60 bg-canvas pt-24 pb-8 sm:pt-28 lg:pb-10">
         <Container>
           <Bone className="mb-5 h-5 w-28" />
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
