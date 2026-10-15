@@ -3,7 +3,6 @@ node_modules/
 src/generated/
 uploads/
 private/
-prisma/migrations/
-migrations/
-*.sql
 
+prisma/migrations/
+*.sql
