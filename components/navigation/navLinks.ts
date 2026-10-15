@@ -8,6 +8,7 @@ export const primaryNav = [
   { label: "Brands", href: "/brands" },
   { label: "Categories", href: "/categories" },
   { label: "Health Insights", href: "/insights" },
+  { label: "Contact", href: "/contact" },
 ] as const satisfies readonly NavLink[];
 
 const formLink = (form: string): NavLink => ({ label: FORM_LABELS[form], href: `/products?form=${form}` });

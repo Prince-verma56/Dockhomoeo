@@ -12,7 +12,11 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { InsightCard } from "@/components/content/InsightCard";
 import { RisePanel } from "@/components/shared/RisePanel";
+import { Eyebrow } from "@/components/shared/Eyebrow";
+import { HoverExpand, type HoverExpandItem } from "@/components/unlumen-ui/primitives/hover-expand";
 import { cn } from "@/lib/utils";
+import { describeForms, describeNames, getCategoryDirectory } from "@/lib/catalogue";
+import { categoryMedia } from "@/data/media";
 
 type Props = PageProps<"/insights">;
 
@@ -68,12 +72,36 @@ const gridColumns = (count: number) =>
 
 export default async function InsightsPage({ searchParams }: Props) {
   const slug = await topicParam(searchParams);
-  const [{ total, topics }, listing, home] = await Promise.all([
+  const [{ total, topics }, listing, categories] = await Promise.all([
     topicsOf(),
     repositories.insight.getInsights(1, 12, slug ?? undefined),
-    repositories.home.getHomeData(),
+    getCategoryDirectory(),
   ]);
   const activeTopic = topics.find((t) => t.slug === slug) ?? null;
+
+  const concerns: HoverExpandItem[] = categories.flatMap((category) => {
+    const media = categoryMedia(category.slug, category.imageUrl);
+    if (!media) return [];
+    const forms = describeForms(category.forms);
+    return [
+      {
+        label: category.name,
+        sublabel: `${category.productCount} ${category.productCount === 1 ? "product" : "products"}`,
+        image: media.src,
+        imagePosition: media.position,
+        imageKind: media.kind,
+        description: [
+          forms ? forms.charAt(0).toUpperCase() + forms.slice(1) : null,
+          category.brands.length ? `from ${describeNames(category.brands)}` : null,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .concat("."),
+        href: `/products?category=${encodeURIComponent(category.slug)}`,
+        cta: `Shop ${category.name}`,
+      },
+    ];
+  });
   const [featured, ...latest] = listing.items;
 
   const pill = (active: boolean) =>
@@ -177,28 +205,30 @@ export default async function InsightsPage({ searchParams }: Props) {
         </section>
 
         {/* Same twelve-column grid as the article cards above it. */}
-        {home.categories.length > 0 ? (
+        {/* Health concerns as an expanding index: point at one to see it. */}
+        {concerns.length > 0 ? (
           <RisePanel aria-labelledby="insights-explore" settle className="dh-section-sm">
             <Container>
-              <div className="grid gap-6 lg:grid-cols-12 lg:items-center lg:gap-6">
-                <div className="lg:col-span-4">
-                  <h2 id="insights-explore" className="dh-title-block text-ink">
+              <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
+                <div className="lg:sticky lg:top-28 lg:col-span-4 lg:self-start">
+                  <Eyebrow rule>From reading to remedies</Eyebrow>
+                  <h2 id="insights-explore" className="dh-title-section mt-3 text-ink">
                     Explore remedies by health concern
                   </h2>
-                  <p className="dh-body mt-2">Talk to a practitioner first, then browse what we stock.</p>
+                  <p className="dh-body mt-3">
+                    Talk to a practitioner first, then browse what we stock for each concern.
+                  </p>
+                  <Link
+                    href="/categories"
+                    className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-forest hover:text-forest-deep"
+                  >
+                    All categories
+                    <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
                 </div>
-                <ul className="flex flex-wrap gap-2 lg:col-span-8 lg:justify-end">
-                  {home.categories.map((category) => (
-                    <li key={category.slug}>
-                      <Link
-                        href={`/products?category=${encodeURIComponent(category.slug)}`}
-                        className="inline-flex h-10 items-center rounded-full border border-line bg-paper px-4 text-sm text-ink transition-colors hover:border-forest/35 hover:text-forest"
-                      >
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className="lg:col-span-8">
+                  <HoverExpand items={concerns} />
+                </div>
               </div>
             </Container>
           </RisePanel>
