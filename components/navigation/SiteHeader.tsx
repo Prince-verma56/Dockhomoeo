@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Search, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { SearchPalette, SearchTrigger } from "@/components/search/SearchPalette";
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { MobileNav } from "@/components/navigation/MobileNav";
 import { ShopMegaMenu } from "@/components/navigation/ShopMegaMenu";
@@ -42,15 +42,14 @@ export function SiteHeader() {
   const [isPastHero, setIsPastHero] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
-  const heroPlayback = useHeroPlayback();
-  const isNavVisible = heroPlayback ? heroPlayback.navVisible : true;
-
   const pathname = usePathname();
+  const isHome = pathname === "/";
+  const heroPlayback = useHeroPlayback();
+  const isNavVisible = !isHome || (heroPlayback ? heroPlayback.navVisible : true);
+
   const { itemCount, setIsOpen } = useCart();
   const { count: savedCount } = useFavourites();
   const { status, isAuthenticated } = useAuth();
-  // Over the hero video the bar stays clear until the hero is mostly behind it.
-  const isHome = pathname === "/";
 
   useEffect(() => {
     const header = headerRef.current;
@@ -134,20 +133,12 @@ export function SiteHeader() {
           {/* Between lg and xl the nav and the field do not both fit (the
               Login button was clipped at 1024–1100px); the icon stands in. */}
           <div className="hidden md:block lg:hidden xl:block">
-            <GlobalSearch />
+            <SearchTrigger />
           </div>
 
           {/* Search button for small screens */}
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="size-9 rounded-full text-[#14251f] hover:bg-black/5 md:hidden lg:inline-flex xl:hidden"
-          >
-            <Link href="/search" aria-label="Search">
-              <Search className="size-[18px]" strokeWidth={1.75} />
-            </Link>
-          </Button>
+          <SearchTrigger variant="icon" className="md:hidden lg:grid xl:hidden" />
+          <SearchPalette />
 
           {/* Wishlist Heart */}
           <Button

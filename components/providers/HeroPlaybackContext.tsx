@@ -23,25 +23,20 @@ export const HERO_PLAYBACK_RATE = 2;
  */
 const REVEAL_LEAD_SECONDS = 1;
 
+/** Delay before the hero text, leaves, and navbar reveal after video playback starts */
+const REVEAL_DELAY_MS = 2400;
+
 /** Playback never started (slow network, autoplay refused): show the copy anyway. */
-const START_TIMEOUT_MS = 4000;
+const START_TIMEOUT_MS = 3800;
 
 /** Playback stalled mid-way while buffering: show the copy rather than wait on the network. */
 const STALL_TIMEOUT_MS = 2500;
 
-const SEEN_KEY = "dochomoeo_hero_seen";
-
 /**
- * Whether this visit skips the intro: the tab has already watched it, or the
- * visitor prefers reduced motion. SEEN_KEY is only written when the page is
- * left (see below), so the answer cannot change while the hero is on screen.
+ * Whether this visit skips the intro: prefers reduced motion.
  */
 const getIntroSkipped = () => {
-  try {
-    if (sessionStorage.getItem(SEEN_KEY) === "true") return true;
-  } catch {
-    // Storage unavailable (private mode): treat as a first visit.
-  }
+  if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 };
 const getServerIntroSkipped = () => false;
@@ -64,7 +59,6 @@ interface HeroPlaybackContextValue {
 const HeroPlaybackContext = createContext<HeroPlaybackContextValue | null>(null);
 
 const applyRate = (video: HTMLVideoElement) => {
-  // defaultPlaybackRate survives a reload of the media; playbackRate is the live value.
   video.defaultPlaybackRate = HERO_PLAYBACK_RATE;
   video.playbackRate = HERO_PLAYBACK_RATE;
 };
@@ -76,19 +70,6 @@ const showLastFrame = (video: HTMLVideoElement) => {
   video.pause();
 };
 
-/**
- * Owns the homepage hero video and the moment its copy appears.
- *
- * - First visit in a tab: the video plays once at 2×; the copy reveals
- *   REVEAL_LEAD_SECONDS before the last frame, on `ended`, on scroll, or via
- *   the start/stall fallbacks — whichever comes first. The video then rests
- *   on its final frame.
- * - Returning visit (sessionStorage) or reduced motion: no intro. The video
- *   is parked on its final frame and the copy is shown without transitions.
- *
- * Only state that consumers read is kept here; time updates are handled in
- * the event listener, so the hero does not re-render four times a second.
- */
 export function HeroPlaybackProvider({
   children,
 }: {
@@ -101,14 +82,13 @@ export function HeroPlaybackProvider({
   const [isCompleted, setIsCompleted] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [skippedByVisitor, setSkippedByVisitor] = useState(false);
-  // Nav is always visible now as per user request
-  const navVisible = true;
 
   // False on the server and during hydration, so the markup matches; React
   // re-renders with the browser's answer straight after.
   const skippedAtLoad = useSyncExternalStore(subscribeNever, getIntroSkipped, getServerIntroSkipped);
   const hasSkipped = skippedAtLoad || skippedByVisitor;
   const contentVisible = hasSkipped || revealed;
+  const navVisible = hasSkipped || revealed;
 
   const reveal = useCallback(() => {
     if (revealedRef.current) return;
@@ -125,34 +105,20 @@ export function HeroPlaybackProvider({
 
   useEffect(() => {
     const video = videoRef.current;
-    // Read directly: on a returning visit the hook above still holds the
-    // hydration value here, and the video must not start playing.
     const skip = getIntroSkipped();
-    if (skip) revealedRef.current = true;
-
-    // The intro counts as seen once its copy has been shown; it is recorded on
-    // the way out so this visit's answer above stays fixed.
-    const remember = () => {
-      if (!revealedRef.current) return;
-      try {
-        sessionStorage.setItem(SEEN_KEY, "true");
-      } catch {
-        // Storage unavailable: the intro simply plays again next time.
-      }
-    };
-    window.addEventListener("pagehide", remember);
+    if (skip) {
+      revealedRef.current = true;
+      setRevealed(true);
+    }
 
     if (!video) {
       const timer = setTimeout(reveal, 0);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("pagehide", remember);
-        remember();
-      };
+      return () => clearTimeout(timer);
     }
 
     let startTimer: ReturnType<typeof setTimeout> | undefined;
     let stallTimer: ReturnType<typeof setTimeout> | undefined;
+    let revealTimer: ReturnType<typeof setTimeout> | undefined;
 
     const onLoadedMetadata = () => {
       if (skip) showLastFrame(video);
@@ -161,6 +127,9 @@ export function HeroPlaybackProvider({
       setIsPlaying(true);
       clearTimeout(startTimer);
       clearTimeout(stallTimer);
+      if (!revealedRef.current && !revealTimer) {
+        revealTimer = setTimeout(reveal, REVEAL_DELAY_MS);
+      }
     };
     const onPause = () => setIsPlaying(false);
     const onWaiting = () => {
@@ -173,7 +142,6 @@ export function HeroPlaybackProvider({
       if (remaining <= REVEAL_LEAD_SECONDS) reveal();
     };
     const onEnded = () => {
-      // The element rests on its final frame once ended; nothing to seek.
       setIsCompleted(true);
       setIsPlaying(false);
       reveal();
@@ -198,6 +166,7 @@ export function HeroPlaybackProvider({
     return () => {
       clearTimeout(startTimer);
       clearTimeout(stallTimer);
+      clearTimeout(revealTimer);
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("pause", onPause);
@@ -205,9 +174,6 @@ export function HeroPlaybackProvider({
       video.removeEventListener("timeupdate", onTimeUpdate);
       video.removeEventListener("ended", onEnded);
       video.removeEventListener("error", reveal);
-      window.removeEventListener("pagehide", remember);
-      // Client-side navigation away from the homepage.
-      remember();
     };
   }, [reveal]);
 
