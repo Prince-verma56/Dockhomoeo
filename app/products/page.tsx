@@ -5,6 +5,8 @@ import { listingHref, parseSearchState, toSearchFilters } from "@/lib/search/sea
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { ShopView } from "@/sections/shop/ShopView";
+import { BreadcrumbJsonLd } from "@/components/shared/PageBreadcrumb";
+import { shopHeading } from "@/lib/navigation/crumbs";
 
 export const metadata: Metadata = {
   title: "Shop homoeopathic remedies",
@@ -26,6 +28,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/product
       <SiteHeader />
       <main id="main" className="flex-1 bg-canvas">
         <ShopView state={state} result={result} />
+        <BreadcrumbJsonLd items={shopHeading(state, result).crumbs} />
       </main>
       <SiteFooter />
     </>

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
-import { PageBreadcrumb, type Crumb } from "@/components/shared/PageBreadcrumb";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { shopHeading } from "@/lib/navigation/crumbs";
 import { Button } from "@/components/ui/button";
 import { FORM_NOUNS, activeFilterCount, formLabel, listingHref, type SearchState } from "@/lib/search/searchState";
 import { ProductResults, useListingNavigation } from "@/sections/listing/ProductResults";
@@ -29,7 +29,7 @@ const list = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
  */
 export function ShopView({ state, result }: ShopViewProps) {
   const { view, isPending, refine } = useListingNavigation(state, shopHref);
-  const { title, crumbs } = heading(state, result);
+  const { title, crumbs } = shopHeading(state, result);
   const forms = result.facets.forms;
   const brandCount = result.facets.brands.length;
   const onlyForm = state.form.length === 1 ? state.form[0] : null;
@@ -49,7 +49,7 @@ export function ShopView({ state, result }: ShopViewProps) {
     <>
       <section aria-labelledby="shop-heading" className="dh-band-sage pt-28 pb-8 sm:pt-32 lg:pb-10">
         <Container>
-          <PageBreadcrumb items={crumbs} className="mb-5" />
+          <PageBreadcrumb items={crumbs} className="mb-5" structuredData={false} />
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
             <div className="max-w-2xl">
               <Eyebrow>Shop</Eyebrow>
@@ -121,23 +121,6 @@ export function ShopView({ state, result }: ShopViewProps) {
         }
       />
 
-      <DemoContentNotice />
     </>
   );
-}
-
-function heading(state: SearchState, result: ApiProductListingResponse): { title: string; crumbs: Crumb[] } {
-  const all: Crumb = { name: "Products", href: "/products" };
-  if (state.q) return { title: `Results for “${state.q}”`, crumbs: [all, { name: "Search", href: shopHref(state) }] };
-  if (result.category) {
-    return {
-      title: result.category.name,
-      crumbs: [{ name: "Categories", href: "/categories" }, { name: result.category.name, href: shopHref({ ...state, page: 1 }) }],
-    };
-  }
-  if (state.form.length === 1) {
-    const name = formLabel(state.form[0]);
-    return { title: name, crumbs: [all, { name, href: shopHref({ ...state, page: 1 }) }] };
-  }
-  return { title: "All products", crumbs: [all] };
 }

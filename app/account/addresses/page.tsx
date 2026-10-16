@@ -1,143 +1,224 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { repositories } from "@/lib/repositories";
-import { ApiAddress } from "@/types/api/account";
-import { Loader2, Plus, MapPin, MoreVertical, Edit2, Trash2, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Loader2, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { AccountEmpty, AccountError, AccountLoading, AccountPageHeader, panelClass } from "@/components/account/AccountStates";
+import { AddressFormSheet } from "@/components/account/AddressFormSheet";
+import { FormNotice } from "@/components/shared/FormField";
+import { repositories } from "@/lib/repositories";
+import { describeError } from "@/lib/api";
+import { useAsyncData } from "@/lib/hooks/useAsyncData";
+import { MAX_ADDRESSES, addressToForm, emptyAddressForm, type AddressForm } from "@/lib/account/addressForm";
+import { cn } from "@/lib/utils";
+import type { ApiAddress, ApiAddressInput } from "@/types/api/account";
 
+const loadAddresses = () => repositories.account.getAddresses();
+
+type Editing = { mode: "add" } | { mode: "edit"; address: ApiAddress } | null;
+
+/**
+ * Saved delivery addresses: GET, POST, PATCH and DELETE /api/me/addresses.
+ * After every change the list is read again, because the backend decides
+ * which address becomes the default (the first one saved, or the most recent
+ * one when the default is deleted).
+ */
 export default function AddressesPage() {
-  const [addresses, setAddresses] = useState<ApiAddress[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { state, reload, refresh } = useAsyncData(loadAddresses);
+  const [editing, setEditing] = useState<Editing>(null);
+  const [lastEditing, setLastEditing] = useState<Exclude<Editing, null>>({ mode: "add" });
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [notice, setNotice] = useState<{ tone: "success" | "error"; text: string } | null>(null);
 
-  useEffect(() => {
-    async function fetchAddresses() {
-      try {
-        const data = await repositories.account.getAddresses();
-        setAddresses(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchAddresses();
-  }, []);
+  const addresses = state.status === "ready" ? state.data : [];
+  const full = addresses.length >= MAX_ADDRESSES;
 
-  const handleSetDefault = async (id: string) => {
-    try {
-      await repositories.account.setDefaultAddress(id);
-      setAddresses(addresses.map(a => ({ ...a, isDefault: a.id === id })));
-    } catch (e) {
-      console.error(e);
-    }
+  const open = (next: Exclude<Editing, null>) => {
+    setNotice(null);
+    setLastEditing(next);
+    setEditing(next);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await repositories.account.deleteAddress(id);
-      setAddresses(addresses.filter(a => a.id !== id));
-    } catch (e) {
-      console.error(e);
-    }
+  // The sheet keeps its content while it animates closed, so it reads the last opened form.
+  const current = editing ?? lastEditing;
+  const initial: AddressForm =
+    current.mode === "edit"
+      ? addressToForm(current.address)
+      : emptyAddressForm({
+          fullName: [user?.firstName, user?.lastName].filter(Boolean).join(" "),
+          phone: user?.phone ?? "",
+          isDefault: addresses.length === 0,
+        });
+
+  const save = async (input: ApiAddressInput) => {
+    if (current.mode === "edit") await repositories.account.updateAddress(current.address.id, input);
+    else await repositories.account.addAddress(input);
+    await refresh();
+    setEditing(null);
+    setNotice({ tone: "success", text: current.mode === "edit" ? "Address updated." : "Address saved." });
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center rounded-[2rem] bg-white border border-forest-abyss/5">
-        <Loader2 className="size-8 animate-spin text-forest-deep" />
-      </div>
-    );
-  }
+  const act = async (id: number, action: () => Promise<void>, done: string) => {
+    if (busyId !== null) return;
+    setBusyId(id);
+    setNotice(null);
+    try {
+      await action();
+      await refresh();
+      setConfirmDelete(null);
+      setNotice({ tone: "success", text: done });
+    } catch (err) {
+      setNotice({ tone: "error", text: describeError(err, "That did not work. Please try again.") });
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="font-display text-2xl font-bold text-ink">Saved Addresses</h2>
-        <Button className="rounded-xl bg-forest-deep text-white hover:bg-forest-abyss h-11 px-6 shadow-sm">
-          <Plus className="mr-2 size-4" />
-          Add New Address
-        </Button>
-      </div>
+    <div>
+      <AccountPageHeader
+        title="Addresses"
+        description={`Saved for faster checkout. You can keep up to ${MAX_ADDRESSES}.`}
+        action={
+          state.status === "ready" && addresses.length > 0 ? (
+            <Button variant="brand" size="xl" onClick={() => open({ mode: "add" })} disabled={full} className="w-full sm:w-auto">
+              <Plus aria-hidden />
+              Add address
+            </Button>
+          ) : null
+        }
+      />
 
-      {addresses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[2rem] bg-white border border-forest-abyss/5 p-16 text-center shadow-sm">
-          <div className="rounded-full bg-forest-abyss/5 p-4 mb-4">
-            <MapPin className="size-8 text-muted-ink" />
-          </div>
-          <h3 className="font-display text-xl font-bold text-ink">No saved addresses</h3>
-          <p className="mt-2 text-muted-ink max-w-md">
-            Add a delivery address to make checkout faster next time.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {addresses.map((addr) => (
-            <div
-              key={addr.id}
-              className={`relative rounded-[2rem] p-6 sm:p-8 shadow-sm border transition-all duration-300 ${
-                addr.isDefault 
-                  ? "bg-forest-deep/5 border-forest-deep/20" 
-                  : "bg-white border-forest-abyss/5 hover:border-forest-deep/20"
-              }`}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-lg text-ink">{addr.fullName}</span>
-                  {addr.isDefault && (
-                    <span className="inline-flex items-center rounded-md bg-forest-deep/10 px-2 py-1 text-xs font-medium text-forest-deep">
+      {notice ? (
+        <FormNotice tone={notice.tone} className="mb-5">
+          {notice.text}
+        </FormNotice>
+      ) : null}
+      {full ? (
+        <FormNotice tone="info" className="mb-5">
+          You have {MAX_ADDRESSES} saved addresses, the most we can keep. Delete one to add another.
+        </FormNotice>
+      ) : null}
+
+      {state.status === "loading" ? <AccountLoading rows={2} label="Loading your addresses…" /> : null}
+      {state.status === "error" ? <AccountError message={state.message} onRetry={reload} /> : null}
+
+      {state.status === "ready" && addresses.length === 0 ? (
+        <AccountEmpty
+          icon={<MapPin aria-hidden className="size-6" strokeWidth={1.6} />}
+          title="No saved addresses yet"
+          action={
+            <Button variant="brand" size="xl" onClick={() => open({ mode: "add" })}>
+              <Plus aria-hidden />
+              Add your first address
+            </Button>
+          }
+        >
+          Add one now, or tick &ldquo;save this address&rdquo; when you check out.
+        </AccountEmpty>
+      ) : null}
+
+      {state.status === "ready" && addresses.length > 0 ? (
+        <ul className="grid gap-4 lg:grid-cols-2">
+          {addresses.map((address) => {
+            const busy = busyId === address.id;
+            const confirming = confirmDelete === address.id;
+            return (
+              <li
+                key={address.id}
+                className={cn(panelClass, "flex flex-col p-5 sm:p-6", address.isDefault && "border-forest/30 bg-sage-wash/50")}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-semibold text-ink">{address.fullName}</p>
+                  {address.isDefault ? (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-forest px-2.5 py-0.5 text-xs font-semibold text-cream">
+                      <CheckCircle2 aria-hidden className="size-3.5" />
                       Default
                     </span>
-                  )}
+                  ) : null}
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-8 rounded-full -mr-2 text-muted-ink hover:text-ink hover:bg-black/5">
-                      <MoreVertical className="size-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40 rounded-xl">
-                    <DropdownMenuItem className="cursor-pointer rounded-lg">
-                      <Edit2 className="mr-2 size-4 text-muted-ink" />
-                      Edit
-                    </DropdownMenuItem>
-                    {!addr.isDefault && (
-                      <DropdownMenuItem 
-                        className="cursor-pointer rounded-lg"
-                        onClick={() => handleSetDefault(addr.id)}
-                      >
-                        <CheckCircle2 className="mr-2 size-4 text-muted-ink" />
-                        Set as Default
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem 
-                      className="cursor-pointer rounded-lg text-red-600 focus:text-red-600 focus:bg-red-50"
-                      onClick={() => handleDelete(addr.id)}
-                    >
-                      <Trash2 className="mr-2 size-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                <address className="mt-2 flex-1 space-y-0.5 text-sm text-muted-ink not-italic">
+                  <p>{address.line1}</p>
+                  {address.landmark ? <p>{address.landmark}</p> : null}
+                  <p>
+                    {address.city}, {address.state} {address.pincode}
+                  </p>
+                  <p className="pt-2 text-ink">+91 {address.phone}</p>
+                </address>
 
-              <address className="not-italic text-sm text-muted-ink space-y-1">
-                <p>{addr.line1}</p>
-                {addr.landmark && <p>{addr.landmark}</p>}
-                <p>{addr.city}, {addr.state} {addr.pincode}</p>
-                <p className="mt-4 text-ink font-medium">Phone: {addr.phone}</p>
-              </address>
-            </div>
-          ))}
-        </div>
-      )}
+                {confirming ? (
+                  <div role="alertdialog" aria-labelledby={`delete-${address.id}`} className="mt-5 rounded-xl border border-destructive/25 bg-destructive/5 p-4">
+                    <p id={`delete-${address.id}`} className="text-sm font-medium text-ink">
+                      Delete this address?{address.isDefault ? " Another saved address will become your default." : ""}
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        variant="destructive"
+                        size="lg"
+                        className="rounded-lg"
+                        disabled={busy}
+                        onClick={() => act(address.id, () => repositories.account.deleteAddress(address.id), "Address deleted.")}
+                        autoFocus
+                      >
+                        {busy ? <Loader2 aria-hidden className="animate-spin" /> : <Trash2 aria-hidden />}
+                        Delete
+                      </Button>
+                      <Button variant="ghost" size="lg" className="rounded-lg" disabled={busy} onClick={() => setConfirmDelete(null)}>
+                        Keep it
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-5 flex flex-wrap items-center gap-x-1 gap-y-2 border-t border-line/70 pt-4">
+                    <Button variant="ghost" size="lg" className="rounded-lg text-ink" disabled={busyId !== null} onClick={() => open({ mode: "edit", address })}>
+                      <Pencil aria-hidden />
+                      Edit
+                    </Button>
+                    {!address.isDefault ? (
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        className="rounded-lg text-ink"
+                        disabled={busyId !== null}
+                        onClick={() => act(address.id, () => repositories.account.setDefaultAddress(address.id), "Default address updated.")}
+                      >
+                        {busy ? <Loader2 aria-hidden className="animate-spin" /> : <CheckCircle2 aria-hidden />}
+                        Make default
+                      </Button>
+                    ) : null}
+                    <Button
+                      variant="ghost"
+                      size="lg"
+                      className="ml-auto rounded-lg text-destructive hover:bg-destructive/6 hover:text-destructive"
+                      disabled={busyId !== null}
+                      onClick={() => {
+                        setNotice(null);
+                        setConfirmDelete(address.id);
+                      }}
+                      aria-label={`Delete address for ${address.fullName}, ${address.line1}`}
+                    >
+                      <Trash2 aria-hidden />
+                      Delete
+                    </Button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      <AddressFormSheet
+        open={editing !== null}
+        onOpenChange={(next) => !next && setEditing(null)}
+        mode={current.mode}
+        initial={initial}
+        onSubmit={save}
+        lockDefault={current.mode === "edit" && current.address.isDefault}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { ApiBrand } from "@/types/api/home";
 
 /**
  * Top Homeopathic Brand definitions matching the user's inspiration screenshot:
@@ -329,7 +330,23 @@ const homeopathicBrands = [
  * - White rounded cards with authentic brand vector logos
  * - Dappled botanical ambiance
  */
-export function TrustedBrands() {
+/**
+ * The hand-drawn wordmark for a catalogue brand, when one was drawn for it.
+ * Matched on the brand's own slug or name, so "dr-reckeweg" or "Reckeweg &
+ * Co." both find the Reckeweg mark; anything else gets its uploaded logo or
+ * a typographic wordmark below.
+ */
+function drawnLogoFor(brand: ApiBrand) {
+  const text = `${brand.slug} ${brand.name}`.toLowerCase();
+  return homeopathicBrands.find((drawn) => text.includes(drawn.id))?.logo ?? null;
+}
+
+/**
+ * The brands the shop actually stocks (GET /api/shop/home `brands`, the 18
+ * with the most products), each linking to its brand page. When the shop has
+ * none, the drawn maker logos stand in, each opening a search for that maker.
+ */
+export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -340,6 +357,31 @@ export function TrustedBrands() {
       behavior: "smooth",
     });
   };
+
+  // The shop's own brands when it has any; otherwise the makers drawn for this
+  // section, each opening a search for that maker (never a brand page that may not exist).
+  const tiles =
+    brands.length > 0
+      ? brands.map((brand) => ({
+          key: String(brand.id),
+          href: `/brands/${encodeURIComponent(brand.slug)}`,
+          label: `${brand.name}, ${brand.productCount} ${brand.productCount === 1 ? "product" : "products"}`,
+          logo: drawnLogoFor(brand) ??
+            (brand.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- logos are any size and format the admin uploads
+              <img src={brand.logoUrl} alt="" className="max-h-12 w-auto max-w-36 object-contain" loading="lazy" />
+            ) : (
+              <span className="block max-w-36 text-center font-display text-lg leading-tight font-semibold tracking-tight text-[#0c1110]">
+                {brand.name}
+              </span>
+            )),
+        }))
+      : homeopathicBrands.map((brand) => ({
+          key: brand.id,
+          href: `/products?q=${encodeURIComponent(brand.id)}`,
+          label: `Search for ${brand.name}`,
+          logo: brand.logo,
+        }));
 
   return (
     <section
@@ -416,15 +458,14 @@ export function TrustedBrands() {
             ref={scrollContainerRef}
             className="dh-rail-mask w-full flex items-center gap-4 sm:gap-5 overflow-x-auto scroll-smooth py-4 px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
-            {homeopathicBrands.map((brand) => (
+            {tiles.map((tile) => (
               <Link
-                key={brand.id}
-                href={brand.href}
+                key={tile.key}
+                href={tile.href}
+                aria-label={tile.label}
                 className="group relative flex h-20 sm:h-[90px] w-42 sm:w-50 shrink-0 items-center justify-center rounded-2xl bg-white/85 hover:bg-white backdrop-blur-xl border border-white/90 shadow-[0_4px_20px_rgba(20,40,30,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:shadow-[0_12px_28px_rgba(12,80,59,0.12)] hover:-translate-y-1.5 px-4 transition-all duration-300"
               >
-                <div className="transition-transform duration-300 group-hover:scale-105">
-                  {brand.logo}
-                </div>
+                <div className="transition-transform duration-300 group-hover:scale-105">{tile.logo}</div>
               </Link>
             ))}
           </div>

@@ -74,7 +74,7 @@ export function ProductCard({
         price: product.price.amount,
         imageUrl: product.image,
         brand: product.brand,
-        form: product.form,
+        form: product.form ?? undefined,
       },
       { source },
     );

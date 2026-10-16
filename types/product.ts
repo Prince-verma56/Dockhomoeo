@@ -22,7 +22,8 @@ export type Product = {
   slug: string;
   name: string;
   brand: string;
-  form: ProductForm;
+  /** The pack the illustration draws; null when the product does not state its form (a plain carton). */
+  form: ProductForm | null;
   /** Potency or pack size, shown as the card's secondary line. */
   variant: string;
   /**

@@ -6,6 +6,7 @@ import { Check, Heart, Info, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { productCrumbs } from "@/lib/navigation/crumbs";
 import { SafeRichText } from "@/components/shared/SafeRichText";
 import { Rating } from "@/components/shared/Rating";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { ProductCard } from "@/components/commerce/ProductCard";
 import { ProductMedia } from "@/components/commerce/ProductMedia";
 import { QuantityStepper } from "@/components/commerce/QuantityStepper";
 import { PincodeCheck } from "@/components/commerce/PincodeCheck";
-import { mapApiCardToProduct } from "@/lib/adapters/product";
+import { mapApiCardToProduct, packFormFromText } from "@/lib/adapters/product";
 import { formatRupees } from "@/lib/formatters/price";
 import { formLabel, potencyLabel } from "@/lib/search/searchState";
 import { useCart } from "@/components/providers/CartProvider";
@@ -41,7 +42,11 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
   const { addItem } = useCart();
   const favourites = useFavourites();
   const favourited = favourites.isFavourite(product.slug);
-  const form = FORMS.find((value) => value === product.form) ?? "drops";
+  // The shop's own dosage form, shown as a fact; left out when the shop gives none.
+  const form = FORMS.find((value) => value === product.form) ?? null;
+  // The illustration follows the card's rule (lib/adapters/product), so the
+  // product looks the same from listing to order.
+  const packForm = packFormFromText(initial?.title, product.name);
 
   useEffect(() => () => window.clearTimeout(addedTimer.current), []);
 
@@ -65,7 +70,7 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
         price: variant.price,
         imageUrl: image?.url,
         brand: product.brand?.name,
-        form,
+        form: packForm ?? undefined,
       },
       { source: mediaRef.current?.querySelector<HTMLElement>("[data-product-media]") ?? mediaRef.current },
     );
@@ -75,13 +80,15 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
     addedTimer.current = window.setTimeout(() => setAdded(false), ADDED_MS);
   };
 
-  const crumbs = product.trail.slice(1).map((step) => ({ name: step.name, href: `/${step.slug ? (step.slug === product.slug ? `product/${step.slug}` : step.slug) : ""}` }));
+  // The shop's `trail` is the product's category chain, top level first
+  // (GET /api/shop/products/:slug); each step opens that category's listing.
+  const crumbs = productCrumbs(product);
 
   type DetailRow = { label: string; value: React.ReactNode };
   const rows: (DetailRow | null)[] = [
     product.brand ? { label: "Brand", value: <Link href={`/brands/${product.brand.slug}`} className="font-medium text-forest underline-offset-4 hover:underline">{product.brand.name}</Link> } : null,
     product.manufacturer ? { label: "Manufacturer", value: product.manufacturer } : null,
-    { label: "Form", value: formLabel(form) },
+    form ? { label: "Form", value: formLabel(form) } : null,
     variant?.potency ? { label: "Potency", value: potencyLabel(variant.potency) } : null,
     variant?.packSize ? { label: "Pack size", value: variant.packSize } : null,
     variant?.sku ? { label: "SKU", value: variant.sku } : null,
@@ -100,14 +107,14 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
   return (
     <div className="bg-canvas pt-24 pb-16 sm:pt-28 lg:pb-24">
       <Container>
-        <PageBreadcrumb items={crumbs} className="mb-6 lg:mb-8" />
+        <PageBreadcrumb items={crumbs} className="mb-6 lg:mb-8" structuredData={false} />
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14 xl:gap-20">
           {/* Gallery */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div ref={mediaRef} className="relative">
               <ProductMedia
-                product={{ form, name: product.name, brand: product.brand?.name, mediaLabel: image?.altText ?? product.name, image: image?.url }}
+                product={{ form: packForm, name: product.name, brand: product.brand?.name, mediaLabel: image?.altText ?? product.name, image: image?.url }}
                 ratio="aspect-square"
                 rounded="rounded-[1.75rem]"
                 eager
@@ -136,7 +143,7 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
                       )}
                     >
                       <ProductMedia
-                        product={{ form, name: product.name, mediaLabel: "", image: img.url }}
+                        product={{ form: packForm, name: product.name, mediaLabel: "", image: img.url }}
                         ratio="aspect-square"
                         sizes="80px"
                       />
@@ -155,10 +162,12 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
                   {product.brand.name}
                 </Link>
               ) : null}
-              <span aria-hidden className="text-line">/</span>
-              <Link href={`/products?form=${form}`} className="text-muted-ink hover:text-forest">
-                {formLabel(form)}
-              </Link>
+              {product.brand && form ? <span aria-hidden className="text-line">/</span> : null}
+              {form ? (
+                <Link href={`/products?form=${form}`} className="text-muted-ink hover:text-forest">
+                  {formLabel(form)}
+                </Link>
+              ) : null}
             </div>
 
             <h1 className="mt-2 font-display text-[2.125rem] leading-[1.08] tracking-tight text-ink sm:text-[2.75rem]">{product.name}</h1>
@@ -281,6 +290,13 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
               </p>
             ) : null}
 
+            {!product.allowCod || !product.allowPrepaid ? (
+              <p className="mt-4 flex items-start gap-2 rounded-2xl border border-line-soft bg-paper p-4 text-sm text-ink">
+                <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-forest" />
+                {product.allowCod ? "This product can only be paid for on delivery." : "This product can only be paid for online."}
+              </p>
+            ) : null}
+
             <div className="mt-4">
               <PincodeCheck />
             </div>
@@ -321,6 +337,42 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
             </section>
           </div>
         </div>
+
+        {product.reviews.length > 0 ? (
+          <section aria-labelledby="reviews-heading" className="mt-16 border-t border-line/70 pt-12 lg:mt-24 lg:pt-16">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <h2 id="reviews-heading" className="dh-title-block text-ink">
+                Customer reviews
+              </h2>
+              {product.ratingCount > 0 ? (
+                <p className="flex items-center gap-2 text-sm text-muted-ink">
+                  <Rating value={product.ratingAverage} variant="full" />
+                  <span>
+                    {product.ratingCount} {product.ratingCount === 1 ? "rating" : "ratings"}
+                  </span>
+                </p>
+              ) : null}
+            </div>
+            <ul className="grid gap-4 md:grid-cols-2">
+              {product.reviews.map((review) => (
+                <li key={review.id} className="rounded-2xl border border-line-soft bg-paper p-5 shadow-xs">
+                  <div className="flex items-center justify-between gap-3">
+                    <Rating value={review.rating} variant="full" />
+                    <time dateTime={new Date(review.createdAt).toISOString()} className="text-xs text-muted-ink">
+                      {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(review.createdAt))}
+                    </time>
+                  </div>
+                  {review.title ? <p className="mt-3 font-semibold text-ink">{review.title}</p> : null}
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-ink">{review.body}</p>
+                  <p className="mt-3 text-xs text-muted-ink">
+                    {review.authorName}
+                    {review.isVerifiedBuyer ? " · Verified buyer" : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {product.related.length > 0 ? (
           <section aria-labelledby="related-heading" className="mt-16 border-t border-line/70 pt-12 lg:mt-24 lg:pt-16">

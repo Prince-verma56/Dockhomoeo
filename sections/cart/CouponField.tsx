@@ -10,14 +10,15 @@ import { formatRupees } from "@/lib/formatters/price";
  * `coupon` or `couponError`); nothing is checked or discounted here.
  */
 export function CouponField() {
-  const { couponCode, applyCoupon, removeCoupon, quote, quoteIsCurrent } = useCart();
+  const { couponCode, applyCoupon, removeCoupon, quote, quoteIsCurrent, quoteStatus, retryQuote } = useCart();
   const [draft, setDraft] = useState("");
   const [open, setOpen] = useState(false);
   const [removed, setRemoved] = useState<string | null>(null);
   const inputId = useId();
   const errorId = `${inputId}-error`;
 
-  const checking = couponCode !== null && !quoteIsCurrent;
+  const unreachable = couponCode !== null && quoteStatus === "error";
+  const checking = couponCode !== null && !quoteIsCurrent && !unreachable;
   const applied = couponCode !== null && quoteIsCurrent && quote?.coupon ? quote.coupon : null;
   const refusal = couponCode !== null && quoteIsCurrent && !quote?.coupon ? quote?.couponError ?? null : null;
 
@@ -83,8 +84,8 @@ export function CouponField() {
           autoComplete="off"
           spellCheck={false}
           maxLength={40}
-          aria-invalid={refusal ? true : undefined}
-          aria-describedby={refusal ? errorId : undefined}
+          aria-invalid={refusal || unreachable ? true : undefined}
+          aria-describedby={refusal || unreachable ? errorId : undefined}
           className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3.5 text-sm uppercase text-ink placeholder:normal-case placeholder:text-muted-ink/80 aria-invalid:border-destructive"
           placeholder="Enter code"
         />
@@ -110,7 +111,16 @@ export function CouponField() {
         </button>
       </div>
       <p id={errorId} role="status" className="min-h-4 text-xs text-destructive">
-        {refusal ?? (checking ? <span className="text-muted-ink">Checking with the shop…</span> : null)}
+        {unreachable ? (
+          <>
+            We couldn&rsquo;t check this code with the shop just now.{" "}
+            <button type="button" onClick={retryQuote} className="font-semibold text-forest underline-offset-4 hover:underline">
+              Try again
+            </button>
+          </>
+        ) : (
+          refusal ?? (checking ? <span className="text-muted-ink">Checking with the shop…</span> : null)
+        )}
       </p>
     </form>
   );

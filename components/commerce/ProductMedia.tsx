@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ProductPackshot } from "@/components/commerce/ProductPackshot";
-import { productPhotoFor } from "@/data/productImagery";
 import type { Product } from "@/types/product";
 
 type ProductMediaProps = {
@@ -26,10 +25,10 @@ type ProductMediaProps = {
 /**
  * The product image slot, shared by cards, the product page and rails.
  *
- * A photograph is shown only when the data supplies one (the local catalogue
- * only pairs a product with a photo of that same product; see
- * data/productImagery). Otherwise — or if the photo fails to load — the
- * illustrated pack stands in, so no frame is ever blank or broken.
+ * A photograph is shown only when the shop supplies one for this product
+ * (`imageUrl` from the API). Otherwise, or if the photo fails to load, the
+ * illustrated pack stands in, printed with the product's own name, brand and
+ * potency, so no frame is ever blank, broken or showing another product.
  *
  * `data-product-media` marks the element the add-to-cart flight lifts off from.
  */
@@ -42,8 +41,7 @@ export function ProductMedia({
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px",
 }: ProductMediaProps) {
   const [failed, setFailed] = useState(false);
-  const resolvedPhoto = product.slug ? productPhotoFor(product.slug, product.form) : undefined;
-  const imageSrc = product.image ?? resolvedPhoto?.src ?? null;
+  const imageSrc = product.image ?? null;
   const showPhoto = Boolean(imageSrc) && !failed;
 
   return (
@@ -54,7 +52,7 @@ export function ProductMedia({
       {showPhoto && imageSrc ? (
         <Image
           src={imageSrc}
-          alt={product.mediaLabel || resolvedPhoto?.alt || product.name}
+          alt={product.mediaLabel || product.name}
           fill
           loading={eager ? "eager" : undefined}
           fetchPriority={eager ? "high" : undefined}

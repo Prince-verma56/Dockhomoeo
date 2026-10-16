@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { healthGoals } from "@/data/mock/home";
+import type { ApiCategory } from "@/types/api/home";
 import { gsap } from "@/lib/animation/gsap";
 
 /**
@@ -17,7 +18,16 @@ import { gsap } from "@/lib/animation/gsap";
  * 4. Perfectly balanced vertical positioning after the Hero section without empty void gaps.
  * 5. Organic curved wave shape separator cradling the shelf and transitioning into Bestselling section.
  */
-export function HealthGoals() {
+/** The illustrated sculpture for a category, when one was made for a health goal of that slug. */
+const sculptureFor = (slug: string) => healthGoals.find((goal) => goal.id === slug)?.image ?? null;
+
+/**
+ * The shop's top-level categories (GET /api/shop/home `categories`, only
+ * those with products), each opening the listing for that category. When the
+ * shop has none (or cannot be reached) the curated health goals stand in, so
+ * the shelf is never missing; each still opens its category listing.
+ */
+export function HealthGoals({ categories }: { categories: ApiCategory[] }) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const shelfRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -120,6 +130,11 @@ export function HealthGoals() {
     return () => ctx.revert();
   }, []);
 
+  const shelf =
+    categories.length > 0
+      ? categories.map((category) => ({ key: String(category.id), slug: category.slug, name: category.name, imageUrl: category.imageUrl }))
+      : healthGoals.map((goal) => ({ key: goal.id, slug: goal.id, name: goal.name, imageUrl: goal.image ?? null }));
+
   return (
     <section
       ref={sectionRef}
@@ -194,29 +209,39 @@ export function HealthGoals() {
               onScroll={checkScroll}
               className="flex-1 flex items-center gap-3 sm:gap-4 lg:gap-5 overflow-x-auto no-scrollbar scroll-smooth py-1.5 px-1"
             >
-              {healthGoals.map((goal) => (
+              {shelf.map((category) => {
+                const art = sculptureFor(category.slug) ?? category.imageUrl;
+                return (
                 <Link
-                  key={goal.id}
-                  href={goal.href}
+                  key={category.key}
+                  href={`/products?category=${encodeURIComponent(category.slug)}`}
                   className="group flex flex-col items-center shrink-0 w-[88px] sm:w-[98px] lg:w-[106px] select-none outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:rounded-2xl"
                 >
                   {/* Generously Scaled Soft White Pedestal with 3D Botanical Sculpture */}
                   <div className="relative size-[78px] sm:size-[86px] lg:size-[94px] rounded-[20px] sm:rounded-[24px] bg-white border border-[#e0e6e2] shadow-[0_4px_14px_rgba(0,0,0,0.04)] group-hover:shadow-[0_10px_24px_rgba(13,90,67,0.15)] group-hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center p-2 overflow-hidden">
-                    <img
-                      src={goal.image || `/Images/HealthGoals/${goal.id}.webp`}
-                      alt=""
-                      aria-hidden="true"
-                      className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300 drop-shadow-xs"
-                      loading="lazy"
-                    />
+                    {art ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- local sculptures and admin uploads of any size
+                      <img
+                        src={art}
+                        alt=""
+                        aria-hidden="true"
+                        className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300 drop-shadow-xs"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span aria-hidden className="font-display text-3xl text-forest/70">
+                        {category.name.slice(0, 1)}
+                      </span>
+                    )}
                   </div>
 
                   {/* Clean, Full Non-Truncated Category Label */}
                   <span className="mt-2 text-[0.78rem] sm:text-[0.82rem] font-semibold text-[#182a22] group-hover:text-forest transition-colors text-center whitespace-nowrap tracking-tight">
-                    {goal.name}
+                    {category.name}
                   </span>
                 </Link>
-              ))}
+                );
+              })}
             </div>
 
             {/* Desktop Right Carousel Control (>) */}

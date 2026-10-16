@@ -9,8 +9,7 @@ import { ClipReveal } from "@/components/shared/ClipReveal";
 import { SplitHeading } from "@/components/shared/SplitHeading";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { MediaPlaceholder } from "@/components/shared/MediaPlaceholder";
-import { articles } from "@/data/mock/home";
-import type { Article } from "@/types/content";
+import type { ApiInsightCard } from "@/types/api/insight";
 
 /**
  * Editorial journal.
@@ -21,8 +20,10 @@ import type { Article } from "@/types/content";
  * grids above it (brain/08_UI_SPEC.md: "three editorial cards with varied
  * image crops").
  */
-export function HealthInsights() {
-  const [lead, ...rest] = articles;
+export function HealthInsights({ articles }: { articles: ApiInsightCard[] }) {
+  // Published articles only (GET /api/shop/blog). None yet: the band stays,
+  // with the journal's topics and no invented titles.
+  const [lead, ...rest] = articles.slice(0, 3);
 
   return (
     <Section
@@ -48,7 +49,7 @@ export function HealthInsights() {
               href="/insights"
               className="group inline-flex items-center gap-2 text-[0.875rem] font-medium text-forest"
             >
-              Read all articles
+              {articles.length > 0 ? "Read all articles" : "Visit the journal"}
               <ArrowUpRight
                 aria-hidden
                 className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -66,7 +67,13 @@ export function HealthInsights() {
             <div data-article className="lg:col-span-2">
               <ArticleCard article={lead} layout="lead" />
             </div>
-          ) : null}
+          ) : (
+            UPCOMING.map((topic, index) => (
+              <div key={topic.title} data-article className={index === 0 ? "lg:col-span-2" : undefined}>
+                <UpcomingTopic topic={topic} lead={index === 0} />
+              </div>
+            ))
+          )}
 
           {rest.map((article) => (
             <div key={article.id} data-article>
@@ -79,24 +86,61 @@ export function HealthInsights() {
   );
 }
 
+/** Journal topics shown before the first article is published. Photographs only; no article is implied. */
+const UPCOMING = [
+  { title: "Everyday immunity", category: "Wellness", image: "/Images/journal_immunity.webp" },
+  { title: "Caring for children", category: "Family", image: "/Images/journal_children.webp" },
+  { title: "Women’s wellness", category: "Women’s health", image: "/Images/journal_women.webp" },
+] as const;
+
+function UpcomingTopic({ topic, lead }: { topic: (typeof UPCOMING)[number]; lead: boolean }) {
+  return (
+    <article className="flex h-full flex-col">
+      <div className="relative h-[12rem] w-full overflow-hidden rounded-frame sm:h-[13.5rem]">
+        <Image
+          src={topic.image}
+          alt=""
+          fill
+          sizes={lead ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"}
+          className="object-cover"
+        />
+        <span className="absolute top-3 left-3 rounded-full bg-paper/92 px-2.5 py-1 text-[0.6875rem] font-semibold text-ink shadow-2xs backdrop-blur-sm">
+          Coming soon
+        </span>
+      </div>
+      <div className="mt-5 flex flex-1 flex-col">
+        <p className="dh-eyebrow text-forest">{topic.category}</p>
+        <h3 className={cn("mt-3 leading-snug text-ink", lead ? "font-display text-[1.5rem] sm:text-[1.75rem]" : "text-[1.0625rem] font-medium")}>
+          {topic.title}
+        </h3>
+        <p className="mt-auto pt-5 text-xs text-muted-ink">
+          {lead
+            ? "Our first articles are being written: practical reading to help you prepare questions for your practitioner."
+            : "Articles on this topic are on their way."}
+        </p>
+      </div>
+    </article>
+  );
+}
+
 function ArticleCard({
   article,
   layout,
 }: {
-  article: Article;
+  article: ApiInsightCard;
   layout: "lead" | "standard";
 }) {
   const isLead = layout === "lead";
 
   return (
     <article className="group h-full">
-      <Link href={article.href} className="flex h-full flex-col">
+      <Link href={`/insights/${article.slug}`} className="flex h-full flex-col">
         <ClipReveal from="bottom">
-          {article.image ? (
+          {article.coverImageUrl ? (
             <div className="relative w-full h-[12rem] sm:h-[13.5rem] rounded-frame overflow-hidden">
               <Image 
-                src={article.image}
-                alt={article.mediaLabel || ""}
+                src={article.coverImageUrl}
+                alt=""
                 fill
                 sizes={isLead ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"}
                 className="object-cover transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
@@ -104,7 +148,7 @@ function ArticleCard({
             </div>
           ) : (
             <MediaPlaceholder
-              label={article.mediaLabel}
+              label={article.title}
               tone={isLead ? "clay" : "sage"}
               ratio="h-[12rem] sm:h-[13.5rem]"
               className="rounded-frame transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
@@ -122,7 +166,7 @@ function ArticleCard({
         </ClipReveal>
 
         <div className="mt-5 flex flex-1 flex-col">
-          <p className="dh-eyebrow text-forest">{article.category}</p>
+          {article.category ? <p className="dh-eyebrow text-forest">{article.category.name}</p> : null}
 
           <h3
             className={cn(
@@ -136,7 +180,9 @@ function ArticleCard({
           </h3>
 
           <p className="mt-auto flex items-center gap-2 pt-5 text-xs text-muted-ink">
-            {article.readingMinutes} min read
+            {article.publishedAt
+              ? new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(new Date(article.publishedAt))
+              : "Read article"}
             <ArrowUpRight
               aria-hidden
               className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

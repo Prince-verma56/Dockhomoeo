@@ -1,5 +1,4 @@
 import type { Product } from "@/types/product";
-import { productPhotoFor } from "@/data/productImagery";
 
 const catalogue: Product[] = [
   {
@@ -424,14 +423,11 @@ const catalogue: Product[] = [
 ];
 
 /**
- * Photographs come from data/productImagery, which only pairs a product with a
- * photograph of that same remedy and form. Everything else renders the
- * illustrated pack rather than borrowing another product’s photograph.
+ * The development catalogue has no product photographs: no local photo shows
+ * one of these exact remedies (the files that were mapped here showed other,
+ * fictionally labelled products). Every product renders the illustrated pack.
  */
-export const mockProducts: Product[] = catalogue.map((product) => {
-  const photo = productPhotoFor(product.slug, product.form);
-  return photo ? { ...product, image: photo.src, mediaLabel: photo.alt } : product;
-});
+export const mockProducts: Product[] = catalogue;
 
 /**
  * The pack the mock shop sells for a catalogue product. One scheme for the

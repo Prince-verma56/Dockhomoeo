@@ -1,14 +1,24 @@
 import { FORM_LABELS } from "@/lib/search/searchState";
 
-export type NavLink = { label: string; href: string };
+export type NavLink = {
+  label: string;
+  href: string;
+  /**
+   * Left out of the desktop header below 1400px, where the full row, the
+   * search field and the account button do not all fit; still in the footer
+   * and the mobile menu.
+   */
+  wideOnly?: boolean;
+};
 
 /** Top-level destinations shared by the desktop header and the mobile drawer. */
 export const primaryNav = [
   { label: "Shop", href: "/products" },
+  { label: "Doctors", href: "/doctors" },
   { label: "Brands", href: "/brands" },
   { label: "Categories", href: "/categories" },
   { label: "Health Insights", href: "/insights" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact", href: "/contact", wideOnly: true },
 ] as const satisfies readonly NavLink[];
 
 const formLink = (form: string): NavLink => ({ label: FORM_LABELS[form], href: `/products?form=${form}` });

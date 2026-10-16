@@ -12,6 +12,7 @@ import { repositories } from "@/lib/repositories";
 import { formLabel } from "@/lib/search/searchState";
 import { featuredCollections } from "@/data/mock/home";
 import { FORM_MEDIA } from "@/data/media";
+import { unstable_rethrow } from "next/navigation";
 
 /** Lines for forms the curated collection does not cover. */
 const FALLBACK_TAGLINES: Record<string, string> = {
@@ -22,7 +23,8 @@ type FormCard = {
   form: string;
   name: string;
   tagline: string | null;
-  count: number;
+  /** Null when the shop could not be asked: no number is shown rather than a made-up one. */
+  count: number | null;
   src: string;
   position?: string;
 };
@@ -34,9 +36,19 @@ type FormCard = {
  * products; photographs and taglines from the curated collection.
  */
 export async function FeaturedCollection() {
-  const catalogue = await repositories.search.search({ pageSize: 1 });
+  // Unreachable shop: the curated collections still show, without product counts.
+  const catalogue = await repositories.search.search({ pageSize: 1 }).catch((error: unknown) => {
+    unstable_rethrow(error);
+    return null;
+  });
 
-  const cards: FormCard[] = catalogue.facets.forms.flatMap((facet) => {
+  const curatedCards: FormCard[] = featuredCollections.flatMap((collection) =>
+    collection.image
+      ? [{ form: collection.form, name: formLabel(collection.form), tagline: collection.tagline, count: null, src: collection.image, position: collection.imagePosition }]
+      : [],
+  );
+
+  const liveCards: FormCard[] = (catalogue?.facets.forms ?? []).flatMap((facet) => {
     const curated = featuredCollections.find((collection) => collection.form === facet.value);
     const media = curated?.image
       ? { src: curated.image, position: curated.imagePosition }
@@ -54,6 +66,7 @@ export async function FeaturedCollection() {
     ];
   });
 
+  const cards = liveCards.length > 0 ? liveCards : curatedCards;
   const [lead, ...others] = cards;
   const rest = others.slice(0, 4);
   if (!lead) return null;
@@ -137,9 +150,11 @@ function FormTile({ card, lead = false }: { card: FormCard; lead?: boolean }) {
       {media}
       <div aria-hidden className="absolute inset-0 bg-linear-to-t from-forest-abyss/80 via-forest-abyss/15 to-transparent" />
 
-      <span className="absolute top-3.5 left-3.5 rounded-full bg-paper/92 px-2.5 py-1 text-[0.6875rem] font-semibold text-ink tabular-nums shadow-2xs backdrop-blur-sm sm:top-4 sm:left-4">
-        {card.count} {card.count === 1 ? "product" : "products"}
-      </span>
+      {card.count !== null ? (
+        <span className="absolute top-3.5 left-3.5 rounded-full bg-paper/92 px-2.5 py-1 text-[0.6875rem] font-semibold text-ink tabular-nums shadow-2xs backdrop-blur-sm sm:top-4 sm:left-4">
+          {card.count} {card.count === 1 ? "product" : "products"}
+        </span>
+      ) : null}
 
       <div className={cn("absolute inset-x-0 bottom-0 flex items-end justify-between gap-3", lead ? "p-6 sm:p-8" : "p-4 sm:p-5")}>
         <div className="min-w-0">

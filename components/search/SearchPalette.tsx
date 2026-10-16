@@ -4,7 +4,7 @@ import { Fragment, useCallback, useEffect, useId, useRef, useState, useSyncExter
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
-import { ArrowRight, Clock, CornerDownLeft, Factory, LayoutGrid, Loader2, Search, X } from "lucide-react";
+import { ArrowRight, Clock, CornerDownLeft, Factory, LayoutGrid, Loader2, Search, Stethoscope, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { repositories } from "@/lib/repositories";
 import { useDebounce } from "@/lib/hooks/useDebounce";
@@ -38,6 +38,8 @@ type Scope = "all" | "product" | "category" | "brand";
 type Option =
   | { kind: "query"; id: string; href: string; label: string }
   | { kind: "recent"; id: string; href: string; label: string }
+  /** The same words against the doctor directory (GET /api/care/doctors?q=). */
+  | { kind: "doctors"; id: string; href: string; label: string }
   | { kind: "product"; id: string; href: string; label: string; brand: string | null; image: string | null; price: number }
   | { kind: "category" | "brand"; id: string; href: string; label: string };
 
@@ -136,7 +138,7 @@ export function SearchTrigger({ variant = "field", className }: { variant?: "fie
       aria-haspopup="dialog"
       aria-keyshortcuts="Control+K Meta+K /"
       className={cn(
-        "group flex h-10 w-[210px] items-center gap-2.5 rounded-full border border-black/10 bg-white/80 pr-2 pl-3.5 text-left shadow-sm backdrop-blur-sm transition-[border-color,background-color,box-shadow] duration-300 hover:border-forest/30 hover:bg-white lg:w-[250px] xl:w-[280px]",
+        "group flex h-10 w-[210px] items-center gap-2.5 rounded-full border border-black/10 bg-white/80 pr-2 pl-3.5 text-left shadow-sm backdrop-blur-sm transition-[border-color,background-color,box-shadow] duration-300 hover:border-forest/30 hover:bg-white lg:w-[250px] xl:w-[240px] min-[1400px]:w-[280px]",
         className,
       )}
     >
@@ -307,6 +309,8 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       data?.brands.forEach((b, i) =>
         options.push({ kind: "brand", id: `${baseId}-b${i}`, href: `/brands/${encodeURIComponent(b.slug)}`, label: b.name }),
       );
+    if (effectiveScope === "all")
+      options.push({ kind: "doctors", id: `${baseId}-d`, href: `/doctors?q=${encodeURIComponent(trimmed)}`, label: trimmed });
   } else {
     recent.forEach((r, i) => options.push({ kind: "recent", id: `${baseId}-r${i}`, href: searchHref({ q: r }), label: r }));
   }
@@ -362,7 +366,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
     setRecent(next);
   };
 
-  const matchCount = options.length - (suggestable ? 1 : 0);
+  const matchCount = options.filter((option) => option.kind === "product" || option.kind === "category" || option.kind === "brand").length;
   const announcement = !suggestable
     ? ""
     : loading
@@ -506,7 +510,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
             return (
               <Fragment key={option.id}>
                 {/* Visual group label only: each option says what it is. */}
-                {startsGroup && option.kind !== "query" && option.kind !== "recent" ? (
+                {startsGroup && option.kind !== "query" && option.kind !== "recent" && option.kind !== "doctors" ? (
                   <p aria-hidden className="dh-eyebrow px-3 pt-3 pb-2 text-[0.66rem] text-muted-ink">
                     {GROUP_LABELS[option.kind]}
                   </p>
@@ -622,6 +626,16 @@ function OptionRow({
           </span>
           <span className="min-w-0 flex-1 truncate">
             Search for <span className="font-semibold">“{option.label}”</span>
+          </span>
+          <ArrowRight aria-hidden className={cn("size-4 shrink-0 text-forest transition-opacity", active ? "opacity-100" : "opacity-0")} />
+        </>
+      ) : option.kind === "doctors" ? (
+        <>
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-sage-wash text-forest">
+            <Stethoscope aria-hidden className="size-4" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1 truncate">
+            Search doctors for <span className="font-semibold">“{option.label}”</span>
           </span>
           <ArrowRight aria-hidden className={cn("size-4 shrink-0 text-forest transition-opacity", active ? "opacity-100" : "opacity-0")} />
         </>

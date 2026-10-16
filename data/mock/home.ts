@@ -1,108 +1,20 @@
-import { mockProducts, mockVariantIdForSlug } from "@/data/mock/products";
-import type {
-  HealthGoal,
-  Product,
-  ProductCollection,
-} from "@/types/product";
-import type {
-  ConsultationCapability,
-  Doctor,
-  JourneyStep,
-} from "@/types/doctor";
+import type { HealthGoal, ProductCollection } from "@/types/product";
+import type { JourneyStep } from "@/types/doctor";
 import type {
   Article,
   Brand,
-  FooterGroup,
-  Testimonial,
   TrustBenefit,
 } from "@/types/content";
 
 /* =============================================================================
- * DEMO CONTENT
- *
- * Every value below is placeholder data for design review. Product names,
- * prices, ratings, review counts, doctors, availability, fees, brand lists and
- * patient quotes are invented and must be replaced by the real catalogue and
- * verification sources before this page is shown to customers
- * (brain/00_MASTER_RULES.md rules 10–11, brain/17_DECISIONS.md D009).
- *
- * The page surfaces this flag as a visible notice so a stakeholder reviewing a
- * deploy preview is never misled into reading the figures as real.
- * ========================================================================== */
-export const IS_DEMO_CONTENT = true;
 
 /* -------------------------------------------------------------------------- */
 /* Navigation                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export const primaryNav = [
-  { label: "Shop", href: "/products" },
-  { label: "Doctors", href: "/doctors" },
-  { label: "Brands", href: "/brands" },
-  { label: "About", href: "/about" },
-  { label: "Wellness", href: "/wellness" },
-  { label: "Learn", href: "/learn" },
-] as const;
-
-/** Grouped links shown inside the Shop navigation panel. */
-export const shopMenu = {
-  byForm: [
-    { label: "Drops & Dilutions", href: "/products?form=drops" },
-    { label: "Tablets & Pellets", href: "/products?form=tablets" },
-    { label: "Mother Tinctures", href: "/products?form=tincture" },
-    { label: "Creams & Ointments", href: "/products?form=cream" },
-  ],
-  byGoal: [
-    { label: "Immunity", href: "/products?category=immunity" },
-    { label: "Skin Care", href: "/products?category=skin-care" },
-    { label: "Digestive", href: "/products?category=digestive" },
-    { label: "Sleep & Stress", href: "/products?category=sleep-stress" },
-  ],
-} as const;
-
-export const utilityMessages = [
-  { id: "delivery", label: "Free delivery on orders above ₹499" },
-  { id: "genuine", label: "100% genuine homoeopathic medicines" },
-  { id: "doctors", label: "Consult certified doctors online" },
-] as const;
-
 /* -------------------------------------------------------------------------- */
 /* Hero                                                                        */
 /* -------------------------------------------------------------------------- */
-
-export const heroTrustPoints: TrustBenefit[] = [
-  {
-    id: "genuine",
-    title: "100% Genuine",
-    detail: "Sourced from licensed manufacturers",
-    icon: "shield-check",
-  },
-  {
-    id: "formulations",
-    title: "Classical Formulations",
-    detail: "Prepared to pharmacopoeia standards",
-    icon: "flask-conical",
-  },
-  {
-    id: "experts",
-    title: "Expert Doctors",
-    detail: "Verified BHMS & MD practitioners",
-    icon: "stethoscope",
-  },
-  {
-    id: "holistic",
-    title: "Care For Every Family",
-    detail: "Remedies across ages and goals",
-    icon: "heart-pulse",
-  },
-];
-
-/** Illustrative figures only — see IS_DEMO_CONTENT. */
-export const heroStats = [
-  { id: "products", value: "3,000+", label: "Products" },
-  { id: "doctors", value: "50+", label: "Expert doctors" },
-  { id: "rating", value: "4.8", label: "Average rating" },
-] as const;
 
 /* -------------------------------------------------------------------------- */
 /* Health goals                                                                */
@@ -124,37 +36,6 @@ export const healthGoals: HealthGoal[] = [
 /* Products                                                                    */
 /* -------------------------------------------------------------------------- */
 
-/**
- * The homepage row shows catalogue products rather than copies of them, so a
- * card here has the same id, brand, price and imagery as /products, the
- * product page and the cart quote. Only the selection and order live here.
- */
-const BESTSELLER_SLUGS = [
-  "immunity-support-30-ch",
-  "digestive-care-drops",
-  "arnica-pellets-200",
-  "arnica-massage-oil",
-  "kali-phos-6x",
-  "respiratory-care-drops",
-  "calendula-cream",
-  "hair-care-drops",
-] as const;
-
-/** Each card’s "Add" needs the pack the shop sells; it comes from the catalogue by slug. */
-export const bestsellingProducts: Product[] = BESTSELLER_SLUGS.flatMap((slug) => {
-  const product = mockProducts.find((item) => item.slug === slug);
-  return product ? [{ ...product, variantId: mockVariantIdForSlug(slug) }] : [];
-});
-
-/** Tabs in the bestsellers section map to these dosage forms. */
-export const productFilters = [
-  { id: "all", label: "All" },
-  { id: "drops", label: "Drops" },
-  { id: "tablets", label: "Tablets" },
-  { id: "tincture", label: "Tinctures" },
-  { id: "cream", label: "Creams" },
-] as const;
-
 export const featuredCollections: ProductCollection[] = [
   {
     id: "c-drops",
@@ -164,7 +45,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 120,
     tone: "amber",
     mediaLabel: "Dropper bottle with a single suspended droplet, backlit",
-    image: "/Images/Products/reckeweg-r41.webp",
+    image: "/Images/Editorial/eucalyptus-dropper-bottle.webp",
   },
   {
     id: "c-tablets",
@@ -174,7 +55,7 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 200,
     tone: "clear",
     mediaLabel: "Glass pellet jar with the lid resting beside it",
-    image: "/Images/Products/lords-kali-phos.webp",
+    image: "/Images/Editorial/chamomilla-pellet-bottle.webp",
   },
   {
     id: "c-tinctures",
@@ -183,10 +64,10 @@ export const featuredCollections: ProductCollection[] = [
     tagline: "Pure extracts for deeper support",
     productCount: 90,
     tone: "forest",
-    mediaLabel: "Tincture bottle among pressed botanical leaves",
-    image: "/Images/SeasonalEditBG.webp",
-    // The scene's amber tincture bottle sits right of centre (as in FORM_MEDIA).
-    imagePosition: "78% 60%",
+    mediaLabel: "Remedy bottles and jars on a stone plinth by the water",
+    image: "/Images/NaturesCareBG.webp",
+    // The bottles sit left of centre (as in FORM_MEDIA).
+    imagePosition: "40% 60%",
   },
   {
     id: "c-creams",
@@ -196,34 +77,13 @@ export const featuredCollections: ProductCollection[] = [
     productCount: 80,
     tone: "cobalt",
     mediaLabel: "Cream tube on a folded linen cloth, top-down light",
-    image: "/Images/Products/boiron-arnica.webp",
+    image: "/Images/Editorial/arnica-cream-tube.webp",
   },
 ];
 
 /* -------------------------------------------------------------------------- */
 /* Doctors & consultation                                                      */
 /* -------------------------------------------------------------------------- */
-
-export const featuredDoctor: Doctor = {
-  id: "d-001",
-  name: "Dr. A. Demo",
-  qualifications: "BHMS, MD (Hom)",
-  specialty: "Women's Health",
-  experienceYears: 12,
-  rating: { value: 4.8, count: 1200 },
-  nextAvailable: "Today, 5:30 PM",
-  consultationFee: { amount: 499, currency: "INR" },
-  initials: "AD",
-  mediaLabel:
-    "Portrait of a homoeopathic doctor in a consultation room, natural window light",
-};
-
-export const consultationCapabilities: ConsultationCapability[] = [
-  { id: "modes", label: "Video, audio or chat consultations", icon: "video" },
-  { id: "prescriptions", label: "Digital prescriptions", icon: "file-text" },
-  { id: "followup", label: "Follow-up and long-term care", icon: "calendar-check" },
-  { id: "verified", label: "Verified and experienced doctors", icon: "badge-check" },
-];
 
 export const journeySteps: JourneyStep[] = [
   {
@@ -294,54 +154,6 @@ export const brands: Brand[] = [
   { id: "b-7", name: "Orchard", monogram: "OR", origin: "Demo brand", href: "/brands/orchard" },
 ];
 
-/**
- * Placeholder quotes written for layout review. They describe service and
- * delivery experience only — no medical outcomes, no symptom claims
- * (brain/01_PRD.md: "Do not imply medical outcomes").
- */
-export const testimonials: Testimonial[] = [
-  {
-    id: "t-1",
-    quote:
-      "Placeholder review copy used while the layout is reviewed. It stands in for a customer's note about booking a consultation and how straightforward the process felt.",
-    authorName: "Sample Reviewer",
-    authorLocation: "Pune",
-    initials: "SR",
-    rating: 5,
-    verifiedBuyer: true,
-  },
-  {
-    id: "t-2",
-    quote:
-      "Placeholder review copy covering packaging and delivery speed, used to check how a shorter quote sits inside the supporting card.",
-    authorName: "Sample Reviewer",
-    authorLocation: "Mumbai",
-    initials: "SR",
-    rating: 5,
-    verifiedBuyer: true,
-  },
-  {
-    id: "t-3",
-    quote:
-      "Placeholder review copy about the prescription reminder feature, written to the length a real review is expected to run.",
-    authorName: "Sample Reviewer",
-    authorLocation: "Bangalore",
-    initials: "SR",
-    rating: 4,
-    verifiedBuyer: false,
-  },
-  {
-    id: "t-4",
-    quote:
-      "Placeholder review copy describing the follow-up scheduling flow, used to validate the carousel with more than two entries.",
-    authorName: "Sample Reviewer",
-    authorLocation: "Jaipur",
-    initials: "SR",
-    rating: 5,
-    verifiedBuyer: true,
-  },
-];
-
 export const articles: Article[] = [
   {
     id: "a-1",
@@ -383,67 +195,9 @@ export const articles: Article[] = [
 /* Offer                                                                       */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Campaign copy is intentionally value-free. No percentage, price or deadline
- * is hard-coded — those arrive from the promotions source
- * (brain/01_PRD.md: "Avoid hard-coding 30% OFF unless supplied").
- */
-export const offerCampaign = {
-  eyebrow: "Seasonal edit",
-  headlineLines: ["The Seasonal", "Wellness Edit"],
-  description:
-    "A curated selection of remedies for the change of season, chosen with our in-house practitioners.",
-  ctaLabel: "Shop the edit",
-  ctaHref: "/products?collection=seasonal",
-  mediaLabel:
-    "Hero remedy bottle on a dark stone plinth, dramatic single-source lighting",
-  benefits: [
-    { id: "genuine", title: "100% Genuine", detail: "Authentic medicines", icon: "shield-check" },
-    { id: "delivery", title: "Fast Delivery", detail: "Pan-India shipping", icon: "truck" },
-    { id: "secure", title: "Secure Payments", detail: "UPI, cards, net banking", icon: "credit-card" },
-  ] satisfies TrustBenefit[],
-} as const;
-
 /* -------------------------------------------------------------------------- */
 /* Footer                                                                      */
 /* -------------------------------------------------------------------------- */
-
-export const footerGroups: FooterGroup[] = [
-  {
-    id: "quick-links",
-    title: "Quick Links",
-    links: [
-      { label: "Shop", href: "/products" },
-      { label: "Doctors", href: "/doctors" },
-      { label: "Brands", href: "/brands" },
-      { label: "About Us", href: "/about" },
-      { label: "Wellness", href: "/wellness" },
-      { label: "Learn", href: "/learn" },
-    ],
-  },
-  {
-    id: "customer-care",
-    title: "Customer Care",
-    links: [
-      { label: "My Account", href: "/user" },
-      { label: "Track Order", href: "/user/orders" },
-      { label: "Shipping Policy", href: "/shipping" },
-      { label: "Return & Cancellation", href: "/return-and-cancellation" },
-      { label: "Help & Support", href: "/inquiry" },
-    ],
-  },
-  {
-    id: "legal",
-    title: "Legal",
-    links: [
-      { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms & Conditions", href: "/terms" },
-      { label: "Refund Policy", href: "/refund-policy" },
-      { label: "Disclaimer", href: "/disclaimer" },
-      { label: "Sitemap", href: "/sitemap" },
-    ],
-  },
-];
 
 export const paymentMarks = [
   "UPI",

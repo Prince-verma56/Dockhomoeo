@@ -1,4 +1,4 @@
-import type { ApiOrderDetail, ApiPaymentMethod } from "@/types/api/cart";
+import type { ApiOrderDetail } from "@/types/api/cart";
 
 /**
  * What /thankyou shows, derived only from an order the shop returned
@@ -11,17 +11,20 @@ export type OrderConfirmation = {
   preview: boolean;
   state: "confirmed" | "awaiting-payment" | "cancelled" | "received";
   placedAt: string;
-  payment: { method: ApiPaymentMethod; label: string; paid: boolean };
+  payment: { method: ApiOrderDetail["paymentMethod"]; label: string; paid: boolean };
   /** Only enough to recognise the delivery — no street address or phone on screen. */
   deliverTo: { name: string; place: string };
   items: ApiOrderDetail["items"];
   totals: { subtotal: number; couponCode: string | null; couponDiscount: number; shipping: number; codCharge: number; total: number };
+  /** The shop will open a payment page for it again (online, unpaid, gateway connected). */
+  canPay: boolean;
 };
 
-const PAYMENT_LABELS: Record<ApiPaymentMethod, string> = {
+const PAYMENT_LABELS: Record<ApiOrderDetail["paymentMethod"], string> = {
   COD: "Pay on delivery",
   ONLINE: "Paid online",
   CREDIT: "Wholesale credit",
+  BANK_TRANSFER: "Bank transfer",
 };
 
 export function toOrderConfirmation(order: ApiOrderDetail, preview: boolean): OrderConfirmation {
@@ -58,5 +61,6 @@ export function toOrderConfirmation(order: ApiOrderDetail, preview: boolean): Or
       codCharge: order.codCharge,
       total: order.grandTotal,
     },
+    canPay: order.canPay,
   };
 }

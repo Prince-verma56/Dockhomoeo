@@ -2,37 +2,54 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Factory, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck, Factory, MapPin, PackageSearch, RotateCw, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { MomentumRail, RailSlide } from "@/components/kokonutui/carousel-cards";
-import { bestsellingProducts, productFilters } from "@/data/mock/home";
+import type { Product } from "@/types/product";
 
-/**
- * Only claims the shop can stand behind: the makers it stocks, the maker on
- * every product page, and the delivery check on every product.
- */
-const ASSURANCES = [
-  { icon: Factory, title: "Licensed manufacturers", detail: "SBL, Dr. Reckeweg, Boiron, Schwabe and more" },
-  { icon: BadgeCheck, title: "Maker named on every product", detail: "Know exactly where each remedy comes from" },
-  { icon: MapPin, title: "Delivery check by pincode", detail: "See availability before you order" },
-] as const;
+/** One of the shop's home rails (GET /api/shop/home `rails`), its cards already mapped for ProductCard. */
+export type HomeRail = { key: string; title: string; href: string; products: Product[] };
 
-/** Tabs only for forms that have a bestseller, so no tab opens onto nothing. */
-const TABS = productFilters.filter(
-  (tab) => tab.id === "all" || bestsellingProducts.some((product) => product.form === tab.id),
-);
+const list = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
 
 /**
  * Bestsellers: an editorial column beside a momentum rail of product cards.
  * The rail flicks and springs to a card (mouse), scrolls natively with snap
  * (touch), steps with the arrow keys, and keeps every card's own controls —
- * favourite and Add — working. Changing the form tab restarts the rail.
+ * favourite and Add — working.
+ *
+ * The tabs are the shop's own rails ("Best sellers", "Biggest savings",
+ * "Just added"…); the backend leaves a rail out when it has nothing in it,
+ * so no tab opens onto nothing. With no rails at all the section is not shown.
  */
-export function BestsellingProducts() {
-  const [filter, setFilter] = useState<string>("all");
+export function BestsellingProducts({
+  rails,
+  brandNames,
+  unavailable = false,
+}: {
+  rails: HomeRail[];
+  brandNames: string[];
+  /** The shop could not be reached; the section stays and says so. */
+  unavailable?: boolean;
+}) {
+  const [filter, setFilter] = useState<string>(rails[0]?.key ?? "");
   const reducedMotion = useReducedMotion();
-  const products = filter === "all" ? bestsellingProducts : bestsellingProducts.filter((product) => product.form === filter);
+  const rail = rails.find((r) => r.key === filter) ?? rails[0] ?? null;
+  const products = rail?.products ?? [];
+
+  // Only claims the shop can stand behind: the makers it actually stocks, the
+  // maker on every product page, and the delivery check on every product.
+  const makers = brandNames.slice(0, 4);
+  const assurances = [
+    {
+      icon: Factory,
+      title: "Licensed manufacturers",
+      detail: makers.length ? `${list.format(brandNames.length > 4 ? [...makers, "more"] : makers)}` : "The maker is named on every pack",
+    },
+    { icon: BadgeCheck, title: "Maker named on every product", detail: "Know exactly where each remedy comes from" },
+    { icon: MapPin, title: "Delivery check by pincode", detail: "See availability before you order" },
+  ];
 
   return (
     <section
@@ -63,7 +80,7 @@ export function BestsellingProducts() {
                 Our most popular remedies, from the licensed manufacturers we stock.
               </p>
               <Link
-                href="/products?sort=popular"
+                href={rails[0]?.href ?? "/products"}
                 className="group mt-7 inline-flex h-12 items-center gap-2.5 rounded-full bg-forest pr-2 pl-6 text-sm font-semibold text-cream shadow-soft transition-[background-color,box-shadow] duration-300 hover:bg-forest-deep hover:shadow-lift"
               >
                 View all bestsellers
@@ -74,7 +91,7 @@ export function BestsellingProducts() {
             </div>
 
             <ul className="mt-9 hidden flex-col gap-4 border-t border-forest/12 pt-6 lg:flex">
-              {ASSURANCES.map(({ icon: Icon, title, detail }) => (
+              {assurances.map(({ icon: Icon, title, detail }) => (
                 <li key={title} className="flex items-center gap-3">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full border border-line-soft bg-paper text-forest">
                     <Icon aria-hidden className="size-4" strokeWidth={1.9} />
@@ -88,29 +105,30 @@ export function BestsellingProducts() {
             </ul>
           </div>
 
-          {/* Rail */}
+          {/* Rail, or an honest panel when there is nothing to show */}
           <div className="min-w-0 flex-1">
+            {rail ? (
             <MomentumRail
-              key={filter}
-              label="Bestselling medicines"
+              key={rail.key}
+              label={rail.title}
               align="start"
               depth="none"
               cardWidth="[--rail-card:72cqw] @md/rail:[--rail-card:15.5rem] @5xl/rail:[--rail-card:16.5rem]"
               toolbarStart={
                 <div
                   role="tablist"
-                  aria-label="Filter bestsellers by form"
+                  aria-label="Choose a collection"
                   className="dh-no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-black/[0.07] bg-paper/80 p-1 shadow-2xs backdrop-blur-md"
                 >
-                  {TABS.map((tab) => {
-                    const active = filter === tab.id;
+                  {rails.map((tab) => {
+                    const active = rail.key === tab.key;
                     return (
                       <button
-                        key={tab.id}
+                        key={tab.key}
                         role="tab"
                         aria-selected={active}
                         type="button"
-                        onClick={() => setFilter(tab.id)}
+                        onClick={() => setFilter(tab.key)}
                         className={`relative shrink-0 rounded-full px-4 py-1.5 text-[0.8125rem] font-medium transition-colors duration-200 ${
                           active ? "text-cream" : "text-muted-ink hover:text-ink"
                         }`}
@@ -122,7 +140,7 @@ export function BestsellingProducts() {
                             transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
                           />
                         ) : null}
-                        <span className="relative">{tab.label}</span>
+                        <span className="relative">{tab.title}</span>
                       </button>
                     );
                   })}
@@ -130,7 +148,7 @@ export function BestsellingProducts() {
               }
               toolbarEnd={
                 <Link
-                  href="/products"
+                  href={rail.href}
                   className="ml-1 hidden items-center gap-1.5 text-[0.8125rem] font-semibold text-forest hover:text-forest-deep sm:inline-flex"
                 >
                   View all
@@ -155,6 +173,39 @@ export function BestsellingProducts() {
                 </RailSlide>
               ))}
             </MomentumRail>
+            ) : (
+              <div className="flex h-full min-h-72 flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-forest/20 bg-paper/70 px-6 py-12 text-center">
+                <span className="grid size-14 place-items-center rounded-full bg-sage-wash text-forest">
+                  <PackageSearch aria-hidden className="size-6" strokeWidth={1.6} />
+                </span>
+                <h3 className="mt-5 font-display text-xl text-ink">
+                  {unavailable ? "We couldn’t load products just now" : "Our first remedies are on their way"}
+                </h3>
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-ink">
+                  {unavailable
+                    ? "The shop is not responding at the moment. Please try again shortly."
+                    : "Bestsellers appear here as soon as the shop lists its products."}
+                </p>
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  {unavailable ? (
+                    <button
+                      type="button"
+                      onClick={() => window.location.reload()}
+                      className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-forest px-5 text-sm font-semibold text-cream transition-colors hover:bg-forest-deep"
+                    >
+                      <RotateCw aria-hidden className="size-4" />
+                      Try again
+                    </button>
+                  ) : null}
+                  <Link
+                    href="/categories"
+                    className="inline-flex h-11 items-center rounded-full border border-forest/25 px-5 text-sm font-semibold text-forest transition-colors hover:bg-forest/6"
+                  >
+                    Browse by health concern
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

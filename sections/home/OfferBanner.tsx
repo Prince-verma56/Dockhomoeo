@@ -6,7 +6,27 @@ import { SplitHeading } from "@/components/shared/SplitHeading";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
 import { ICONS } from "@/lib/icons";
-import { offerCampaign } from "@/data/mock/home";
+import type { TrustBenefit } from "@/types/content";
+
+/** A real saving in the live catalogue (GET /api/shop/products, sorted by discount). */
+export type CatalogueOffer = {
+  /** The largest discount off MRP on sale right now, in whole percent. */
+  maxDiscount: number;
+  /** How many products are at least 10% below MRP. */
+  count: number;
+};
+
+/**
+ * Promises the shop can keep on every order: the maker is on every product
+ * page, delivery is checked by pincode, and the backend prices every order
+ * again before it is placed. Nothing about speed, coverage or payment methods
+ * the shop's configuration may not support.
+ */
+const BENEFITS: TrustBenefit[] = [
+  { id: "maker", title: "Maker on every pack", detail: "Know where each remedy comes from", icon: "shield-check" },
+  { id: "pincode", title: "Delivery check", detail: "By pincode, before you order", icon: "truck" },
+  { id: "prices", title: "Prices confirmed", detail: "Re-checked by the shop at checkout", icon: "credit-card" },
+];
 
 /**
  * The campaign banner — the page's one dark, cinematic band.
@@ -16,10 +36,17 @@ import { offerCampaign } from "@/data/mock/home";
  * page's main organic transition into the footer, which is why there is no wave
  * separator anywhere above it (brain/11_ANIMATION_SPEC.md, pattern H).
  *
- * No percentage, price or deadline is rendered: the campaign object carries
- * copy only, and the real promotion arrives from the promotions source.
+ * The offer is the catalogue's own: the biggest discount on sale today and
+ * how many products are at least 10% below MRP, linking to that listing. The
+ * backend has no public promotions source, so no campaign, code or deadline is
+ * invented. With nothing discounted (or the shop unreachable) the band stays,
+ * inviting shoppers to the catalogue without any price claim.
+ *
+ * The backdrop is drawn, not photographed: no bottle stands in it, so no
+ * product the shop does not sell is pictured beside a real offer.
  */
-export function OfferBanner() {
+export function OfferBanner({ offer }: { offer: CatalogueOffer | null }) {
+  const href = offer ? (offer.count > 0 ? "/products?discount=10&sort=discount" : "/products?sort=discount") : "/products";
   return (
     <section
       aria-labelledby="offer-heading"
@@ -27,15 +54,30 @@ export function OfferBanner() {
     >
       <Container width="wide" className="px-0 sm:px-0 lg:px-0">
         <div className="dh-grain dh-grain-dark relative isolate overflow-hidden rounded-[2rem] bg-forest-deep md:rounded-[2.5rem]">
-          {/* Single dramatic key light behind the product, warm trace at right. */}
+          {/* Unbranded backdrop: a warm key light on forest green, botanical leaves at the edges. */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
-              backgroundImage: "url('/Images/SeasonalEditBG.webp')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
+              backgroundImage:
+                "radial-gradient(60% 80% at 62% 45%, rgba(214,190,120,0.22), transparent 70%), radial-gradient(45% 60% at 10% 0%, rgba(255,255,255,0.06), transparent 70%)",
             }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element -- decorative cut-out, already used by the hero */}
+          <img
+            aria-hidden
+            alt=""
+            src="/Images/PNGS/HeroRightLeaves.webp"
+            loading="lazy"
+            className="pointer-events-none absolute -right-10 -bottom-16 h-[115%] w-auto opacity-35 mix-blend-luminosity select-none sm:opacity-45"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element -- decorative cut-out, already used by the hero */}
+          <img
+            aria-hidden
+            alt=""
+            src="/Images/PNGS/HeroLeftLeaves.webp"
+            loading="lazy"
+            className="pointer-events-none absolute -top-20 -left-16 hidden h-[80%] w-auto rotate-12 opacity-25 mix-blend-luminosity select-none md:block"
           />
 
           <div className="relative grid items-center gap-10 px-6 py-12 sm:px-10 md:py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)_minmax(0,0.58fr)] lg:gap-10 lg:px-14 lg:py-12 xl:px-20">
@@ -43,19 +85,25 @@ export function OfferBanner() {
             <div className="max-w-[26rem]">
               <Reveal>
                 <Eyebrow rule className="text-cream/70">
-                  {offerCampaign.eyebrow}
+                  {offer ? "Biggest savings" : "The DocHomoeo shop"}
                 </Eyebrow>
               </Reveal>
 
               <SplitHeading
                 id="offer-heading"
-                lines={[...offerCampaign.headlineLines]}
+                lines={offer ? [`Save up to ${offer.maxDiscount}%`, "on genuine remedies"] : ["Genuine remedies,", "from makers you know"]}
                 className="mt-5 text-[2.25rem] leading-[1.02] text-cream sm:text-[2.875rem] lg:text-[3.25rem]"
               />
 
               <Reveal delay={0.12}>
                 <p className="mt-5 max-w-[36ch] text-[0.9375rem] leading-relaxed text-cream/70">
-                  {offerCampaign.description}
+                  {offer
+                    ? `${
+                        offer.count > 0
+                          ? `${offer.count} ${offer.count === 1 ? "remedy is" : "remedies are"} priced at least 10% below the printed MRP right now.`
+                          : "Selected remedies are priced below the printed MRP right now."
+                      } Every price is confirmed again when you check out.`
+                    : "Dilutions, tablets, mother tinctures and ointments, each with its maker named, checked for delivery to your pincode before you order."}
                 </p>
 
                 <Button
@@ -64,8 +112,8 @@ export function OfferBanner() {
                   size="pill"
                   className="mt-8"
                 >
-                  <Link href={offerCampaign.ctaHref}>
-                    {offerCampaign.ctaLabel}
+                  <Link href={href}>
+                    {offer ? "Shop the savings" : "Shop all remedies"}
                     <ArrowRight className="size-4" strokeWidth={1.8} />
                   </Link>
                 </Button>
@@ -79,13 +127,13 @@ export function OfferBanner() {
 
             {/* -------------------------------------------------- benefits */}
             <Reveal stagger="[data-offer-benefit]" className="grid gap-2.5">
-              {offerCampaign.benefits.map((benefit) => {
+              {BENEFITS.map((benefit) => {
                 const Icon = ICONS[benefit.icon];
                 return (
                   <div
                     key={benefit.id}
                     data-offer-benefit
-                    className="flex items-center gap-3 rounded-2xl border border-white/12 bg-white/6 px-4 py-3.5"
+                    className="flex items-center gap-3 rounded-2xl border border-white/12 bg-forest-deep/55 px-4 py-3.5 backdrop-blur-md"
                   >
                     <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-cream">
                       <Icon aria-hidden className="size-4" strokeWidth={1.6} />

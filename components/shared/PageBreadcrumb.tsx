@@ -9,15 +9,17 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { absoluteUrl } from "@/lib/site";
+import type { Crumb } from "@/lib/navigation/crumbs";
 
-export type Crumb = { name: string; href: string };
+export type { Crumb };
 
 /**
- * The visible breadcrumb and its BreadcrumbList structured data, from one
- * list so the two cannot disagree. "Home" is prepended; the last item is the
- * current page.
+ * BreadcrumbList structured data for a trail ("Home" prepended). A <script>
+ * must come from a server component: React 19 warns about one rendered by a
+ * client component, so client views render the visible trail with
+ * `structuredData={false}` and their server page renders this.
  */
-export function PageBreadcrumb({ items, className }: { items: Crumb[]; className?: string }) {
+export function BreadcrumbJsonLd({ items }: { items: Crumb[] }) {
   const trail: Crumb[] = [{ name: "Home", href: "/" }, ...items];
   const jsonLd = {
     "@context": "https://schema.org",
@@ -29,7 +31,22 @@ export function PageBreadcrumb({ items, className }: { items: Crumb[]; className
       item: absoluteUrl(crumb.href),
     })),
   };
+  return (
+    <script
+      type="application/ld+json"
+      // Escaping "<" keeps the JSON from closing the script element.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+    />
+  );
+}
 
+/**
+ * The visible breadcrumb, plus its structured data unless `structuredData` is
+ * false (inside a client component). "Home" is prepended; the last item is
+ * the current page.
+ */
+export function PageBreadcrumb({ items, className, structuredData = true }: { items: Crumb[]; className?: string; structuredData?: boolean }) {
+  const trail: Crumb[] = [{ name: "Home", href: "/" }, ...items];
   return (
     <>
       <Breadcrumb className={className}>
@@ -53,11 +70,7 @@ export function PageBreadcrumb({ items, className }: { items: Crumb[]; className
           )}
         </BreadcrumbList>
       </Breadcrumb>
-      <script
-        type="application/ld+json"
-        // Escaping "<" keeps the JSON from closing the script element.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
-      />
+      {structuredData ? <BreadcrumbJsonLd items={items} /> : null}
     </>
   );
 }

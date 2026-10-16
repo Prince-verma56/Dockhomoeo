@@ -4,7 +4,8 @@ import { repositories } from "@/lib/repositories";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { ProductDetailView } from "@/sections/product/ProductDetailView";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
+import { BreadcrumbJsonLd } from "@/components/shared/PageBreadcrumb";
+import { productCrumbs } from "@/lib/navigation/crumbs";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -43,8 +44,8 @@ export default async function ProductPage(props: PageProps) {
       <SiteHeader />
       <main id="main" className="flex-1 bg-canvas">
         <ProductDetailView product={product} />
+        <BreadcrumbJsonLd items={productCrumbs(product)} />
       </main>
-      <DemoContentNotice />
       <SiteFooter />
     </>
   );

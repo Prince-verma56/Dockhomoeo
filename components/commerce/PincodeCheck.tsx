@@ -3,6 +3,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { CheckCircle2, Loader2, MapPin, XCircle } from "lucide-react";
 import { repositories } from "@/lib/repositories";
+import { describeError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ApiServiceabilityResult } from "@/types/api/serviceability";
@@ -34,8 +35,8 @@ export function PincodeCheck() {
     setStatus({ kind: "checking" });
     try {
       setStatus({ kind: "done", result: await repositories.serviceability.checkPincode(pincode) });
-    } catch {
-      setStatus({ kind: "error", message: "We couldn’t check that pincode just now. Try again in a moment." });
+    } catch (error) {
+      setStatus({ kind: "error", message: describeError(error, "We couldn’t check that pincode just now. Try again in a moment.") });
     }
   };
 
@@ -75,7 +76,7 @@ export function PincodeCheck() {
               <span>
                 Delivers to {status.result.city ? `${status.result.city}, ` : ""}
                 {status.result.pincode}
-                {status.result.deliveryDays ? ` in about ${status.result.deliveryDays} days` : ""}.
+                {status.result.deliveryDays ? ` in about ${status.result.deliveryDays} days.` : ". The delivery time is confirmed when your order ships."}
                 {status.result.codAvailable ? " Pay on delivery available." : " Prepaid orders only."}
               </span>
             </p>

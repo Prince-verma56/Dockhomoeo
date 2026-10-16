@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Headset, Menu, PackageCheck, User } from "lucide-react";
+import { ChevronRight, ClipboardList, Headset, Menu, PackageCheck, User } from "lucide-react";
 import {
   Sheet,
   SheetClose,
@@ -17,6 +17,7 @@ import { SearchBar } from "@/components/shared/SearchBar";
 import { Separator } from "@/components/ui/separator";
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { primaryNav, shopMenu } from "@/components/navigation/navLinks";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 /**
  * Mobile navigation drawer.
@@ -27,6 +28,7 @@ import { primaryNav, shopMenu } from "@/components/navigation/navLinks";
  * (brain/17_DECISIONS.md D010).
  */
 export function MobileNav() {
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
   return (
@@ -134,31 +136,33 @@ export function MobileNav() {
         </div>
 
         <div className="border-t border-line/70 bg-cream p-5">
-          <Button asChild variant="brand" size="xl" className="w-full">
-            <Link href="/login">
-              <User className="size-4" strokeWidth={1.7} />
-              Login / Register
-            </Link>
-          </Button>
+          <SheetClose asChild>
+            <Button asChild variant="brand" size="xl" className="w-full">
+              <Link href={isAuthenticated ? "/account" : "/login"}>
+                <User className="size-4" strokeWidth={1.7} />
+                {isAuthenticated ? "My account" : "Login / Register"}
+              </Link>
+            </Button>
+          </SheetClose>
 
           <Separator className="my-4 bg-line/70" />
 
-          <div className="flex items-center justify-between text-[0.8125rem] text-muted-ink">
-            <Link
-              href="/account/orders"
-              className="flex items-center gap-2 transition-colors hover:text-forest"
-            >
-              <PackageCheck aria-hidden className="size-4" strokeWidth={1.6} />
-              Track Order
-            </Link>
-            <Link
-              href="/contact"
-              className="flex items-center gap-2 transition-colors hover:text-forest"
-            >
-              <Headset aria-hidden className="size-4" strokeWidth={1.6} />
-              Help
-            </Link>
-          </div>
+          <ul className="grid grid-cols-3 gap-2 text-[0.8125rem] text-muted-ink">
+            {[
+              { href: "/account/orders", label: "Track Order", Icon: PackageCheck },
+              { href: "/account/prescriptions", label: "Prescriptions", Icon: ClipboardList },
+              { href: "/contact", label: "Help", Icon: Headset },
+            ].map(({ href, label, Icon }) => (
+              <li key={href}>
+                <SheetClose asChild>
+                  <Link href={href} className="flex flex-col items-center gap-1.5 rounded-lg py-1 text-center transition-colors hover:text-forest">
+                    <Icon aria-hidden className="size-4" strokeWidth={1.6} />
+                    {label}
+                  </Link>
+                </SheetClose>
+              </li>
+            ))}
+          </ul>
         </div>
       </SheetContent>
     </Sheet>

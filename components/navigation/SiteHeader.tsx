@@ -10,7 +10,7 @@ import { SearchPalette, SearchTrigger } from "@/components/search/SearchPalette"
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { MobileNav } from "@/components/navigation/MobileNav";
 import { ShopMegaMenu } from "@/components/navigation/ShopMegaMenu";
-import { isActivePath, primaryNav } from "@/components/navigation/navLinks";
+import { isActivePath, primaryNav, type NavLink } from "@/components/navigation/navLinks";
 import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
 import { useCart } from "@/components/providers/CartProvider";
 import { useFavourites } from "@/lib/favourites/favourites";
@@ -81,7 +81,7 @@ export function SiteHeader() {
   }, [isHome]);
 
   const navItemClass = cn(
-    "inline-flex h-9 items-center rounded-full bg-transparent px-3.5 text-[0.875rem] font-semibold transition-colors",
+    "inline-flex h-9 items-center rounded-full bg-transparent px-2.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors min-[1400px]:px-3.5",
     "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43]",
     !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]",
   );
@@ -111,10 +111,10 @@ export function SiteHeader() {
         <nav aria-label="Main" className="mx-auto hidden lg:block">
           <ul className="flex items-center gap-1 xl:gap-2">
             <ShopMegaMenu className={navItemClass} active={isActivePath(pathname, "/products")} />
-            {primaryNav.slice(1).map((item) => {
+            {primaryNav.slice(1).map((item: NavLink) => {
               const active = isActivePath(pathname, item.href);
               return (
-                <li key={item.href}>
+                <li key={item.href} className={cn(item.wideOnly && "hidden min-[1400px]:list-item")}>
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
@@ -130,14 +130,15 @@ export function SiteHeader() {
 
         {/* Right side controls: Search, Wishlist, Cart, Login */}
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          {/* Between lg and xl the nav and the field do not both fit (the
-              Login button was clipped at 1024–1100px); the icon stands in. */}
-          <div className="hidden md:block lg:hidden xl:block">
+          {/* The full search input field fits comfortably on xl screens (>=1280px);
+              below xl (including tablet 768px-1023px and mobile), the compact icon
+              prevents header overflow and button clipping. */}
+          <div className="hidden xl:block">
             <SearchTrigger />
           </div>
 
-          {/* Search button for small screens */}
-          <SearchTrigger variant="icon" className="md:hidden lg:grid xl:hidden" />
+          {/* Search button for viewports below xl */}
+          <SearchTrigger variant="icon" className="xl:hidden" />
           <SearchPalette />
 
           {/* Wishlist Heart */}

@@ -29,6 +29,14 @@ const footerGroups = [
     ],
   },
   {
+    id: "care",
+    label: "Care",
+    links: [
+      { label: "Find a Doctor", href: "/doctors" },
+      { label: "My Prescriptions", href: "/account/prescriptions" },
+    ],
+  },
+  {
     id: "about",
     label: "About",
     links: [
@@ -106,7 +114,7 @@ export function SiteFooter() {
             className="md:order-last md:col-span-2 lg:order-0 lg:col-span-1"
           >
             {/* Tablet and up: columns. */}
-            <div className="hidden gap-8 md:grid md:grid-cols-3">
+            <div className="hidden gap-8 md:grid md:grid-cols-4 lg:grid-cols-2 2xl:grid-cols-4">
               {footerGroups.map((group) => (
                 <div key={group.id}>
                   <h2 className="dh-eyebrow text-cream/50">{group.label}</h2>

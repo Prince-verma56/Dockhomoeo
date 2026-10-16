@@ -29,7 +29,14 @@ export type CartSnapshot = {
  * Only product lines are kept in localStorage — never addresses, contact or
  * payment details. Other tabs follow through the storage event.
  */
-const STORAGE_KEY = "dochomo_cart";
+/**
+ * Versioned with the catalogue the variant ids belong to. The development
+ * catalogue's ids (productId × 1000 + n) mean nothing to the live shop and
+ * could even collide with a real pack, so carts saved under the old key are
+ * dropped rather than priced as someone else's medicine.
+ */
+const STORAGE_KEY = "dochomoeo_cart_live_v1";
+const RETIRED_KEYS = ["dochomo_cart"];
 const SERVER_SNAPSHOT: CartSnapshot = { items: [], hydrated: false };
 
 let snapshot: CartSnapshot | null = null;
@@ -49,6 +56,11 @@ const isCartItem = (value: unknown): value is CartItem => {
 };
 
 function read(): CartItem[] {
+  try {
+    for (const key of RETIRED_KEYS) window.localStorage.removeItem(key);
+  } catch {
+    // Storage unavailable; nothing to clean up.
+  }
   try {
     const parsed: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]");
     return Array.isArray(parsed) ? parsed.filter(isCartItem) : [];

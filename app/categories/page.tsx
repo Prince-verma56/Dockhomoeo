@@ -10,7 +10,6 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
 import { PageHead, HeadStats } from "@/components/shared/PageHead";
 import { SectionHeader } from "@/components/shared/SectionHeader";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { DepthImage } from "@/components/shared/DepthImage";
 import { CategoryCard } from "@/components/commerce/CategoryCard";
@@ -270,7 +269,6 @@ export default async function CategoriesPage() {
           </Container>
         </section>
       </main>
-      <DemoContentNotice />
       <SiteFooter />
     </>
   );

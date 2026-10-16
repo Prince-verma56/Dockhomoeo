@@ -6,7 +6,6 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AlertCircle, ArrowLeft, ArrowRight, RotateCw, ShoppingBag, Trash2 } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { OrderSummary } from "@/components/commerce/OrderSummary";
 import { QuantityStepper } from "@/components/commerce/QuantityStepper";
 import { Button } from "@/components/ui/button";
@@ -121,7 +120,6 @@ export function CartView() {
           </div>
         </Container>
       </section>
-      <DemoContentNotice />
     </>
   );
 }
@@ -176,7 +174,7 @@ function CartRow({
       className="overflow-hidden border-b border-line-soft"
     >
       <div className="flex gap-4 py-5 sm:gap-5">
-        <ProductThumb imageUrl={line.imageUrl} name={line.name} form={line.form} className="size-20 rounded-2xl sm:size-24" />
+        <ProductThumb imageUrl={line.imageUrl} name={line.name} form={line.form} variant={line.variantTitle} brand={line.brand} className="size-20 rounded-2xl sm:size-24" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-6">

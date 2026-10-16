@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Heart, Info } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { Button } from "@/components/ui/button";
 import { repositories } from "@/lib/repositories";
@@ -137,7 +136,6 @@ export function FavouritesView() {
           )}
         </Container>
       </section>
-      <DemoContentNotice />
     </>
   );
 }

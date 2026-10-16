@@ -28,6 +28,8 @@ export interface ApiQuoteLine {
   unitPrice: number;
   lineTotal: number;
   priceNote: string | null;
+  allowCod: boolean;
+  allowPrepaid: boolean;
   minQuantity: number;
   maxQuantity: number;
   problem: string | null;
@@ -35,7 +37,6 @@ export interface ApiQuoteLine {
 
 export interface ApiQuote {
   channel: "D2C" | "B2B";
-  accountId: number | null;
   lines: ApiQuoteLine[];
   removed: number[];
   itemCount: number;
@@ -53,6 +54,12 @@ export interface ApiQuote {
   freeDeliveryFrom: number | null;
   codAvailable: boolean;
   codCharge: number;
+  /** "X can only be paid for online." — some product in the cart refuses pay-on-delivery. */
+  codNote: string | null;
+  /** "X can only be paid for on delivery." — some product refuses online payment. */
+  onlineNote: string | null;
+  /** Both of the above at once: the cart cannot be ordered in one go. */
+  paymentConflict: string | null;
   grandTotal: number;
   wholesale: {
     businessName: string;
@@ -97,7 +104,8 @@ export interface ApiOrderDetail {
   orderNumber: string;
   channel: "D2C" | "B2B";
   status: string;
-  paymentMethod: ApiPaymentMethod;
+  /** Staff can record a bank transfer on an order; the shop never offers it. */
+  paymentMethod: ApiPaymentMethod | "BANK_TRANSFER";
   paymentStatus: string;
   placedAt: string;
   estimatedDelivery: string | null;
@@ -125,6 +133,14 @@ export interface ApiOrderDetail {
     lineTotal: number;
     slug: string | null;
   }[];
+  billingName: string | null;
+  billingGstNumber: string | null;
+  cancelReason: string | null;
+  invoiceNumber: string | null;
+  history: { status: string; note: string | null; createdAt: string }[];
+  shipments: { carrier: string | null; trackingNumber: string | null; trackingUrl: string | null; status: string }[];
+  /** Still before courier pickup. Cancelling is a later phase's UI. */
   canCancel: boolean;
+  /** An online order not paid yet, while the gateway is connected: POST /api/me/orders/:id/pay. */
   canPay: boolean;
 }

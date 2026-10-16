@@ -1,5 +1,33 @@
 export type StaffRole = "SUPER_ADMIN" | "ADMIN" | "STAFF";
 
+/** The panel's areas, as in AREAS (backend/src/lib/permissions.ts). */
+export type AdminArea =
+  | "dashboard"
+  | "orders"
+  | "returns"
+  | "payments"
+  | "shipping"
+  | "customers"
+  | "b2b"
+  | "catalog"
+  | "discounts"
+  | "doctors"
+  | "consultations"
+  | "payouts"
+  | "content"
+  | "reports"
+  | "settings"
+  | "staff";
+
+/** Every admin list answers in this envelope (`paged`, backend/src/lib/http.ts). */
+export interface AdminPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+}
+
 export interface SessionStaffUser {
   id: number;
   role: StaffRole;
@@ -64,19 +92,7 @@ export interface AdminOrderItem {
   channel: "D2C" | "B2B";
 }
 
-export interface AdminDoctorItem {
-  id: number;
-  displayName: string;
-  slug: string;
-  stream: string;
-  specialization?: string | null;
-  experienceYears?: number | null;
-  qualification?: string | null;
-  verificationStatus: "PENDING" | "APPROVED" | "REJECTED";
-  videoFee?: number | null;
-  acceptsConsultations: boolean;
-  submittedAt?: string | null;
-}
+// Doctors, streams, reviews and prescriptions have their own file: types/api/admin-care.ts.
 
 export interface AdminCategoryItem {
   id: number;

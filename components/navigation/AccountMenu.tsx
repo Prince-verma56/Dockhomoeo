@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User, Package, MapPin, LogOut } from "lucide-react";
+import { User, Package, MapPin, LogOut, ClipboardList, Settings, CalendarClock } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,18 +12,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { displayName, useAuth } from "@/components/providers/AuthProvider";
 
 export function AccountMenu() {
   const { user, logout } = useAuth();
 
   if (!user) return null;
 
-  const initials = user.firstName ? user.firstName[0].toUpperCase() : "U";
+  const initials = (user.firstName?.trim()[0] ?? user.name?.trim()[0] ?? "U").toUpperCase();
+  const items = [
+    { href: "/account", label: "Account overview", icon: User },
+    { href: "/account/consultations", label: "Consultations", icon: CalendarClock },
+    { href: "/account/orders", label: "My orders", icon: Package },
+    { href: "/account/prescriptions", label: "Prescriptions", icon: ClipboardList },
+    { href: "/account/addresses", label: "Saved addresses", icon: MapPin },
+    { href: "/account/profile", label: "Profile", icon: Settings },
+  ];
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="outline-none ml-1">
+      <DropdownMenuTrigger aria-label={`Account menu for ${displayName(user)}`} className="ml-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-forest/40">
         <Avatar className="size-9 border border-white/40 shadow-sm transition-transform hover:scale-105 active:scale-95 bg-white/50 backdrop-blur-md text-forest-deep">
           <AvatarFallback className="bg-transparent font-semibold">
             {initials}
@@ -34,37 +42,27 @@ export function AccountMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none text-ink">
-              {user.firstName} {user.lastName}
+              {[user.firstName, user.lastName].filter(Boolean).join(" ") || "Your account"}
             </p>
             <p className="text-xs leading-none text-muted-ink">
-              {user.phone}
+              +91 {user.phone}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-forest-abyss/5 my-1" />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild className="rounded-xl cursor-pointer hover:bg-forest-deep/5 focus:bg-forest-deep/5">
-            <Link href="/account">
-              <User className="mr-2 size-4 text-forest-deep/70" />
-              <span>Account Overview</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="rounded-xl cursor-pointer hover:bg-forest-deep/5 focus:bg-forest-deep/5">
-            <Link href="/account/orders">
-              <Package className="mr-2 size-4 text-forest-deep/70" />
-              <span>My Orders</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="rounded-xl cursor-pointer hover:bg-forest-deep/5 focus:bg-forest-deep/5">
-            <Link href="/account/addresses">
-              <MapPin className="mr-2 size-4 text-forest-deep/70" />
-              <span>Saved Addresses</span>
-            </Link>
-          </DropdownMenuItem>
+          {items.map(({ href, label, icon: Icon }) => (
+            <DropdownMenuItem key={href} asChild className="rounded-xl cursor-pointer hover:bg-forest-deep/5 focus:bg-forest-deep/5">
+              <Link href={href}>
+                <Icon className="mr-2 size-4 text-forest-deep/70" />
+                <span>{label}</span>
+              </Link>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-forest-abyss/5 my-1" />
         <DropdownMenuItem 
-          onClick={() => logout()}
+          onClick={() => void logout()}
           className="rounded-xl cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700"
         >
           <LogOut className="mr-2 size-4" />

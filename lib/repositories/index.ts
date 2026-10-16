@@ -8,42 +8,52 @@ import {
   IAccountRepository,
   IServiceabilityRepository,
   IPrescriptionRepository,
+  ICareRepository,
+  IConsultationRepository,
 } from "./interfaces";
 import {
-  LocalHomeRepository,
-  LocalProductRepository,
-  LocalSearchRepository,
-  LocalCartRepository,
-  LocalInsightRepository,
-  LocalAuthRepository,
-  LocalAccountRepository,
-  LocalServiceabilityRepository,
-  LocalPrescriptionRepository,
-} from "./local";
+  ApiAccountRepository,
+  ApiAuthRepository,
+  ApiCareRepository,
+  ApiConsultationRepository,
+  ApiCartRepository,
+  ApiHomeRepository,
+  ApiInsightRepository,
+  ApiPrescriptionRepository,
+  ApiProductRepository,
+  ApiSearchRepository,
+  ApiServiceabilityRepository,
+} from "./api";
 
 /**
- * True while the repositories below are the local development mocks. Pages
- * use it to label previews honestly — e.g. an order placed here is a preview
- * reference, not an order. Flip it in the same change that swaps in API
- * repositories.
+ * False: the catalogue, cart, checkout, orders and Health Insights are the
+ * live shop API (Phase 2+3, insights since Phase 4). When true, pages label what they show as development data — an
+ * order "placed" then is a preview reference, not an order — and the local
+ * photo map may stand in for product images.
+ *
+ * The development catalogue in ./local (LocalHome/Product/Search/Cart/
+ * Serviceability/InsightRepository) is kept for explicit offline work: swap the
+ * classes below *and* set this to true together. Nothing falls back to it
+ * when a live request fails.
  */
-export const usingMockData = true;
+export const usingMockData = false;
+
 
 // Dependency Injection Container
-// The UI only imports from this file, ensuring that swapping to
-// API-based repositories in the future requires exactly zero UI changes.
-// Ready replacements for home, product, search, cart and serviceability live
-// in ./api (Api*Repository); the swap order is in
-// DOCHOMO-FINAL-FRONTEND-HANDOFF.md.
+// The UI only imports from this file, so swapping implementations needs no UI change.
+
+const auth = new ApiAuthRepository();
 
 export const repositories = {
-  home: new LocalHomeRepository() as IHomeRepository,
-  product: new LocalProductRepository() as IProductRepository,
-  search: new LocalSearchRepository() as ISearchRepository,
-  cart: new LocalCartRepository() as ICartRepository,
-  insight: new LocalInsightRepository() as IInsightRepository,
-  auth: new LocalAuthRepository() as IAuthRepository,
-  account: new LocalAccountRepository() as IAccountRepository,
-  serviceability: new LocalServiceabilityRepository() as IServiceabilityRepository,
-  prescription: new LocalPrescriptionRepository() as IPrescriptionRepository,
+  home: new ApiHomeRepository() as IHomeRepository,
+  product: new ApiProductRepository() as IProductRepository,
+  search: new ApiSearchRepository() as ISearchRepository,
+  cart: new ApiCartRepository() as ICartRepository,
+  serviceability: new ApiServiceabilityRepository() as IServiceabilityRepository,
+  insight: new ApiInsightRepository() as IInsightRepository,
+  auth: auth as IAuthRepository,
+  account: new ApiAccountRepository(auth) as IAccountRepository,
+  prescription: new ApiPrescriptionRepository() as IPrescriptionRepository,
+  care: new ApiCareRepository() as ICareRepository,
+  consultation: new ApiConsultationRepository() as IConsultationRepository,
 };

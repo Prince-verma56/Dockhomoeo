@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { repositories } from "@/lib/repositories";
+import { describeError } from "@/lib/api";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { cartStore, getServerSnapshot, getSnapshot, subscribe, type CartItem } from "@/lib/cart/cartStore";
 import { flyToCart, type Flight } from "@/lib/cart/flyToCart";
@@ -52,11 +53,40 @@ interface CartContextType {
   /** The pack whose image is in flight; its cart thumbnail waits for it. */
   flightVariantId: number | null;
   updateQuantity: (variantId: number, quantity: number) => void;
+  /**
+   * The prescription this cart is being ordered for; sent as `prescriptionId`
+   * at checkout so the order is recorded against it. Cleared with the cart.
+   */
+  prescription: LinkedPrescription | null;
+  setPrescription: (prescription: LinkedPrescription | null) => void;
   removeItem: (variantId: number) => void;
   clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+/** The prescription an order is being placed for (only its id and number, never its contents). */
+export type LinkedPrescription = { id: number; number: string };
+const PRESCRIPTION_KEY = "dochomoeo_cart_prescription_v1";
+
+function readPrescription(): LinkedPrescription | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const value = JSON.parse(window.localStorage.getItem(PRESCRIPTION_KEY) ?? "null") as LinkedPrescription | null;
+    return value && Number.isInteger(value.id) && typeof value.number === "string" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePrescription(value: LinkedPrescription | null) {
+  try {
+    if (value) window.localStorage.setItem(PRESCRIPTION_KEY, JSON.stringify(value));
+    else window.localStorage.removeItem(PRESCRIPTION_KEY);
+  } catch {
+    // Without storage the link lasts for this page only.
+  }
+}
 
 /** Quantity taps arrive in bursts; price the cart once they settle. */
 const QUOTE_DEBOUNCE_MS = 250;
@@ -71,6 +101,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [failure, setFailure] = useState<{ key: string; message: string } | null>(null);
   const [droppedCount, setDroppedCount] = useState(0);
   const [flightVariantId, setFlightVariantId] = useState<number | null>(null);
+  const [prescription, setPrescriptionState] = useState<LinkedPrescription | null>(readPrescription);
+  const setPrescription = useCallback((value: LinkedPrescription | null) => {
+    writePrescription(value);
+    setPrescriptionState(value);
+  }, []);
   const [announcement, setAnnouncement] = useState("");
   // Packs added in the last moment. A ref, not state: it gates clicks and
   // must not re-render the whole tree.
@@ -136,9 +171,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           cartStore.drop(quote.removed);
         }
       },
-      () => {
+      (error: unknown) => {
         if (!active) return;
-        setFailure({ key: settledKey, message: "We couldn't check prices with the shop just now." });
+        setFailure({ key: settledKey, message: describeError(error, "We couldn't check prices with the shop just now.") });
       },
     );
     return () => {
@@ -177,10 +212,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     flightVariantId,
     updateQuantity: (variantId, quantity) => cartStore.setQuantity(variantId, quantity),
     removeItem: (variantId) => cartStore.remove(variantId),
+    // An empty cart is not being ordered for any prescription.
+    prescription: cart.items.length > 0 ? prescription : null,
+    setPrescription,
     clearCart: () => {
       cartStore.clear();
       setCouponCode(null);
       setDroppedCount(0);
+      setPrescription(null);
     },
   };
 

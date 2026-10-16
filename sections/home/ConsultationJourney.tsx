@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import {
+  ArrowRight,
   Calendar,
   CreditCard,
   FileText,
@@ -19,11 +21,20 @@ import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 /**
  * 5 Journey Steps matching the user's inspiration design
  */
-const journeySteps = [
+const journeySteps: {
+  step: string;
+  title: string;
+  description: string;
+  /** Where this step happens on the site, when it is a page of its own. */
+  link?: { href: string; label: string };
+  icon: typeof Search;
+  color: { aura: string; inner: string; shadow: string };
+}[] = [
   {
     step: "01",
     title: "Find Your Doctor",
-    description: "Browse certified doctors by speciality.",
+    description: "Browse verified doctors by speciality.",
+    link: { href: "/doctors", label: "Browse doctors" },
     icon: Search,
     color: {
       aura: "bg-[#edf6ee] ring-8 ring-[#edf6ee]/70 text-[#1b5037]",
@@ -45,7 +56,7 @@ const journeySteps = [
   {
     step: "03",
     title: "Consult Online",
-    description: "Talk over video, audio or chat.",
+    description: "Talk over video or audio.",
     icon: Video,
     color: {
       aura: "bg-[#edf6f9] ring-8 ring-[#edf6f9]/70 text-[#146687]",
@@ -57,6 +68,7 @@ const journeySteps = [
     step: "04",
     title: "Get Prescription",
     description: "Receive a digital prescription.",
+    link: { href: "/account/prescriptions", label: "Your prescriptions" },
     icon: FileText,
     color: {
       aura: "bg-[#f7f0f8] ring-8 ring-[#f7f0f8]/70 text-[#75347d]",
@@ -68,6 +80,7 @@ const journeySteps = [
     step: "05",
     title: "Receive & Order",
     description: "Medicines delivered to your home.",
+    link: { href: "/products", label: "Shop remedies" },
     icon: Package,
     color: {
       aura: "bg-[#edf7f1] ring-8 ring-[#edf7f1]/70 text-[#13613d]",
@@ -83,8 +96,8 @@ const journeySteps = [
 const trustBenefits = [
   {
     id: "genuine",
-    title: "100% Genuine",
-    detail: "Products",
+    title: "Genuine",
+    detail: "Licensed makers",
     icon: Sprout,
     color: "bg-[#edf6ee] text-[#1b5037] border-white/80",
   },
@@ -278,7 +291,7 @@ export function ConsultationJourney() {
             data-anim="subtitle"
             className="mt-3 text-[0.95rem] sm:text-[1.02rem] text-[#33483e] leading-relaxed max-w-xl font-normal"
           >
-            Consult certified homeopathic doctors from the comfort of your home, track your treatment, and receive genuine medicines at your doorstep.
+            Consult verified homoeopathic doctors from the comfort of your home, track your treatment, and receive genuine medicines at your doorstep.
           </p>
         </div>
 
@@ -346,6 +359,15 @@ export function ConsultationJourney() {
                     <p className="mt-1 text-[0.82rem] sm:text-[0.86rem] text-[#485e52] leading-relaxed max-w-[22ch]">
                       {item.description}
                     </p>
+                    {item.link ? (
+                      <Link
+                        href={item.link.href}
+                        className="mt-2 inline-flex items-center gap-1 rounded-sm text-[0.82rem] font-semibold text-forest underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-forest/30 focus-visible:outline-none"
+                      >
+                        {item.link.label}
+                        <ArrowRight aria-hidden className="size-3.5" />
+                      </Link>
+                    ) : null}
                   </div>
                 </li>
               );

@@ -11,7 +11,6 @@ import { ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { SafeRichText } from "@/components/shared/SafeRichText";
 import { Button } from "@/components/ui/button";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { DepthImage } from "@/components/shared/DepthImage";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { cn } from "@/lib/utils";
@@ -21,12 +20,13 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const insight = await repositories.insight.getBySlug(params.slug);
   if (!insight) return { title: "Article not found", robots: { index: false, follow: true } };
 
+  // The shop's SEO title already carries the site name ("… | DocHomoeo"), so it
+  // replaces the layout's template; a plain article title gets the template.
   const title = insight.seoTitle || insight.title;
-  const description = insight.seoDescription || insight.excerpt;
+  const description = insight.seoDescription || insight.excerpt || undefined;
   const url = `/insights/${insight.slug}`;
   return {
-    // The root layout's title template adds the site name.
-    title,
+    title: insight.seoTitle ? { absolute: insight.seoTitle } : insight.title,
     description,
     alternates: { canonical: url },
     openGraph: {
@@ -180,7 +180,6 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
           </RisePanel>
         ) : null}
       </main>
-      <DemoContentNotice />
       <SiteFooter />
     </>
   );

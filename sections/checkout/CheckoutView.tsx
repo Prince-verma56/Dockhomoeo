@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { OrderSummary } from "@/components/commerce/OrderSummary";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,8 +40,10 @@ import {
   type CheckoutForm,
 } from "@/lib/checkout/checkoutForm";
 import type { ApiPaymentMethod } from "@/types/api/cart";
+import type { ApiAddress } from "@/types/api/account";
 import type { ApiServiceabilityResult } from "@/types/api/serviceability";
 import { CartBreadcrumb } from "@/sections/cart/CartView";
+import { CheckoutPrescription } from "@/sections/checkout/CheckoutPrescription";
 
 const FIELD_LABELS: Record<CheckoutField, string> = {
   fullName: "Full name",
@@ -93,9 +94,53 @@ export function CheckoutView() {
     }));
   }
 
+  // Saved addresses (GET /api/me/addresses, default first). The default fills
+  // the form once; choosing another fills it again; "a different address"
+  // clears it. A saved address is not saved a second time.
+  const [saved, setSaved] = useState<{ userId: number; items: ApiAddress[] } | null>(null);
+  // A saved address id; "new" for a blank form; "edit" when a saved address
+  // needs correcting (the fields open, prefilled); null until the list arrives.
+  const [chosenAddress, setChosenAddress] = useState<number | "new" | "edit" | null>(null);
+  const showAddressFields = typeof chosenAddress !== "number";
+  const signedInUserId = auth.status === "authenticated" ? (auth.user?.id ?? null) : null;
+  useEffect(() => {
+    if (signedInUserId === null) return;
+    let active = true;
+    repositories.account.getAddresses().then(
+      (items) => active && setSaved({ userId: signedInUserId, items }),
+      // Saved addresses are a shortcut; without them the form still works.
+      () => active && setSaved({ userId: signedInUserId, items: [] }),
+    );
+    return () => {
+      active = false;
+    };
+  }, [signedInUserId]);
+  const savedAddresses = saved && saved.userId === signedInUserId ? saved.items : [];
+
+  const chooseSavedAddress = (address: ApiAddress) => {
+    setChosenAddress(address.id);
+    setForm((current) => ({
+      ...current,
+      fullName: address.fullName,
+      phone: address.phone,
+      line1: address.line1,
+      landmark: address.landmark ?? "",
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+      saveAddress: false,
+    }));
+  };
+  const chooseNewAddress = () => {
+    setChosenAddress("new");
+    setForm((current) => ({ ...EMPTY_FORM, fullName: current.fullName, phone: current.phone, note: current.note }));
+  };
+  if (chosenAddress === null && savedAddresses.length > 0) chooseSavedAddress(savedAddresses[0]);
+
   // Delivery check for a complete pincode (GET /api/shop/pincode/:pincode).
   const pincode = /^\d{6}$/.test(form.pincode.trim()) ? form.pincode.trim() : null;
   const [pinAnswer, setPinAnswer] = useState<{ pincode: string; result: ApiServiceabilityResult | null } | null>(null);
+  const [pinAttempt, setPinAttempt] = useState(0);
   useEffect(() => {
     if (!pincode) return;
     let active = true;
@@ -106,7 +151,11 @@ export function CheckoutView() {
     return () => {
       active = false;
     };
-  }, [pincode]);
+  }, [pincode, pinAttempt]);
+  const retryPincode = () => {
+    setPinAnswer(null);
+    setPinAttempt((n) => n + 1);
+  };
   const pin = pincode && pinAnswer?.pincode === pincode ? pinAnswer : null;
   const pinBlocked = pin?.result?.deliverable === false;
 
@@ -135,6 +184,14 @@ export function CheckoutView() {
       : []),
   ];
   const paymentChosen = paymentOptions.some((option) => option.value === cart.paymentMethod);
+  // The current choice is no longer offered (a product is prepaid-only, the
+  // pincode refuses COD…) and only one way remains: take it.
+  if (!paymentChosen && paymentOptions.length === 1 && cart.quoteStatus === "ready") {
+    cart.setPaymentMethod(paymentOptions[0].value);
+  }
+  const paymentNotes = quote?.paymentConflict
+    ? [quote.paymentConflict]
+    : [quote?.codNote, quote?.onlineNote].filter((note): note is string => Boolean(note));
   const blockedLine = lines.find((line) => line.problem);
   const signedIn = auth.status === "authenticated";
   const priceReady = cart.quoteStatus === "ready" && !totals.provisional;
@@ -158,10 +215,13 @@ export function CheckoutView() {
     const found = validateCheckoutForm(form);
     const first = FIELD_ORDER.find((field) => found[field]);
     if (first) {
-      focusField(first);
+      // A saved address that does not pass (older data): open it for correcting.
+      if (typeof chosenAddress === "number") setChosenAddress("edit");
+      requestAnimationFrame(() => focusField(first));
       return;
     }
     if (pinBlocked) return fail("We don't deliver to this pincode yet. Try another address.");
+    if (quote?.paymentConflict) return fail(quote.paymentConflict);
     if (!paymentChosen) return fail("Choose how you'd like to pay.");
     if (blockedLine) return fail(`${blockedLine.name}: ${blockedLine.problem}. Update your cart to continue.`);
     if (!priceReady) return fail("Prices are still being checked with the shop. Try again in a moment.");
@@ -177,6 +237,7 @@ export function CheckoutView() {
         saveAddress: form.saveAddress,
         note: form.note.trim() || null,
         expectedTotal: totals.total,
+        prescriptionId: cart.prescription?.id,
       });
       setPlaced(true);
       if (result.payUrl) {
@@ -189,6 +250,11 @@ export function CheckoutView() {
       cart.clearCart();
     } catch (error) {
       if (error instanceof CheckoutError && error.status === 409) cart.retryQuote();
+      if (error instanceof CheckoutError && error.status === 401) {
+        submittingRef.current = false;
+        setSubmitting(false);
+        return fail("Your session has ended. Sign in again to place your order — your cart is kept.");
+      }
       submittingRef.current = false;
       setSubmitting(false);
       fail(
@@ -271,6 +337,8 @@ export function CheckoutView() {
 
           <MobileOrderPeek lines={lines} total={totals.total} />
 
+          <CheckoutPrescription userId={signedInUserId} />
+
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14">
             <form id="checkout-form" noValidate onSubmit={onSubmit} className="min-w-0 space-y-8">
               {submitError ? (
@@ -347,7 +415,15 @@ export function CheckoutView() {
               {/* Disabled until signed in: nothing typed here would survive the trip to /login. */}
               <fieldset disabled={!signedIn || submitting} className="space-y-8 disabled:opacity-60">
                 <CheckoutSection step={2} title="Delivery address" icon={<MapPin aria-hidden className="size-4" />}>
-                  <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+                  {savedAddresses.length > 0 ? (
+                    <SavedAddressPicker
+                      addresses={savedAddresses}
+                      chosen={chosenAddress}
+                      onChoose={chooseSavedAddress}
+                      onNew={chooseNewAddress}
+                    />
+                  ) : null}
+                  <div className={cn("grid gap-x-4 gap-y-5 sm:grid-cols-2", !showAddressFields && "hidden")}>
                     <TextField field="fullName" form={form} errors={errors} onChange={update} required autoComplete="name" className="sm:col-span-2" />
                     <TextField
                       field="phone"
@@ -369,14 +445,14 @@ export function CheckoutView() {
                       required
                       inputMode="numeric"
                       autoComplete="postal-code"
-                      hint={<PincodeStatus pincode={pincode} pin={pin} />}
+                      hint={<PincodeStatus pincode={pincode} pin={pin} onRetry={retryPincode} />}
                     />
                     <TextField field="line1" form={form} errors={errors} onChange={update} required autoComplete="address-line1" className="sm:col-span-2" />
                     <TextField field="landmark" form={form} errors={errors} onChange={update} autoComplete="address-line2" hint="Optional" className="sm:col-span-2" />
                     <TextField field="city" form={form} errors={errors} onChange={update} required autoComplete="address-level2" />
                     <StateField form={form} errors={errors} onChange={update} />
                   </div>
-                  <label className="mt-5 flex cursor-pointer items-center gap-3 text-sm text-ink">
+                  <label className={cn("mt-5 flex cursor-pointer items-center gap-3 text-sm text-ink", !showAddressFields && "hidden")}>
                     <Checkbox
                       checked={form.saveAddress}
                       onCheckedChange={(checked) => update("saveAddress", checked === true)}
@@ -414,8 +490,10 @@ export function CheckoutView() {
                     options={paymentOptions}
                     value={cart.paymentMethod}
                     onChange={cart.setPaymentMethod}
-                    onlineMissing={quote !== null && !quote.onlinePayment}
+                    onlineMissing={quote !== null && !quote.onlinePayment && !quote.onlineNote}
                     codBlockedByPincode={pin?.result?.codAvailable === false}
+                    notes={paymentNotes}
+                    conflict={Boolean(quote?.paymentConflict)}
                   />
                 </CheckoutSection>
               </fieldset>
@@ -469,7 +547,6 @@ export function CheckoutView() {
           </div>
         </Container>
       </section>
-      <DemoContentNotice />
     </>
   );
 }
@@ -638,9 +715,11 @@ function StateField({
 function PincodeStatus({
   pincode,
   pin,
+  onRetry,
 }: {
   pincode: string | null;
   pin: { pincode: string; result: ApiServiceabilityResult | null } | null;
+  onRetry: () => void;
 }) {
   if (!pincode) return <>6 digits</>;
   if (!pin) {
@@ -651,7 +730,16 @@ function PincodeStatus({
       </span>
     );
   }
-  if (!pin.result) return <>We couldn&apos;t check this pincode; the shop confirms delivery when you order.</>;
+  if (!pin.result) {
+    return (
+      <>
+        We couldn&apos;t check this pincode; the shop confirms delivery when you order.{" "}
+        <button type="button" onClick={onRetry} className="font-semibold text-forest underline-offset-4 hover:underline">
+          Check again
+        </button>
+      </>
+    );
+  }
   if (!pin.result.deliverable) {
     return <span className="font-medium text-destructive">We don&apos;t deliver to {pin.pincode} yet.</span>;
   }
@@ -670,16 +758,40 @@ function PaymentChoice({
   onChange,
   onlineMissing,
   codBlockedByPincode,
+  notes,
+  conflict,
 }: {
   options: PaymentOption[];
   value: ApiPaymentMethod;
   onChange: (method: ApiPaymentMethod) => void;
   onlineMissing: boolean;
   codBlockedByPincode: boolean;
+  /** The shop's own words about products that limit how the cart can be paid. */
+  notes: string[];
+  /** The cart mixes prepaid-only and pay-on-delivery-only products. */
+  conflict: boolean;
 }) {
   return (
     <fieldset>
       <legend className="sr-only">How would you like to pay?</legend>
+      {notes.length > 0 ? (
+        <div
+          role={conflict ? "alert" : "note"}
+          className={cn(
+            "mb-3 flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm",
+            conflict ? "border-destructive/30 bg-destructive/5 text-ink" : "border-line-soft bg-cream text-ink",
+          )}
+        >
+          <AlertCircle aria-hidden className={cn("mt-0.5 size-4 shrink-0", conflict ? "text-destructive" : "text-forest")} />
+          <span className="space-y-1">
+            {notes.map((note) => (
+              <span key={note} className="block">
+                {note}
+              </span>
+            ))}
+          </span>
+        </div>
+      ) : null}
       {options.length === 0 ? (
         <p className="text-sm text-muted-ink">Payment options appear once prices are checked.</p>
       ) : (
@@ -725,7 +837,7 @@ function OrderLines({ lines }: { lines: CartLineView[] }) {
       {lines.map((line) => (
         <li key={line.variantId} className="flex items-center gap-3">
           <span className="relative shrink-0">
-            <ProductThumb imageUrl={line.imageUrl} name={line.name} form={line.form} sizes="48px" className="size-12" />
+            <ProductThumb imageUrl={line.imageUrl} name={line.name} form={line.form} variant={line.variantTitle} brand={line.brand} sizes="48px" className="size-12" />
             <span className="absolute -top-0.5 -right-0.5 grid min-w-5 place-items-center rounded-full bg-forest-deep px-1 text-[0.6875rem] leading-5 font-semibold text-cream">
               <span className="sr-only">Quantity </span>
               {line.quantity}
@@ -743,6 +855,75 @@ function OrderLines({ lines }: { lines: CartLineView[] }) {
 }
 
 /** Phones see what they are buying before the form, collapsed so it never pushes the fields away. */
+/** The customer's saved addresses as choices, plus "a different address". */
+function SavedAddressPicker({
+  addresses,
+  chosen,
+  onChoose,
+  onNew,
+}: {
+  addresses: ApiAddress[];
+  chosen: number | "new" | "edit" | null;
+  onChoose: (address: ApiAddress) => void;
+  onNew: () => void;
+}) {
+  return (
+    <fieldset className="mb-6">
+      <legend className="mb-3 text-sm font-medium text-ink">Deliver to a saved address</legend>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {addresses.map((address) => {
+          const selected = chosen === address.id;
+          return (
+            <label
+              key={address.id}
+              className={cn(
+                "flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 text-sm transition-colors",
+                selected ? "border-forest bg-forest/8 shadow-2xs" : "border-line-soft bg-paper hover:border-forest/35",
+              )}
+            >
+              <input
+                type="radio"
+                name="saved-address"
+                checked={selected}
+                onChange={() => onChoose(address)}
+                className="mt-1 size-4 shrink-0 accent-forest"
+              />
+              <span className="min-w-0">
+                <span className="flex items-center gap-2 font-semibold text-ink">
+                  {address.fullName}
+                  {address.isDefault ? (
+                    <span className="rounded-full bg-forest/10 px-2 py-0.5 text-[0.6875rem] font-semibold text-forest">Default</span>
+                  ) : null}
+                </span>
+                <span className="mt-0.5 block text-muted-ink">
+                  {address.line1}
+                  {address.landmark ? `, ${address.landmark}` : ""}, {address.city}, {address.state} {address.pincode}
+                </span>
+                <span className="mt-0.5 block text-muted-ink">+91 {address.phone}</span>
+              </span>
+            </label>
+          );
+        })}
+        <label
+          className={cn(
+            "flex cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 py-3.5 text-sm transition-colors",
+            chosen === "new" || chosen === "edit" ? "border-forest bg-forest/8" : "border-line hover:border-forest/35",
+          )}
+        >
+          <input
+            type="radio"
+            name="saved-address"
+            checked={chosen === "new" || chosen === "edit"}
+            onChange={onNew}
+            className="size-4 shrink-0 accent-forest"
+          />
+          <span className="font-semibold text-ink">{chosen === "edit" ? "Correct this address below" : "Use a different address"}</span>
+        </label>
+      </div>
+    </fieldset>
+  );
+}
+
 function MobileOrderPeek({ lines, total }: { lines: CartLineView[]; total: number }) {
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   return (

@@ -1,21 +1,28 @@
+/**
+ * One product in a listing or rail: the backend's `toCard` (catalog-index.ts),
+ * priced by the pack shown. It carries no dosage form and no sales count; the
+ * listing's `facets.forms` is where forms are counted.
+ */
 export interface ApiProductCard {
   id: number;
   name: string;
   slug: string;
-  form: string | null;
   brandName: string | null;
   imageUrl: string | null;
+  /** The pack the card shows and adds to the cart. */
+  variantId: number;
+  variantTitle: string | null;
+  /** How many packs the product has; more than one means the product page offers a choice. */
+  variantCount: number;
   price: number;
   mrp: number;
   discountPercent: number;
   rating: number;
   ratingCount: number;
   inStock: boolean;
-  sold: number;
+  requiresPrescription: boolean;
+  /** Only for an approved wholesale account. */
   wholesalePrice?: number;
-  /** The pack the card shows, as returned by GET /api/shop/products. */
-  variantId?: number;
-  variantTitle?: string | null;
 }
 
 export interface ApiProductVariant {
@@ -77,6 +84,10 @@ export interface ApiProductDetail {
   manufacturer: string | null;
   countryOfOrigin: string | null;
   requiresPrescription: boolean;
+  /** Pay-on-delivery allowed for this product. */
+  allowCod: boolean;
+  /** Online payment allowed for this product. */
+  allowPrepaid: boolean;
   ratingAverage: number;
   ratingCount: number;
   brand: { name: string; slug: string; logoUrl: string | null } | null;

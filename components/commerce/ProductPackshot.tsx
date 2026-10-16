@@ -3,13 +3,15 @@ import { cn } from "@/lib/utils";
 import type { ProductForm } from "@/types/product";
 
 /**
- * The illustrated pack: what a product shows when no photograph of that exact
- * product exists (data/productImagery.ts explains why another product's photo
- * is never borrowed).
+ * The illustrated pack: what a product shows when the shop has no photograph
+ * of that exact product. Another product's photo is never borrowed: the pack
+ * is drawn from the product's own name, brand, potency and dosage form.
  *
  * It draws a container for the dosage form and prints the product's own name,
  * brand and potency on its label, so every card is distinct and nothing is
- * misattributed. Everything is sized in container units, so the same markup
+ * misattributed. When the form is not known (`null`: the product's name and
+ * pack do not state it, and listing data carries no form) it draws a plain
+ * carton, so no bottle or tube is implied. Everything is sized in container units, so the same markup
  * reads as a packshot on the product page, a card in the grid and a 48px cart
  * thumbnail — where the label text steps aside and only its rules remain.
  */
@@ -26,7 +28,16 @@ type Palette = {
   accent: string;
 };
 
-const PALETTES: Record<ProductForm, Palette> = {
+const PALETTES: Record<ProductForm | "unknown", Palette> = {
+  unknown: {
+    surface: "linear-gradient(180deg, #f1f0ea 0%, #e6e6dc 100%)",
+    arch: "linear-gradient(180deg, #dfe2d6 0%, #d4d9cb 100%)",
+    glass: "#f7f4ec",
+    cap: "#d9d3c4",
+    label: "#fffdf8",
+    ink: "#14251f",
+    accent: "#0d5a43",
+  },
   drops: {
     surface: "linear-gradient(180deg, #f6efe3 0%, #efe3cf 100%)",
     arch: "linear-gradient(180deg, #ead8bb 0%, #e4cfae 100%)",
@@ -96,7 +107,7 @@ const FORM_NOUN: Record<ProductForm, string> = {
  * "Calendula Ointment" → { title: "Calendula", detail: "Ointment" }
  * Only splits what the name itself says; nothing is added.
  */
-export function packLabel(name: string, form: ProductForm): { title: string; detail: string } {
+export function packLabel(name: string, form: ProductForm | null): { title: string; detail: string } {
   let title = name.trim();
   let potency: string | null = null;
   let formWord: string | null = null;
@@ -111,12 +122,13 @@ export function packLabel(name: string, form: ProductForm): { title: string; det
     formWord = formMatch[1].charAt(0).toUpperCase() + formMatch[1].slice(1).toLowerCase();
     title = title.slice(0, formMatch.index).trim();
   }
-  return { title, detail: potency ?? formWord ?? FORM_NOUN[form] };
+  return { title, detail: potency ?? formWord ?? (form ? FORM_NOUN[form] : "") };
 }
 
 type ProductPackshotProps = {
   name: string;
-  form: ProductForm;
+  /** Null when the dosage form is not known: a plain carton is drawn. */
+  form: ProductForm | null;
   brand?: string | null;
   className?: string;
   /** Accessible name. Omit when the pack sits beside a visible product name. */
@@ -124,7 +136,7 @@ type ProductPackshotProps = {
 };
 
 export function ProductPackshot({ name, form, brand, className, label }: ProductPackshotProps) {
-  const palette = PALETTES[form];
+  const palette = PALETTES[form ?? "unknown"];
   const { title, detail } = packLabel(name, form);
   const vars = {
     "--pk-glass": palette.glass,
@@ -139,7 +151,7 @@ export function ProductPackshot({ name, form, brand, className, label }: Product
       role={label ? "img" : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
-      data-packshot={form}
+      data-packshot={form ?? "unknown"}
       className={cn("absolute inset-0 overflow-hidden [container-type:size]", className)}
       style={{ ...vars, backgroundImage: palette.surface }}
     >
@@ -174,14 +186,33 @@ export function ProductPackshot({ name, form, brand, className, label }: Product
         className="absolute bottom-[11%] left-1/2 flex origin-bottom -translate-x-1/2 flex-col items-center [@container(orientation:landscape)]:scale-[0.84]"
       >
         <Vessel form={form}>
-          <Label brand={brand} title={title} detail={detail} wide={form === "tablets"} />
+          <Label brand={brand} title={title} detail={detail} wide={form === "tablets" || form === null} />
         </Vessel>
       </div>
     </div>
   );
 }
 
-function Vessel({ form, children }: { form: ProductForm; children: React.ReactNode }) {
+function Vessel({ form, children }: { form: ProductForm | null; children: React.ReactNode }) {
+  if (form === null) {
+    // A plain carton: the shape of no particular dosage form.
+    return (
+      <>
+        <span
+          className="relative z-10 h-[4cqmin] w-[54cqmin] rounded-t-[0.8cqmin]"
+          style={{ background: `${MATTE}, var(--pk-cap)` }}
+        />
+        <span
+          className="relative h-[60cqmin] w-[52cqmin] overflow-hidden rounded-b-[1.2cqmin]"
+          style={{ background: `${MATTE}, var(--pk-glass)` }}
+        >
+          <span className="absolute inset-x-0 top-[6%] h-[2.5%] bg-(--pk-accent)/70" />
+          {children}
+        </span>
+      </>
+    );
+  }
+
   if (form === "tablets") {
     return (
       <>
@@ -313,9 +344,11 @@ function Label({
       <span className="line-clamp-3 text-[5.2cqmin] leading-[1.08] font-semibold tracking-[-0.01em] [overflow-wrap:anywhere] hyphens-auto @max-[9rem]:hidden">
         {title}
       </span>
-      <span className="text-[3.5cqmin] leading-none font-semibold tracking-[0.08em] uppercase @max-[9rem]:hidden" style={{ color: "var(--pk-accent)" }}>
-        {detail}
-      </span>
+      {detail ? (
+        <span className="text-[3.5cqmin] leading-none font-semibold tracking-[0.08em] uppercase @max-[9rem]:hidden" style={{ color: "var(--pk-accent)" }}>
+          {detail}
+        </span>
+      ) : null}
     </span>
   );
 }

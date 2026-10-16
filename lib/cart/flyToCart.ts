@@ -32,6 +32,14 @@ const LANDING_SECONDS = 0.18;
 const TARGET_TIMEOUT_MS = 1000;
 /** Peak aerodynamic banking angle along the curved flight path (degrees). */
 const PEAK_TILT = 3.6;
+/** The lift's scale, carried into the flight and eased away rather than snapped back. */
+const LIFT_SCALE = 1.04;
+
+/** Smooth 0→1 with zero slope at both ends. */
+const smoothstep = (x: number) => {
+  const t = Math.min(1, Math.max(0, x));
+  return t * t * (3 - 2 * t);
+};
 
 export const cartThumbSelector = (variantId: number) => `[data-cart-thumb="${variantId}"]`;
 
@@ -126,7 +134,7 @@ export function flyToCart(source: HTMLElement, variantId: number): Flight {
     const lift = gsap.to(copy, {
       duration: LIFT_SECONDS,
       ease: "power2.out",
-      scale: 1.04,
+      scale: LIFT_SCALE,
       y: `-=${liftOffset}`,
       boxShadow: "0 28px 56px -12px rgba(13, 90, 67, 0.35), 0 16px 32px -8px rgba(20, 37, 31, 0.25)",
       transformOrigin: "center center",
@@ -172,8 +180,12 @@ export function flyToCart(source: HTMLElement, variantId: number): Flight {
     const progress = { t: 0 };
     const node = copy;
 
-    // Reset GSAP scale and position on the node so we drive coordinates continuously
-    gsap.set(node, { scale: 1, x: 0, y: 0 });
+    // Hand the copy from GSAP's transform to the per-frame one below in the
+    // same frame and at the same place and scale. (Setting x/y/scale through
+    // GSAP here would write translate(0,0) and flash the copy in the corner
+    // for a frame, and snap the lift's scale back to 1.)
+    gsap.set(node, { clearProps: "transform" });
+    node.style.transform = `translate3d(${startCenter.x - w0 / 2}px, ${startCenter.y - h0 / 2}px, 0) scale(${LIFT_SCALE})`;
 
     // Phase 2: Cinematic Cubic Bézier Flight
     await settle(
@@ -182,7 +194,7 @@ export function flyToCart(source: HTMLElement, variantId: number): Flight {
           gsap.to(progress, {
             t: 1,
             duration: FLIGHT_SECONDS,
-            ease: "power2.inOut",
+            ease: "power3.inOut",
             onUpdate: () => {
               const t = progress.t;
 
@@ -227,11 +239,13 @@ export function flyToCart(source: HTMLElement, variantId: number): Flight {
               const curX = u3 * p0x + 3 * u2 * t * p1x + 3 * u * t2 * p2x + t3 * p3x;
               const curY = u3 * p0y + 3 * u2 * t * p1y + 3 * u * t2 * p2y + t3 * p3y;
 
-              // Progressive size reduction: stays legible during liftoff, smoothly morphs into thumb
-              const sizeEased = t < 0.25 ? t * 0.6 : t < 0.75 ? 0.15 + (t - 0.25) * 1.3 : 0.8 + (t - 0.75) * 0.8;
-              const s = Math.min(1, Math.max(0, sizeEased));
+              // Size: holds briefly so the product stays recognisable as it
+              // leaves, then shrinks on a smooth curve into the thumbnail.
+              const s = smoothstep((t - 0.06) / 0.94);
               const curW = w0 + (ew - w0) * s;
               const curH = h0 + (eh - h0) * s;
+              // The lift's extra scale fades out over the first third.
+              const lift = 1 + (LIFT_SCALE - 1) * (1 - smoothstep(t / 0.35));
 
               // Border radius morph
               const curRadius = r0 + (endRadius - r0) * t;
@@ -244,7 +258,7 @@ export function flyToCart(source: HTMLElement, variantId: number): Flight {
               node.style.width = `${curW}px`;
               node.style.height = `${curH}px`;
               node.style.borderRadius = `${curRadius}px`;
-              node.style.transform = `translate3d(${curX - curW / 2}px, ${curY - curH / 2}px, 0) rotate(${tilt}deg)`;
+              node.style.transform = `translate3d(${curX - curW / 2}px, ${curY - curH / 2}px, 0) rotate(${tilt}deg) scale(${lift})`;
             },
             onComplete: resolve,
           })

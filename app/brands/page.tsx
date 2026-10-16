@@ -8,7 +8,6 @@ import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Reveal } from "@/components/shared/Reveal";
 import { PageHead, HeadStats } from "@/components/shared/PageHead";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { DepthImage } from "@/components/shared/DepthImage";
 import { brandOrigin } from "@/components/commerce/BrandCard";
@@ -190,7 +189,6 @@ export default async function BrandsPage() {
           ) : null}
         </RisePanel>
       </main>
-      <DemoContentNotice />
       <SiteFooter />
     </>
   );

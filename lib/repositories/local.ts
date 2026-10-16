@@ -27,7 +27,14 @@ import { slugify } from "@/lib/formatters/slug";
 // Simulated network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const mapToApiProductCard = (p: Product, index: number): ApiProductCard => ({
+/**
+ * The development catalogue keeps two things the real card leaves out: the
+ * dosage form (its own filter and "related" logic use it) and a sales count
+ * for "most popular". Callers only ever see them as an ApiProductCard.
+ */
+type MockCard = ApiProductCard & { form: string | null; sold: number };
+
+const mapToApiProductCard = (p: Product, index: number): MockCard => ({
   id: index + 1,
   name: p.name,
   slug: p.slug,
@@ -45,6 +52,8 @@ const mapToApiProductCard = (p: Product, index: number): ApiProductCard => ({
   // Same id scheme as LocalProductRepository's default variant.
   variantId: mockVariantId(index),
   variantTitle: p.variant,
+  variantCount: 1,
+  requiresPrescription: false,
 });
 
 const mockApiCards = mockProducts.map(mapToApiProductCard);
@@ -53,7 +62,7 @@ const mockApiCards = mockProducts.map(mapToApiProductCard);
 // catalog-index.ts): every typed word must appear in one lower-cased string per
 // product, and matches rank by where the query lands in the name. Health goals
 // stand in for the backend's product tags.
-type SearchEntry = { card: ApiProductCard; nameLower: string; text: string };
+type SearchEntry = { card: MockCard; nameLower: string; text: string };
 
 const searchIndex = new Map<number, SearchEntry>(
   mockProducts.map((p, index) => {
@@ -176,16 +185,16 @@ export class LocalHomeRepository implements IHomeRepository {
  * products in the same category, then — because the mock catalogue is small —
  * ones that share a health concern, then the same dosage form.
  */
-function relatedCards(product: Product, card: ApiProductCard): ApiProductCard[] {
+function relatedCards(product: Product, card: MockCard): ApiProductCard[] {
   const others = mockApiCards.filter((c) => c.id !== card.id && c.inStock);
-  const bySlug = (c: ApiProductCard) => productBySlug.get(c.slug);
+  const bySlug = (c: MockCard) => productBySlug.get(c.slug);
   const goals = new Set(product.healthGoals ?? []);
   const tiers = [
     others.filter((c) => product.category !== undefined && bySlug(c)?.category === product.category),
     others.filter((c) => (bySlug(c)?.healthGoals ?? []).some((goal) => goals.has(goal))),
     others.filter((c) => c.form === card.form),
   ];
-  const chosen: ApiProductCard[] = [];
+  const chosen: MockCard[] = [];
   for (const tier of tiers) for (const c of tier) if (chosen.length < 4 && !chosen.includes(c)) chosen.push(c);
   return chosen;
 }
@@ -214,6 +223,8 @@ export class LocalProductRepository implements IProductRepository {
       indications: null,
       directions: null,
       safetyInfo: null,
+      allowCod: true,
+      allowPrepaid: true,
       manufacturer: brandName,
       countryOfOrigin: null,
       requiresPrescription: false,
@@ -293,7 +304,7 @@ export class LocalSearchRepository implements ISearchRepository {
     type Group = "category" | "brand" | "form" | "potency" | "pack" | "price" | "discount" | "rating";
     const potencies = new Set(filters.potency ?? []);
     const packs = new Set(filters.pack ?? []);
-    const checks: [Group, (p: ApiProductCard, product: Product | undefined) => boolean][] = [
+    const checks: [Group, (p: MockCard, product: Product | undefined) => boolean][] = [
       ["category", (p, product) => !filters.category || inCategory(product, filters.category)],
       ["brand", (p) => !filters.brand?.length || matchesBrand(p.brandName, filters.brand)],
       ["form", (p) => !filters.form?.length || (p.form !== null && filters.form.includes(p.form))],
@@ -322,7 +333,7 @@ export class LocalSearchRepository implements ISearchRepository {
     let lowest = Infinity;
     let highest = 0;
 
-    const results: ApiProductCard[] = [];
+    const results: MockCard[] = [];
     for (const p of mockApiCards) {
       // typed text and "in stock only" are not facet groups: they always apply
       if (!matchesQuery(p) || (filters.inStock && !p.inStock)) continue;
@@ -377,7 +388,7 @@ export class LocalSearchRepository implements ISearchRepository {
     // Sorting, as the backend: with nothing typed, "relevance" means most popular.
     const requested = SORT_ALIASES[filters.sort ?? ""] ?? filters.sort ?? "relevance";
     const sort = requested === "relevance" && words.length === 0 ? "popular" : requested;
-    const inStockFirst = (a: ApiProductCard, b: ApiProductCard) => Number(b.inStock) - Number(a.inStock);
+    const inStockFirst = (a: MockCard, b: MockCard) => Number(b.inStock) - Number(a.inStock);
     if (sort === "price-asc") results.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") results.sort((a, b) => b.price - a.price);
     else if (sort === "newest") results.sort((a, b) => b.id - a.id);
@@ -505,6 +516,12 @@ function sampleOrder(): ApiOrderDetail {
     shippingState: "Maharashtra",
     shippingPincode: "400001",
     items,
+    billingName: null,
+    billingGstNumber: null,
+    cancelReason: null,
+    invoiceNumber: null,
+    history: [],
+    shipments: [],
     canCancel: false,
     canPay: false,
   };
@@ -564,6 +581,8 @@ export class LocalCartRepository implements ICartRepository {
         unitPrice: card.price,
         lineTotal: roundMoney(card.price * l.quantity),
         priceNote: null,
+        allowCod: true,
+        allowPrepaid: true,
         minQuantity: 1,
         maxQuantity: MOCK_MAX_QUANTITY,
         problem: l.quantity > MOCK_MAX_QUANTITY ? `You can buy up to ${MOCK_MAX_QUANTITY} of this` : null,
@@ -583,7 +602,6 @@ export class LocalCartRepository implements ICartRepository {
 
     return {
       channel: "D2C",
-      accountId: null,
       lines: quoteLines,
       removed,
       itemCount: quoteLines.reduce((sum, l) => sum + l.quantity, 0),
@@ -596,6 +614,9 @@ export class LocalCartRepository implements ICartRepository {
       freeDeliveryFrom: null,
       codAvailable: true,
       codCharge,
+      codNote: null,
+      onlineNote: null,
+      paymentConflict: null,
       grandTotal: roundMoney(subtotal + codCharge),
       wholesale: null,
       onlinePayment: false,
@@ -661,6 +682,12 @@ export class LocalCartRepository implements ICartRepository {
         lineTotal: line.lineTotal,
         slug: line.slug,
       })),
+      billingName: null,
+      billingGstNumber: null,
+      cancelReason: null,
+      invoiceNumber: null,
+      history: [],
+      shipments: [],
       canCancel: false,
       canPay: false,
     });
@@ -670,6 +697,11 @@ export class LocalCartRepository implements ICartRepository {
   async getOrder(orderId: number): Promise<ApiOrderDetail | null> {
     await delay(250);
     return allOrders().find((order) => order.id === orderId) ?? null;
+  }
+
+  /** The development catalogue takes no payments. */
+  async payOrder(): Promise<{ payUrl: string }> {
+    throw new CheckoutError("Online payment is not connected in the development catalogue.", 501);
   }
 }
 
@@ -732,7 +764,7 @@ export class LocalInsightRepository implements IInsightRepository {
       seoDescription: null,
       seo: {
         title: article.title,
-        description: card.excerpt,
+        description: card.excerpt ?? "",
         path: `/insights/${slug}`,
         image: card.coverImageUrl,
       },
@@ -753,185 +785,15 @@ export class LocalInsightRepository implements IInsightRepository {
   }
 }
 
-import { IAuthRepository, IAccountRepository } from "./interfaces";
-import { ApiAuthResponse, ApiUser } from "@/types/api/auth";
-import { ApiAccountProfile, ApiAddress, ApiOrder, ApiOrderSummary, type OrderStatus } from "@/types/api/account";
+/*
+ * Sign-in, the account (profile, addresses, orders) and prescriptions have no
+ * local implementation: they always use the backend (ApiAuthRepository,
+ * ApiAccountRepository, ApiPrescriptionRepository in ./api). A mock session
+ * would show account screens that never persist anything.
+ */
 
-export class LocalAuthRepository implements IAuthRepository {
-  async requestOtp(phone: string): Promise<{ success: boolean; message?: string }> {
-    await delay(600);
-    return { success: true, message: "OTP sent successfully" };
-  }
-
-  async verifyOtp(phone: string, code: string): Promise<ApiAuthResponse> {
-    await delay(800);
-    if (code === "000000") {
-      return { success: false, message: "Invalid OTP" };
-    }
-    const mockUser: ApiUser = {
-      id: 1,
-      firstName: "Test",
-      lastName: "User",
-      email: "test@example.com",
-      phone,
-      roles: ["USER"],
-    };
-    return {
-      success: true,
-      session: {
-        token: "mock-jwt-token",
-        expiresAt: new Date(Date.now() + 86400000).toISOString(),
-        user: mockUser,
-      }
-    };
-  }
-
-  async logout(): Promise<void> {
-    await delay(400);
-  }
-
-  async getCurrentUser(): Promise<ApiUser | null> {
-    await delay(300);
-    return null;
-  }
-}
-
-const mockAddresses: ApiAddress[] = [
-  {
-    id: "addr_1",
-    fullName: "Test User",
-    phone: "9876543210",
-    line1: "123 Health Ave",
-    landmark: "Near Park",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pincode: "400001",
-    isDefault: true,
-  }
-];
-
-const ORDER_STATUSES = new Set<OrderStatus>(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"]);
-
-/** The account's older order shape, filled from the same store as GET /me/orders/:id. */
-function toAccountOrder(order: ApiOrderDetail): ApiOrder {
-  const [fullName, line1] = [order.customerName, order.shippingAddress];
-  return {
-    id: String(order.id),
-    orderNumber: order.orderNumber,
-    status: ORDER_STATUSES.has(order.status as OrderStatus) ? (order.status as OrderStatus) : "PENDING",
-    placedAt: order.placedAt,
-    subtotal: order.subtotal,
-    shipping: order.shippingCharge,
-    tax: 0,
-    grandTotal: order.grandTotal,
-    items: order.items.map((item) => ({
-      id: String(item.id),
-      productId: mockApiCards.find((c) => c.slug === item.slug)?.id ?? 0,
-      productName: item.productName,
-      variantId: 0,
-      variantName: item.variantTitle,
-      quantity: item.quantity,
-      price: item.unitPrice,
-      imageUrl: item.imageUrl ?? undefined,
-    })),
-    shippingAddress: {
-      id: `order-${order.id}`,
-      fullName,
-      phone: order.customerPhone,
-      line1,
-      city: order.shippingCity,
-      state: order.shippingState,
-      pincode: order.shippingPincode,
-      isDefault: false,
-    },
-    paymentMethod: order.paymentMethod,
-    paymentStatus: order.paymentStatus === "PAID" ? "PAID" : order.paymentStatus === "FAILED" ? "FAILED" : "PENDING",
-  };
-}
-
-export class LocalAccountRepository implements IAccountRepository {
-  async getProfile(): Promise<ApiAccountProfile | null> {
-    await delay(300);
-    return {
-      id: 1,
-      firstName: "Test",
-      lastName: "User",
-      email: "test@example.com",
-      phone: "9876543210",
-      gender: "MALE",
-    };
-  }
-  
-  async updateProfile(profile: Partial<ApiAccountProfile>): Promise<ApiAccountProfile> {
-    await delay(500);
-    return { id: 1, firstName: "Test", lastName: "User", email: "test@example.com", phone: "9876543210", ...profile };
-  }
-  
-  async getAddresses(): Promise<ApiAddress[]> {
-    await delay(400);
-    return [...mockAddresses];
-  }
-  
-  async addAddress(address: Omit<ApiAddress, 'id'>): Promise<ApiAddress> {
-    await delay(500);
-    const newAddr = { ...address, id: "addr_" + Date.now() };
-    if (newAddr.isDefault) {
-      mockAddresses.forEach(a => a.isDefault = false);
-    }
-    mockAddresses.push(newAddr as ApiAddress);
-    return newAddr as ApiAddress;
-  }
-  
-  async updateAddress(id: string, address: Partial<ApiAddress>): Promise<ApiAddress> {
-    await delay(500);
-    const idx = mockAddresses.findIndex(a => a.id === id);
-    if (idx >= 0) {
-      if (address.isDefault) {
-        mockAddresses.forEach(a => a.isDefault = false);
-      }
-      mockAddresses[idx] = { ...mockAddresses[idx], ...address } as ApiAddress;
-      return mockAddresses[idx];
-    }
-    throw new Error("Address not found");
-  }
-  
-  async deleteAddress(id: string): Promise<void> {
-    await delay(400);
-    const idx = mockAddresses.findIndex(a => a.id === id);
-    if (idx >= 0) {
-      mockAddresses.splice(idx, 1);
-    }
-  }
-  
-  async setDefaultAddress(id: string): Promise<void> {
-    await delay(300);
-    mockAddresses.forEach(a => a.isDefault = a.id === id);
-  }
-  
-  async getOrders(): Promise<ApiOrderSummary[]> {
-    await delay(500);
-    return allOrders().map((order) => ({
-      id: order.id,
-      orderNumber: order.orderNumber,
-      status: order.status,
-      grandTotal: order.grandTotal,
-      placedAt: order.placedAt,
-      itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
-    }));
-  }
-  
-  async getOrderById(id: string): Promise<ApiOrder | null> {
-    await delay(500);
-    // The order list links by numeric id (as GET /me/orders does); an order
-    // number is accepted too.
-    const order = allOrders().find((o) => String(o.id) === id || o.orderNumber === id);
-    return order ? toAccountOrder(order) : null;
-  }
-}
-
-import { IServiceabilityRepository, IPrescriptionRepository } from "./interfaces";
+import { IServiceabilityRepository } from "./interfaces";
 import { ApiServiceabilityResult } from "@/types/api/serviceability";
-import { ApiPrescription } from "@/types/api/prescription";
 
 export class LocalServiceabilityRepository implements IServiceabilityRepository {
   /**
@@ -943,26 +805,5 @@ export class LocalServiceabilityRepository implements IServiceabilityRepository 
     await delay(400);
     const deliverable = pincode !== "000000";
     return { pincode, deliverable, codAvailable: deliverable, deliveryDays: null, city: null, state: null };
-  }
-}
-
-/**
- * No prescriptions in the local data. The backend has no prescription upload:
- * prescriptions are issued by a DocHomoeo doctor after a consultation
- * (GET /api/me/prescriptions, ISSUED only, numeric ids) and can be ordered from
- * (POST /api/me/prescriptions/:id/order, or prescriptionId on checkout). A
- * mock "uploaded PDF" would imply a flow that does not exist, so none is shown.
- */
-const mockPrescriptions: ApiPrescription[] = [];
-
-export class LocalPrescriptionRepository implements IPrescriptionRepository {
-  async getPrescriptions(): Promise<ApiPrescription[]> {
-    await delay(400);
-    return mockPrescriptions;
-  }
-
-  async getPrescriptionById(id: string): Promise<ApiPrescription | null> {
-    await delay(200);
-    return mockPrescriptions.find(p => p.id === id) || null;
   }
 }

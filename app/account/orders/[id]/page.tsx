@@ -7,38 +7,38 @@ import { ArrowLeft, CreditCard, Loader2, MapPin, Package, SearchX } from "lucide
 import { repositories } from "@/lib/repositories";
 import { formatRupees } from "@/lib/formatters/price";
 import { formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductThumb } from "@/components/commerce/ProductThumb";
+import { AccountError, StatusPill } from "@/components/account/AccountStates";
+import { PAYMENT_METHOD_LABELS, orderStatus, paymentStatusLabel } from "@/lib/account/orderStatus";
+import { describeError } from "@/lib/api";
 import type { ApiOrderDetail } from "@/types/api/cart";
 
-const PAYMENT_LABELS: Record<string, string> = { COD: "Pay on delivery", ONLINE: "Online", CREDIT: "Wholesale credit" };
-const statusLabel = (status: string) => status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ");
-
 /**
- * One order, read through the same contract as the confirmation page
- * (GET /api/me/orders/:id via the cart repository), so an order placed at
- * checkout opens here with the same lines and totals.
+ * One of the customer's orders (GET /api/me/orders/:id). A 404 from the
+ * backend (not this customer's order, or no such order) shows "not found";
+ * any other failure offers a retry.
  */
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const orderId = Number.parseInt(id, 10);
   const validId = Number.isInteger(orderId) && orderId > 0;
-  const [state, setState] = useState<{ status: "loading" } | { status: "missing" } | { status: "ready"; order: ApiOrderDetail }>({
-    status: "loading",
-  });
+  const [state, setState] = useState<
+    { status: "loading" } | { status: "missing" } | { status: "error"; message: string } | { status: "ready"; order: ApiOrderDetail }
+  >({ status: "loading" });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!validId) return;
     let active = true;
-    repositories.cart
-      .getOrder(orderId)
+    repositories.account
+      .getOrderById(orderId)
       .then((order) => active && setState(order ? { status: "ready", order } : { status: "missing" }))
-      .catch(() => active && setState({ status: "missing" }));
+      .catch((error: unknown) => active && setState({ status: "error", message: describeError(error, "We could not load this order.") }));
     return () => {
       active = false;
     };
-  }, [orderId, validId]);
+  }, [orderId, validId, attempt]);
 
   if (state.status === "loading" && validId) {
     return (
@@ -46,6 +46,18 @@ export default function OrderDetailPage() {
         <Loader2 aria-hidden className="size-7 animate-spin text-forest" />
         <span className="sr-only">Loading order…</span>
       </div>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <AccountError
+        message={state.message}
+        onRetry={() => {
+          setState({ status: "loading" });
+          setAttempt((n) => n + 1);
+        }}
+      />
     );
   }
 
@@ -79,9 +91,7 @@ export default function OrderDetailPage() {
             <h2 className="font-display text-2xl text-ink">Order {order.orderNumber}</h2>
             <p className="mt-1 text-sm text-muted-ink">Placed on {formatDate(order.placedAt)}</p>
           </div>
-          <Badge variant={order.status === "DELIVERED" ? "default" : "secondary"} className="w-fit px-3 py-1 text-sm">
-            {statusLabel(order.status)}
-          </Badge>
+          <StatusPill {...orderStatus(order.status)} className="h-7 px-3 text-sm" />
         </div>
       </div>
 
@@ -94,7 +104,7 @@ export default function OrderDetailPage() {
           <ul className="divide-y divide-line/70">
             {order.items.map((item) => (
               <li key={item.id} className="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
-                <ProductThumb imageUrl={item.imageUrl} name={item.productName} className="size-16" />
+                <ProductThumb imageUrl={item.imageUrl} name={item.productName} variant={item.variantTitle} brand={item.brandName} className="size-16" />
                 <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 sm:flex-row">
                   <div className="min-w-0">
                     {item.brandName ? <p className="text-[0.6875rem] font-semibold tracking-wider text-muted-ink uppercase">{item.brandName}</p> : null}
@@ -169,8 +179,8 @@ export default function OrderDetailPage() {
               Payment
             </h3>
             <p className="text-sm text-muted-ink">
-              {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod} ·{" "}
-              <span className="font-medium text-ink">{statusLabel(order.paymentStatus)}</span>
+              {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod} ·{" "}
+              <span className="font-medium text-ink">{paymentStatusLabel(order.paymentStatus)}</span>
             </p>
           </section>
         </div>

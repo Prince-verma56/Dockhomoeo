@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Building2,
   FlaskConical,
   HeartHandshake,
   Leaf,
-  Star,
+  MapPin,
+  ShieldCheck,
   Stethoscope,
   UserCheck,
 } from "lucide-react";
@@ -21,8 +21,9 @@ import { gsap } from "@/lib/animation/gsap";
  * HomeHero
  * 
  * Features:
- * 1. Background video from /Videos/HeroVideo2.mp4 at 2× (HeroPlaybackProvider owns
- *    playback and decides when the copy reveals)
+ * 1. Background video from /Videos/HeroVideo2.mp4 at 1× normalized speed,
+ *    trimmed to the starting 4 seconds (HeroPlaybackProvider owns playback
+ *    and decides when the copy reveals)
  * 2. Bottom play/mute UI removed completely
  * 3. Masked parallax reveal animation on headline, copy, and trust elements
  * 4. Subparagraph and bottom proof bar encased in subtle frosted glass for 100% legibility
@@ -187,18 +188,18 @@ export function HomeHero() {
   const cards = [
     {
       icon: <Leaf className="size-5 text-[#0d5a43]" />,
-      title: "100%",
-      subtitle: "Natural Ingredients",
+      title: "Genuine",
+      subtitle: "Licensed Makers",
     },
     {
       icon: <FlaskConical className="size-5 text-[#0d5a43]" />,
-      title: "Clinically",
-      subtitle: "Trusted Formulations",
+      title: "Classical",
+      subtitle: "Homoeopathic Remedies",
     },
     {
       icon: <UserCheck className="size-5 text-[#0d5a43]" />,
-      title: "Expert Doctors",
-      subtitle: "Online",
+      title: "Verified Doctors",
+      subtitle: "Consults Opening Soon",
     },
     {
       icon: <HeartHandshake className="size-5 text-[#0d5a43]" />,
@@ -220,8 +221,8 @@ export function HomeHero() {
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
           src="/Videos/HeroVideo2.mp4"
-          // No autoPlay: the provider sets the 2× rate before starting playback,
-          // so the first frames never run at 1× while the page hydrates.
+          // No autoPlay: the provider sets the 1× normalized rate before starting playback,
+          // and clamps playback to the initial 4 seconds.
           muted
           playsInline
           preload="auto"
@@ -386,30 +387,16 @@ export function HomeHero() {
               style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "680ms" }}
             >
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 rounded-full bg-white/40 backdrop-blur-md border border-white/60 px-5 py-2.5 shadow-[0_4px_24px_rgba(20,37,31,0.06)] w-fit">
-                {/* Patient Avatars */}
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-2.5 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                      alt="Happy family member"
-                      className="inline-block size-8.5 rounded-full ring-2 ring-white object-cover"
-                    />
-                    <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
-                      alt="Happy family member"
-                      className="inline-block size-8.5 rounded-full ring-2 ring-white object-cover"
-                    />
-                    <img
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
-                      alt="Happy family member"
-                      className="inline-block size-8.5 rounded-full ring-2 ring-white object-cover"
-                    />
-                  </div>
+                {/* Promises every order keeps (no unverified counts or ratings) */}
+                <div className="flex items-center gap-2">
+                  <span className="grid size-7.5 place-items-center rounded-lg bg-[#0d5a43]/15 text-[#0d5a43]">
+                    <ShieldCheck className="size-4" />
+                  </span>
                   <div className="text-xs leading-snug">
                     <span className="block font-bold text-[#14251f] text-[0.8125rem]">
-                      10,000+
+                      Maker on every pack
                     </span>
-                    <span className="text-[#3b4742] font-semibold">Happy Families</span>
+                    <span className="text-[#3b4742] font-semibold">Genuine medicines</span>
                   </div>
                 </div>
 
@@ -419,13 +406,13 @@ export function HomeHero() {
                 {/* Rating */}
                 <div className="flex items-center gap-2">
                   <span className="grid size-7.5 place-items-center rounded-lg bg-[#0d5a43]/15 text-[#0d5a43]">
-                    <Building2 className="size-4" />
+                    <MapPin className="size-4" />
                   </span>
                   <div className="text-xs leading-snug">
-                    <span className="flex items-center gap-1 font-bold text-[#14251f] text-[0.8125rem]">
-                      4.8 <Star className="size-3 fill-amber-500 text-amber-500" />
+                    <span className="block font-bold text-[#14251f] text-[0.8125rem]">
+                      Delivery check
                     </span>
-                    <span className="text-[#3b4742] font-semibold">App Rating</span>
+                    <span className="text-[#3b4742] font-semibold">By pincode</span>
                   </div>
                 </div>
               </div>

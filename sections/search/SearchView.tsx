@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, SearchX } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { SearchCombobox } from "@/components/search/SearchCombobox";
 import { Button } from "@/components/ui/button";
 import {
@@ -117,7 +116,6 @@ export function SearchView({ state, result, suggestions }: SearchViewProps) {
         />
       )}
 
-      <DemoContentNotice />
     </>
   );
 }
@@ -158,12 +156,17 @@ function NoResults({ query, suggestions }: { query: string; suggestions: string[
         items={suggestions}
         className="mt-8 [&_ul]:justify-center"
       />
-      <Button asChild variant="brandOutline" size="xl" className="mt-8">
-        <Link href="/products">
-          Browse all products
-          <ArrowRight aria-hidden />
-        </Link>
-      </Button>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <Button asChild variant="brandOutline" size="xl">
+          <Link href="/products">
+            Browse all products
+            <ArrowRight aria-hidden />
+          </Link>
+        </Button>
+        <Button asChild variant="ghost" size="xl">
+          <Link href={`/doctors?q=${encodeURIComponent(query)}`}>Search doctors instead</Link>
+        </Button>
+      </div>
     </div>
   );
 }
@@ -174,6 +177,7 @@ function BrowseInstead() {
     { href: "/products", label: "All products" },
     { href: "/categories", label: "Shop by category" },
     { href: "/brands", label: "Shop by brand" },
+    { href: "/doctors", label: "Find a doctor" },
   ];
   return (
     <section aria-labelledby="browse-heading" className="py-10 lg:py-14">
@@ -181,7 +185,7 @@ function BrowseInstead() {
         <h2 id="browse-heading" className="dh-eyebrow text-muted-ink">
           Prefer to browse?
         </h2>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {links.map((link) => (
             <li key={link.href}>
               <Link

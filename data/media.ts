@@ -16,14 +16,19 @@ export type Media = {
   kind: "photo" | "study";
 };
 
-/** Product photography for each dosage form, until dedicated form artwork exists. */
+/**
+ * Mood photography for each dosage form, shown on the form collections.
+ * These are editorial scenes (public/Images/Editorial), not photographs of
+ * products the shop sells: the bottles carry other, fictional labels, so they
+ * are never attached to a product, a card, the cart or an order.
+ */
 export const FORM_MEDIA: Record<string, { src: string; position?: string }> = {
-  drops: { src: "/Images/Products/reckeweg-r41.webp" },
-  tablets: { src: "/Images/Products/lords-kali-phos.webp" },
-  // The scene's amber tincture bottle sits right of centre.
-  tincture: { src: "/Images/SeasonalEditBG.webp", position: "78% 60%" },
-  cream: { src: "/Images/Products/boiron-arnica.webp" },
-  oil: { src: "/Images/Products/bakson-arnica-oil.webp" },
+  drops: { src: "/Images/Editorial/eucalyptus-dropper-bottle.webp" },
+  tablets: { src: "/Images/Editorial/chamomilla-pellet-bottle.webp" },
+  // Unbranded-at-a-glance remedy bottles on a stone plinth (not a catalogue product).
+  tincture: { src: "/Images/NaturesCareBG.webp", position: "40% 60%" },
+  cream: { src: "/Images/Editorial/arnica-cream-tube.webp" },
+  oil: { src: "/Images/Editorial/massage-oil-bottle.webp" },
 };
 
 /** Wide scenes not tied to one product, form or concern. */
@@ -42,11 +47,11 @@ const CATEGORY_MEDIA: Record<string, Media> = {
   // An amber dropper on a stone in a mountain meadow, among chamomile.
   immunity: { src: "/Images/journal_immunity.webp", position: "50% 58%", kind: "photo" },
   // A remedy cream tube laid among yellow flowers.
-  "skin-care": { src: "/Images/Products/boiron-arnica.webp", position: "50% 55%", kind: "photo" },
+  "skin-care": { src: "/Images/Editorial/arnica-cream-tube.webp", position: "50% 55%", kind: "photo" },
   // A dropper bottle with fresh eucalyptus.
-  respiratory: { src: "/Images/Products/reckeweg-r41.webp", position: "50% 50%", kind: "photo" },
+  respiratory: { src: "/Images/Editorial/eucalyptus-dropper-bottle.webp", position: "50% 50%", kind: "photo" },
   // A pellet jar beside chamomile flowers.
-  "sleep-stress": { src: "/Images/Products/lords-kali-phos.webp", position: "50% 50%", kind: "photo" },
+  "sleep-stress": { src: "/Images/Editorial/chamomilla-pellet-bottle.webp", position: "50% 50%", kind: "photo" },
   // A woman seated in meditation in a calm, plant-filled room.
   "womens-health": { src: "/Images/journal_women.webp", position: "52% 50%", kind: "photo" },
   // A toddler laughing in a sunlit meadow.

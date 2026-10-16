@@ -9,7 +9,6 @@ import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { PageHead } from "@/components/shared/PageHead";
 import { SectionHeader } from "@/components/shared/SectionHeader";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { InsightCard } from "@/components/content/InsightCard";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { Eyebrow } from "@/components/shared/Eyebrow";
@@ -17,14 +16,18 @@ import { HoverExpand, type HoverExpandItem } from "@/components/unlumen-ui/primi
 import { cn } from "@/lib/utils";
 import { describeForms, describeNames, getCategoryDirectory } from "@/lib/catalogue";
 import { categoryMedia } from "@/data/media";
+import { MAX_INSIGHT_PAGE_SIZE } from "@/types/api/insight";
 
 type Props = PageProps<"/insights">;
 
 const DESCRIPTION =
   "Reading on homoeopathy, natural wellness and family care from DocHomoeo — written to help you prepare questions for your practitioner.";
 
-/** Every article, for the topic list. Shared by metadata and page within one request. */
-const allInsights = cache(() => repositories.insight.getInsights(1, 100));
+/**
+ * The newest articles, for the topic list (the blog API returns at most 50 per
+ * page and has no topic list of its own). Shared by metadata and page within one request.
+ */
+const allInsights = cache(() => repositories.insight.getInsights(1, MAX_INSIGHT_PAGE_SIZE));
 
 async function topicsOf() {
   const { items } = await allInsights();
@@ -35,7 +38,7 @@ async function topicsOf() {
     topic.count += 1;
     topics.set(item.category.slug, topic);
   }
-  return { total: items.length, topics: [...topics.values()] };
+  return { total: (await allInsights()).total, topics: [...topics.values()] };
 }
 
 const topicParam = async (searchParams: Props["searchParams"]) => {
@@ -193,12 +196,20 @@ export default async function InsightsPage({ searchParams }: Props) {
               </>
             ) : (
               <div className="rounded-[1.5rem] border border-dashed border-line bg-paper/70 px-6 py-14 text-center">
-                <h2 className="dh-title-block text-ink">No articles in this topic yet</h2>
-                <p className="dh-body mx-auto mt-2 max-w-sm">New reading is added regularly.</p>
-                <Link href="/insights" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
-                  See all articles
-                  <ArrowRight aria-hidden className="size-4" />
-                </Link>
+                <h2 className="dh-title-block text-ink">
+                  {activeTopic || slug ? "No articles in this topic yet" : "No articles have been published yet"}
+                </h2>
+                <p className="dh-body mx-auto mt-2 max-w-sm">
+                  {activeTopic || slug
+                    ? "Try another topic, or see everything published so far."
+                    : "Health Insights will appear here as our team publishes them. Meanwhile, you can browse remedies by health concern below."}
+                </p>
+                {activeTopic || slug ? (
+                  <Link href="/insights" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
+                    See all articles
+                    <ArrowRight aria-hidden className="size-4" />
+                  </Link>
+                ) : null}
               </div>
             )}
           </Container>
@@ -234,7 +245,6 @@ export default async function InsightsPage({ searchParams }: Props) {
           </RisePanel>
         ) : null}
       </main>
-      <DemoContentNotice />
       <SiteFooter />
     </>
   );

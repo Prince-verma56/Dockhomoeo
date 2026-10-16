@@ -103,6 +103,8 @@ export function CartDrawer() {
                     imageUrl={line.imageUrl}
                     name={line.name}
                     form={line.form}
+                    variant={line.variantTitle}
+                    brand={line.brand}
                     className="size-20 transition-opacity duration-200 data-flight-pending:opacity-0"
                   />
                   <div className="flex min-w-0 flex-1 flex-col">

@@ -9,7 +9,6 @@ import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { PageHead } from "@/components/shared/PageHead";
 import { SectionHeader } from "@/components/shared/SectionHeader";
-import { DemoContentNotice } from "@/components/shared/DemoContentNotice";
 import { BrandCard, brandOrigin } from "@/components/commerce/BrandCard";
 import { RisePanel } from "@/components/shared/RisePanel";
 import { cn } from "@/lib/utils";
@@ -160,7 +159,6 @@ export default async function BrandPage({ params, searchParams }: Props) {
           </RisePanel>
         ) : null}
       </main>
-      <DemoContentNotice />
       <SiteFooter />
     </>
   );

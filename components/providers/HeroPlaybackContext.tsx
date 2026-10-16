@@ -11,15 +11,16 @@ import React, {
 } from "react";
 
 /**
- * The hero video plays at double speed. Every timing below is measured in
- * wall-clock seconds against that effective length (10 s of footage → 5 s on
- * screen), so the copy reveal stays in step with what the visitor sees.
+ * The hero video plays at normal 1× speed, trimmed to the first 4 seconds.
+ * Every timing below is measured in seconds so the copy reveal stays in step
+ * with what the visitor sees.
  */
-export const HERO_PLAYBACK_RATE = 2;
+export const HERO_PLAYBACK_RATE = 1;
+export const HERO_TRIM_SECONDS = 4;
 
 /**
- * How long before the video's last frame the hero copy starts revealing. The
- * headline transitions run ~1.1–1.4 s, so it lands as the footage settles.
+ * How long before the video's trimmed duration the hero copy starts revealing.
+ * The headline transitions run ~1.0–1.2 s, so it lands as the footage settles.
  */
 const REVEAL_LEAD_SECONDS = 1;
 
@@ -64,9 +65,10 @@ const applyRate = (video: HTMLVideoElement) => {
 };
 
 const showLastFrame = (video: HTMLVideoElement) => {
-  if (Number.isFinite(video.duration) && video.duration > 0) {
-    video.currentTime = Math.max(0, video.duration - 0.05);
-  }
+  const target = Number.isFinite(video.duration) && video.duration > 0
+    ? Math.min(video.duration - 0.05, HERO_TRIM_SECONDS)
+    : HERO_TRIM_SECONDS;
+  video.currentTime = Math.max(0, target);
   video.pause();
 };
 
@@ -108,7 +110,6 @@ export function HeroPlaybackProvider({
     const skip = getIntroSkipped();
     if (skip) {
       revealedRef.current = true;
-      setRevealed(true);
     }
 
     if (!video) {
@@ -137,8 +138,21 @@ export function HeroPlaybackProvider({
       stallTimer = setTimeout(reveal, STALL_TIMEOUT_MS);
     };
     const onTimeUpdate = () => {
-      if (revealedRef.current || !(video.duration > 0)) return;
-      const remaining = (video.duration - video.currentTime) / (video.playbackRate || 1);
+      if (!(video.duration > 0)) return;
+
+      // Trim video playback to the starting 4 seconds
+      if (video.currentTime >= HERO_TRIM_SECONDS) {
+        video.currentTime = HERO_TRIM_SECONDS;
+        video.pause();
+        setIsPlaying(false);
+        setIsCompleted(true);
+        reveal();
+        return;
+      }
+
+      if (revealedRef.current) return;
+      const effectiveDuration = Math.min(video.duration, HERO_TRIM_SECONDS);
+      const remaining = (effectiveDuration - video.currentTime) / (video.playbackRate || 1);
       if (remaining <= REVEAL_LEAD_SECONDS) reveal();
     };
     const onEnded = () => {
@@ -193,7 +207,7 @@ export function HeroPlaybackProvider({
     if (!video) return;
 
     applyRate(video);
-    if (video.ended) {
+    if (video.ended || video.currentTime >= HERO_TRIM_SECONDS) {
       video.currentTime = 0;
       setIsCompleted(false);
       video.play().catch(() => {});
