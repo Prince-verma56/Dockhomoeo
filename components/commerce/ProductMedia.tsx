@@ -32,6 +32,48 @@ type ProductMediaProps = {
  *
  * `data-product-media` marks the element the add-to-cart flight lifts off from.
  */
+/**
+ * Real product photography fallbacks mapped by dosage form and known remedy names/slugs.
+ */
+export function getRealFallbackImage(product: {
+  slug?: string | null;
+  name?: string;
+  form?: string | null;
+}): string {
+  const text = `${product.slug || ""} ${product.name || ""}`.toLowerCase();
+  if (text.includes("kali") || text.includes("phos") || text.includes("tablet")) {
+    return "/Images/Products/lords-kali-phos.jpg";
+  }
+  if (text.includes("natrum") || text.includes("muriaticum")) {
+    return "/Images/Products/sbl-natrum.jpg";
+  }
+  if (text.includes("boiron") || (text.includes("arnica") && (text.includes("tube") || text.includes("pellet")))) {
+    return "/Images/Products/boiron-arnica.jpg";
+  }
+  if (text.includes("alfalfa") || text.includes("tincture") || text.includes(" q")) {
+    return "/Images/Products/schwabe-alfalfa.jpg";
+  }
+  if (text.includes("oil") || text.includes("massage")) {
+    return "/Images/Products/bakson-arnica-oil.jpg";
+  }
+  if (text.includes("r41") || text.includes("nerve") || text.includes("memory")) {
+    return "/Images/Products/reckeweg-r41.jpg";
+  }
+  if (text.includes("r89") || text.includes("hair")) {
+    return "/Images/Products/reckeweg-r89.jpg";
+  }
+  if (text.includes("calcarea") || text.includes("calc")) {
+    return "/Images/Products/sbl-calc-carb.jpg";
+  }
+  if (product.form === "tablets") return "/Images/Products/lords-kali-phos.jpg";
+  if (product.form === "cream") return "/Images/Products/boiron-arnica.jpg";
+  if (product.form === "oil") return "/Images/Products/bakson-arnica-oil.jpg";
+  if (product.form === "tincture") return "/Images/Products/schwabe-alfalfa.jpg";
+  if (product.form === "drops") return "/Images/Products/reckeweg-r41.jpg";
+
+  return "/Images/Products/sbl-natrum.jpg";
+}
+
 export function ProductMedia({
   product,
   className,
@@ -41,35 +83,25 @@ export function ProductMedia({
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px",
 }: ProductMediaProps) {
   const [failed, setFailed] = useState(false);
-  const imageSrc = product.image ?? null;
-  const showPhoto = Boolean(imageSrc) && !failed;
+  const fallbackSrc = getRealFallbackImage({ slug: product.slug, name: product.name, form: product.form });
+  const imageSrc = (product.image && !failed) ? product.image : fallbackSrc;
 
   return (
     <div
       data-product-media
       className={cn("relative isolate overflow-hidden bg-cream-sunk", ratio, rounded, className)}
     >
-      {showPhoto && imageSrc ? (
-        <Image
-          src={imageSrc}
-          alt={product.mediaLabel || product.name}
-          fill
-          loading={eager ? "eager" : undefined}
-          fetchPriority={eager ? "high" : undefined}
-          sizes={sizes}
-          onError={() => setFailed(true)}
-          className="object-cover object-center transition-transform duration-700 ease-premium group-hover:scale-[1.04]"
-        />
-      ) : (
-        <ProductPackshot
-          name={product.name}
-          brand={product.brand}
-          form={product.form}
-          label={`${product.name}, illustrated pack`}
-          className="transition-transform duration-700 ease-premium group-hover:scale-[1.03]"
-        />
-      )}
-      {/* Inner hairline so photos and packs share one edge treatment. */}
+      <Image
+        src={imageSrc}
+        alt={product.mediaLabel || product.name}
+        fill
+        loading={eager ? "eager" : undefined}
+        fetchPriority={eager ? "high" : undefined}
+        sizes={sizes}
+        onError={() => setFailed(true)}
+        className="object-cover object-center transition-transform duration-700 ease-premium group-hover:scale-[1.04]"
+      />
+      {/* Inner hairline so photos share one clean edge treatment. */}
       <span aria-hidden className="pointer-events-none absolute inset-0 z-2 rounded-[inherit] ring-1 ring-ink/6 ring-inset" />
     </div>
   );

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ProductPackshot } from "@/components/commerce/ProductPackshot";
 import type { ProductForm } from "@/types/product";
 import { packFormFromText } from "@/lib/adapters/product";
+import { getRealFallbackImage } from "@/components/commerce/ProductMedia";
 
 const FORMS: readonly ProductForm[] = ["drops", "tablets", "tincture", "cream", "oil"];
 
@@ -38,6 +39,8 @@ export function ProductThumb({
 } & Omit<React.ComponentProps<"span">, "children">) {
   const [failed, setFailed] = useState(false);
   const packForm = FORMS.find((value) => value === form) ?? packFormFromText(variant, name);
+  const fallbackSrc = getRealFallbackImage({ name, form: packForm });
+  const finalSrc = (imageUrl && !failed) ? imageUrl : fallbackSrc;
 
   return (
     <span
@@ -45,11 +48,7 @@ export function ProductThumb({
       {...rest}
       className={cn("relative block shrink-0 overflow-hidden rounded-xl bg-cream-sunk ring-1 ring-ink/6 ring-inset", className)}
     >
-      {imageUrl && !failed ? (
-        <Image src={imageUrl} alt="" fill sizes={sizes} className="object-cover" onError={() => setFailed(true)} />
-      ) : (
-        <ProductPackshot name={name} brand={brand} form={packForm} />
-      )}
+      <Image src={finalSrc} alt="" fill sizes={sizes} className="object-cover" onError={() => setFailed(true)} />
     </span>
   );
 }

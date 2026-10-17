@@ -11,15 +11,14 @@ import React, {
 } from "react";
 
 /**
- * The hero video plays at normal 1× speed, trimmed to the first 4 seconds.
- * Every timing below is measured in seconds so the copy reveal stays in step
- * with what the visitor sees.
+ * The hero video plays at normal 1× speed from start to end without trimming.
+ * Timing is measured in seconds so the copy reveal stays in step with playback.
  */
 export const HERO_PLAYBACK_RATE = 1;
-export const HERO_TRIM_SECONDS = 4;
+export const HERO_TRIM_SECONDS: number | null = null;
 
 /**
- * How long before the video's trimmed duration the hero copy starts revealing.
+ * How long before the video's end the hero copy starts revealing if not already revealed.
  * The headline transitions run ~1.0–1.2 s, so it lands as the footage settles.
  */
 const REVEAL_LEAD_SECONDS = 1;
@@ -65,10 +64,11 @@ const applyRate = (video: HTMLVideoElement) => {
 };
 
 const showLastFrame = (video: HTMLVideoElement) => {
-  const target = Number.isFinite(video.duration) && video.duration > 0
-    ? Math.min(video.duration - 0.05, HERO_TRIM_SECONDS)
-    : HERO_TRIM_SECONDS;
-  video.currentTime = Math.max(0, target);
+  const target =
+    Number.isFinite(video.duration) && video.duration > 0
+      ? Math.max(0, video.duration - 0.05)
+      : 0;
+  video.currentTime = target;
   video.pause();
 };
 
@@ -140,19 +140,8 @@ export function HeroPlaybackProvider({
     const onTimeUpdate = () => {
       if (!(video.duration > 0)) return;
 
-      // Trim video playback to the starting 4 seconds
-      if (video.currentTime >= HERO_TRIM_SECONDS) {
-        video.currentTime = HERO_TRIM_SECONDS;
-        video.pause();
-        setIsPlaying(false);
-        setIsCompleted(true);
-        reveal();
-        return;
-      }
-
       if (revealedRef.current) return;
-      const effectiveDuration = Math.min(video.duration, HERO_TRIM_SECONDS);
-      const remaining = (effectiveDuration - video.currentTime) / (video.playbackRate || 1);
+      const remaining = (video.duration - video.currentTime) / (video.playbackRate || 1);
       if (remaining <= REVEAL_LEAD_SECONDS) reveal();
     };
     const onEnded = () => {
@@ -207,7 +196,7 @@ export function HeroPlaybackProvider({
     if (!video) return;
 
     applyRate(video);
-    if (video.ended || video.currentTime >= HERO_TRIM_SECONDS) {
+    if (video.ended) {
       video.currentTime = 0;
       setIsCompleted(false);
       video.play().catch(() => {});
