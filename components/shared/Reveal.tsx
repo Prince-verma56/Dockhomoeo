@@ -69,8 +69,8 @@ export function Reveal({
         return;
       }
 
-      // fromTo keeps the from-state owned by the tween, so it is re-applied
-      // whenever the context is rebuilt or ScrollTrigger refreshes.
+      // fromTo animates targets into view once. On complete, inline styles are cleared
+      // so elements remain permanent and never re-animate or flicker on subsequent scrolls/refreshes.
       gsap.fromTo(
         targets,
         { opacity: 0, y },
@@ -85,7 +85,9 @@ export function Reveal({
             trigger: root,
             start,
             once: true,
-            invalidateOnRefresh: true,
+          },
+          onComplete: () => {
+            gsap.set(targets, { clearProps: "opacity,transform" });
           },
         },
       );

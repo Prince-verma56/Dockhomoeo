@@ -13,7 +13,7 @@ export function DoctorAvatar({ photoUrl, className }: { photoUrl: string | null;
     >
       {photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- doctor photos are admin uploads of any size
-        <img src={photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
+        <img src={photoUrl} alt="" draggable={false} className="absolute inset-0 size-full object-cover pointer-events-none select-none" />
       ) : (
         <UserRound className="size-[52%]" strokeWidth={1.4} />
       )}

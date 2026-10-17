@@ -465,7 +465,8 @@ export function HomeHero() {
               src="/Images/PNGS/HeroLeftLeaves.webp"
               alt=""
               aria-hidden="true"
-              className="w-full h-auto object-contain object-left-bottom select-none"
+              draggable={false}
+              className="w-full h-auto object-contain object-left-bottom select-none pointer-events-none"
             />
           </div>
         </div>
@@ -483,7 +484,8 @@ export function HomeHero() {
               src="/Images/PNGS/HeroRightLeaves.webp"
               alt=""
               aria-hidden="true"
-              className="w-full h-auto object-contain object-right-bottom select-none"
+              draggable={false}
+              className="w-full h-auto object-contain object-right-bottom select-none pointer-events-none"
             />
           </div>
         </div>

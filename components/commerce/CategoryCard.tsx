@@ -21,9 +21,10 @@ function CategoryMedia({ media, sizes, className }: { media: Media | null; sizes
           alt=""
           fill
           sizes={sizes}
+          draggable={false}
           style={media.position ? { objectPosition: media.position } : undefined}
           className={cn(
-            "transition-transform duration-[1.2s] ease-premium group-hover:scale-[1.04]",
+            "transition-transform duration-[1.2s] ease-premium group-hover:scale-[1.04] pointer-events-none select-none",
             media.kind === "photo" ? "object-cover" : "object-contain p-[7%]",
           )}
         />
@@ -33,7 +34,7 @@ function CategoryMedia({ media, sizes, className }: { media: Media | null; sizes
 }
 
 const frame =
-  "group flex h-full flex-col overflow-hidden border border-line-soft bg-paper shadow-soft transition-[border-color,box-shadow,transform] duration-500 ease-premium hover:-translate-y-1 hover:border-forest/25 hover:shadow-lift";
+  "group flex h-full flex-col overflow-hidden border border-line-soft bg-paper shadow-soft transition-[border-color,box-shadow,transform] duration-500 ease-premium hover:-translate-y-1 hover:border-forest/25 hover:shadow-lift select-none";
 
 /**
  * A category in the /categories directory. Two sizes on one system:

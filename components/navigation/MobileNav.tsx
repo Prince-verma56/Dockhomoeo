@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, ClipboardList, Headset, Menu, PackageCheck, User } from "lucide-react";
 import {
@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { primaryNav, shopMenu } from "@/components/navigation/navLinks";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { getLenis } from "@/components/providers/SmoothScrollProvider";
 
 /**
  * Mobile navigation drawer.
@@ -30,6 +31,13 @@ import { useAuth } from "@/components/providers/AuthProvider";
 export function MobileNav() {
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const lenis = getLenis();
+    lenis?.stop();
+    return () => lenis?.start();
+  }, [open]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -59,7 +67,7 @@ export function MobileNav() {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-5">
+        <div data-lenis-prevent className="dh-custom-scrollbar flex-1 overflow-y-auto overscroll-contain p-5">
           <form role="search" action="/search">
             <label htmlFor="mobile-search" className="sr-only">
               Search medicines, doctors and symptoms

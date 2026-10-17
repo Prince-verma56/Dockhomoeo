@@ -82,7 +82,8 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
           src="/Images/ConsultentBG.webp"
           alt=""
           aria-hidden="true"
-          className="size-full object-cover object-[24%_center] lg:object-center"
+          draggable={false}
+          className="size-full object-cover object-[24%_center] lg:object-center pointer-events-none select-none"
         />
 
         {/* Soft atmospheric gradient for small screen text readability */}
@@ -129,7 +130,7 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
                       >
                         {doctor.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element -- doctor photos are admin uploads of any size
-                          <img src={doctor.photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
+                          <img src={doctor.photoUrl} alt="" draggable={false} className="absolute inset-0 size-full object-cover pointer-events-none select-none" />
                         ) : (
                           initialsOf(doctor.displayName)
                         )}
@@ -162,7 +163,7 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
                           <span className="relative size-11 overflow-hidden rounded-full bg-white/40 backdrop-blur-md border border-white/80 shadow-xs text-[#0c503b] font-bold text-sm grid place-items-center shrink-0">
                             {featured.photoUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element -- doctor photos are admin uploads of any size
-                              <img src={featured.photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
+                              <img src={featured.photoUrl} alt="" draggable={false} className="absolute inset-0 size-full object-cover pointer-events-none select-none" />
                             ) : (
                               initialsOf(featured.displayName)
                             )}

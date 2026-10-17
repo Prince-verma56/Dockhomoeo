@@ -48,7 +48,7 @@ export function ProductThumb({
       {...rest}
       className={cn("relative block shrink-0 overflow-hidden rounded-xl bg-cream-sunk ring-1 ring-ink/6 ring-inset", className)}
     >
-      <Image src={finalSrc} alt="" fill sizes={sizes} className="object-cover" onError={() => setFailed(true)} />
+      <Image src={finalSrc} alt="" fill sizes={sizes} className="object-cover pointer-events-none select-none" draggable={false} onError={() => setFailed(true)} />
     </span>
   );
 }

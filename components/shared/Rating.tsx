@@ -32,7 +32,7 @@ export function Rating({
       {variant === "compact" ? (
         <Star
           aria-hidden
-          className="size-3.5 fill-warm text-warm"
+          className="size-3.5 fill-amber-500 text-amber-500"
           strokeWidth={1.5}
         />
       ) : (
@@ -44,8 +44,8 @@ export function Rating({
               className={cn(
                 "size-3.5",
                 index < Math.round(value)
-                  ? "fill-warm text-warm"
-                  : "text-line",
+                  ? "fill-amber-500 text-amber-500"
+                  : "text-line/60 fill-transparent",
               )}
             />
           ))}

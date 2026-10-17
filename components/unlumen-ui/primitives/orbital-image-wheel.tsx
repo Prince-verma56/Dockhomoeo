@@ -31,6 +31,8 @@ export type OrbitalImageWheelProps = {
    * (dh-orbit-* in app/globals.css), so there is no flash or layout jump.
    */
   fallback: ReactNode;
+  /** Top header content pinned seamlessly above the orbital wheel */
+  header?: ReactNode;
   /**
    * Label for the focused item's link button; `{label}` is replaced with the
    * item's label. A string, not a render prop, so a Server Component can set it.
@@ -77,6 +79,7 @@ export function OrbitalImageWheel({
   items,
   label,
   fallback,
+  header,
   actionLabel = "View {label}",
   stepVh = 34,
   hold = 0.45,
@@ -123,22 +126,25 @@ export function OrbitalImageWheel({
       const measure = () => {
         const width = stage.clientWidth;
         const height = stage.clientHeight;
-        const cardH = clamp(height * 0.44, 220, 400);
+        const headerEl = stage.querySelector<HTMLElement>("[data-orbit-header]");
+        const headerH = headerEl ? headerEl.offsetHeight : 0;
+        const bottomPad = 130;
+        const availableH = Math.max(260, height - headerH - bottomPad);
+        const cardH = clamp(availableH * 0.72, 190, 360);
         const cardW = Math.round(cardH * 0.78);
         // An ellipse rather than a circle: wide enough to put two cards either
         // side of the focus across the screen, shallow enough that the outer
         // ones stay above the caption. Never so tight that neighbours collide.
-        const rx = Math.max(width * 0.5, cardW * 1.95);
+        const rx = Math.max(width * 0.48, cardW * 1.85);
+        const focusY = Math.max(headerH + cardH / 2 + 16, height * 0.46);
         return {
           width,
           height,
           cardW,
           cardH,
           rx,
-          ry: rx * 0.42,
-          // The focused card's centre: high enough to leave the caption room,
-          // low enough to clear the fixed header.
-          focusY: Math.max(height * 0.4, HEADER_CLEARANCE + cardH / 2),
+          ry: rx * 0.38,
+          focusY,
         };
       };
 
@@ -282,6 +288,14 @@ export function OrbitalImageWheel({
       {enabled ? (
         <div ref={rootRef} className="dh-orbit-wheel relative" style={{ height: `calc(100svh + ${travel}svh)` }}>
           <div ref={stageRef} className="sticky top-0 h-svh overflow-hidden">
+            {header ? (
+              <div
+                data-orbit-header
+                className="absolute inset-x-0 top-0 z-[150] px-4 pt-4 sm:px-8 sm:pt-6 md:px-12 md:pt-7 pointer-events-auto"
+              >
+                {header}
+              </div>
+            ) : null}
             {slots.map(({ key, item }) => (
               <Link
                 key={key}
@@ -350,7 +364,10 @@ export function OrbitalImageWheel({
         </div>
       ) : null}
 
-      <div className={cn(enabled && "dh-orbit-fallback")}>{fallback}</div>
+      <div className={cn(enabled && "dh-orbit-fallback")}>
+        {header ? <div className="px-4 pt-6 pb-2 sm:px-8">{header}</div> : null}
+        {fallback}
+      </div>
     </div>
   );
 }

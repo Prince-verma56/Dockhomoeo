@@ -85,7 +85,14 @@ export function SearchFilters({ facets, value, onChange, categoryName }: SearchF
         <Group id="category" title="Category" selected={value.category ? 1 : 0}>
           <RadioList
             name="category"
-            options={[{ value: "", label: "All categories", count: null }, ...categories]}
+            options={[
+              {
+                value: "",
+                label: "All categories",
+                count: facets.categories.reduce((sum, c) => sum + (c.count || 0), 0) || null,
+              },
+              ...categories,
+            ]}
             selected={value.category ?? ""}
             onSelect={(category) => onChange({ ...value, category: category || null })}
           />

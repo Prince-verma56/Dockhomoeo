@@ -487,7 +487,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       </p>
 
       {/* Results / suggestions */}
-      <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div data-lenis-prevent className="dh-custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {!suggestable && recent.length > 0 ? (
           <div className="flex items-center justify-between px-5 pt-4">
             <p className="dh-eyebrow text-[0.66rem] text-muted-ink">Recent searches</p>

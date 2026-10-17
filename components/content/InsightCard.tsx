@@ -32,7 +32,8 @@ export function InsightCard({ insight, featured = false }: { insight: ApiInsight
       fill
       priority={featured}
       sizes={featured ? "(min-width: 1024px) 760px, 100vw" : "(min-width: 1024px) 420px, (min-width: 768px) 50vw, 100vw"}
-      className="object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.03]"
+      draggable={false}
+      className="object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.03] pointer-events-none select-none"
     />
   ) : (
     <span aria-hidden className="absolute inset-0 grid place-items-center bg-cream-sunk">

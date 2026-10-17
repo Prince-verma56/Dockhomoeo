@@ -89,7 +89,7 @@ export function ProductMedia({
   return (
     <div
       data-product-media
-      className={cn("relative isolate overflow-hidden bg-cream-sunk", ratio, rounded, className)}
+      className={cn("relative isolate overflow-hidden bg-cream-sunk select-none", ratio, rounded, className)}
     >
       <Image
         src={imageSrc}
@@ -99,7 +99,8 @@ export function ProductMedia({
         fetchPriority={eager ? "high" : undefined}
         sizes={sizes}
         onError={() => setFailed(true)}
-        className="object-cover object-center transition-transform duration-700 ease-premium group-hover:scale-[1.04]"
+        draggable={false}
+        className="pointer-events-none select-none object-cover object-center transition-transform duration-700 ease-premium group-hover:scale-[1.04]"
       />
       {/* Inner hairline so photos share one clean edge treatment. */}
       <span aria-hidden className="pointer-events-none absolute inset-0 z-2 rounded-[inherit] ring-1 ring-ink/6 ring-inset" />

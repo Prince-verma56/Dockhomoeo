@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,8 +43,8 @@ const BENEFITS: TrustBenefit[] = [
  * invented. With nothing discounted (or the shop unreachable) the band stays,
  * inviting shoppers to the catalogue without any price claim.
  *
- * The backdrop is drawn, not photographed: no bottle stands in it, so no
- * product the shop does not sell is pictured beside a real offer.
+ * Background uses /Images/SeasonalEditBG.webp with a warm illuminated bottle
+ * and organic botanicals.
  */
 export function OfferBanner({ offer }: { offer: CatalogueOffer | null }) {
   const href = offer ? (offer.count > 0 ? "/products?discount=10&sort=discount" : "/products?sort=discount") : "/products";
@@ -53,31 +54,21 @@ export function OfferBanner({ offer }: { offer: CatalogueOffer | null }) {
       className="bg-ivory px-3 pt-4 pb-8 sm:px-5 md:pt-8 md:pb-12"
     >
       <Container width="wide" className="px-0 sm:px-0 lg:px-0">
-        <div className="dh-grain dh-grain-dark relative isolate overflow-hidden rounded-[2rem] bg-forest-deep md:rounded-[2.5rem]">
-          {/* Unbranded backdrop: a warm key light on forest green, botanical leaves at the edges. */}
+        <div className="relative isolate overflow-hidden rounded-[2rem] bg-forest-deep md:rounded-[2.5rem]">
+          {/* Background image */}
+          <Image
+            src="/Images/SeasonalEditBG.webp"
+            alt="DocHomoeo seasonal offer background"
+            fill
+            sizes="(max-width: 1280px) 100vw, 1400px"
+            className="pointer-events-none object-cover object-center select-none"
+            draggable={false}
+            priority={false}
+          />
+          {/* Subtle gradient overlay to keep typography on the left and pills on the right sharp while showcasing the bottle */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "radial-gradient(60% 80% at 62% 45%, rgba(214,190,120,0.22), transparent 70%), radial-gradient(45% 60% at 10% 0%, rgba(255,255,255,0.06), transparent 70%)",
-            }}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element -- decorative cut-out, already used by the hero */}
-          <img
-            aria-hidden
-            alt=""
-            src="/Images/PNGS/HeroRightLeaves.webp"
-            loading="lazy"
-            className="pointer-events-none absolute -right-10 -bottom-16 h-[115%] w-auto opacity-35 mix-blend-luminosity select-none sm:opacity-45"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element -- decorative cut-out, already used by the hero */}
-          <img
-            aria-hidden
-            alt=""
-            src="/Images/PNGS/HeroLeftLeaves.webp"
-            loading="lazy"
-            className="pointer-events-none absolute -top-20 -left-16 hidden h-[80%] w-auto rotate-12 opacity-25 mix-blend-luminosity select-none md:block"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0d2a1f]/92 via-[#0d2a1f]/35 to-[#0d2a1f]/80 lg:from-[#0d2a1f]/88 lg:via-transparent lg:to-[#0d2a1f]/75"
           />
 
           <div className="relative grid items-center gap-10 px-6 py-12 sm:px-10 md:py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)_minmax(0,0.58fr)] lg:gap-10 lg:px-14 lg:py-12 xl:px-20">

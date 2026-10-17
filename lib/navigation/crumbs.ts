@@ -30,9 +30,5 @@ export function shopHeading(state: SearchState, result: ApiProductListingRespons
       crumbs: [{ name: "Categories", href: "/categories" }, { name: result.category.name, href: shopHref({ ...state, page: 1 }) }],
     };
   }
-  if (state.form.length === 1) {
-    const name = formLabel(state.form[0]);
-    return { title: name, crumbs: [all, { name, href: shopHref({ ...state, page: 1 }) }] };
-  }
-  return { title: "All products", crumbs: [all] };
+  return { title: "All remedies", crumbs: [all] };
 }

@@ -39,12 +39,31 @@ export default async function ProductPage(props: PageProps) {
     notFound();
   }
 
+  // Ensure "You may also consider" showcases a full, relevant 4-card grid
+  let related = product.related ?? [];
+  if (related.length < 4) {
+    try {
+      const searchRes = await repositories.search.search({});
+      const additional = searchRes.items.filter(
+        (item) => item.slug !== product.slug && !related.some((r) => r.slug === item.slug)
+      );
+      related = [...related, ...additional].slice(0, 4);
+    } catch {
+      // Gracefully continue with available items
+    }
+  }
+
+  const enrichedProduct = {
+    ...product,
+    related,
+  };
+
   return (
     <>
       <SiteHeader />
       <main id="main" className="flex-1 bg-canvas">
-        <ProductDetailView product={product} />
-        <BreadcrumbJsonLd items={productCrumbs(product)} />
+        <ProductDetailView product={enrichedProduct} />
+        <BreadcrumbJsonLd items={productCrumbs(enrichedProduct)} />
       </main>
       <SiteFooter />
     </>

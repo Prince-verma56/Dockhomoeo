@@ -30,6 +30,7 @@ type ProductCardProps = {
   mediaRatio?: string;
   /** First-row cards: load the photo immediately, it is likely the LCP element. */
   eager?: boolean;
+  layout?: "grid" | "list";
 };
 
 /** How long the button says "Added" after a successful add. */
@@ -49,6 +50,7 @@ export function ProductCard({
   variant = "default",
   mediaRatio = "aspect-[4/5]",
   eager = false,
+  layout = "grid",
 }: ProductCardProps) {
   const favourites = useFavourites();
   const favourited = favourites.isFavourite(product.slug);
@@ -84,22 +86,36 @@ export function ProductCard({
     addedTimer.current = window.setTimeout(() => setAdded(false), ADDED_MS);
   };
 
+  const hasCardDiscount = Boolean(
+    product.compareAtPrice && product.compareAtPrice.amount > product.price.amount,
+  );
+  const cardDiscount = hasCardDiscount && product.compareAtPrice
+    ? Math.round(((product.compareAtPrice.amount - product.price.amount) / product.compareAtPrice.amount) * 100)
+    : 0;
+
   return (
     <Card
       data-product-card
       className={cn(
         // @container: the price row adapts to the card's own width, not the viewport's.
-        "@container group relative flex h-full flex-col gap-0 overflow-hidden rounded-2xl border border-line-soft bg-paper p-0 shadow-soft transition-[box-shadow,transform,border-color] duration-400 ease-premium",
+        "@container group relative flex h-full gap-0 overflow-hidden rounded-2xl border border-line-soft bg-paper p-0 shadow-soft transition-[box-shadow,transform,border-color] duration-400 ease-premium select-none",
         "hover:-translate-y-1 hover:border-forest/25 hover:shadow-lift focus-within:border-forest/30",
+        layout === "list" ? "flex-col sm:flex-row" : "flex-col",
         className,
       )}
     >
-      <div className="relative overflow-hidden">
-        <ProductMedia product={product} ratio={mediaRatio} eager={eager} />
+      <div className={cn("relative overflow-hidden", layout === "list" && "sm:w-52 sm:shrink-0")}>
+        <ProductMedia product={product} ratio={layout === "list" ? "aspect-square sm:aspect-[4/5]" : mediaRatio} eager={eager} />
 
         {product.badge ? (
           <div className="absolute top-3 left-3 z-3">
             <ProductBadge kind={product.badge} />
+          </div>
+        ) : cardDiscount > 0 ? (
+          <div className="absolute top-3 left-3 z-3">
+            <span className="inline-flex h-[24px] items-center rounded-full bg-forest-deep px-2.5 text-[0.6875rem] font-bold tracking-wide text-cream shadow-xs">
+              {cardDiscount}% OFF
+            </span>
           </div>
         ) : null}
 
@@ -146,7 +162,8 @@ export function ProductCard({
 
       <div
         className={cn(
-          "flex flex-1 flex-col gap-1 border-t border-line/50 bg-white p-3.5 sm:p-4",
+          "flex flex-1 flex-col gap-1 bg-white p-3.5 sm:p-4",
+          layout === "list" ? "border-t sm:border-t-0 sm:border-l border-line/50" : "border-t border-line/50",
           isFeatured && "gap-2 p-5",
         )}
       >
@@ -169,23 +186,27 @@ export function ProductCard({
           </Link>
         </h3>
 
-        {/* Side by side when the card is wide enough; stacked on two-up phone
-            cards, so the pack size is never cut short. */}
-        <div className="flex min-w-0 items-center gap-2 text-xs text-[#5f6f68] @max-[13rem]:flex-col @max-[13rem]:items-start @max-[13rem]:gap-1">
-          <span className="truncate @max-[13rem]:max-w-full">{product.variant}</span>
-          {product.rating ? (
-            <>
-              <span aria-hidden className="text-line @max-[13rem]:hidden">•</span>
-              <Rating value={product.rating.value} count={product.rating.count} className="shrink-0 text-xs" />
-            </>
-          ) : null}
-        </div>
+        {/* Pack size */}
+        <p className="truncate text-xs text-[#5f6f68]">{product.variant}</p>
+
+        {/* Full 5-star rating with review count matching reference design */}
+        {product.rating ? (
+          <div className="mt-0.5 flex items-center">
+            <Rating
+              value={product.rating.value}
+              count={product.rating.count}
+              variant="full"
+              className="text-xs"
+            />
+          </div>
+        ) : null}
 
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-line/40 pt-2.5">
           <ProductPrice
             price={product.price}
             compareAtPrice={product.compareAtPrice}
             size={isFeatured ? "lg" : "md"}
+            showSaving={true}
           />
 
           <Button

@@ -6,6 +6,7 @@ import { repositories } from "@/lib/repositories";
 import { describeError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import type { ApiServiceabilityResult } from "@/types/api/serviceability";
 
 type Status =
@@ -20,7 +21,7 @@ type Status =
  * answers: deliverable or not, pay on delivery, and a delivery estimate when
  * one is configured — never a promise the data does not make.
  */
-export function PincodeCheck() {
+export function PincodeCheck({ className }: { className?: string }) {
   const id = useId();
   const [pincode, setPincode] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -41,10 +42,12 @@ export function PincodeCheck() {
   };
 
   return (
-    <form onSubmit={onSubmit} noValidate className="rounded-2xl border border-line/80 bg-cream p-4">
+    <form onSubmit={onSubmit} noValidate className={cn("rounded-2xl border border-line-soft bg-paper p-4 shadow-2xs", className)}>
       <label htmlFor={id} className="flex items-center gap-2 text-sm font-semibold text-ink">
-        <MapPin aria-hidden className="size-4 text-forest" strokeWidth={1.8} />
-        Check delivery
+        <span className="grid size-6 place-items-center rounded-full bg-forest/10 text-forest">
+          <MapPin aria-hidden className="size-3.5 text-forest" strokeWidth={2} />
+        </span>
+        Check delivery availability
       </label>
       <div className="mt-3 flex gap-2">
         <Input
@@ -60,34 +63,34 @@ export function PincodeCheck() {
             setPincode(event.target.value.replace(/\D/g, "").slice(0, 6));
             if (status.kind !== "idle") setStatus({ kind: "idle" });
           }}
-          className="h-11 flex-1 rounded-xl border-line bg-white px-3.5 text-[0.9375rem] tracking-wider tabular-nums"
+          className="h-11 flex-1 rounded-xl border-line bg-canvas/60 px-3.5 text-[0.9375rem] tracking-wider tabular-nums focus-visible:bg-white"
         />
-        <Button type="submit" variant="brandOutline" size="xl" className="h-11 cursor-pointer px-5" disabled={status.kind === "checking"}>
-          {status.kind === "checking" ? <Loader2 aria-hidden className="animate-spin" /> : null}
+        <Button type="submit" variant="brand" size="default" className="h-11 cursor-pointer rounded-xl px-5 font-semibold" disabled={status.kind === "checking"}>
+          {status.kind === "checking" ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
           Check
         </Button>
       </div>
-      <div id={`${id}-result`} role="status" className="mt-2.5 min-h-5 text-[0.8125rem]">
+      <div id={`${id}-result`} role="status" className="mt-2.5 min-h-5 text-xs">
         {status.kind === "error" ? <p className="text-destructive">{status.message}</p> : null}
         {status.kind === "done" ? (
           status.result.deliverable ? (
-            <p className="flex items-start gap-1.5 text-forest-deep">
-              <CheckCircle2 aria-hidden className="mt-px size-4 shrink-0" />
+            <p className="flex items-start gap-1.5 text-forest-deep font-medium">
+              <CheckCircle2 aria-hidden className="mt-px size-3.5 shrink-0 text-forest" />
               <span>
                 Delivers to {status.result.city ? `${status.result.city}, ` : ""}
                 {status.result.pincode}
-                {status.result.deliveryDays ? ` in about ${status.result.deliveryDays} days.` : ". The delivery time is confirmed when your order ships."}
-                {status.result.codAvailable ? " Pay on delivery available." : " Prepaid orders only."}
+                {status.result.deliveryDays ? ` in about ${status.result.deliveryDays} days.` : ". Delivery confirmed on dispatch."}
+                {status.result.codAvailable ? " Cash on delivery available." : " Prepaid only."}
               </span>
             </p>
           ) : (
-            <p className="flex items-start gap-1.5 text-destructive">
-              <XCircle aria-hidden className="mt-px size-4 shrink-0" />
+            <p className="flex items-start gap-1.5 text-destructive font-medium">
+              <XCircle aria-hidden className="mt-px size-3.5 shrink-0" />
               We don’t deliver to {status.result.pincode} yet.
             </p>
           )
         ) : null}
-        {status.kind === "idle" ? <p className="text-muted-ink">Delivery options depend on your pincode.</p> : null}
+        {status.kind === "idle" ? <p className="text-muted-ink text-[0.75rem]">Get delivery estimate, available offers and payment options.</p> : null}
       </div>
     </form>
   );

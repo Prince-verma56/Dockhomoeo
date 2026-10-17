@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import { Link001 } from "@/components/ui/skiper-ui/skiper40";
 import { cn } from "@/lib/utils";
 import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
 import { shopMenu, type NavLink } from "@/components/navigation/navLinks";
@@ -186,17 +187,14 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
               <ul className="-mx-6 -mb-6 mt-6 flex items-center justify-between border-t border-line/75 bg-cream/70 px-6 py-3.5">
                 {shopMenu.more.map((link) => (
                   <li key={link.href}>
-                    <Link
+                    <Link001
                       href={link.href}
                       onClick={() => close()}
-                      className="group inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-semibold text-forest transition-colors hover:bg-forest/8"
+                      tone="forest"
+                      className="px-2 py-1 text-[0.8125rem] font-semibold"
                     >
                       {link.label}
-                      <ArrowRight
-                        aria-hidden
-                        className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-                      />
-                    </Link>
+                    </Link001>
                   </li>
                 ))}
               </ul>

@@ -1,6 +1,63 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "lenis/dist/lenis.css";
+
+html {
+  scroll-behavior: auto !important;
+  scrollbar-gutter: stable;
+}
+
+/* Neutralize Radix / react-remove-scroll layout shift on Windows */
+html body[data-scroll-locked],
+body[data-scroll-locked] {
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+  overflow: hidden !important;
+}
+
+[data-radix-scroll-lock] {
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+}
+
+/* Sleek custom scrollbars for drawers and search modals */
+.dh-custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13, 90, 67, 0.25) transparent;
+}
+.dh-custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.dh-custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dh-custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(13, 90, 67, 0.25);
+  border-radius: 9999px;
+}
+.dh-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(13, 90, 67, 0.45);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+  min-height: 100%;
+}
+
+/* Prevent image ghost dragging across product cards, carousels, bento grids, and media */
+[data-product-media] img,
+[data-product-card] img,
+.dh-no-drag,
+img.pointer-events-none,
+img[draggable="false"] {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
 
 @custom-variant dark (&:is(.dark *));
 

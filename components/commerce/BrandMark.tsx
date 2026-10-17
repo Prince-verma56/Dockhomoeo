@@ -57,8 +57,8 @@ export function BrandMark({
 
   if (logoUrl) {
     return (
-      <span className={cn("relative block shrink-0 overflow-hidden border border-line/80 bg-white", spec.box, className)}>
-        <Image src={logoUrl} alt={`${name} logo`} fill sizes="96px" className="object-contain p-2" />
+      <span className={cn("relative block shrink-0 overflow-hidden border border-line/80 bg-white select-none", spec.box, className)}>
+        <Image src={logoUrl} alt={`${name} logo`} fill sizes="96px" className="object-contain p-2 pointer-events-none select-none" draggable={false} />
       </span>
     );
   }
@@ -116,8 +116,8 @@ export function BrandWordmark({
 }) {
   if (logoUrl) {
     return (
-      <span aria-hidden className={cn("relative block overflow-hidden bg-white", className)}>
-        <Image src={logoUrl} alt="" fill sizes="320px" className="object-contain p-6" />
+      <span aria-hidden className={cn("relative block overflow-hidden bg-white select-none", className)}>
+        <Image src={logoUrl} alt="" fill sizes="320px" className="object-contain p-6 pointer-events-none select-none" draggable={false} />
       </span>
     );
   }

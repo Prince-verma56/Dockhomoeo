@@ -369,7 +369,7 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
           logo: drawnLogoFor(brand) ??
             (brand.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- logos are any size and format the admin uploads
-              <img src={brand.logoUrl} alt="" className="max-h-12 w-auto max-w-36 object-contain" loading="lazy" />
+              <img src={brand.logoUrl} alt="" draggable={false} className="max-h-12 w-auto max-w-36 object-contain pointer-events-none select-none" loading="lazy" />
             ) : (
               <span className="block max-w-36 text-center font-display text-lg leading-tight font-semibold tracking-tight text-[#0c1110]">
                 {brand.name}
@@ -402,7 +402,8 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
           <img
             src="/Images/PNGS/HeroLeftLeaves.webp"
             alt=""
-            className="h-72 sm:h-96 w-auto object-contain filter blur-[0.6px]"
+            draggable={false}
+            className="h-72 sm:h-96 w-auto object-contain filter blur-[0.6px] pointer-events-none select-none"
           />
         </div>
 
@@ -411,7 +412,8 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
           <img
             src="/Images/PNGS/HeroLeftLeaves.webp"
             alt=""
-            className="h-64 sm:h-80 w-auto object-contain filter blur-[0.8px]"
+            draggable={false}
+            className="h-64 sm:h-80 w-auto object-contain filter blur-[0.8px] pointer-events-none select-none"
           />
         </div>
 

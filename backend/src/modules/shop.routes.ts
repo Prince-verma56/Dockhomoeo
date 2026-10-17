@@ -250,7 +250,19 @@ shopRoutes.get("/products", async (req, res) => {
         .filter((b) => (count.brand.get(b.id) ?? 0) > 0 || brandIds.has(b.id))
         .map((b) => ({ value: b.slug, label: b.name, count: count.brand.get(b.id) ?? 0, selected: brandIds.has(b.id) }))
         .sort((a, b) => Number(b.selected) - Number(a.selected) || b.count - a.count),
-      forms: facetOptions(count.form, forms),
+      forms: (() => {
+        const FORM_ORDER = ["drops", "tablets", "tincture", "oil", "cream"];
+        return [...count.form.entries()]
+          .map(([value, n]) => ({ value, count: n, selected: forms.has(value) }))
+          .sort((a, b) => {
+            const ia = FORM_ORDER.indexOf(String(a.value));
+            const ib = FORM_ORDER.indexOf(String(b.value));
+            if (ia !== -1 && ib !== -1) return ia - ib;
+            if (ia !== -1) return -1;
+            if (ib !== -1) return 1;
+            return b.count - a.count;
+          });
+      })(),
       potencies: facetOptions(count.potency, potencies),
       packs: facetOptions(count.pack, packs),
       prices: PRICE_BANDS.map((band) => ({ ...band, count: count.price.get(band.key) ?? 0 })).filter((band) => band.count > 0),

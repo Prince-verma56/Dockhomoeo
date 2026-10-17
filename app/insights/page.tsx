@@ -1,249 +1,36 @@
 import type { Metadata } from "next";
-import { cache } from "react";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { repositories } from "@/lib/repositories";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
-import { Container } from "@/components/shared/Container";
-import { Reveal } from "@/components/shared/Reveal";
-import { PageHead } from "@/components/shared/PageHead";
-import { SectionHeader } from "@/components/shared/SectionHeader";
-import { InsightCard } from "@/components/content/InsightCard";
-import { RisePanel } from "@/components/shared/RisePanel";
-import { Eyebrow } from "@/components/shared/Eyebrow";
-import { HoverExpand, type HoverExpandItem } from "@/components/unlumen-ui/primitives/hover-expand";
-import { cn } from "@/lib/utils";
-import { describeForms, describeNames, getCategoryDirectory } from "@/lib/catalogue";
-import { categoryMedia } from "@/data/media";
-import { MAX_INSIGHT_PAGE_SIZE } from "@/types/api/insight";
+import { HealthInsightsView } from "@/sections/insights/HealthInsightsView";
 
 type Props = PageProps<"/insights">;
 
-const DESCRIPTION =
-  "Reading on homoeopathy, natural wellness and family care from DocHomoeo — written to help you prepare questions for your practitioner.";
-
-/**
- * The newest articles, for the topic list (the blog API returns at most 50 per
- * page and has no topic list of its own). Shared by metadata and page within one request.
- */
-const allInsights = cache(() => repositories.insight.getInsights(1, MAX_INSIGHT_PAGE_SIZE));
-
-async function topicsOf() {
-  const { items } = await allInsights();
-  const topics = new Map<string, { name: string; slug: string; count: number }>();
-  for (const item of items) {
-    if (!item.category) continue;
-    const topic = topics.get(item.category.slug) ?? { ...item.category, count: 0 };
-    topic.count += 1;
-    topics.set(item.category.slug, topic);
-  }
-  return { total: (await allInsights()).total, topics: [...topics.values()] };
-}
-
-const topicParam = async (searchParams: Props["searchParams"]) => {
-  const value = (await searchParams).category;
-  return (Array.isArray(value) ? value[0] : value)?.trim() || null;
+export const metadata: Metadata = {
+  title: "Health Insights | The Wellness Journal | DocHomoeo",
+  description:
+    "Knowledge for a healthier tomorrow. Practical guides, expert-backed insights and natural wellness knowledge from DocHomoeo.",
+  alternates: { canonical: "/insights" },
+  openGraph: {
+    title: "Health Insights — The Wellness Journal · DocHomoeo",
+    description:
+      "Knowledge for a healthier tomorrow. Practical guides, expert-backed insights and natural wellness knowledge.",
+    url: "/insights",
+    type: "website",
+  },
 };
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const slug = await topicParam(searchParams);
-  if (!slug) {
-    return {
-      title: "Health insights",
-      description: DESCRIPTION,
-      alternates: { canonical: "/insights" },
-      openGraph: { title: "Health insights · DocHomoeo", description: DESCRIPTION, url: "/insights", type: "website" },
-    };
-  }
-  const topic = (await topicsOf()).topics.find((t) => t.slug === slug);
-  // A topic is a real listing of its own; an unknown one is not worth indexing.
-  if (!topic) return { title: "Health insights", robots: { index: false, follow: true } };
-  const description = `Articles on ${topic.name.toLowerCase()} from DocHomoeo Health Insights.`;
-  const url = `/insights?category=${encodeURIComponent(topic.slug)}`;
-  return {
-    title: `${topic.name} — health insights`,
-    description,
-    alternates: { canonical: url },
-    openGraph: { title: `${topic.name} · DocHomoeo`, description, url, type: "website" },
-  };
-}
-
-/** Columns that fit the count, so a short list never leaves a ragged last row. */
-const gridColumns = (count: number) =>
-  count === 1 ? "max-w-2xl" : count === 2 || count === 4 ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3";
-
 export default async function InsightsPage({ searchParams }: Props) {
-  const slug = await topicParam(searchParams);
-  const [{ total, topics }, listing, categories] = await Promise.all([
-    topicsOf(),
-    repositories.insight.getInsights(1, 12, slug ?? undefined),
-    getCategoryDirectory(),
-  ]);
-  const activeTopic = topics.find((t) => t.slug === slug) ?? null;
-
-  const concerns: HoverExpandItem[] = categories.flatMap((category) => {
-    const media = categoryMedia(category.slug, category.imageUrl);
-    if (!media) return [];
-    const forms = describeForms(category.forms);
-    return [
-      {
-        label: category.name,
-        sublabel: `${category.productCount} ${category.productCount === 1 ? "product" : "products"}`,
-        image: media.src,
-        imagePosition: media.position,
-        imageKind: media.kind,
-        description: [
-          forms ? forms.charAt(0).toUpperCase() + forms.slice(1) : null,
-          category.brands.length ? `from ${describeNames(category.brands)}` : null,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .concat("."),
-        href: `/products?category=${encodeURIComponent(category.slug)}`,
-        cta: `Shop ${category.name}`,
-      },
-    ];
-  });
-  const [featured, ...latest] = listing.items;
-
-  const pill = (active: boolean) =>
-    cn(
-      "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
-      active
-        ? "border-forest-deep bg-forest-deep text-cream"
-        : "border-line bg-paper text-ink hover:border-forest/35 hover:text-forest",
-    );
+  const listing = await repositories.insight.getInsights(1, 12).catch(() => ({ items: [], total: 0 }));
 
   return (
     <>
       <SiteHeader />
       <main id="main" className="flex-1 overflow-x-clip bg-canvas">
-        <PageHead
-          id="insights-heading"
-          crumbs={[
-            { name: "Health insights", href: "/insights" },
-            ...(activeTopic
-              ? [{ name: activeTopic.name, href: `/insights?category=${encodeURIComponent(activeTopic.slug)}` }]
-              : []),
-          ]}
-          animate
-          title={
-            <>
-              Health <span className="pe-[0.06em] italic text-forest-deep">insights</span>
-            </>
-          }
-          description="Reading on homoeopathy, natural wellness and family care — written to help you prepare questions for your practitioner, not to replace a consultation."
-          overlap={Boolean(featured)}
-        >
-          {topics.length > 1 ? (
-            <nav aria-label="Article topics">
-              <ul className="flex flex-wrap gap-2">
-                <li>
-                  <Link href="/insights" aria-current={activeTopic ? undefined : "page"} className={pill(!activeTopic)}>
-                    All topics
-                    <span className="text-xs opacity-70">{total}</span>
-                  </Link>
-                </li>
-                {topics.map((topic) => {
-                  const active = topic.slug === activeTopic?.slug;
-                  return (
-                    <li key={topic.slug}>
-                      <Link
-                        href={`/insights?category=${encodeURIComponent(topic.slug)}`}
-                        aria-current={active ? "page" : undefined}
-                        className={pill(active)}
-                      >
-                        {topic.name}
-                        <span className="text-xs opacity-70">
-                          {topic.count}
-                          <span className="sr-only"> {topic.count === 1 ? "article" : "articles"}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          ) : null}
-        </PageHead>
-
-        {/* The lead article sits across the head's arc. */}
-        <section aria-label="Articles" className={cn("dh-section-b", featured ? "dh-overlap-up" : "pt-(--dh-space-section-sm)")}>
-          <Container>
-            {featured ? (
-              <>
-                <InsightCard insight={featured} featured />
-                {latest.length > 0 ? (
-                  <div className="mt-(--dh-space-section)">
-                    <SectionHeader
-                      title={activeTopic ? `More on ${activeTopic.name.toLowerCase()}` : "Latest articles"}
-                      action={
-                        <p className="dh-meta">
-                          {latest.length} more {latest.length === 1 ? "article" : "articles"}
-                        </p>
-                      }
-                    />
-                    <Reveal as="ul" stagger=":scope > li" y={18} className={cn("grid gap-5 lg:gap-6", gridColumns(latest.length))}>
-                      {latest.map((insight) => (
-                        <li key={insight.id}>
-                          <InsightCard insight={insight} />
-                        </li>
-                      ))}
-                    </Reveal>
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <div className="rounded-[1.5rem] border border-dashed border-line bg-paper/70 px-6 py-14 text-center">
-                <h2 className="dh-title-block text-ink">
-                  {activeTopic || slug ? "No articles in this topic yet" : "No articles have been published yet"}
-                </h2>
-                <p className="dh-body mx-auto mt-2 max-w-sm">
-                  {activeTopic || slug
-                    ? "Try another topic, or see everything published so far."
-                    : "Health Insights will appear here as our team publishes them. Meanwhile, you can browse remedies by health concern below."}
-                </p>
-                {activeTopic || slug ? (
-                  <Link href="/insights" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-forest">
-                    See all articles
-                    <ArrowRight aria-hidden className="size-4" />
-                  </Link>
-                ) : null}
-              </div>
-            )}
-          </Container>
-        </section>
-
-        {/* Same twelve-column grid as the article cards above it. */}
-        {/* Health concerns as an expanding index: point at one to see it. */}
-        {concerns.length > 0 ? (
-          <RisePanel aria-labelledby="insights-explore" settle className="dh-section-sm">
-            <Container>
-              <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
-                <div className="lg:sticky lg:top-28 lg:col-span-4 lg:self-start">
-                  <Eyebrow rule>From reading to remedies</Eyebrow>
-                  <h2 id="insights-explore" className="dh-title-section mt-3 text-ink">
-                    Explore remedies by health concern
-                  </h2>
-                  <p className="dh-body mt-3">
-                    Talk to a practitioner first, then browse what we stock for each concern.
-                  </p>
-                  <Link
-                    href="/categories"
-                    className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-forest hover:text-forest-deep"
-                  >
-                    All categories
-                    <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                </div>
-                <div className="lg:col-span-8">
-                  <HoverExpand items={concerns} />
-                </div>
-              </div>
-            </Container>
-          </RisePanel>
-        ) : null}
+        <HealthInsightsView
+          initialInsights={listing.items}
+          totalArticles={listing.total}
+        />
       </main>
       <SiteFooter />
     </>

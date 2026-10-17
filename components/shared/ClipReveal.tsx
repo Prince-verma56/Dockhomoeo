@@ -51,7 +51,10 @@ export function ClipReveal({
           trigger: root,
           start: "top 84%",
           once: true,
-          invalidateOnRefresh: true,
+        },
+        onComplete: () => {
+          gsap.set(root, { clearProps: "clipPath" });
+          if (inner) gsap.set(inner, { clearProps: "transform" });
         },
       });
 

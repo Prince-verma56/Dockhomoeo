@@ -10,12 +10,15 @@ import {
 } from "@/components/ui/accordion";
 import { Container } from "@/components/shared/Container";
 import { Wordmark } from "@/components/navigation/Wordmark";
+import { Link000 } from "@/components/ui/skiper-ui/skiper40";
+import { BellButton } from "@/components/kokonutui/bell-button";
 import {
   FacebookMark,
   InstagramMark,
   XMark,
   YoutubeMark,
 } from "@/components/shared/SocialIcons";
+import { PaymentMethodsRow } from "@/components/shared/PaymentBadges";
 
 const footerGroups = [
   {
@@ -53,8 +56,6 @@ const footerGroups = [
     ],
   },
 ];
-
-const paymentMarks = ["Visa", "Mastercard", "Amex", "UPI"];
 
 const SOCIALS = [
   { label: "Facebook", href: "https://facebook.com", Icon: FacebookMark },
@@ -121,12 +122,13 @@ export function SiteFooter() {
                   <ul className="mt-4 flex flex-col gap-2.5">
                     {group.links.map((link) => (
                       <li key={link.href}>
-                        <Link
+                        <Link000
                           href={link.href}
-                          className={`rounded-sm text-[0.875rem] text-cream/70 transition-colors hover:text-cream ${FOCUS_RING}`}
+                          tone="cream"
+                          className={`w-fit rounded-sm text-[0.875rem] ${FOCUS_RING}`}
                         >
                           {link.label}
-                        </Link>
+                        </Link000>
                       </li>
                     ))}
                   </ul>
@@ -152,12 +154,13 @@ export function SiteFooter() {
                     <ul className="flex flex-col gap-3 pb-3">
                       {group.links.map((link) => (
                         <li key={link.href}>
-                          <Link
+                          <Link000
                             href={link.href}
-                            className="text-[0.875rem] text-cream/70 transition-colors hover:text-cream"
+                            tone="cream"
+                            className="w-fit text-[0.875rem]"
                           >
                             {link.label}
-                          </Link>
+                          </Link000>
                         </li>
                       ))}
                     </ul>
@@ -176,7 +179,17 @@ export function SiteFooter() {
               Health tips, new arrivals and exclusive offers.
             </p>
 
-            <form className="mt-4 flex max-w-md items-center gap-2" suppressHydrationWarning>
+            <div className="mt-3.5 mb-2">
+              <BellButton
+                tone="dark"
+                count={4820}
+                label="Join wellness alerts"
+                subscribedLabel="Alerts active"
+                className="text-xs h-9 px-3.5"
+              />
+            </div>
+
+            <form className="mt-2 flex max-w-md items-center gap-2" suppressHydrationWarning>
               <label htmlFor="newsletter-email" className="sr-only">
                 Email address
               </label>
@@ -202,16 +215,9 @@ export function SiteFooter() {
 
             <div className="mt-6">
               <h3 className="dh-eyebrow text-cream/50">We accept</h3>
-              <ul className="mt-3 flex flex-wrap items-center gap-2">
-                {paymentMarks.map((mark) => (
-                  <li
-                    key={mark}
-                    className="rounded-lg border border-white/12 bg-white/5 px-3 py-1.5 text-[0.6875rem] font-medium tracking-wide text-cream/70"
-                  >
-                    {mark}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-3">
+                <PaymentMethodsRow />
+              </div>
             </div>
           </div>
         </div>

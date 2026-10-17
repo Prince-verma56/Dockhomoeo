@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,7 @@ import { useCart } from "@/components/providers/CartProvider";
 import { buildCartView } from "@/lib/cart/cartView";
 import { formatRupees } from "@/lib/formatters/price";
 import { Button } from "@/components/ui/button";
+import { getLenis } from "@/components/providers/SmoothScrollProvider";
 import {
   Sheet,
   SheetClose,
@@ -44,6 +46,15 @@ export function CartDrawer() {
   const { lines, totals } = buildCartView(items, quote, quoteIsCurrent);
   const close = () => setIsOpen(false);
 
+  // Stop Lenis while the cart drawer is open so page wheel scrolling does not
+  // fight Radix scroll lock or cause unresponsiveness on Windows.
+  useEffect(() => {
+    if (!isOpen) return;
+    const lenis = getLenis();
+    lenis?.stop();
+    return () => lenis?.start();
+  }, [isOpen]);
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetContent
@@ -71,7 +82,7 @@ export function CartDrawer() {
         </SheetHeader>
 
         {/* data-lenis-prevent: wheel scrolling here belongs to the list, not the page. */}
-        <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+        <div data-lenis-prevent className="dh-custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
           {lines.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center px-4 text-center">
               <span className="grid size-16 place-items-center rounded-full bg-sage-tint text-forest">

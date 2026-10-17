@@ -122,9 +122,12 @@ export function useSectionTimeline<T extends HTMLElement = HTMLElement>(
             trigger: root,
             start,
             once: true,
-            // Positions are re-measured on refresh, so late-loading media
-            // cannot leave this timeline firing at the wrong scroll offset.
-            invalidateOnRefresh: true,
+          },
+          onComplete: () => {
+            for (const { sel } of steps) {
+              const targets = root.querySelectorAll(sel);
+              gsap.set(targets, { clearProps: "opacity,transform,clipPath" });
+            }
           },
         });
 

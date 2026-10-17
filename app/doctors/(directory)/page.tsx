@@ -2,16 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import {
+  Activity,
   ArrowRight,
   BookOpen,
   CalendarCheck,
   CheckCircle2,
+  ChevronDown,
   Clock,
   CreditCard,
   FileText,
   Headset,
   HelpCircle,
+  Info,
   LayoutGrid,
+  Leaf,
   Phone,
   RotateCw,
   Search,
@@ -50,7 +54,7 @@ async function optional<T>(request: Promise<T>, fallback: T): Promise<T> {
 
 /**
  * Consultation Journey: Four compact stages strictly matching
- * actual backend workflows (appointments, held slots, file uploads, prescriptions).
+ * actual backend workflows with photographic device visuals.
  */
 const JOURNEY_STEPS = [
   {
@@ -59,13 +63,15 @@ const JOURNEY_STEPS = [
     description: "Browse verified doctors and pick a free appointment slot in India time (IST).",
     note: `Held for ${HOLD_MINUTES} min while booking`,
     icon: CalendarCheck,
+    image: "/Images/doctors/step-doctor-laptop.jpg",
   },
   {
     step: "02",
     title: "Share health details",
-    description: "Detail your health concerns and upload up to 5 past reports or prescriptions.",
+    description: "Tell us about your health concerns and upload up to 5 past reports or prescriptions.",
     note: "PDF, JPG, PNG or WebP up to 5 MB",
     icon: FileText,
+    image: "/Images/doctors/step-tablet-details.jpg",
   },
   {
     step: "03",
@@ -73,6 +79,7 @@ const JOURNEY_STEPS = [
     description: "Pay the doctor's fee securely. Your call link appears in your account.",
     note: `Cancelable up to ${CANCEL_HOURS}h before slot`,
     icon: Video,
+    image: "/Images/doctors/step-video-call.jpg",
   },
   {
     step: "04",
@@ -80,6 +87,7 @@ const JOURNEY_STEPS = [
     description: "Access your doctor's prescription in your account and order medicines in one step.",
     note: "Instant checkout with home delivery",
     icon: CheckCircle2,
+    image: "/Images/doctors/step-phone-prescription.jpg",
   },
 ] as const;
 
@@ -242,7 +250,8 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/doctors"
                     <img
                       src="/Images/ConsultentBG.webp"
                       alt="DocHomoeo doctor clinical consultation environment"
-                      className="size-full object-cover object-[26%_center] transition-transform duration-700 ease-premium hover:scale-105"
+                      draggable={false}
+                      className="size-full object-cover object-[26%_center] transition-transform duration-700 ease-premium hover:scale-105 pointer-events-none select-none"
                     />
                     {/* Balanced gradient overlay for docked card readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-forest-abyss/70 via-black/15 to-transparent pointer-events-none" />
@@ -332,60 +341,66 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/doctors"
         {/* ============================================================== */}
         <section id="how-it-works" aria-labelledby="steps-heading" className="border-t border-line/60 bg-paper/60 py-16 sm:py-20">
           <Container width="wide">
-            <div className="max-w-2xl">
-              <span className="dh-eyebrow text-forest">Consultation Journey</span>
-              <h2 id="steps-heading" className="mt-2 font-display text-2xl sm:text-3xl lg:text-[2.25rem] font-bold text-ink leading-tight">
-                Your consultation, step by step
-              </h2>
-              <p className="mt-3 text-sm sm:text-base text-muted-ink leading-relaxed">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+              <div className="max-w-xl">
+                <span className="text-xs font-bold uppercase tracking-wider text-forest">The Process</span>
+                <h2 id="steps-heading" className="mt-2 font-display text-2xl sm:text-3xl lg:text-[2.25rem] font-bold text-ink leading-tight">
+                  Your consultation, step by step
+                </h2>
+              </div>
+              <p className="max-w-md text-xs sm:text-sm text-muted-ink leading-relaxed lg:text-right">
                 Clear, transparent, and completely integrated into your DocHomoeo account — from selecting your practitioner to receiving
                 your digital prescription.
               </p>
             </div>
 
-            {/* 4 Connected Stages */}
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {JOURNEY_STEPS.map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.step}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-line/75 bg-paper p-5 sm:p-6 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-forest/35 hover:shadow-soft"
-                  >
-                    <div>
-                      {/* Top Marker: Step Number & Micro-Icon */}
-                      <div className="flex items-center justify-between border-b border-line-soft pb-3.5">
-                        <span className="font-display text-2xl font-bold tracking-tight text-forest/50 group-hover:text-forest transition-colors">
-                          {item.step}
-                        </span>
-                        <span className="grid size-8 place-items-center rounded-xl bg-sage-wash text-forest">
-                          <Icon className="size-4" strokeWidth={1.8} />
-                        </span>
-                      </div>
-
-                      <h3 className="mt-4 font-display text-base sm:text-lg font-semibold text-ink leading-snug">
-                        {item.title}
-                      </h3>
-
-                      <p className="mt-2 text-xs sm:text-sm text-muted-ink leading-relaxed">
-                        {item.description}
-                      </p>
+            {/* 4 Connected Stages with Realistic Device Mockup Visuals */}
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {JOURNEY_STEPS.map((item) => (
+                <div
+                  key={item.step}
+                  className="group relative flex flex-col justify-between rounded-2xl border border-line-soft bg-paper p-4 sm:p-5 shadow-2xs transition-all duration-300 hover:-translate-y-1 hover:border-forest/35 hover:shadow-soft"
+                >
+                  <div>
+                    {/* Step Pill Badge */}
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center justify-center rounded-lg bg-forest/10 px-2.5 py-0.5 text-xs font-bold text-forest tracking-tight">
+                        {item.step}
+                      </span>
                     </div>
 
-                    <div className="mt-5 rounded-lg bg-canvas px-3 py-1.5 text-[0.72rem] font-medium text-forest-deep border border-line-soft">
-                      {item.note}
+                    {/* Realistic Device Visual */}
+                    <div className="relative mt-3.5 mb-4 aspect-[4/3] w-full overflow-hidden rounded-xl border border-line-soft bg-cream/30">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        draggable={false}
+                        className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 pointer-events-none select-none"
+                      />
                     </div>
+
+                    <h3 className="font-display text-base font-bold text-ink leading-snug">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-2 text-xs text-muted-ink leading-relaxed">
+                      {item.description}
+                    </p>
                   </div>
-                );
-              })}
+
+                  <div className="mt-4 rounded-lg bg-canvas px-2.5 py-1 text-[0.7rem] font-medium text-forest-deep border border-line-soft">
+                    {item.note}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Medical Disclaimer */}
-            <div className="mt-10 flex items-start gap-3 rounded-2xl border border-line/60 bg-canvas/80 p-4 sm:p-5 text-xs text-muted-ink">
-              <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-forest/10 text-forest">
-                <ShieldCheck className="size-3.5" />
+            {/* Medical Disclaimer Banner */}
+            <div className="mt-8 flex items-start gap-3 rounded-2xl border border-line-soft bg-canvas/90 p-4 sm:p-5 text-xs text-muted-ink">
+              <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-forest-abyss text-white">
+                <Info className="size-3" />
               </span>
-              <p className="leading-relaxed">
+              <p className="leading-relaxed text-[0.8125rem]">
                 Consultations are provided by verified independent practitioners, not by DocHomoeo. DocHomoeo provides the platform for
                 scheduling, secure connectivity, and digital prescription access. Online consultations are not intended for medical
                 emergencies. If you require emergency care, please visit your nearest hospital immediately.
@@ -395,39 +410,56 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/doctors"
         </section>
 
         {/* ============================================================== */}
-        {/* SUBTLE FINAL CALL TO ACTION: Prior to Shared Footer             */}
+        {/* CARE & SUPPORT CTA: Premium Deep Forest Curved Banner          */}
         {/* ============================================================== */}
-        <section aria-label="Consultation Inquiries" className="border-t border-line/50 bg-canvas py-12 sm:py-16">
+        <section aria-label="Care and Support Inquiries" className="border-t border-line/50 bg-canvas py-12 sm:py-16">
           <Container width="wide">
-            <div className="rounded-[2rem] border border-line-soft bg-gradient-to-r from-sage-wash/70 via-paper to-sage-wash/50 p-7 sm:p-10 shadow-2xs">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div className="max-w-xl">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-forest">
-                    <Sparkles className="size-3.5" />
-                    Care & Support
+            <div className="relative overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#0c3c2e] via-[#093327] to-[#06261d] text-white p-6 sm:p-8 lg:p-9 shadow-lift">
+              {/* Soft background ambient highlights */}
+              <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-forest/20 blur-3xl" />
+              <div aria-hidden className="pointer-events-none absolute -left-20 -bottom-20 size-80 rounded-full bg-emerald-500/10 blur-3xl" />
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6 sm:gap-8">
+                {/* Left specialist photograph */}
+                <div className="shrink-0 flex justify-center md:justify-start">
+                  <div className="relative w-48 sm:w-56 aspect-[16/11] rounded-2xl overflow-hidden border border-white/15 shadow-float">
+                    <img
+                      src="/Images/doctors/care-banner-agent.jpg"
+                      alt="DocHomoeo Care Specialist"
+                      draggable={false}
+                      className="size-full object-cover object-center pointer-events-none select-none"
+                    />
                   </div>
-                  <h3 className="mt-2 font-display text-xl sm:text-2xl font-bold text-ink">
-                    Have questions about consultations or remedies?
+                </div>
+
+                {/* Center Editorial Copy */}
+                <div className="flex-1 text-center md:text-left min-w-0">
+                  <span className="text-[0.72rem] font-bold uppercase tracking-widest text-emerald-300">
+                    Care & Support
+                  </span>
+                  <h3 className="mt-2 font-display text-2xl sm:text-3xl lg:text-[2.1rem] font-bold text-white tracking-tight leading-snug">
+                    Need help choosing your next step?
                   </h3>
-                  <p className="mt-2 text-sm text-muted-ink leading-relaxed">
-                    Our team is here to assist you with practitioner schedules, health concern recommendations, or ordering prescribed
-                    medicines.
+                  <p className="mt-2 text-sm sm:text-base text-white/80 leading-relaxed max-w-xl">
+                    Our care team can help with remedies, schedules and ordering.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 shrink-0">
-                  <Button asChild variant="brand" size="lg" className="rounded-full shadow-xs">
-                    <Link href="/products">
-                      <ShoppingBag className="size-4" />
-                      Browse Remedies
-                    </Link>
-                  </Button>
-                  <Button asChild variant="brandOutline" size="lg" className="rounded-full">
-                    <Link href="/contact">
-                      <Headset className="size-4" />
-                      Contact Care Team
-                    </Link>
-                  </Button>
+                {/* Right Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-3.5 shrink-0">
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-full bg-white text-forest-deep hover:bg-cream text-sm font-semibold shadow-sm transition-all hover:scale-102 cursor-pointer"
+                  >
+                    <span>Browse Remedies</span>
+                    <ArrowRight className="size-4" />
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center justify-center h-11 px-6 rounded-full border border-white/60 bg-white/10 text-white hover:bg-white hover:text-forest-deep text-sm font-semibold backdrop-blur-xs transition-all shadow-xs cursor-pointer"
+                  >
+                    Contact Care Team
+                  </Link>
                 </div>
               </div>
             </div>
@@ -462,32 +494,26 @@ function Streams({ streams }: { streams: ApiConsultingStream[] }) {
   const later = streams.filter((stream) => stream.status !== "OPEN");
 
   return (
-    <div className="mb-8 rounded-2xl border border-line-soft bg-paper/75 p-4 sm:p-5 shadow-2xs backdrop-blur-xs">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-ink">Consultation Stream:</span>
-          {open.length ? (
-            <ul className="flex flex-wrap gap-2">
-              {open.map((stream) => (
-                <li
-                  key={stream.name}
-                  className="inline-flex h-7 items-center gap-1.5 rounded-full border border-forest/25 bg-forest/8 px-3 text-xs font-semibold text-forest-deep"
-                >
-                  <span aria-hidden className="size-1.5 rounded-full bg-forest" />
-                  {stream.name}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <span className="text-xs text-muted-ink">None open yet</span>
-          )}
+    <div className="mb-10 rounded-full border border-line-soft bg-paper/85 px-4 sm:px-6 py-2.5 sm:py-3 shadow-2xs backdrop-blur-sm">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-forest-deep">
+            <Activity className="size-4 text-forest" />
+            <span>Consultation Stream:</span>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-forest/30 bg-forest/8 px-3.5 py-1 text-xs font-semibold text-forest-deep shadow-2xs">
+            <span aria-hidden className="size-1.5 rounded-full bg-forest" />
+            <span>{open[0]?.name ?? "Homeopathy"}</span>
+            <ChevronDown className="size-3 text-forest/70" />
+          </div>
         </div>
 
-        {later.length ? (
-          <div className="min-w-0 text-xs text-muted-ink lg:max-w-xl lg:text-right">
-            <span className="font-semibold text-ink">Coming soon:</span> {later.map((stream) => stream.name).join(" · ")}
-          </div>
-        ) : null}
+        <div className="flex items-center gap-2 text-xs text-muted-ink">
+          <span className="hidden sm:inline-block h-3.5 w-px bg-line" />
+          <Clock className="size-3.5 text-forest" />
+          <span>More specialities coming soon</span>
+        </div>
       </div>
     </div>
   );
@@ -496,58 +522,56 @@ function Streams({ streams }: { streams: ApiConsultingStream[] }) {
 const ALTERNATIVES = [
   {
     href: "/categories",
-    icon: LayoutGrid,
+    icon: Leaf,
     title: "Browse by Health Concern",
-    detail: "Doctor-curated remedies categorized by wellness goals.",
+    detail: "Doctor-curated remedies by wellness.",
+    image: "/Images/doctors/concern-remedies.jpg",
   },
   {
     href: "/insights",
     icon: BookOpen,
     title: "Read Health Insights",
-    detail: "Clinical homoeopathic articles to guide your wellness journey.",
+    detail: "Clinical homeopathy articles to guide your wellness.",
+    image: "/Images/doctors/insights-books.jpg",
   },
   {
     href: "/contact",
     icon: Headset,
     title: "Contact Our Care Team",
-    detail: "Inquire about upcoming doctor availability or remedy guidance.",
+    detail: "Inquire about upcoming doctor availability or remedies.",
+    image: "/Images/doctors/care-support.jpg",
   },
 ] as const;
 
 /**
  * Thoughtful Empty State:
  * Renders when no doctors are listed yet in the database.
- * Designed intentionally as an informative, warm holding state rather than a bare error.
+ * Designed intentionally matching the high-fidelity editorial layout with 3 visual photo cards.
  */
 function DirectoryOpeningSoon() {
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-line/80 bg-paper shadow-soft">
-      <div className="grid lg:grid-cols-12">
-        {/* Left Area: Main Announcement & Core CTA */}
-        <div className="p-7 sm:p-10 lg:p-12 lg:col-span-7 flex flex-col justify-center">
-          <div className="inline-flex items-center gap-2.5">
-            <span className="grid size-12 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs">
-              <Stethoscope aria-hidden className="size-6" strokeWidth={1.75} />
-            </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-forest">
-              Practitioner Onboarding in Progress
-            </span>
+    <div className="py-2">
+      <div className="grid gap-8 lg:grid-cols-12 lg:items-start xl:gap-10">
+        {/* Left Column: Announcement & CTAs */}
+        <div className="lg:col-span-4 xl:col-span-4 flex flex-col justify-center pt-2">
+          <div className="text-xs font-bold uppercase tracking-wider text-muted-ink">
+            Practitioner Onboarding
           </div>
 
-          <h2 className="mt-5 font-display text-2xl sm:text-3xl lg:text-[2.25rem] font-bold text-ink leading-tight">
-            Meet your doctor soon
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl lg:text-[2.65rem] font-bold text-ink leading-[1.12]">
+            Meet your<br className="hidden sm:inline" /> doctor soon
           </h2>
 
-          <p className="mt-3.5 max-w-lg text-sm sm:text-base leading-relaxed text-muted-ink">
+          <p className="mt-4 text-sm sm:text-base leading-relaxed text-muted-ink">
             No doctors are currently available for booking as practitioners are completing credential verification and setting their
-            schedules. Verified homoeopathic doctors will appear here with live appointment slots for video and audio consultations.
+            schedules.
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Button asChild variant="brand" size="xl" className="rounded-full shadow-soft hover:shadow-lift">
               <Link href="/products">
-                <ShoppingBag aria-hidden className="size-4" />
                 Browse Remedies
+                <ArrowRight aria-hidden className="size-4" />
               </Link>
             </Button>
             <Button asChild variant="brandOutline" size="xl" className="rounded-full">
@@ -559,36 +583,47 @@ function DirectoryOpeningSoon() {
           </div>
         </div>
 
-        {/* Right Area: Alternative Care Pathways */}
-        <div className="border-t border-line/75 bg-cream/40 p-6 sm:p-8 lg:border-t-0 lg:border-l lg:p-10 lg:col-span-5 flex flex-col justify-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-ink mb-4">
-            Explore While We Prepare Consultations
-          </p>
-
-          <ul className="space-y-3">
-            {ALTERNATIVES.map(({ href, icon: Icon, title, detail }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="group flex items-center gap-3.5 rounded-2xl border border-line-soft bg-paper p-3.5 sm:p-4 transition-all duration-200 hover:border-forest/30 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/30"
-                >
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest group-hover:bg-forest group-hover:text-cream transition-colors">
-                    <Icon aria-hidden className="size-4.5" strokeWidth={1.8} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-ink group-hover:text-forest transition-colors">
-                      {title}
-                    </span>
-                    <span className="block text-xs text-muted-ink leading-normal truncate">{detail}</span>
-                  </div>
-                  <ArrowRight
-                    aria-hidden
-                    className="size-4 text-muted-ink transition-transform group-hover:translate-x-0.5 group-hover:text-forest shrink-0"
+        {/* Right Column: 3 Visual Photo Cards */}
+        <div className="lg:col-span-8 xl:col-span-8">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {ALTERNATIVES.map(({ href, icon: Icon, title, detail, image }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-line-soft bg-paper shadow-2xs transition-all duration-300 hover:-translate-y-1 hover:border-forest/35 hover:shadow-soft"
+              >
+                {/* Visual Header with floating circular icon badge */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-cream/40">
+                  <img
+                    src={image}
+                    alt={title}
+                    draggable={false}
+                    className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 pointer-events-none select-none"
                   />
-                </Link>
-              </li>
+                  <span className="absolute top-3 right-3 grid size-9 place-items-center rounded-full bg-paper/95 text-forest shadow-float backdrop-blur-xs transition-transform duration-300 group-hover:scale-110">
+                    <Icon className="size-4" strokeWidth={1.8} />
+                  </span>
+                </div>
+
+                {/* Card Content */}
+                <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-display text-sm sm:text-[0.9375rem] font-bold text-ink leading-snug group-hover:text-forest transition-colors">
+                        {title}
+                      </h3>
+                      <span className="grid size-6.5 shrink-0 place-items-center rounded-full border border-line-soft bg-canvas text-muted-ink transition-all duration-300 group-hover:border-forest group-hover:bg-forest group-hover:text-cream">
+                        <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-ink leading-relaxed">
+                      {detail}
+                    </p>
+                  </div>
+                </div>
+              </Link>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </div>

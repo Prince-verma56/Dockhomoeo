@@ -54,7 +54,8 @@ export function CategoryDiscovery({ categories }: CategoryDiscoveryProps) {
                       src={category.imageUrl} 
                       alt={category.name} 
                       fill 
-                      className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                      draggable={false}
+                      className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none select-none"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   </>

@@ -145,43 +145,44 @@ export function ConsultationJourney() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: container,
-          start: "top 78%",
+          start: "top 95%",
           once: true,
+          fastScrollEnd: true,
         },
       });
 
       // 1. Eyebrow badge fade & scale
       tl.fromTo(
         "[data-anim='eyebrow']",
-        { opacity: 0, y: 16, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power2.out" }
+        { opacity: 0, y: 12, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power2.out" }
       );
 
       // 2. Headline mask text wipe reveal
       tl.fromTo(
         "[data-anim='heading-mask']",
-        { y: "115%", opacity: 0 },
-        { y: "0%", opacity: 1, duration: 0.85, ease: "power3.out" },
-        "-=0.35"
+        { y: "100%", opacity: 0 },
+        { y: "0%", opacity: 1, duration: 0.4, ease: "power2.out" },
+        "-=0.2"
       );
 
       // 3. Subtitle fade in
       tl.fromTo(
         "[data-anim='subtitle']",
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-        "-=0.55"
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+        "-=0.25"
       );
 
-      // 4. SVG wave path draws smoothly from left to right
+      // 4. SVG wave path draws swiftly from left to right
       const wavePath = container.querySelector("[data-anim='wave-path']");
       if (wavePath) {
         const length = 1200;
         gsap.set(wavePath, { strokeDasharray: length, strokeDashoffset: length });
         tl.to(
           wavePath,
-          { strokeDashoffset: 0, duration: 1.3, ease: "power2.inOut" },
-          "-=0.4"
+          { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" },
+          "-=0.25"
         );
       }
 
@@ -189,47 +190,47 @@ export function ConsultationJourney() {
       tl.fromTo(
         "[data-anim='wave-dot']",
         { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.4, stagger: 0.12, ease: "back.out(2)" },
-        "-=1.0"
+        { scale: 1, opacity: 1, duration: 0.2, stagger: 0.03, ease: "back.out(2)" },
+        "-=0.4"
       );
 
-      // 6. Staggered node badges pop in with soft bounce
+      // 6. Staggered node badges pop in swiftly
       tl.fromTo(
         "[data-anim='node-badge']",
-        { scale: 0.45, opacity: 0, y: 22 },
+        { scale: 0.5, opacity: 0, y: 16 },
         {
           scale: 1,
           opacity: 1,
           y: 0,
-          duration: 0.65,
-          stagger: 0.1,
-          ease: "back.out(1.6)",
+          duration: 0.35,
+          stagger: 0.04,
+          ease: "back.out(1.5)",
         },
-        "-=1.1"
+        "-=0.38"
       );
 
       // 7. Node texts slide up
       tl.fromTo(
         "[data-anim='node-text']",
-        { opacity: 0, y: 14 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" },
-        "-=0.7"
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.25, stagger: 0.03, ease: "power2.out" },
+        "-=0.25"
       );
 
       // 8. Why Choose glass card floats up smoothly
       tl.fromTo(
         "[data-anim='why-choose-card']",
-        { opacity: 0, y: 35, scale: 0.98 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
-        "-=0.45"
+        { opacity: 0, y: 20, scale: 0.99 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" },
+        "-=0.2"
       );
 
       // 9. Benefit badges ripple in
       tl.fromTo(
         "[data-anim='benefit-item']",
-        { opacity: 0, x: -14 },
-        { opacity: 1, x: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" },
-        "-=0.5"
+        { opacity: 0, x: -10 },
+        { opacity: 1, x: 0, duration: 0.25, stagger: 0.03, ease: "power2.out" },
+        "-=0.25"
       );
     }, container);
 
@@ -251,7 +252,8 @@ export function ConsultationJourney() {
           src="/Images/SimplePathBG.webp"
           alt=""
           aria-hidden="true"
-          className="size-full object-cover object-[center_top] lg:object-center"
+          draggable={false}
+          className="size-full object-cover object-[center_top] lg:object-center pointer-events-none select-none"
         />
         {/* Seamless atmospheric top blend connecting from Doctor Consultation */}
         <div aria-hidden="true" className="dh-section-blend-top" />

@@ -3,7 +3,7 @@
 import { useEffect, useOptimistic, useRef, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, SearchX, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, LayoutGrid, List, SearchX, SlidersHorizontal, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
@@ -19,7 +19,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { mapApiCardToProduct } from "@/lib/adapters/product";
+import type { ApiProductCard } from "@/types/api/product";
 import { formatRupees } from "@/lib/formatters/price";
+import { getLenis } from "@/components/providers/SmoothScrollProvider";
 import {
   NO_FILTERS,
   SORT_OPTIONS,
@@ -32,6 +34,126 @@ import {
 } from "@/lib/search/searchState";
 import type { ApiFacets, ApiListingSort, ApiProductListingResponse } from "@/types/api/search";
 import { SearchFilters, hasFacetOptions } from "@/sections/search/SearchFilters";
+
+const FORM_CANONICAL_ORDER = ["drops", "tablets", "tincture", "oil", "cream"];
+
+function getFormIcon(form: string) {
+  switch (form) {
+    case "drops":
+      return (
+        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M10 2h4" />
+          <path d="M12 2v3" />
+          <rect x="7" y="5" width="10" height="16" rx="3" />
+          <path d="M12 10v4" />
+          <circle cx="12" cy="16" r="0.8" fill="currentColor" />
+        </svg>
+      );
+    case "tablets":
+      return (
+        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="m10.5 4.5 9 9a5 5 0 0 1-7.1 7.1l-9-9a5 5 0 0 1 7.1-7.1z" />
+          <line x1="8.5" y1="12.5" x2="15.5" y2="5.5" />
+        </svg>
+      );
+    case "tincture":
+      return (
+        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M10 2v5.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 7.5V2" />
+          <path d="M8.5 2h7" />
+          <path d="M7 16h10" />
+        </svg>
+      );
+    case "oil":
+      return (
+        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+        </svg>
+      );
+    case "cream":
+      return (
+        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M7 21h10" />
+          <path d="M8 21 9 9h6l1 12" />
+          <rect x="9.5" y="4" width="5" height="5" rx="1.5" />
+          <path d="M11 2h2" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+/**
+ * Complementary remedies shelf shown when an active filter leaves few results (<= 2).
+ * Fills the visual space naturally and introduces shoppers to popular remedies in other forms.
+ */
+function ComplementaryRemedies({
+  excludeIds,
+  onClearFilters,
+  totalAll,
+}: {
+  excludeIds: (number | string)[];
+  onClearFilters: () => void;
+  totalAll: number;
+}) {
+  const [items, setItems] = useState<ApiProductCard[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/shop/products?sort=popular&pageSize=6")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data?.items) return;
+        const normalizedExcludes = new Set(excludeIds.map((id) => String(id)));
+        const filtered = data.items
+          .filter((item: ApiProductCard) => !normalizedExcludes.has(String(item.id)))
+          .slice(0, 4);
+        setItems(filtered);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [excludeIds.join(",")]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mt-10 rounded-2xl border border-line-soft bg-paper/70 p-5 sm:p-6 shadow-2xs backdrop-blur-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/50 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="grid size-6 place-items-center rounded-full bg-forest/10 text-forest text-xs font-bold">
+              ✦
+            </span>
+            <h3 className="text-sm sm:text-base font-semibold text-ink">
+              Complementary remedies in other forms
+            </h3>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-ink">
+            Frequently paired remedies trusted by patients across our complete apothecary
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClearFilters}
+          className="cursor-pointer text-xs font-semibold text-forest hover:text-forest-deep underline-offset-4 hover:underline"
+        >
+          View all {totalAll} remedies →
+        </button>
+      </div>
+
+      <ul className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+        {items.map((item) => (
+          <li key={item.id} className="h-full">
+            <ProductCard product={mapApiCardToProduct(item)} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 /**
  * URL-driven listing state shared by /products, /search and brand pages:
@@ -83,6 +205,8 @@ type ProductResultsProps = {
   label: string;
   /** A brand page fixes the brand, so its facet group is not offered. */
   hideBrandFacet?: boolean;
+  /** When hero banner provides the remedy form pills, suppress duplicate inner tabs */
+  hasHeroTabs?: boolean;
   /** Shown when nothing matched and there is nothing to filter. */
   emptyState: ReactNode;
 };
@@ -102,20 +226,28 @@ export function ProductResults({
   onRefine,
   label,
   hideBrandFacet = false,
+  hasHeroTabs = false,
   emptyState,
 }: ProductResultsProps) {
+  const [layout, setLayout] = useState<"grid" | "list">("grid");
   const resultsTopRef = useRef<HTMLDivElement>(null);
   const facets: ApiFacets = hideBrandFacet ? { ...result.facets, brands: [] } : result.facets;
   const filterCount = activeFilterCount(view);
   const showFilters = hasFacetOptions(facets) || filterCount > 0;
 
-  const applyFilters = (filters: FilterSelection) => onRefine(filters);
+  const applyFilters = (filters: FilterSelection) => {
+    onRefine(filters);
+  };
+
   const clearFilters = () => {
     onRefine(NO_FILTERS);
-    // The control that was pressed is about to disappear; keep focus nearby.
-    resultsTopRef.current?.focus();
+    // Keep focus nearby with preventScroll so native focus does not trigger harsh jumps
+    resultsTopRef.current?.focus({ preventScroll: true });
   };
-  const onSort = (sort: ApiListingSort) => onRefine({ sort });
+
+  const onSort = (sort: ApiListingSort) => {
+    onRefine({ sort });
+  };
 
   if (!showFilters) {
     return (
@@ -125,17 +257,26 @@ export function ProductResults({
     );
   }
 
+  const allFormsTotal = facets.forms.reduce((sum, f) => sum + f.count, 0) || result.total;
+  const sortedForms = [...facets.forms].sort((a, b) => {
+    const ia = FORM_CANONICAL_ORDER.indexOf(a.value);
+    const ib = FORM_CANONICAL_ORDER.indexOf(b.value);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.value.localeCompare(b.value);
+  });
+
   return (
-    <section aria-label={label} className="pt-6 pb-4 lg:pt-10 lg:pb-16">
+    <section
+      aria-label={label}
+      className="relative z-10 -mt-6 sm:-mt-8 rounded-t-[2.5rem] sm:rounded-t-[3rem] bg-canvas pt-8 sm:pt-10 pb-16 shadow-[0_-8px_30px_rgba(20,37,31,0.03)] border-t border-line/30"
+    >
       <Container>
         <div className="lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[16.5rem_minmax(0,1fr)] xl:gap-12">
           <aside aria-labelledby="filters-heading" className="hidden lg:block">
-            {/* Sticky below the fixed header and never taller than the
-                viewport; it scrolls on its own when every group is open. */}
-            <div
-              data-lenis-prevent
-              className="dh-no-scrollbar sticky top-24 max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain rounded-2xl dh-card px-5 pt-4 pb-2"
-            >
+            {/* Natural full height container without artificial height limitations or hidden scrollbars */}
+            <div className="rounded-2xl dh-card px-5 pt-4 pb-5 border border-line-soft bg-paper shadow-soft">
               <div className="flex items-center justify-between border-b border-line/70 pb-3">
                 <h2 id="filters-heading" className="flex items-center gap-2 text-[0.9375rem] font-semibold text-ink">
                   <SlidersHorizontal aria-hidden className="size-4 text-forest" strokeWidth={1.8} />
@@ -161,14 +302,100 @@ export function ProductResults({
           </aside>
 
           {/* Focus lands here when a pressed control disappears (a removed chip,
-              "Clear all"): the next Tab reaches the first result. It is not in
-              the tab order, so it carries no ring of its own. */}
+              "Clear all"): preventScroll keeps viewport stable while tab order stays clean. */}
           <div ref={resultsTopRef} tabIndex={-1} className="min-w-0 outline-none!">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <p role="status" className="text-sm text-muted-ink">
+            {/* Form Filter Tabs */}
+            {sortedForms.length > 0 ? (
+              <div className="mb-6">
+                <nav aria-label="Remedy form tabs" className="dh-no-scrollbar -mx-1 overflow-x-auto px-1 pb-1">
+                  <ul className="flex items-center gap-1.5 sm:gap-2">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => onRefine({ form: [] })}
+                        className={cn(
+                          "inline-flex h-9.5 cursor-pointer items-center gap-2 rounded-xl px-4 text-xs sm:text-[0.8125rem] font-medium transition-all duration-200 whitespace-nowrap",
+                          view.form.length === 0
+                            ? "bg-forest font-semibold text-white shadow-xs"
+                            : "border border-line-soft bg-paper text-ink/80 hover:border-forest/30 hover:bg-forest/6 hover:text-forest",
+                        )}
+                      >
+                        <span>All forms</span>
+                        <span
+                          className={cn(
+                            "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] tabular-nums font-semibold",
+                            view.form.length === 0 ? "bg-white/25 text-white" : "bg-[#f0f2eb] text-[#55645d]",
+                          )}
+                        >
+                          {allFormsTotal}
+                        </span>
+                      </button>
+                    </li>
+                    {sortedForms.map((form) => {
+                      const active = view.form.length === 1 && view.form[0] === form.value;
+                      return (
+                        <li key={form.value}>
+                          <button
+                            type="button"
+                            onClick={() => onRefine({ form: active ? [] : [form.value] })}
+                            aria-pressed={active}
+                            className={cn(
+                              "inline-flex h-9.5 cursor-pointer items-center gap-2 rounded-xl px-4 text-xs sm:text-[0.8125rem] font-medium transition-all duration-200 whitespace-nowrap",
+                              active
+                                ? "bg-forest font-semibold text-white shadow-xs"
+                                : "border border-line-soft bg-paper text-ink/80 hover:border-forest/30 hover:bg-forest/6 hover:text-forest",
+                            )}
+                          >
+                            {getFormIcon(form.value)}
+                            <span>{formLabel(form.value)}</span>
+                            <span
+                              className={cn(
+                                "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] tabular-nums font-semibold",
+                                active ? "bg-white/25 text-white" : "bg-[#f0f2eb] text-[#55645d]",
+                              )}
+                            >
+                              {form.count}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              </div>
+            ) : null}
+
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+              <p role="status" className="text-sm font-medium text-ink">
                 <ResultCount result={result} filtered={filterCount > 0} />
               </p>
-              <SortSelect value={view.sort} onChange={onSort} className="hidden lg:flex" />
+              <div className="flex items-center gap-3">
+                <SortSelect value={view.sort} onChange={onSort} className="hidden lg:flex" />
+                <div className="hidden sm:flex items-center gap-1 rounded-xl border border-line-soft bg-paper p-1 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setLayout("grid")}
+                    aria-label="Grid view"
+                    className={cn(
+                      "grid size-7.5 cursor-pointer place-items-center rounded-lg transition-colors",
+                      layout === "grid" ? "bg-forest/10 text-forest font-semibold" : "text-muted-ink hover:text-ink",
+                    )}
+                  >
+                    <LayoutGrid className="size-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLayout("list")}
+                    aria-label="List view"
+                    className={cn(
+                      "grid size-7.5 cursor-pointer place-items-center rounded-lg transition-colors",
+                      layout === "list" ? "bg-forest/10 text-forest font-semibold" : "text-muted-ink hover:text-ink",
+                    )}
+                  >
+                    <List className="size-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
             <ActiveFilters
@@ -176,36 +403,79 @@ export function ProductResults({
               result={result}
               onApply={(filters) => {
                 applyFilters(filters);
-                // The chip that was pressed is gone; keep focus nearby.
-                resultsTopRef.current?.focus();
+                resultsTopRef.current?.focus({ preventScroll: true });
               }}
               onClear={clearFilters}
             />
 
             {result.items.length > 0 ? (
-              <ul
-                aria-busy={pending || undefined}
-                className={cn(
-                  "grid grid-cols-2 gap-3 transition-opacity duration-200 sm:gap-5 md:grid-cols-3 xl:grid-cols-4",
-                  pending && "opacity-60",
+              <div className="relative min-h-[400px]">
+                {pending && (
+                  <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-24 bg-canvas/30 backdrop-blur-[0.5px] rounded-2xl transition-opacity duration-300">
+                    <div className="flex items-center gap-2.5 rounded-full border border-forest/20 bg-paper/95 px-4 py-2 text-xs font-semibold text-forest shadow-md backdrop-blur-md">
+                      <span className="size-2 rounded-full bg-forest animate-ping" />
+                      Updating remedies…
+                    </div>
+                  </div>
                 )}
-              >
-                {result.items.map((item, index) => (
-                  <li
-                    key={item.id}
-                    // A short, capped stagger: cards settle as one gesture rather
-                    // than queueing, and reduced motion skips it entirely.
-                    className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-3 motion-safe:fill-mode-both"
-                    style={{
-                      animationDelay: `${Math.min(index, 7) * 45}ms`,
-                      animationDuration: "var(--duration-medium)",
-                      animationTimingFunction: "var(--ease-premium)",
-                    }}
+                <AnimatePresence mode="wait">
+                  <motion.ul
+                    key={`${state.form.join(",")}-${state.category ?? ""}-${state.brand.join(",")}-${state.sort}-${result.page}-${layout}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    aria-busy={pending || undefined}
+                    className={cn(
+                      layout === "grid"
+                        ? "grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4"
+                        : "grid grid-cols-1 gap-4",
+                      pending && "opacity-50",
+                    )}
                   >
-                    <ProductCard product={mapApiCardToProduct(item)} eager={index < 4} />
-                  </li>
-                ))}
-              </ul>
+                    {result.items.map((item, index) => (
+                      <li key={item.id} className="h-full">
+                        <ProductCard
+                          product={mapApiCardToProduct(item)}
+                          eager={index < 4}
+                          layout={layout}
+                        />
+                      </li>
+                    ))}
+                    {result.items.length === 1 && layout === "grid" ? (
+                      <li className="h-full">
+                        <div className="flex h-full min-h-[280px] flex-col justify-between rounded-2xl border border-forest/15 bg-gradient-to-br from-[#f2f7f3] to-paper p-5 sm:p-6 shadow-soft">
+                          <div>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-forest/10 px-2.5 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-forest">
+                              Care & Guidance
+                            </span>
+                            <h4 className="mt-3 text-sm font-semibold text-ink sm:text-[0.9375rem] leading-snug">
+                              Need personalized potency or dosage guidance?
+                            </h4>
+                            <p className="mt-2 text-xs text-muted-ink leading-relaxed">
+                              Verified homeopathic physicians are available for instant audio and video consultations.
+                            </p>
+                          </div>
+                          <div className="mt-5">
+                            <Button asChild size="sm" variant="brand" className="w-full text-xs font-semibold">
+                              <Link href="/care">Find a Doctor</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </li>
+                    ) : null}
+                  </motion.ul>
+                </AnimatePresence>
+
+                {/* Complementary remedies shelf when filter results are sparse */}
+                {result.items.length > 0 && result.items.length < 4 && filterCount > 0 ? (
+                  <ComplementaryRemedies
+                    excludeIds={result.items.map((i) => i.id)}
+                    onClearFilters={clearFilters}
+                    totalAll={allFormsTotal}
+                  />
+                ) : null}
+              </div>
             ) : (
               <FilteredEmpty view={view} result={result} onClear={clearFilters} onApply={applyFilters} />
             )}
@@ -293,32 +563,49 @@ function ActiveFilters({
   if (chips.length === 0) return null;
 
   return (
-    <ul aria-label="Active filters" className="mb-5 flex flex-wrap items-center gap-2">
-      {chips.map((chip) => (
-        <li key={chip.key}>
-          <button
-            type="button"
-            aria-label={`Remove filter: ${chip.label}`}
-            onClick={() => onApply(chip.next)}
-            className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-forest/25 bg-forest/6 pr-2 pl-3 text-[0.8125rem] font-medium text-forest-deep transition-colors hover:border-forest/45 hover:bg-forest/10"
-          >
-            {chip.label}
-            <X aria-hidden className="size-3.5" />
-          </button>
-        </li>
-      ))}
-      {chips.length > 1 ? (
-        <li>
-          <button
-            type="button"
-            onClick={onClear}
-            className="h-8 cursor-pointer rounded-full px-2 text-[0.8125rem] font-semibold text-forest underline-offset-4 hover:underline"
-          >
-            Clear all
-          </button>
-        </li>
-      ) : null}
-    </ul>
+    <motion.div layout className="mb-5 overflow-hidden">
+      <motion.ul layout aria-label="Active filters" className="flex flex-wrap items-center gap-2">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {chips.map((chip) => (
+            <motion.li
+              key={chip.key}
+              layout
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <button
+                type="button"
+                aria-label={`Remove filter: ${chip.label}`}
+                onClick={() => onApply(chip.next)}
+                className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-forest/25 bg-forest/6 pr-2 pl-3 text-[0.8125rem] font-medium text-forest-deep transition-colors hover:border-forest/45 hover:bg-forest/10"
+              >
+                {chip.label}
+                <X aria-hidden className="size-3.5" />
+              </button>
+            </motion.li>
+          ))}
+          {chips.length > 1 ? (
+            <motion.li
+              key="clear-all"
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <button
+                type="button"
+                onClick={onClear}
+                className="h-8 cursor-pointer rounded-full px-2 text-[0.8125rem] font-semibold text-forest underline-offset-4 hover:underline"
+              >
+                Clear all
+              </button>
+            </motion.li>
+          ) : null}
+        </AnimatePresence>
+      </motion.ul>
+    </motion.div>
   );
 }
 
@@ -447,6 +734,13 @@ function MobileActionBar({
   const draftCount = activeFilterCount(draft);
   const changed = JSON.stringify(draft) !== JSON.stringify(filtersOf(view));
 
+  useEffect(() => {
+    if (!open) return;
+    const lenis = getLenis();
+    lenis?.stop();
+    return () => lenis?.start();
+  }, [open]);
+
   return (
     <div className="sticky bottom-0 z-30 mt-10 border-t border-line bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden">
       <div className="mx-auto grid max-w-xl grid-cols-2 divide-x divide-line">
@@ -484,7 +778,7 @@ function MobileActionBar({
                 </SheetDescription>
               </div>
             </SheetHeader>
-            <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4">
+            <div data-lenis-prevent className="dh-custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4">
               <SearchFilters facets={facets} value={draft} onChange={setDraft} categoryName={categoryName} />
             </div>
             <SheetFooter className="flex-row gap-3 border-t border-line/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -548,7 +842,9 @@ function Pagination({
   hrefFor: (state: SearchState) => string;
 }) {
   if (result.pageCount <= 1) return null;
-  const { page, pageCount } = result;
+  const { page, pageCount, total, pageSize } = result;
+  const first = (page - 1) * pageSize + 1;
+  const last = Math.min(page * pageSize, total);
   const start = Math.max(1, Math.min(page - 2, pageCount - 4));
   const pages = Array.from({ length: Math.min(5, pageCount) }, (_, i) => start + i);
   const pageClass = "grid size-10 place-items-center rounded-full text-sm font-medium transition-colors";
@@ -570,7 +866,7 @@ function Pagination({
     );
 
   return (
-    <nav aria-label="Result pages" className="mt-12 flex flex-col items-center gap-3">
+    <nav aria-label="Result pages" className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-line/40 pt-6">
       <div className="flex items-center gap-1.5">
         {step(page - 1, "Previous page", <ChevronLeft aria-hidden className="size-4" />)}
         {pages.map((n) => (
@@ -581,7 +877,7 @@ function Pagination({
             aria-current={n === page ? "page" : undefined}
             className={cn(
               pageClass,
-              n === page ? "bg-forest-deep text-cream shadow-soft" : "text-muted-ink hover:bg-cream hover:text-ink",
+              n === page ? "bg-forest-deep text-cream shadow-soft font-semibold" : "text-muted-ink hover:bg-cream hover:text-ink",
             )}
           >
             {n}
@@ -589,8 +885,8 @@ function Pagination({
         ))}
         {step(page + 1, "Next page", <ChevronRight aria-hidden className="size-4" />)}
       </div>
-      <p className="text-xs text-muted-ink">
-        Page {page} of {pageCount}
+      <p className="text-xs text-muted-ink tabular-nums">
+        Showing {first}–{last} of {total} products
       </p>
     </nav>
   );
@@ -609,7 +905,13 @@ function FilteredEmpty({
 }) {
   const chips = filterChips(view, result);
   return (
-    <div className="rounded-card border border-dashed border-line bg-cream/70 px-6 py-14 text-center">
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="flex min-h-[380px] flex-col items-center justify-center rounded-card border border-dashed border-line bg-cream/70 px-6 py-14 text-center"
+    >
       <span className="mx-auto grid size-14 place-items-center rounded-full bg-sage-tint text-forest">
         <SearchX aria-hidden className="size-6" strokeWidth={1.6} />
       </span>
@@ -638,6 +940,6 @@ function FilteredEmpty({
       <Button type="button" variant="brand" size="xl" className="mt-6" onClick={onClear}>
         Clear all filters
       </Button>
-    </div>
+    </motion.div>
   );
 }

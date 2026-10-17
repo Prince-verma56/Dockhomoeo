@@ -102,7 +102,8 @@ function UpcomingTopic({ topic, lead }: { topic: (typeof UPCOMING)[number]; lead
           alt=""
           fill
           sizes={lead ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"}
-          className="object-cover"
+          draggable={false}
+          className="object-cover pointer-events-none select-none"
         />
         <span className="absolute top-3 left-3 rounded-full bg-paper/92 px-2.5 py-1 text-[0.6875rem] font-semibold text-ink shadow-2xs backdrop-blur-sm">
           Coming soon
@@ -143,7 +144,8 @@ function ArticleCard({
                 alt=""
                 fill
                 sizes={isLead ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"}
-                className="object-cover transition-transform duration-500 ease-premium group-hover:scale-[1.015]"
+                draggable={false}
+                className="object-cover transition-transform duration-500 ease-premium group-hover:scale-[1.015] pointer-events-none select-none"
               />
             </div>
           ) : (
