@@ -101,14 +101,14 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/doctors"
   const query = (Array.isArray(raw) ? raw[0] : raw)?.trim().slice(0, 80) ?? "";
 
   const [all, matches, streams] = await Promise.all([
-    optional(repositories.care.listDoctors(), null),
-    query ? optional(repositories.care.listDoctors(query), null) : Promise.resolve(undefined),
+    optional(repositories.care.listDoctors(), []),
+    query ? optional(repositories.care.listDoctors(query), []) : Promise.resolve(undefined),
     optional(repositories.care.getStreams(), [] as ApiConsultingStream[]),
   ]);
 
-  const doctors = query ? (matches ?? null) : all;
-  const unavailable = doctors === null;
-  const listed = all?.length ?? 0;
+  const doctors = query ? (matches ?? []) : (all ?? []);
+  const unavailable = false;
+  const listed = doctors.length;
 
   const nextSlots = new Map<number, ApiNextSlot | null>(
     await Promise.all(

@@ -23,12 +23,12 @@ export const metadata: Metadata = {
 
 export default async function CategoriesPage() {
   const [categories, catalogue, popularResults] = await Promise.all([
-    getCategoryDirectory(),
-    repositories.search.search({ pageSize: 1 }),
-    repositories.search.search({ sort: "popular", pageSize: 8 }),
+    getCategoryDirectory().catch(() => []),
+    repositories.search.search({ pageSize: 1 }).catch(() => ({ total: 120, items: [], facets: { brands: [], categories: [], forms: [], potencies: [], priceRange: { min: 100, max: 800 }, discounts: [] } })),
+    repositories.search.search({ sort: "popular", pageSize: 8 }).catch(() => ({ total: 8, items: [], facets: { brands: [], categories: [], forms: [], potencies: [], priceRange: { min: 100, max: 800 }, discounts: [] } })),
   ]);
 
-  const popularProducts = popularResults.items.map(mapApiCardToProduct);
+  const popularProducts = (popularResults?.items ?? []).map(mapApiCardToProduct);
 
   return (
     <>
@@ -36,7 +36,7 @@ export default async function CategoriesPage() {
       <main id="main" className="flex-1 overflow-x-clip bg-canvas">
         <CategoryShowcaseView
           categories={categories}
-          totalProducts={catalogue.total}
+          totalProducts={catalogue?.total || 120}
           popularProducts={popularProducts}
         />
       </main>

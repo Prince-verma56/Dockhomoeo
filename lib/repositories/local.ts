@@ -807,3 +807,169 @@ export class LocalServiceabilityRepository implements IServiceabilityRepository 
     return { pincode, deliverable, codAvailable: deliverable, deliveryDays: null, city: null, state: null };
   }
 }
+
+import type { ICareRepository } from "./interfaces";
+import type {
+  ApiDoctorCard,
+  ApiDoctorDetail,
+  ApiDoctorSlot,
+  ApiNextSlot,
+  ApiConsultingStream,
+} from "@/types/api/care";
+
+export const mockDoctors: ApiDoctorCard[] = [
+  {
+    id: 1,
+    slug: "dr-rajesh-sharma",
+    displayName: "Dr. Rajesh Sharma",
+    photoUrl: "/Images/ConsultentBG.webp",
+    qualification: "BHMS, MD (Homeopathy)",
+    specialization: "Chronic Diseases & Immunity",
+    experienceYears: 16,
+    languages: ["English", "Hindi"],
+    bio: "Senior homeopathic consultant specializing in long-standing constitutional disorders, chronic allergies, and autoimmune support with 16+ years of clinical practice.",
+    clinicCity: "Mumbai",
+    videoFee: 500,
+    audioFee: 400,
+    slotMinutes: 20,
+    ratingAverage: 4.9,
+    ratingCount: 142,
+  },
+  {
+    id: 2,
+    slug: "dr-priya-nair",
+    displayName: "Dr. Priya Nair",
+    photoUrl: "/Images/doctors/care-banner-agent.jpg",
+    qualification: "BHMS, Fellowship in Dermatology (Homeopathy)",
+    specialization: "Skin, Hair & Hormonal Health",
+    experienceYears: 12,
+    languages: ["English", "Hindi", "Malayalam"],
+    bio: "Specialist in dermatological homeopathy, treating eczema, psoriasis, acne, and hormonal hair disorders through individualized constitutional prescribing.",
+    clinicCity: "Bangalore",
+    videoFee: 600,
+    audioFee: 450,
+    slotMinutes: 20,
+    ratingAverage: 4.8,
+    ratingCount: 98,
+  },
+  {
+    id: 3,
+    slug: "dr-amit-verma",
+    displayName: "Dr. Amit Verma",
+    photoUrl: "/Images/Editorial/chamomilla-pellet-bottle.webp",
+    qualification: "BHMS, PGCR",
+    specialization: "Pediatrics & Respiratory Care",
+    experienceYears: 14,
+    languages: ["English", "Hindi"],
+    bio: "Focused on gentle pediatric remedies, seasonal asthma, bronchitis, and recurrent respiratory tract infections in children and young adults.",
+    clinicCity: "Delhi NCR",
+    videoFee: 550,
+    audioFee: 400,
+    slotMinutes: 20,
+    ratingAverage: 4.9,
+    ratingCount: 115,
+  },
+  {
+    id: 4,
+    slug: "dr-sunita-kulkarni",
+    displayName: "Dr. Sunita Kulkarni",
+    photoUrl: "/Images/journal_women.webp",
+    qualification: "BHMS, MD (Homoeopathic Materia Medica)",
+    specialization: "Women's Wellness & Lifestyle Disorders",
+    experienceYears: 18,
+    languages: ["English", "Hindi", "Marathi"],
+    bio: "Expert homoeopath addressing PCOS, thyroid imbalances, migraines, stress-related sleep disorders, and menopause support through natural holistic healing.",
+    clinicCity: "Pune",
+    videoFee: 650,
+    audioFee: 500,
+    slotMinutes: 20,
+    ratingAverage: 5.0,
+    ratingCount: 184,
+  },
+];
+
+export const mockStreams: ApiConsultingStream[] = [
+  {
+    name: "Classical Homoeopathy",
+    status: "OPEN",
+    description: "Holistic, constitutional care focusing on long-term vitality and root-cause healing.",
+    specializations: [
+      { id: 1, name: "Chronic Diseases & Immunity", description: "Allergies, autoimmunity, joint health" },
+      { id: 2, name: "Skin, Hair & Hormonal Health", description: "Psoriasis, acne, hair thinning" },
+      { id: 3, name: "Pediatrics & Respiratory Care", description: "Asthma, cough, recurrent childhood infections" },
+      { id: 4, name: "Women's Wellness & Lifestyle Disorders", description: "PCOS, migraine, stress management" },
+    ],
+  },
+  {
+    name: "Integrative Wellness",
+    status: "COMING_SOON",
+    description: "Complementary wellness guidance combining lifestyle adjustments with gentle therapeutics.",
+    specializations: [],
+  },
+];
+
+export class LocalCareRepository implements ICareRepository {
+  async listDoctors(query?: string): Promise<ApiDoctorCard[]> {
+    await delay(100);
+    if (!query) return mockDoctors;
+    const q = query.toLowerCase().trim();
+    return mockDoctors.filter(
+      (d) =>
+        d.displayName.toLowerCase().includes(q) ||
+        (d.specialization && d.specialization.toLowerCase().includes(q)) ||
+        d.languages.some((l) => l.toLowerCase().includes(q)) ||
+        (d.clinicCity && d.clinicCity.toLowerCase().includes(q)),
+    );
+  }
+
+  async getNextSlot(slug: string): Promise<ApiNextSlot | null> {
+    await delay(50);
+    const doctor = mockDoctors.find((d) => d.slug === slug);
+    if (!doctor) return null;
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const dayStr = tomorrow.toISOString().split("T")[0];
+    return {
+      startsAt: `${dayStr}T10:30:00+05:30`,
+      time: "10:30",
+      day: dayStr,
+    };
+  }
+
+  async getDoctor(slug: string): Promise<ApiDoctorDetail | null> {
+    await delay(100);
+    const doctor = mockDoctors.find((d) => d.slug === slug);
+    if (!doctor) return null;
+    return {
+      ...doctor,
+      availability: [
+        { dayOfWeek: 1, startTime: "10:00", endTime: "18:00" },
+        { dayOfWeek: 2, startTime: "10:00", endTime: "18:00" },
+        { dayOfWeek: 3, startTime: "10:00", endTime: "18:00" },
+        { dayOfWeek: 4, startTime: "10:00", endTime: "18:00" },
+        { dayOfWeek: 5, startTime: "10:00", endTime: "18:00" },
+        { dayOfWeek: 6, startTime: "10:00", endTime: "14:00" },
+      ],
+    };
+  }
+
+  async getSlots(slug: string, date: string): Promise<ApiDoctorSlot[]> {
+    await delay(100);
+    const doctor = mockDoctors.find((d) => d.slug === slug);
+    if (!doctor) return [];
+    return [
+      { startsAt: `${date}T10:00:00+05:30`, time: "10:00", mode: "VIDEO", available: true, reason: null },
+      { startsAt: `${date}T10:30:00+05:30`, time: "10:30", mode: "VIDEO", available: true, reason: null },
+      { startsAt: `${date}T11:00:00+05:30`, time: "11:00", mode: "AUDIO", available: true, reason: null },
+      { startsAt: `${date}T15:00:00+05:30`, time: "15:00", mode: "VIDEO", available: true, reason: null },
+      { startsAt: `${date}T15:30:00+05:30`, time: "15:30", mode: "AUDIO", available: true, reason: null },
+      { startsAt: `${date}T16:00:00+05:30`, time: "16:00", mode: "VIDEO", available: true, reason: null },
+    ];
+  }
+
+  async getStreams(): Promise<ApiConsultingStream[]> {
+    await delay(50);
+    return mockStreams;
+  }
+}
+
