@@ -523,197 +523,12 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
               </div>
             </div>
 
-            {/* Ingredients & Composition Card */}
-            <div className="rounded-2xl border border-line-soft bg-paper p-4.5 sm:p-5 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setIngredientsOpen(!ingredientsOpen)}
-                className="w-full flex items-center justify-between border-b border-line-soft pb-3 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="grid size-8 place-items-center rounded-lg bg-sage-wash text-forest shadow-2xs">
-                    <FlaskConical className="size-4" strokeWidth={1.9} />
-                  </span>
-                  <div className="text-left">
-                    <h3 className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-forest transition-colors">
-                      Ingredients & Composition
-                    </h3>
-                    <p className="text-[11px] text-muted-ink">Pharmacopoeia standard & active dilution profile</p>
-                  </div>
-                </div>
-                <ChevronDown className={cn("size-4 text-muted-ink transition-transform duration-300 ease-out", ingredientsOpen && "rotate-180")} />
-              </button>
-
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-                  ingredientsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="pt-4 space-y-3">
-                    <div className="rounded-xl border border-line-soft bg-canvas/70 divide-y divide-line-soft text-xs">
-                      <div className="flex items-center justify-between p-3">
-                        <div>
-                          <span className="font-bold text-ink block text-[13px]">{clinicalProfile.composition.active}</span>
-                          <span className="text-[11px] text-muted-ink">Active medicinal formulation</span>
-                        </div>
-                        <span className="rounded-md bg-forest/10 px-2.5 py-1 font-bold text-forest-deep text-xs border border-forest/15">
-                          {variant?.packSize ?? "30 ml"}
-                        </span>
-                      </div>
-
-                      <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                        <div>
-                          <span className="text-muted-ink block">Base / Inactive Vehicle:</span>
-                          <span className="font-semibold text-ink">{clinicalProfile.composition.inactive}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-ink block">Pharmacopoeia Compliance:</span>
-                          <span className="font-semibold text-ink">{clinicalProfile.composition.standard}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-xs text-muted-ink">
-                      <Award className="size-4 text-forest shrink-0" />
-                      <span>{clinicalProfile.composition.grade}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Storage & Safety Guidelines */}
-            <div className="rounded-2xl border border-line-soft bg-paper p-4.5 sm:p-5 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setSafetyOpen(!safetyOpen)}
-                className="w-full flex items-center justify-between border-b border-line-soft pb-3 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="grid size-8 place-items-center rounded-lg bg-sage-wash text-forest shadow-2xs">
-                    <ShieldAlert className="size-4" strokeWidth={1.9} />
-                  </span>
-                  <div className="text-left">
-                    <h3 className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-forest transition-colors">
-                      Storage & Safety Guidelines
-                    </h3>
-                    <p className="text-[11px] text-muted-ink">Preservation instructions and precautions</p>
-                  </div>
-                </div>
-                <ChevronDown className={cn("size-4 text-muted-ink transition-transform duration-300 ease-out", safetyOpen && "rotate-180")} />
-              </button>
-
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-                  safetyOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="pt-4 space-y-2.5 text-xs text-muted-ink leading-relaxed">
-                    <div className="p-3 rounded-xl bg-canvas/70 border border-line-soft space-y-2">
-                      <p>
-                        <strong className="text-ink">Storage: </strong>
-                        {clinicalProfile.safetyAndStorage.storage}
-                      </p>
-                      <p>
-                        <strong className="text-ink">Precautions: </strong>
-                        {clinicalProfile.safetyAndStorage.precautions}
-                      </p>
-                      <p>
-                        <strong className="text-ink">Shelf Life: </strong>
-                        {clinicalProfile.safetyAndStorage.shelfLife}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Frequently Asked Questions (FAQs) Accordion */}
-            <div className="rounded-2xl border border-line-soft bg-paper p-4.5 sm:p-5 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setFaqsOpen(!faqsOpen)}
-                className="w-full flex items-center justify-between border-b border-line-soft pb-3 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="grid size-8 place-items-center rounded-lg bg-sage-wash text-forest shadow-2xs">
-                    <HelpCircle className="size-4" strokeWidth={1.9} />
-                  </span>
-                  <div className="text-left">
-                    <h3 className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-forest transition-colors">
-                      Frequently Asked Questions
-                    </h3>
-                    <p className="text-[11px] text-muted-ink">Clinical insights & remedy usage guidance</p>
-                  </div>
-                </div>
-                <ChevronDown className={cn("size-4 text-muted-ink transition-transform duration-300 ease-out", faqsOpen && "rotate-180")} />
-              </button>
-
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-                  faqsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="pt-4 space-y-2.5">
-                    {clinicalProfile.faqs.map((faq, i) => {
-                      const isOpen = openFaqIndex === i;
-                      return (
-                        <div
-                          key={faq.question}
-                          className={cn(
-                            "rounded-xl border transition-all duration-200 overflow-hidden",
-                            isOpen
-                              ? "border-forest/40 bg-white shadow-xs"
-                              : "border-line-soft bg-canvas/60 hover:border-line hover:bg-canvas"
-                          )}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setOpenFaqIndex(isOpen ? null : i)}
-                            className="w-full p-3.5 text-left flex items-center justify-between gap-3 text-xs sm:text-[13px] font-bold text-ink cursor-pointer hover:text-forest transition-colors"
-                          >
-                            <span>{faq.question}</span>
-                            <span className="shrink-0 text-muted-ink">
-                              <ChevronDown
-                                className={cn(
-                                  "size-3.5 transition-transform duration-300 ease-out",
-                                  isOpen && "rotate-180 text-forest"
-                                )}
-                              />
-                            </span>
-                          </button>
-                          <div
-                            className={cn(
-                              "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-                              isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
-                            )}
-                          >
-                            <div className="overflow-hidden">
-                              <div className="px-3.5 pb-3.5 text-xs text-muted-ink leading-relaxed border-t border-line-soft/60 pt-2.5">
-                                {faq.answer}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
           </div>
 
           {/* ========================================================== */}
-          {/* RIGHT COLUMN: Pinned Buy Box, Delivery, Details, Telehealth */}
+          {/* RIGHT COLUMN: Buy Box, Delivery, Details, Specs & FAQs     */}
           {/* ========================================================== */}
-          <div className="lg:col-span-5 xl:col-span-5 space-y-3.5 w-full min-w-0 lg:sticky lg:top-24 lg:self-start">
+          <div className="lg:col-span-5 xl:col-span-5 space-y-4 w-full min-w-0">
             
             {/* Header / Brand & Title */}
             <div className="space-y-1.5">
@@ -1026,6 +841,115 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
               ) : null}
             </div>
 
+            {/* Ingredients & Composition Card */}
+            <div className="rounded-2xl border border-line-soft bg-paper p-4.5 sm:p-5 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setIngredientsOpen(!ingredientsOpen)}
+                className="w-full flex items-center justify-between border-b border-line-soft pb-3 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-8 place-items-center rounded-lg bg-sage-wash text-forest shadow-2xs">
+                    <FlaskConical className="size-4" strokeWidth={1.9} />
+                  </span>
+                  <div className="text-left">
+                    <h3 className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-forest transition-colors">
+                      Ingredients & Composition
+                    </h3>
+                    <p className="text-[11px] text-muted-ink">Pharmacopoeia standard & active dilution profile</p>
+                  </div>
+                </div>
+                <ChevronDown className={cn("size-4 text-muted-ink transition-transform duration-300 ease-out", ingredientsOpen && "rotate-180")} />
+              </button>
+
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
+                  ingredientsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="pt-4 space-y-3">
+                    <div className="rounded-xl border border-line-soft bg-canvas/70 divide-y divide-line-soft text-xs">
+                      <div className="flex items-center justify-between p-3">
+                        <div>
+                          <span className="font-bold text-ink block text-[13px]">{clinicalProfile.composition.active}</span>
+                          <span className="text-[11px] text-muted-ink">Active medicinal formulation</span>
+                        </div>
+                        <span className="rounded-md bg-forest/10 px-2.5 py-1 font-bold text-forest-deep text-xs border border-forest/15">
+                          {variant?.packSize ?? "30 ml"}
+                        </span>
+                      </div>
+
+                      <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        <div>
+                          <span className="text-muted-ink block">Base / Inactive Vehicle:</span>
+                          <span className="font-semibold text-ink">{clinicalProfile.composition.inactive}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-ink block">Pharmacopoeia Compliance:</span>
+                          <span className="font-semibold text-ink">{clinicalProfile.composition.standard}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-ink">
+                      <Award className="size-4 text-forest shrink-0" />
+                      <span>{clinicalProfile.composition.grade}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Storage & Safety Guidelines */}
+            <div className="rounded-2xl border border-line-soft bg-paper p-4.5 sm:p-5 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setSafetyOpen(!safetyOpen)}
+                className="w-full flex items-center justify-between border-b border-line-soft pb-3 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-8 place-items-center rounded-lg bg-sage-wash text-forest shadow-2xs">
+                    <ShieldAlert className="size-4" strokeWidth={1.9} />
+                  </span>
+                  <div className="text-left">
+                    <h3 className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-forest transition-colors">
+                      Storage & Safety Guidelines
+                    </h3>
+                    <p className="text-[11px] text-muted-ink">Preservation instructions and precautions</p>
+                  </div>
+                </div>
+                <ChevronDown className={cn("size-4 text-muted-ink transition-transform duration-300 ease-out", safetyOpen && "rotate-180")} />
+              </button>
+
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
+                  safetyOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="pt-4 space-y-2.5 text-xs text-muted-ink leading-relaxed">
+                    <div className="p-3 rounded-xl bg-canvas/70 border border-line-soft space-y-2">
+                      <p>
+                        <strong className="text-ink">Storage: </strong>
+                        {clinicalProfile.safetyAndStorage.storage}
+                      </p>
+                      <p>
+                        <strong className="text-ink">Precautions: </strong>
+                        {clinicalProfile.safetyAndStorage.precautions}
+                      </p>
+                      <p>
+                        <strong className="text-ink">Shelf Life: </strong>
+                        {clinicalProfile.safetyAndStorage.shelfLife}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Telehealth Doctor Consultation CTA Card */}
             <div className="rounded-2xl border border-forest/20 bg-linear-to-br from-forest/8 via-forest/4 to-transparent p-4 sm:p-4.5 shadow-2xs">
               <div className="flex items-start gap-3">
@@ -1050,6 +974,82 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
                     <span>Consult a Doctor Online</span>
                     <ArrowRight className="size-3.5" />
                   </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Frequently Asked Questions (FAQs) Accordion */}
+            <div className="rounded-2xl border border-line-soft bg-paper p-4.5 sm:p-5 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setFaqsOpen(!faqsOpen)}
+                className="w-full flex items-center justify-between border-b border-line-soft pb-3 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-8 place-items-center rounded-lg bg-sage-wash text-forest shadow-2xs">
+                    <HelpCircle className="size-4" strokeWidth={1.9} />
+                  </span>
+                  <div className="text-left">
+                    <h3 className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-forest transition-colors">
+                      Frequently Asked Questions
+                    </h3>
+                    <p className="text-[11px] text-muted-ink">Clinical insights & remedy usage guidance</p>
+                  </div>
+                </div>
+                <ChevronDown className={cn("size-4 text-muted-ink transition-transform duration-300 ease-out", faqsOpen && "rotate-180")} />
+              </button>
+
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
+                  faqsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="pt-4 space-y-2.5">
+                    {clinicalProfile.faqs.map((faq, i) => {
+                      const isOpen = openFaqIndex === i;
+                      return (
+                        <div
+                          key={faq.question}
+                          className={cn(
+                            "rounded-xl border transition-all duration-200 overflow-hidden",
+                            isOpen
+                              ? "border-forest/40 bg-white shadow-xs"
+                              : "border-line-soft bg-canvas/60 hover:border-line hover:bg-canvas"
+                          )}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setOpenFaqIndex(isOpen ? null : i)}
+                            className="w-full p-3.5 text-left flex items-center justify-between gap-3 text-xs sm:text-[13px] font-bold text-ink cursor-pointer hover:text-forest transition-colors"
+                          >
+                            <span>{faq.question}</span>
+                            <span className="shrink-0 text-muted-ink">
+                              <ChevronDown
+                                className={cn(
+                                  "size-3.5 transition-transform duration-300 ease-out",
+                                  isOpen && "rotate-180 text-forest"
+                                )}
+                              />
+                            </span>
+                          </button>
+                          <div
+                            className={cn(
+                              "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
+                              isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                            )}
+                          >
+                            <div className="overflow-hidden">
+                              <div className="px-3.5 pb-3.5 text-xs text-muted-ink leading-relaxed border-t border-line-soft/60 pt-2.5">
+                                {faq.answer}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
