@@ -9,10 +9,10 @@ import { MagneticItem } from "@/components/ui/magnetic-dock";
 import { cn } from "@/lib/utils";
 import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
 
-/** Hover intent: long enough to ignore a pointer crossing the bar, short enough to feel immediate. */
-const OPEN_DELAY = 90;
-/** Grace period for the pointer to travel from the bar into the panel. */
-const CLOSE_DELAY = 180;
+/** Near-instant hover response for snappy, premium interaction without lag. */
+const OPEN_DELAY = 15;
+/** Grace period for pointer to navigate comfortably into the panel. */
+const CLOSE_DELAY = 150;
 
 type ShopMegaMenuProps = {
   /** Shared pill styling from the header, so Shop matches its siblings. */
@@ -86,6 +86,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
+  const [hoveredCollection, setHoveredCollection] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const rootRef = useRef<HTMLLIElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -169,9 +170,9 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
       }}
     >
       <MagneticItem
-        maxScale={1.12}
-        magneticDistance={110}
-        maxFloat={3}
+        maxScale={1.06}
+        magneticDistance={70}
+        maxFloat={2}
         disabled={open}
       >
         <div
@@ -255,7 +256,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
               initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8, scale: 0.98 }}
-              transition={{ duration: DURATION.fast, ease: EASE_PREMIUM_BEZIER }}
+              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
               className="w-[830px] lg:w-[890px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[2rem] border border-white/90 dark:border-white/15 bg-white/98 dark:bg-[#0c1e17]/98 backdrop-blur-3xl p-6 lg:p-7 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.35),0_10px_40px_-10px_rgba(13,90,67,0.2),inset_0_1px_2px_rgba(255,255,255,0.95)] ring-1 ring-black/5"
             >
               {/* Main Content Grid: Left 2-column Curated List + Right Featured Highlight Card */}
@@ -270,41 +271,73 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                     <Link
                       href="/categories"
                       onClick={() => close()}
-                      className="text-xs font-semibold text-[#55635d] hover:text-[#0d5a43] transition-colors cursor-pointer"
+                      className="text-xs font-semibold text-[#55635d] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
                     >
                       View all →
                     </Link>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-                    {CURATED_COLLECTIONS.map((item) => (
-                      <Link
-                        key={item.title}
-                        href={item.href}
-                        onClick={() => close()}
-                        className="group flex items-center gap-3 rounded-2xl p-2 transition-all duration-200 hover:bg-[#0d5a43]/8 hover:translate-x-0.5 cursor-pointer"
-                      >
-                        {/* Rounded thumbnail image matching reference design */}
-                        <div className="relative size-11 lg:size-12 shrink-0 overflow-hidden rounded-xl bg-white/70 border border-white/80 shadow-2xs">
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="size-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none select-none"
-                            loading="lazy"
-                          />
-                        </div>
+                  <div
+                    className="grid grid-cols-2 gap-x-2.5 gap-y-1.5 relative"
+                    onMouseLeave={() => setHoveredCollection(null)}
+                  >
+                    {CURATED_COLLECTIONS.map((item) => {
+                      const isHovered = hoveredCollection === item.title;
+                      return (
+                        <Link
+                          key={item.title}
+                          href={item.href}
+                          onClick={() => close()}
+                          onMouseEnter={() => setHoveredCollection(item.title)}
+                          className="group relative flex items-center gap-3 rounded-2xl p-2 cursor-pointer z-10"
+                        >
+                          {/* Smooth Shifting Animated Background Highlight */}
+                          {isHovered ? (
+                            <motion.div
+                              layoutId="mega-curated-hover"
+                              initial={false}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 550,
+                                damping: 35,
+                                mass: 0.18,
+                              }}
+                              className="absolute inset-0 rounded-2xl bg-[#0d5a43]/10 dark:bg-emerald-500/15 pointer-events-none -z-10"
+                            />
+                          ) : null}
 
-                        {/* Title and subtext */}
-                        <div className="min-w-0 flex-1 leading-snug">
-                          <span className="block font-bold text-[0.84rem] lg:text-[0.875rem] text-[#14251f] tracking-tight group-hover:text-[#0d5a43] transition-colors truncate">
-                            {item.title}
-                          </span>
-                          <span className="block text-[0.7rem] lg:text-[0.72rem] text-[#55635d] font-medium tracking-tight truncate mt-0.5">
-                            {item.subtitle}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
+                          {/* Rounded thumbnail image matching reference design */}
+                          <div className="relative size-11 lg:size-12 shrink-0 overflow-hidden rounded-xl bg-white/70 border border-white/80 shadow-2xs">
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className={cn(
+                                "size-full object-cover pointer-events-none select-none transition-transform duration-150 ease-out",
+                                isHovered ? "scale-108" : "scale-100"
+                              )}
+                              loading="lazy"
+                            />
+                          </div>
+
+                          {/* Title and subtext */}
+                          <div className="min-w-0 flex-1 leading-snug">
+                            <span
+                              className={cn(
+                                "block font-bold text-[0.84rem] lg:text-[0.875rem] tracking-tight transition-colors duration-100 truncate",
+                                isHovered ? "text-[#0d5a43] dark:text-emerald-400" : "text-[#14251f] dark:text-white"
+                              )}
+                            >
+                              {item.title}
+                            </span>
+                            <span className="block text-[0.7rem] lg:text-[0.72rem] text-[#55635d] dark:text-[#889891] font-medium tracking-tight truncate mt-0.5">
+                              {item.subtitle}
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -353,7 +386,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                   <Link
                     href="/products"
                     onClick={() => close()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d5a43] hover:text-[#063b2d] transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d5a43] hover:text-[#063b2d] transition-colors duration-100 cursor-pointer"
                   >
                     <Package className="size-3.5" />
                     <span>Shop All Products</span>
@@ -361,7 +394,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                   <Link
                     href="/categories"
                     onClick={() => close()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
                   >
                     <Sparkles className="size-3.5" />
                     <span>All Categories</span>
@@ -369,7 +402,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                   <Link
                     href="/brands"
                     onClick={() => close()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
                   >
                     <Award className="size-3.5" />
                     <span>Certified Brands</span>
@@ -379,10 +412,10 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                 <Link
                   href="/doctors"
                   onClick={() => close()}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d5a43] hover:text-[#063b2d] transition-colors cursor-pointer group"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d5a43] hover:text-[#063b2d] transition-colors duration-100 cursor-pointer group"
                 >
                   <span>Consult a Doctor</span>
-                  <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="size-3 transition-transform duration-100 group-hover:translate-x-0.5" />
                 </Link>
               </div>
 

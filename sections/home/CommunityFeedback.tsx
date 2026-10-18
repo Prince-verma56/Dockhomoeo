@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   ArrowRight,
   BarChart3,
-  Check,
   CheckCircle2,
   Clock,
   Heart,
@@ -114,8 +113,8 @@ export function CommunityFeedback() {
               remedies — and help us improve, for a healthier community.
             </p>
 
-            {/* 4 Arched Category Cards - Fully populated, no empty space */}
-            <div className="mt-7 flex flex-wrap gap-3 sm:gap-4">
+            {/* 4 Arched Category Showcase Cards - Uniform, balanced, no misleading link arrows or tick badges */}
+            <div className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5 w-full max-w-2xl">
               {CATEGORY_CARDS.map((card) => {
                 const Icon = card.icon;
                 const isSelected = activeCategory === card.id;
@@ -126,14 +125,14 @@ export function CommunityFeedback() {
                     type="button"
                     onClick={() => setActiveCategory(card.id)}
                     className={cn(
-                      "group relative flex flex-col justify-between w-28 sm:w-32 lg:w-34 h-38 sm:h-40 p-2 sm:p-2.5 rounded-t-[2.2rem] rounded-b-2xl border transition-all duration-200 cursor-pointer text-left shadow-xs overflow-hidden",
+                      "group relative flex flex-col justify-between p-2 sm:p-2.5 rounded-t-[2rem] rounded-b-2xl border transition-all duration-200 cursor-pointer text-left shadow-xs overflow-hidden",
                       isSelected
-                        ? "border-forest/60 bg-[#0d5a43] text-white shadow-md shadow-forest/25 scale-[1.03]"
-                        : "border-white/70 bg-white/80 hover:bg-white text-ink backdrop-blur-md"
+                        ? "border-forest/60 ring-2 ring-forest/20 bg-white/95 shadow-md shadow-forest/10 -translate-y-0.5"
+                        : "border-forest/15 bg-white/80 hover:bg-white hover:border-forest/30 text-ink backdrop-blur-md"
                     )}
                   >
                     {/* Top Photographic Thumbnail - Dominates the top arch */}
-                    <div className="relative w-full h-22 sm:h-24 rounded-t-[1.9rem] rounded-b-xl overflow-hidden mb-1.5 shadow-2xs">
+                    <div className="relative w-full h-24 sm:h-26 rounded-t-[1.75rem] rounded-b-xl overflow-hidden mb-2 shadow-2xs">
                       <Image
                         src={card.image}
                         alt={card.label}
@@ -144,43 +143,27 @@ export function CommunityFeedback() {
                         className={cn(
                           "absolute inset-0 transition-opacity",
                           isSelected
-                            ? "bg-forest/20"
-                            : "bg-black/8 group-hover:bg-black/0"
+                            ? "bg-forest/10"
+                            : "bg-black/5 group-hover:bg-transparent"
                         )}
                       />
-
-                      {/* Top Checkmark when active */}
-                      {isSelected ? (
-                        <span className="absolute top-2 right-2 flex size-5 items-center justify-center rounded-full bg-white text-forest shadow-xs">
-                          <Check className="size-3 stroke-[2.8]" />
-                        </span>
-                      ) : null}
                     </div>
 
-                    {/* Bottom Content Row: Icon + Label + Arrow cleanly anchored */}
-                    <div className="flex items-center justify-between gap-1 px-1 mt-auto">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <Icon
-                          className={cn(
-                            "size-3.5 shrink-0",
-                            isSelected ? "text-cream" : "text-forest"
-                          )}
-                        />
-                        <span className="text-[11px] sm:text-xs font-bold leading-tight truncate">
-                          {card.label}
-                        </span>
-                      </div>
-
-                      <div
+                    {/* Bottom Content: Icon badge + Full Category Label without truncation */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-1 py-0.5 min-w-0">
+                      <span
                         className={cn(
-                          "flex size-5.5 shrink-0 items-center justify-center rounded-full transition-all text-xs",
+                          "flex size-6 shrink-0 items-center justify-center rounded-full transition-colors",
                           isSelected
-                            ? "bg-white/20 text-white"
-                            : "bg-black/5 text-ink/70 group-hover:bg-forest group-hover:text-white"
+                            ? "bg-forest text-white"
+                            : "bg-forest/10 text-forest group-hover:bg-forest/15"
                         )}
                       >
-                        <ArrowRight className="size-2.5" />
-                      </div>
+                        <Icon className="size-3.5" />
+                      </span>
+                      <span className="text-[11.5px] sm:text-xs font-bold text-ink leading-tight">
+                        {card.label}
+                      </span>
                     </div>
                   </button>
                 );

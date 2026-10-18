@@ -222,9 +222,19 @@ export function SiteFooter() {
           </div>
         </div>
 
+        {/* --------------------------------------------------- brand signature watermark */}
+        <div
+          aria-hidden="true"
+          className="relative mt-8 sm:mt-12 md:mt-16 mb-2 sm:mb-4 w-full select-none pointer-events-none overflow-hidden text-center"
+        >
+          <span className="inline-block font-display font-black italic tracking-tight text-transparent bg-linear-to-b from-white/40 via-cream/24 to-white/[0.05] bg-clip-text text-[clamp(2.5rem,8.8vw,11.5rem)] leading-[0.95] whitespace-nowrap pr-8 sm:pr-12 md:pr-16 pl-3 sm:pl-4 py-2 sm:py-3 drop-shadow-[0_2px_16px_rgba(255,255,255,0.06)]">
+            DocHomoeo
+          </span>
+        </div>
+
         {/* Closing bar: copyright left, build credit centred, tagline right on
             desktop; stacked and centred below lg, where three columns cramp. */}
-        <div className="mt-10 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center text-xs text-cream/50 md:mt-12 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-6 lg:text-left">
+        <div className="flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center text-xs text-cream/50 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-6 lg:text-left">
           <p className="lg:justify-self-start">
             &copy; {new Date().getFullYear()} DocHomoeo. All rights reserved.
           </p>

@@ -7,13 +7,14 @@ import { cn } from "@/lib/utils";
 
 const LOGO_GIF = "/Images/LogoGIF/dochomoeo_logo_animation.gif";
 const LOGO_STATIC = "/Images/LogoGIF/dochomoeo_logo_final_frame.png";
+const LOGO_DARK = "/Images/LogoGIF/dochomoeo_logo_dark.png";
 const LOGO_ANIMATION_DURATION_MS = 8390; // Exact duration of 29 frames in the logo GIF
 
 /**
  * DocHomoeo Brand Logo:
- * - Plays the official dochomoeo_logo_animation.gif from start to end once.
+ * - Plays the official dochomoeo_logo_animation.gif from start to end once in the light navbar.
  * - When playback finishes, smoothly halts on the final frame (dochomoeo_logo_final_frame.png).
- * - Avoids restarting the intro animation on session reloads or navigation.
+ * - For dark footers (tone="dark"), cleanly displays dochomoeo_logo_dark.png with zero background card.
  * - Activates a sleek glassy shining effect that sweeps across the logo every 2 seconds.
  */
 export function Wordmark({
@@ -34,6 +35,8 @@ export function Wordmark({
 
   useEffect(() => {
     setMounted(true);
+    if (isDark) return; // Footer logo stays static and clean without GIF overhead
+
     let alreadyCompleted = false;
     try {
       const currentBuild = process.env.NEXT_PUBLIC_BUILD_TIME;
@@ -70,7 +73,7 @@ export function Wordmark({
     }, 180);
 
     return () => clearTimeout(startTimer);
-  }, [isNavVisible]);
+  }, [isNavVisible, isDark]);
 
   return (
     <Link
@@ -82,59 +85,65 @@ export function Wordmark({
         className
       )}
     >
-      <div
-        className={cn(
-          "relative flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.03]",
-          isDark
-            ? "bg-white/95 backdrop-blur-md rounded-xl px-2.5 py-1 shadow-sm border border-white/30"
-            : ""
-        )}
-      >
+      <div className="relative flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.03]">
         {/* Logo Container holding both GIF and Final Frame - scaled up for maximum visibility without increasing navbar height */}
         <div className="relative h-[56px] sm:h-[62px] aspect-[890/560] overflow-hidden scale-[1.08] sm:scale-[1.16] origin-left">
-          {/* Animated GIF: only loads and plays from start when the navbar animates into view */}
-          {mounted && !isCompleted && gifSrc && (
+          {/* Dark Footer Variant: Pure transparent PNG with crisp contrast and no background block */}
+          {isDark ? (
             <img
-              src={gifSrc}
-              alt="DocHomoeo Logo"
-              width={890}
-              height={560}
-              className={cn(
-                "h-full w-full object-contain pointer-events-none select-none transition-opacity duration-300",
-                isCompleted ? "opacity-0" : "opacity-100"
-              )}
-            />
-          )}
-
-          {/* Static Final Frame: displayed once completed to prevent replaying from start */}
-          {mounted && isCompleted && (
-            <img
-              src={LOGO_STATIC}
+              src={LOGO_DARK}
               alt="DocHomoeo"
               width={890}
               height={560}
-              className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+              className="h-full w-full object-contain pointer-events-none select-none drop-shadow-sm"
             />
-          )}
+          ) : (
+            <>
+              {/* Animated GIF: only loads and plays from start when the navbar animates into view */}
+              {mounted && !isCompleted && gifSrc && (
+                <img
+                  src={gifSrc}
+                  alt="DocHomoeo Logo"
+                  width={890}
+                  height={560}
+                  className={cn(
+                    "h-full w-full object-contain pointer-events-none select-none transition-opacity duration-300",
+                    isCompleted ? "opacity-0" : "opacity-100"
+                  )}
+                />
+              )}
 
-          {/* Glassy Specular Shine Effect — activates once logo finishes and repeats every 2 seconds */}
-          {mounted && isCompleted && (
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 overflow-hidden"
-              style={{
-                WebkitMaskImage: `url('${LOGO_STATIC}')`,
-                maskImage: `url('${LOGO_STATIC}')`,
-                WebkitMaskSize: "contain",
-                maskSize: "contain",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-                WebkitMaskPosition: "center",
-                maskPosition: "center",
-              }}
-            >
-              <span className="logo-shine-beam absolute inset-y-0 w-2/5 bg-gradient-to-r from-transparent via-white/85 to-transparent pointer-events-none" />
-            </span>
+              {/* Static Final Frame: displayed once completed to prevent replaying from start */}
+              {mounted && isCompleted && (
+                <img
+                  src={LOGO_STATIC}
+                  alt="DocHomoeo"
+                  width={890}
+                  height={560}
+                  className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+                />
+              )}
+
+              {/* Glassy Specular Shine Effect — activates once logo finishes and repeats every 2 seconds */}
+              {mounted && isCompleted && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 overflow-hidden"
+                  style={{
+                    WebkitMaskImage: `url('${LOGO_STATIC}')`,
+                    maskImage: `url('${LOGO_STATIC}')`,
+                    WebkitMaskSize: "contain",
+                    maskSize: "contain",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskPosition: "center",
+                    maskPosition: "center",
+                  }}
+                >
+                  <span className="logo-shine-beam absolute inset-y-0 w-2/5 bg-gradient-to-r from-transparent via-white/85 to-transparent pointer-events-none" />
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>

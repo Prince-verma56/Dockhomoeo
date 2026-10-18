@@ -61,34 +61,59 @@ async function waitForTarget(variantId: number, isCancelled: () => boolean): Pro
   return target;
 }
 
-function makeCopy(source: HTMLElement, rect: DOMRect): HTMLElement {
-  const copy = source.cloneNode(true) as HTMLElement;
-  copy.removeAttribute("data-product-media");
-  copy.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
-  copy.setAttribute("aria-hidden", "true");
-  copy.inert = true;
+function extractSourceImage(source: HTMLElement): { imgEl: HTMLImageElement | null; src: string; rect: DOMRect } {
+  const imgEl = source instanceof HTMLImageElement ? source : source.querySelector<HTMLImageElement>("img");
+  const rect = imgEl && imgEl.offsetWidth > 10 ? imgEl.getBoundingClientRect() : source.getBoundingClientRect();
+  const src = imgEl?.currentSrc || imgEl?.src || "";
+  return { imgEl, src, rect };
+}
+
+function makeCopy(source: HTMLElement, rect: DOMRect, imageSrc: string): HTMLElement {
+  const container = document.createElement("div");
+  container.setAttribute("aria-hidden", "true");
+  container.inert = true;
+
+  if (imageSrc) {
+    const img = document.createElement("img");
+    img.src = imageSrc;
+    img.alt = "";
+    img.draggable = false;
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+    img.style.objectPosition = "center";
+    img.style.display = "block";
+    img.style.pointerEvents = "none";
+    img.style.userSelect = "none";
+    container.appendChild(img);
+  } else {
+    const rawCopy = source.cloneNode(true) as HTMLElement;
+    rawCopy.removeAttribute("data-product-media");
+    rawCopy.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
+    container.appendChild(rawCopy);
+  }
 
   const radius = getComputedStyle(source).borderRadius;
 
-  Object.assign(copy.style, {
+  Object.assign(container.style, {
     position: "fixed",
     left: "0px",
     top: "0px",
     width: `${rect.width}px`,
     height: `${rect.height}px`,
     margin: "0",
-    zIndex: "75",
+    zIndex: "100", // Float above SheetContent (z-[61]) and overlay
     pointerEvents: "none",
     overflow: "hidden",
     borderRadius: radius && radius !== "0px" ? radius : "20px",
-    boxShadow: "0 10px 28px -6px rgba(13, 90, 67, 0.22), 0 6px 14px -4px rgba(20, 37, 31, 0.14)",
-    border: "1px solid rgba(255, 255, 255, 0.5)",
+    boxShadow: "0 16px 36px -6px rgba(13, 90, 67, 0.3), 0 8px 18px -4px rgba(20, 37, 31, 0.16)",
+    border: "1px solid rgba(255, 255, 255, 0.6)",
     willChange: "transform, width, height, border-radius, opacity",
     transformOrigin: "center center",
     transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
   } satisfies Partial<CSSStyleDeclaration>);
 
-  return copy;
+  return container;
 }
 
 export function flyToCart(source: HTMLElement, variantId: number): Flight {
@@ -121,14 +146,14 @@ export function flyToCart(source: HTMLElement, variantId: number): Flight {
   };
 
   const done = (async () => {
-    const from = source.getBoundingClientRect();
+    const { src, rect: from } = extractSourceImage(source);
     // Nothing visible to fly (collapsed, off-screen, detached): skip quietly.
     if (from.width < 4 || from.height < 4 || from.bottom < 0 || from.top > window.innerHeight) return;
 
-    copy = makeCopy(source, from);
+    copy = makeCopy(source, from, src);
     document.body.appendChild(copy);
 
-    const liftOffset = Math.min(16, Math.max(8, from.height * 0.05));
+    const liftOffset = Math.min(14, Math.max(6, from.height * 0.04));
 
     // Phase 1: Lift off with tactile anticipation and organic shadow elevation
     const lift = gsap.to(copy, {

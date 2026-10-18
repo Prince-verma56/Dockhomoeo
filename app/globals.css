@@ -48,6 +48,66 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* Custom luxury themed scrollbar for modals, drawers, and panels */
+.dh-custom-scrollbar,
+[data-lenis-prevent].dh-custom-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(13, 90, 67, 0.45) transparent !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.dh-custom-scrollbar::-webkit-scrollbar,
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.dh-custom-scrollbar::-webkit-scrollbar-track,
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.dh-custom-scrollbar::-webkit-scrollbar-thumb,
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(13, 90, 67, 0.4) !important;
+  border-radius: 9999px !important;
+}
+
+.dh-custom-scrollbar::-webkit-scrollbar-thumb:hover,
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #0d5a43 !important;
+}
+
+/* Eliminate native Windows scrollbar arrow buttons across all custom scrollbars */
+.dh-custom-scrollbar::-webkit-scrollbar-button,
+[data-lenis-prevent]::-webkit-scrollbar-button,
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.dh-custom-scrollbar::-webkit-scrollbar-corner,
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+.dark .dh-custom-scrollbar,
+.dark [data-lenis-prevent].dh-custom-scrollbar {
+  scrollbar-color: rgba(52, 211, 153, 0.45) transparent !important;
+}
+
+.dark .dh-custom-scrollbar::-webkit-scrollbar-thumb,
+.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(52, 211, 153, 0.4) !important;
+}
+
+.dark .dh-custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(52, 211, 153, 0.8) !important;
+}
+
 /* Neutralize Radix / react-remove-scroll layout shift on Windows */
 html body[data-scroll-locked],
 body[data-scroll-locked] {
@@ -59,25 +119,6 @@ body[data-scroll-locked] {
 [data-radix-scroll-lock] {
   margin-right: 0px !important;
   padding-right: 0px !important;
-}
-
-/* Sleek custom scrollbars for drawers and search modals */
-.dh-custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(13, 90, 67, 0.25) transparent;
-}
-.dh-custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.dh-custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.dh-custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(13, 90, 67, 0.25);
-  border-radius: 9999px;
-}
-.dh-custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(13, 90, 67, 0.45);
 }
 
 html.lenis,

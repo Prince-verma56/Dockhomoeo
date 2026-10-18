@@ -397,25 +397,8 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
         {/* Central soft organic green-gold radial aura */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(218,234,223,0.45)_0%,transparent_100%)]" />
 
-        {/* Left flank botanical foliage with gentle blur */}
-        <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-25 lg:opacity-30">
-          <img
-            src="/Images/PNGS/HeroLeftLeaves.webp"
-            alt=""
-            draggable={false}
-            className="h-72 sm:h-96 w-auto object-contain filter blur-[0.6px] pointer-events-none select-none"
-          />
-        </div>
-
-        {/* Right flank botanical foliage with gentle blur */}
-        <div className="absolute -right-10 top-1/2 -translate-y-1/2 opacity-20 lg:opacity-25 scale-x-[-1]">
-          <img
-            src="/Images/PNGS/HeroLeftLeaves.webp"
-            alt=""
-            draggable={false}
-            className="h-64 sm:h-80 w-auto object-contain filter blur-[0.8px] pointer-events-none select-none"
-          />
-        </div>
+        {/* Ambient atmospheric aura without intrusive corner foliage */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.03] via-transparent to-emerald-500/[0.03] pointer-events-none" />
 
         {/* Soft top connectivity blend */}
         <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#f6f2ea] to-transparent pointer-events-none" />

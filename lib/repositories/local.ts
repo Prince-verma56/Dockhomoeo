@@ -707,6 +707,8 @@ export class LocalCartRepository implements ICartRepository {
 
 const articleSlug = (article: Article) => article.href.split("/").pop() ?? article.id;
 
+import { ALL_INSIGHT_ARTICLES, getDetailedInsightBySlug } from "@/data/mock/insightsData";
+
 // The drafts in data/mock/home.ts have no author or publication date. The
 // blog API can return both; until it does, none are shown rather than invented.
 const mapToApiInsightCard = (article: Article): ApiInsightCard => ({
@@ -731,25 +733,89 @@ const developmentBody = (article: Article) => `
 
 export class LocalInsightRepository implements IInsightRepository {
   async getInsights(page = 1, pageSize = 12, category?: string): Promise<ApiInsightListingResponse> {
-    await delay(300);
+    await delay(150);
 
-    // The blog API filters by category slug; the display name is accepted too.
+    const allCards: ApiInsightCard[] = [
+      ...ALL_INSIGHT_ARTICLES.map((d) => ({
+        id: d.id,
+        title: d.title,
+        slug: d.slug,
+        excerpt: d.excerpt,
+        coverImageUrl: d.coverImageUrl,
+        authorName: d.authorName,
+        publishedAt: d.publishedAt,
+        category: d.category,
+      })),
+      ...articles.map(mapToApiInsightCard),
+    ];
+
+    const uniqueCards = Array.from(new Map(allCards.map((c) => [c.slug, c])).values());
+
     const filtered = category
-      ? articles.filter((a) => slugify(a.category) === category || a.category.toLowerCase() === category.toLowerCase())
-      : articles;
-    const items = filtered.map(mapToApiInsightCard);
+      ? uniqueCards.filter(
+          (a) =>
+            slugify(a.category?.slug ?? a.category?.name ?? "") === category ||
+            a.category?.name.toLowerCase() === category.toLowerCase()
+        )
+      : uniqueCards;
 
     return {
-      items: items.slice((page - 1) * pageSize, page * pageSize),
-      total: items.length,
+      items: filtered.slice((page - 1) * pageSize, page * pageSize),
+      total: filtered.length,
       page,
       pageSize,
-      pageCount: Math.max(1, Math.ceil(items.length / pageSize)),
+      pageCount: Math.max(1, Math.ceil(filtered.length / pageSize)),
     };
   }
 
   async getBySlug(slug: string): Promise<ApiInsightDetail | null> {
-    await delay(300);
+    await delay(150);
+    const detailed = getDetailedInsightBySlug(slug);
+    if (detailed) {
+      const sectionsHtml = detailed.visualSections
+        .map(
+          (s) => `
+            <div class="insight-editorial-block mb-10">
+              ${s.badge ? `<span class="inline-block text-xs font-bold uppercase tracking-wider text-forest bg-sage-wash px-3 py-1 rounded-full mb-3">${s.badge}</span>` : ""}
+              <h2 class="text-2xl font-bold font-display text-ink mb-2">${s.heading}</h2>
+              ${s.subheading ? `<h3 class="text-base font-semibold text-muted-ink mb-4">${s.subheading}</h3>` : ""}
+              <div class="space-y-4 text-ink/85 leading-relaxed">
+                ${s.content.map((p) => `<p>${p}</p>`).join("")}
+              </div>
+              ${
+                s.bullets && s.bullets.length > 0
+                  ? `<ul class="mt-4 space-y-2 list-disc pl-5 text-ink/80">${s.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>`
+                  : ""
+              }
+            </div>
+          `
+        )
+        .join("");
+
+      return {
+        id: detailed.id,
+        title: detailed.title,
+        slug: detailed.slug,
+        excerpt: detailed.excerpt,
+        coverImageUrl: detailed.coverImageUrl,
+        authorName: detailed.authorName,
+        authorBio: `${detailed.authorRole}. Verified clinical contributor at DocHomoeo.`,
+        authorImageUrl: detailed.authorImageUrl,
+        publishedAt: detailed.publishedAt,
+        updatedAt: null,
+        category: detailed.category,
+        content: sectionsHtml,
+        seoTitle: `${detailed.title} | Health Insights | DocHomoeo`,
+        seoDescription: detailed.excerpt,
+        seo: {
+          title: detailed.title,
+          description: detailed.excerpt,
+          path: `/insights/${detailed.slug}`,
+          image: detailed.coverImageUrl,
+        },
+      };
+    }
+
     const article = articles.find((a) => articleSlug(a) === slug);
     if (!article) return null;
 
@@ -772,12 +838,24 @@ export class LocalInsightRepository implements IInsightRepository {
   }
 
   async getRelated(slug: string): Promise<ApiInsightListingResponse> {
-    await delay(200);
-    const related = articles.filter((a) => articleSlug(a) !== slug).slice(0, 3);
-    const items = related.map(mapToApiInsightCard);
+    await delay(150);
+    const pool: ApiInsightCard[] = [
+      ...ALL_INSIGHT_ARTICLES.filter((a) => a.slug !== slug).map((d) => ({
+        id: d.id,
+        title: d.title,
+        slug: d.slug,
+        excerpt: d.excerpt,
+        coverImageUrl: d.coverImageUrl,
+        authorName: d.authorName,
+        publishedAt: d.publishedAt,
+        category: d.category,
+      })),
+      ...articles.filter((a) => articleSlug(a) !== slug).map(mapToApiInsightCard),
+    ];
+    const unique = Array.from(new Map(pool.map((c) => [c.slug, c])).values()).slice(0, 3);
     return {
-      items,
-      total: related.length,
+      items: unique,
+      total: unique.length,
       page: 1,
       pageSize: 3,
       pageCount: 1,
@@ -822,7 +900,7 @@ export const mockDoctors: ApiDoctorCard[] = [
     id: 1,
     slug: "dr-rajesh-sharma",
     displayName: "Dr. Rajesh Sharma",
-    photoUrl: "/Images/ConsultentBG.webp",
+    photoUrl: "/Images/doctors/dr-rajesh-sharma.jpg",
     qualification: "BHMS, MD (Homeopathy)",
     specialization: "Chronic Diseases & Immunity",
     experienceYears: 16,
@@ -839,7 +917,7 @@ export const mockDoctors: ApiDoctorCard[] = [
     id: 2,
     slug: "dr-priya-nair",
     displayName: "Dr. Priya Nair",
-    photoUrl: "/Images/doctors/care-banner-agent.jpg",
+    photoUrl: "/Images/doctors/dr-priya-nair.jpg",
     qualification: "BHMS, Fellowship in Dermatology (Homeopathy)",
     specialization: "Skin, Hair & Hormonal Health",
     experienceYears: 12,
@@ -856,7 +934,7 @@ export const mockDoctors: ApiDoctorCard[] = [
     id: 3,
     slug: "dr-amit-verma",
     displayName: "Dr. Amit Verma",
-    photoUrl: "/Images/doctors/step-doctor-laptop.jpg",
+    photoUrl: "/Images/doctors/dr-amit-verma.jpg",
     qualification: "BHMS, PGCR",
     specialization: "Pediatrics & Respiratory Care",
     experienceYears: 14,
@@ -873,7 +951,7 @@ export const mockDoctors: ApiDoctorCard[] = [
     id: 4,
     slug: "dr-sunita-kulkarni",
     displayName: "Dr. Sunita Kulkarni",
-    photoUrl: "/Images/journal_women.webp",
+    photoUrl: "/Images/doctors/dr-sunita-kulkarni.jpg",
     qualification: "BHMS, MD (Homoeopathic Materia Medica)",
     specialization: "Women's Wellness & Lifestyle Disorders",
     experienceYears: 18,

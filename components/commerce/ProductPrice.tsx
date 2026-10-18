@@ -29,22 +29,24 @@ export function ProductPrice({
   const sizing = SIZES[size];
 
   return (
-    <p className={cn("flex items-baseline gap-2", className)}>
-      <span className={cn("font-semibold tracking-tight text-ink", sizing.current)}>
-        {formatPrice(price)}
-      </span>
-
-      {compareAtPrice ? (
-        <span className={cn("text-muted-ink line-through", sizing.compare)}>
-          {formatPrice(compareAtPrice)}
+    <div className={cn("flex flex-col justify-center min-w-0 leading-tight", className)}>
+      <div className="flex items-baseline gap-1.5 flex-wrap">
+        <span className={cn("font-bold tracking-tight text-ink", sizing.current)}>
+          {formatPrice(price)}
         </span>
-      ) : null}
+
+        {compareAtPrice ? (
+          <span className={cn("text-muted-ink line-through text-[11px] sm:text-xs", sizing.compare)}>
+            {formatPrice(compareAtPrice)}
+          </span>
+        ) : null}
+      </div>
 
       {showSaving && saving ? (
-        <span className={cn("font-medium text-forest", sizing.compare)}>
+        <span className="text-[10px] sm:text-[11px] font-bold text-forest mt-0.5 truncate">
           {saving}% off
         </span>
       ) : null}
-    </p>
+    </div>
   );
 }

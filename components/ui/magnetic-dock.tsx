@@ -77,8 +77,8 @@ function DockItem({
     // Scale based on distance - closer = larger
     const scale = useTransform(distance, [-magneticDistance, 0, magneticDistance], [1, maxScale, 1])
 
-    // Apply spring physics for smooth animation
-    const springConfig = { damping: 20, stiffness: 300, mass: 0.5 }
+    // Apply spring physics for smooth, instantaneous response
+    const springConfig = { damping: 26, stiffness: 500, mass: 0.18 }
     const smoothScale = useSpring(scale, springConfig)
 
     // Calculate the size based on scale
@@ -534,7 +534,7 @@ function MagneticItem({
         [1, maxScale, 1]
     )
 
-    const springConfig = { damping: 18, stiffness: 320, mass: 0.4 }
+    const springConfig = { damping: 26, stiffness: 500, mass: 0.18 }
     const smoothScale = useSpring(scale, springConfig)
 
     const y = useTransform(smoothScale, (s) => (s - 1) * -maxFloat)

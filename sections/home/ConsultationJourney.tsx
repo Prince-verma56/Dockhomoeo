@@ -242,24 +242,34 @@ export function ConsultationJourney() {
       ref={containerRef}
       id="how-it-works"
       aria-labelledby="journey-heading"
-      className="relative w-full overflow-hidden text-ink py-16 sm:py-20 lg:py-24"
+      className="relative w-full overflow-hidden text-ink py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#f7f5ed] via-[#f4f7f2] to-[#f6f2ea]"
     >
       {/* ----------------------------------------------------------------- */}
-      {/* 1. SCENIC BACKGROUND IMAGE (SimplePathBG.webp)                     */}
+      {/* 1. BRAND COLOR THEME AMBIENCE (Clean botanical elegance)           */}
       {/* ----------------------------------------------------------------- */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
-          src="/Images/SimplePathBG.webp"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="size-full object-cover object-[center_top] lg:object-center pointer-events-none select-none"
-        />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none">
+        {/* Soft herbal & warm sand radial glows */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_45%_at_15%_20%,rgba(13,90,67,0.06)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_85%_75%,rgba(195,160,100,0.045)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.85)_0%,transparent_65%)]" />
+
+        {/* Delicate botanical geometric rings watermark */}
+        <svg className="absolute -top-20 -right-20 w-[540px] h-[540px] text-forest/[0.035]" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="92" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3" />
+          <circle cx="100" cy="100" r="68" stroke="currentColor" strokeWidth="0.5" />
+          <circle cx="100" cy="100" r="44" stroke="currentColor" strokeWidth="0.75" strokeDasharray="1 3" />
+        </svg>
+
+        <svg className="absolute -bottom-24 -left-20 w-[480px] h-[480px] text-forest/[0.03]" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="88" stroke="currentColor" strokeWidth="0.75" strokeDasharray="2 4" />
+          <circle cx="100" cy="100" r="62" stroke="currentColor" strokeWidth="0.5" />
+        </svg>
+
         {/* Seamless atmospheric top blend connecting from Doctor Consultation */}
-        <div aria-hidden="true" className="dh-section-blend-top" />
+        <div className="dh-section-blend-top opacity-60" />
 
         {/* Seamless atmospheric bottom blend connecting to Trusted Brands */}
-        <div aria-hidden="true" className="dh-section-blend-bottom" />
+        <div className="dh-section-blend-bottom opacity-60" />
       </div>
 
       {/* ----------------------------------------------------------------- */}
@@ -270,7 +280,7 @@ export function ConsultationJourney() {
         {/* Eyebrow & Headline with Mask Container */}
         <div className="max-w-2xl">
           {/* Eyebrow Pill Badge */}
-          <div data-anim="eyebrow" className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur-md border border-white/80 px-4 py-1.5 shadow-2xs">
+          <div data-anim="eyebrow" className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md border border-forest/15 px-4 py-1.5 shadow-2xs">
             <span className="size-1.5 rounded-full bg-forest animate-pulse" />
             <span className="text-[0.74rem] font-bold tracking-[0.18em] text-forest uppercase">
               HOW IT WORKS
@@ -282,7 +292,7 @@ export function ConsultationJourney() {
             <h2
               id="journey-heading"
               data-anim="heading-mask"
-              className="font-display text-4xl sm:text-5xl lg:text-[3.35rem] font-bold tracking-tight text-[#11241b] leading-[1.08] drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"
+              className="font-display text-4xl sm:text-5xl lg:text-[3.35rem] font-bold tracking-tight text-[#11241b] leading-[1.08]"
             >
               A Simple Path to Better Health
             </h2>

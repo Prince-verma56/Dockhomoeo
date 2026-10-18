@@ -201,7 +201,7 @@ export function ProductCard({
           </div>
         ) : null}
 
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-line/40 pt-2.5">
+        <div className="mt-auto flex items-center justify-between gap-1.5 border-t border-line/40 pt-2.5">
           <ProductPrice
             price={product.price}
             compareAtPrice={product.compareAtPrice}
@@ -222,9 +222,8 @@ export function ProductCard({
             disabled={variantId === undefined}
             onClick={onAdd}
             className={cn(
-              "relative z-3 inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-forest px-3 text-[0.76rem] font-semibold text-white shadow-xs transition-all hover:bg-forest-deep active:scale-95",
+              "relative z-3 inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-forest px-2.5 sm:px-3 text-[0.76rem] font-semibold text-white shadow-xs transition-all hover:bg-forest-deep active:scale-95",
               "disabled:cursor-not-allowed disabled:bg-ink/15 disabled:text-ink/50",
-              "@max-[11.5rem]:w-8 @max-[11.5rem]:px-0",
               added && "bg-forest-deep",
             )}
           >
@@ -233,9 +232,7 @@ export function ProductCard({
             ) : (
               <ShoppingCart aria-hidden className="size-3.5" strokeWidth={2} />
             )}
-            {/* Two-up cards on a phone leave no room for the word; the
-                button keeps its accessible name either way. */}
-            <span className="@max-[11.5rem]:sr-only">{added ? "Added" : "Add"}</span>
+            <span>{added ? "Added" : "Add"}</span>
           </Button>
         </div>
       </div>

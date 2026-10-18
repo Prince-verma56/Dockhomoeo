@@ -383,51 +383,6 @@ export function HealthInsightsView({
                   </button>
                 </div>
 
-                {/* Three Trust Pillars from Image 2 with Enhanced Styling */}
-                <div className="pt-6 border-t border-line-soft/80 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-2.5 lg:gap-4 select-none">
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs">
-                      <Award className="size-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-ink leading-tight truncate">
-                        Expert reviewed
-                      </p>
-                      <p className="text-[10px] text-muted-ink truncate hidden sm:block">
-                        Qualified practitioners
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs">
-                      <ShieldCheck className="size-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-ink leading-tight truncate">
-                        Evidence based
-                      </p>
-                      <p className="text-[10px] text-muted-ink truncate hidden sm:block">
-                        Pharmacopeia backed
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs">
-                      <Leaf className="size-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-ink leading-tight truncate">
-                        Natural & holistic
-                      </p>
-                      <p className="text-[10px] text-muted-ink truncate hidden sm:block">
-                        Everyday wellness
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
               </div>
 
               {/* Right Column: Expansive Stone Arch Window & Library Composition */}
@@ -487,6 +442,83 @@ export function HealthInsightsView({
                   <div className="h-10 w-px bg-forest/30" />
                 </div>
 
+              </div>
+
+            </div>
+
+            {/* ============================================================== */}
+            {/* FULL-WIDTH TRUST & CREDIBILITY STRIP                          */}
+            {/* Shapes on left (no cursor pointer) & smart shapes on right     */}
+            {/* ============================================================== */}
+            <div className="mt-8 sm:mt-10 pt-6 sm:pt-7 border-t border-line-soft/80 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6 select-none relative z-10">
+              
+              {/* Left Side: Three Modern Minimalist Trust Shapes (Explicitly cursor-default, NOT links) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto">
+                {/* Shape 1: Expert reviewed */}
+                <div className="flex items-center gap-3 rounded-2xl bg-canvas/80 border border-line-soft/90 px-4 py-2.5 shadow-2xs cursor-default">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs">
+                    <Award className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-ink leading-tight">
+                      Expert reviewed
+                    </p>
+                    <p className="text-[10px] text-muted-ink">
+                      Qualified practitioners
+                    </p>
+                  </div>
+                </div>
+
+                {/* Shape 2: Evidence based */}
+                <div className="flex items-center gap-3 rounded-2xl bg-canvas/80 border border-line-soft/90 px-4 py-2.5 shadow-2xs cursor-default">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs">
+                    <ShieldCheck className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-ink leading-tight">
+                      Evidence based
+                    </p>
+                    <p className="text-[10px] text-muted-ink">
+                      Pharmacopeia backed
+                    </p>
+                  </div>
+                </div>
+
+                {/* Shape 3: Natural & holistic */}
+                <div className="flex items-center gap-3 rounded-2xl bg-canvas/80 border border-line-soft/90 px-4 py-2.5 shadow-2xs cursor-default">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs">
+                    <Leaf className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-ink leading-tight">
+                      Natural &amp; holistic
+                    </p>
+                    <p className="text-[10px] text-muted-ink">
+                      Everyday wellness
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Smart Minimalist Shapes Filling the Void Elegantly */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2.5 sm:gap-3 w-full lg:w-auto">
+                {/* Smart Shape A: Live Clinical Metric Pill */}
+                <div className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-sage-wash/50 px-3.5 py-1.5 text-xs font-semibold text-forest shadow-2xs cursor-default">
+                  <span className="size-2 rounded-full bg-forest animate-pulse" />
+                  <span>38+ Verified Guides</span>
+                </div>
+
+                {/* Smart Shape B: Materia Medica Certified */}
+                <div className="inline-flex items-center gap-2 rounded-full border border-line-soft/90 bg-canvas/80 px-3.5 py-1.5 text-xs font-medium text-muted-ink shadow-2xs cursor-default">
+                  <BookOpen className="size-3.5 text-forest" />
+                  <span>Pharmacopeia Grade</span>
+                </div>
+
+                {/* Smart Shape C: 100% Free & Open Access */}
+                <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-line-soft/90 bg-canvas/80 px-3 py-1.5 text-xs font-medium text-muted-ink shadow-2xs cursor-default">
+                  <CheckCircle2 className="size-3.5 text-emerald-600" />
+                  <span>Open Access</span>
+                </div>
               </div>
 
             </div>
@@ -769,7 +801,7 @@ export function HealthInsightsView({
             {CURATED_TOPICS.map((topic) => (
               <Link
                 key={topic.id}
-                href={`/insights?topic=${topic.slug}`}
+                href={`/insights/${topic.slug}`}
                 className="group rounded-3xl border border-line-soft bg-paper overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1.5 hover:border-forest/40 hover:shadow-lift flex flex-col justify-between select-none"
               >
                 <div>

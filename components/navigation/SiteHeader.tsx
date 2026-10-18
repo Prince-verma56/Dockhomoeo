@@ -82,7 +82,7 @@ export function SiteHeader() {
   }, [isHome]);
 
   const navItemClass = cn(
-    "inline-flex h-9 items-center rounded-full bg-transparent px-2.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors min-[1400px]:px-3.5 cursor-pointer",
+    "inline-flex h-9 items-center rounded-full bg-transparent px-2.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors duration-100 ease-out min-[1400px]:px-3.5 cursor-pointer",
     "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43]",
     !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]",
   );
@@ -118,9 +118,9 @@ export function SiteHeader() {
                 return (
                   <li key={item.href} className={cn(item.wideOnly && "hidden min-[1400px]:list-item")}>
                     <MagneticItem
-                      maxScale={1.12}
-                      magneticDistance={110}
-                      maxFloat={3}
+                      maxScale={1.06}
+                      magneticDistance={70}
+                      maxFloat={2}
                     >
                       <Link
                         href={item.href}
