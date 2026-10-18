@@ -295,7 +295,7 @@ export function HealthInsightsView({
   };
 
   return (
-    <div className="relative overflow-x-hidden bg-canvas text-ink selection:bg-forest/15 selection:text-forest-deep">
+    <div className="relative overflow-x-hidden bg-canvas text-ink">
       
       {/* ============================================================== */}
       {/* SECTION 1: IMMERSIVE EDITORIAL HERO (From Image 1 Inspiration)  */}

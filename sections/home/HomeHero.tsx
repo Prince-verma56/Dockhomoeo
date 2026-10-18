@@ -22,8 +22,8 @@ import { gsap } from "@/lib/animation/gsap";
  * 
  * Features:
  * 1. Background video from /Videos/HeroVideo2.mp4 at 1× normalized speed,
- *    playing full duration from start to end without trimming (HeroPlaybackProvider
- *    manages playback and synchronizes the copy reveal)
+ *    starting at 4.0s (first 4 seconds trimmed via code logic) through to completion
+ *    (HeroPlaybackProvider manages playback and synchronizes the copy reveal)
  * 2. Bottom play/mute UI removed completely
  * 3. Masked parallax reveal animation on headline, copy, and trust elements
  * 4. Subparagraph and bottom proof bar encased in subtle frosted glass for 100% legibility
@@ -220,8 +220,8 @@ export function HomeHero() {
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
-          src="/Videos/HeroVideo2.mp4"
-          // Video plays naturally at 1× normalized speed from start to completion without trimming.
+          src="/Videos/HeroVideo2.mp4#t=4"
+          // Video trimmed via code logic: skips the starting 4 seconds, starts playback from 4.0s
           muted
           playsInline
           preload="auto"

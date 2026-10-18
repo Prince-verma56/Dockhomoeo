@@ -46,6 +46,7 @@ import { refundRoutes } from "./modules/refunds.routes";
 import { shipWebhookRoutes, shiprocketRoutes } from "./modules/shiprocket.routes";
 import { shopMeRoutes, shopRoutes } from "./modules/shop.routes";
 import { UPLOAD_DIR, uploadRoutes } from "./modules/uploads.routes";
+import { feedbackAdminRoutes, feedbackRoutes } from "./modules/feedback.routes";
 
 export const app = express();
 
@@ -70,6 +71,7 @@ app.use("/api/ship", shipWebhookRoutes); // the courier's tracking updates
 // the shop
 app.use("/api/shop", optionalSession, shopRoutes); // open to everyone; doctors with a wholesale account see their prices
 app.use("/api/me", requireSignedIn, shopMeRoutes); // checkout, one order, saved addresses
+app.use("/api/feedback", feedbackRoutes); // user and patient feedback
 
 // consultations
 app.use("/api/care", careRoutes); // public: doctors and their free slots
@@ -128,6 +130,7 @@ app.use("/api/admin/inventory", inventoryRoutes);
 app.use("/api/admin/enquiries", enquiryRoutes);
 app.use("/api/admin/banners", bannerRoutes);
 app.use("/api/admin/blog", blogRoutes); // posts and their categories
+app.use("/api/admin/feedback", feedbackAdminRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

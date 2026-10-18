@@ -1,4 +1,4 @@
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Caveat } from "next/font/google";
 
 /**
  * Universal primary font family for DocHomoeo.
@@ -11,6 +11,12 @@ export const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+export const caveat = Caveat({
+  variable: "--font-signature",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["600", "700"],
+});
 
 export const warmSerif = plusJakartaSans;
 export const playfairDisplay = plusJakartaSans;

@@ -11,10 +11,12 @@ import React, {
 } from "react";
 
 /**
- * The hero video plays at normal 1× speed from start to end without trimming.
+ * The hero video plays at normal 1× speed, trimmed to start from 4.0 seconds
+ * (skipping the initial 4 seconds of footage entirely).
  * Timing is measured in seconds so the copy reveal stays in step with playback.
  */
 export const HERO_PLAYBACK_RATE = 1;
+export const HERO_START_TIME = 4;
 export const HERO_TRIM_SECONDS: number | null = null;
 
 /**
@@ -61,6 +63,16 @@ const HeroPlaybackContext = createContext<HeroPlaybackContextValue | null>(null)
 const applyRate = (video: HTMLVideoElement) => {
   video.defaultPlaybackRate = HERO_PLAYBACK_RATE;
   video.playbackRate = HERO_PLAYBACK_RATE;
+};
+
+const seekToStartTime = (video: HTMLVideoElement) => {
+  if (video.currentTime < HERO_START_TIME) {
+    try {
+      video.currentTime = HERO_START_TIME;
+    } catch {
+      // Ignored if media isn't ready; event listeners will retry
+    }
+  }
 };
 
 const showLastFrame = (video: HTMLVideoElement) => {
@@ -122,9 +134,21 @@ export function HeroPlaybackProvider({
     let revealTimer: ReturnType<typeof setTimeout> | undefined;
 
     const onLoadedMetadata = () => {
-      if (skip) showLastFrame(video);
+      if (skip) {
+        showLastFrame(video);
+      } else {
+        seekToStartTime(video);
+      }
+    };
+    const onCanPlay = () => {
+      if (!skip && video.currentTime < HERO_START_TIME) {
+        seekToStartTime(video);
+      }
     };
     const onPlaying = () => {
+      if (video.currentTime < HERO_START_TIME) {
+        seekToStartTime(video);
+      }
       setIsPlaying(true);
       clearTimeout(startTimer);
       clearTimeout(stallTimer);
@@ -140,6 +164,12 @@ export function HeroPlaybackProvider({
     const onTimeUpdate = () => {
       if (!(video.duration > 0)) return;
 
+      // Prevent playing earlier than the starting 4 seconds trim point
+      if (video.currentTime < HERO_START_TIME - 0.25) {
+        seekToStartTime(video);
+        return;
+      }
+
       if (revealedRef.current) return;
       const remaining = (video.duration - video.currentTime) / (video.playbackRate || 1);
       if (remaining <= REVEAL_LEAD_SECONDS) reveal();
@@ -151,6 +181,7 @@ export function HeroPlaybackProvider({
     };
 
     video.addEventListener("loadedmetadata", onLoadedMetadata);
+    video.addEventListener("canplay", onCanPlay);
     video.addEventListener("playing", onPlaying);
     video.addEventListener("pause", onPause);
     video.addEventListener("waiting", onWaiting);
@@ -162,6 +193,9 @@ export function HeroPlaybackProvider({
       if (video.readyState >= 1) showLastFrame(video);
     } else {
       applyRate(video);
+      if (video.readyState >= 1) {
+        seekToStartTime(video);
+      }
       startTimer = setTimeout(reveal, START_TIMEOUT_MS);
       video.play().catch(reveal);
     }
@@ -171,6 +205,7 @@ export function HeroPlaybackProvider({
       clearTimeout(stallTimer);
       clearTimeout(revealTimer);
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
+      video.removeEventListener("canplay", onCanPlay);
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("waiting", onWaiting);
@@ -197,13 +232,16 @@ export function HeroPlaybackProvider({
 
     applyRate(video);
     if (video.ended) {
-      video.currentTime = 0;
+      video.currentTime = HERO_START_TIME;
       setIsCompleted(false);
       video.play().catch(() => {});
       return;
     }
 
     if (video.paused) {
+      if (video.currentTime < HERO_START_TIME) {
+        seekToStartTime(video);
+      }
       video.play().catch(() => {});
     } else {
       video.pause();
@@ -224,7 +262,7 @@ export function HeroPlaybackProvider({
     const video = videoRef.current;
     if (!video) return;
     applyRate(video);
-    video.currentTime = 0;
+    video.currentTime = HERO_START_TIME;
     setIsCompleted(false);
     video.play().catch(() => {});
   }, []);

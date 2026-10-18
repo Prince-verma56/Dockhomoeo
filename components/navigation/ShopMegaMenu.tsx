@@ -4,7 +4,8 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import { Link001 } from "@/components/ui/skiper-ui/skiper40";
+import { Link000, Link001 } from "@/components/ui/skiper-ui/skiper40";
+import { MagneticItem } from "@/components/ui/magnetic-dock";
 import { cn } from "@/lib/utils";
 import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
 import { shopMenu, type NavLink } from "@/components/navigation/navLinks";
@@ -114,58 +115,65 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
         if (!rootRef.current?.contains(event.relatedTarget as Node | null)) close();
       }}
     >
-      <div
-        data-state={open ? "open" : "closed"}
-        className={cn(
-          "flex items-center rounded-full transition-colors",
-          (open || active) && "bg-[#0d5a43]/10 text-[#0d5a43]",
-        )}
+      <MagneticItem
+        maxScale={1.12}
+        magneticDistance={110}
+        maxFloat={3}
+        disabled={open}
       >
-        <Link
-          href="/products"
-          aria-current={active ? "page" : undefined}
-          onClick={() => close()}
-          className={cn(className, "pr-1.5 hover:bg-transparent", (open || active) && "text-[#0d5a43]")}
+        <div
+          data-state={open ? "open" : "closed"}
+          className={cn(
+            "flex items-center rounded-full transition-colors",
+            (open || active) && "bg-[#0d5a43]/10 text-[#0d5a43]",
+          )}
         >
-          Shop
-        </Link>
-        <button
-          ref={buttonRef}
-          type="button"
-          aria-expanded={open}
-          aria-controls={panelId}
-          aria-label="Shop menu"
-          onClick={() => {
-            clearTimer();
-            if (!open) {
-              setOpen(true);
-              setPinned(true);
-            } else if (!pinned) {
-              // Already open from hover: a click confirms it rather than
-              // snapping it shut under the pointer.
-              setPinned(true);
-            } else {
-              close();
-            }
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowDown") {
-              event.preventDefault();
-              setOpen(true);
-              setPinned(true);
-              // The panel mounts on this render; focus once it exists.
-              requestAnimationFrame(() => focusPanelLink(0));
-            }
-          }}
-          className="mr-1 grid size-7 place-items-center rounded-full text-current transition-colors hover:bg-[#0d5a43]/10"
-        >
-          <ChevronDown
-            aria-hidden
-            className={cn("size-4 transition-transform duration-200", open && "rotate-180")}
-            strokeWidth={2}
-          />
-        </button>
-      </div>
+          <Link
+            href="/products"
+            aria-current={active ? "page" : undefined}
+            onClick={() => close()}
+            className={cn(className, "pr-1.5 hover:bg-transparent", (open || active) && "text-[#0d5a43]")}
+          >
+            Shop
+          </Link>
+          <button
+            ref={buttonRef}
+            type="button"
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label="Shop menu"
+            onClick={() => {
+              clearTimer();
+              if (!open) {
+                setOpen(true);
+                setPinned(true);
+              } else if (!pinned) {
+                // Already open from hover: a click confirms it rather than
+                // snapping it shut under the pointer.
+                setPinned(true);
+              } else {
+                close();
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowDown") {
+                event.preventDefault();
+                setOpen(true);
+                setPinned(true);
+                // The panel mounts on this render; focus once it exists.
+                requestAnimationFrame(() => focusPanelLink(0));
+              }
+            }}
+            className="mr-1 grid size-7 place-items-center rounded-full text-current transition-colors hover:bg-[#0d5a43]/10"
+          >
+            <ChevronDown
+              aria-hidden
+              className={cn("size-4 transition-transform duration-200", open && "rotate-180")}
+              strokeWidth={2}
+            />
+          </button>
+        </div>
+      </MagneticItem>
 
       <AnimatePresence>
         {open ? (
@@ -221,16 +229,17 @@ function MenuColumn({
       <span id={headingId} className="mb-2.5 inline-block rounded-full bg-forest/8 px-2.5 py-0.5 text-[11px] font-semibold tracking-wider text-forest uppercase">
         {title}
       </span>
-      <ul aria-labelledby={headingId} className="flex flex-col gap-0.5">
+      <ul aria-labelledby={headingId} className="flex flex-col gap-1.5 py-1">
         {links.map((link) => (
           <li key={link.href}>
-            <Link
+            <Link000
               href={link.href}
               onClick={onNavigate}
-              className="block rounded-xl px-3 py-2 text-[0.875rem] font-medium text-ink transition-[background-color,color,transform] duration-200 hover:bg-forest/8 hover:text-forest hover:translate-x-1"
+              tone="ink"
+              className="w-fit py-1 px-1 text-[0.875rem] font-medium"
             >
               {link.label}
-            </Link>
+            </Link000>
           </li>
         ))}
       </ul>

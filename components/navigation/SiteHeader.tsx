@@ -16,6 +16,7 @@ import { useCart } from "@/components/providers/CartProvider";
 import { useFavourites } from "@/lib/favourites/favourites";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { AccountMenu } from "@/components/navigation/AccountMenu";
+import { MagneticDockContainer, MagneticItem } from "@/components/ui/magnetic-dock";
 
 /**
  * SiteHeader — one header for every route.
@@ -106,26 +107,34 @@ export function SiteHeader() {
         {/* Wordmark logo */}
         <Wordmark className="shrink-0" />
 
-        {/* Desktop navigation. Every label is a link; Shop's panel opens from
-            hover or its own chevron (components/navigation/ShopMegaMenu). */}
+        {/* Desktop navigation with magnetic dock animation. Every label is a link;
+            Shop's panel opens from hover or its own chevron (components/navigation/ShopMegaMenu). */}
         <nav aria-label="Main" className="mx-auto hidden lg:block">
-          <ul className="flex items-center gap-1 xl:gap-2">
-            <ShopMegaMenu className={navItemClass} active={isActivePath(pathname, "/products")} />
-            {primaryNav.slice(1).map((item: NavLink) => {
-              const active = isActivePath(pathname, item.href);
-              return (
-                <li key={item.href} className={cn(item.wideOnly && "hidden min-[1400px]:list-item")}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(navItemClass, active && "bg-[#0d5a43]/10 text-[#0d5a43]")}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          <MagneticDockContainer>
+            <ul className="flex items-center gap-1 xl:gap-2">
+              <ShopMegaMenu className={navItemClass} active={isActivePath(pathname, "/products")} />
+              {primaryNav.slice(1).map((item: NavLink) => {
+                const active = isActivePath(pathname, item.href);
+                return (
+                  <li key={item.href} className={cn(item.wideOnly && "hidden min-[1400px]:list-item")}>
+                    <MagneticItem
+                      maxScale={1.12}
+                      magneticDistance={110}
+                      maxFloat={3}
+                    >
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(navItemClass, active && "bg-[#0d5a43]/10 text-[#0d5a43]")}
+                      >
+                        {item.label}
+                      </Link>
+                    </MagneticItem>
+                  </li>
+                );
+              })}
+            </ul>
+          </MagneticDockContainer>
         </nav>
 
         {/* Right side controls: Search, Wishlist, Cart, Login */}
@@ -141,54 +150,73 @@ export function SiteHeader() {
           <SearchTrigger variant="icon" className="xl:hidden" />
           <SearchPalette />
 
-          {/* Wishlist Heart */}
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
-              !isPastHero && "hover:bg-white/40"
-            )}
-          >
-            <Link
-              href="/favourites"
-              aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
-              className="relative"
+          {/* Wishlist & Cart Action Icons with Magnetic Dock Animation */}
+          <MagneticDockContainer className="flex items-center gap-1.5 sm:gap-2">
+            {/* Wishlist Heart */}
+            <MagneticItem
+              maxScale={1.22}
+              magneticDistance={90}
+              maxFloat={4}
+              tooltip={savedCount > 0 ? `${savedCount} saved` : "Favourites"}
+              tooltipPosition="bottom"
             >
-              <Heart className="size-[18px]" strokeWidth={1.75} />
-              {savedCount > 0 ? (
-                <span
-                  aria-hidden
-                  className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#0d5a43] text-[0.625rem] font-bold text-white shadow-xs"
-                >
-                  {savedCount > 99 ? "99+" : savedCount}
-                </span>
-              ) : null}
-            </Link>
-          </Button>
-
-          {/* Cart with Red Badge */}
-          <Button
-            onClick={() => setIsOpen(true)}
-            variant="ghost"
-            size="icon"
-            aria-label={`Cart, ${itemCount} items`}
-            className={cn(
-              "relative size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
-              !isPastHero && "hover:bg-white/40"
-            )}
-          >
-            <ShoppingBag className="size-[18px]" strokeWidth={1.75} />
-            {itemCount > 0 && (
-              <span
-                aria-hidden
-                className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#e11d48] text-[0.625rem] font-bold text-white shadow-xs"
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
+                  !isPastHero && "hover:bg-white/40"
+                )}
               >
-                {itemCount > 99 ? "99+" : itemCount}
-              </span>
-            )}
-          </Button>
+                <Link
+                  href="/favourites"
+                  aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
+                  className="relative grid size-full place-items-center"
+                >
+                  <Heart className="size-[18px]" strokeWidth={1.75} />
+                  {savedCount > 0 ? (
+                    <span
+                      aria-hidden
+                      className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#0d5a43] text-[0.625rem] font-bold text-white shadow-xs"
+                    >
+                      {savedCount > 99 ? "99+" : savedCount}
+                    </span>
+                  ) : null}
+                </Link>
+              </Button>
+            </MagneticItem>
+
+            {/* Cart with Red Badge */}
+            <MagneticItem
+              maxScale={1.22}
+              magneticDistance={90}
+              maxFloat={4}
+              tooltip={itemCount > 0 ? `${itemCount} items` : "Cart"}
+              tooltipPosition="bottom"
+            >
+              <Button
+                onClick={() => setIsOpen(true)}
+                variant="ghost"
+                size="icon"
+                aria-label={`Cart, ${itemCount} items`}
+                className={cn(
+                  "relative size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
+                  !isPastHero && "hover:bg-white/40"
+                )}
+              >
+                <ShoppingBag className="size-[18px]" strokeWidth={1.75} />
+                {itemCount > 0 && (
+                  <span
+                    aria-hidden
+                    className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#e11d48] text-[0.625rem] font-bold text-white shadow-xs"
+                  >
+                    {itemCount > 99 ? "99+" : itemCount}
+                  </span>
+                )}
+              </Button>
+            </MagneticItem>
+          </MagneticDockContainer>
 
           {/* Account Menu or Login / Register */}
           {status === "loading" ? null : isAuthenticated ? (

@@ -14,6 +14,7 @@ import { ConsultationJourney } from "@/sections/home/ConsultationJourney";
 import { FeaturedCollection } from "@/sections/home/FeaturedCollection";
 import { TrustedBrands } from "@/sections/home/TrustedBrands";
 import { Testimonials, type HomeReview } from "@/sections/home/Testimonials";
+import { CommunityFeedback } from "@/sections/home/CommunityFeedback";
 import { HealthInsights } from "@/sections/home/HealthInsights";
 import { OfferBanner, type CatalogueOffer } from "@/sections/home/OfferBanner";
 
@@ -91,6 +92,7 @@ export default async function HomePage() {
         <TrustedBrands brands={brands} />
         <FeaturedCollection />
         <Testimonials reviews={reviews} />
+        <CommunityFeedback />
         <HealthInsights articles={insights?.items ?? []} />
         <OfferBanner offer={offer} />
       </main>

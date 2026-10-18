@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { plusJakartaSans } from "@/lib/fonts";
+import { plusJakartaSans, caveat } from "@/lib/fonts";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 import { CartProvider } from "@/components/providers/CartProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${plusJakartaSans.variable} antialiased`}
+      className={`${plusJakartaSans.variable} ${caveat.variable} antialiased`}
     >
       <head>
         {/* Runs before first paint: arms the scroll-reveal gate in

@@ -3,6 +3,46 @@
 @import "shadcn/tailwind.css";
 @import "lenis/dist/lenis.css";
 
+/* ==========================================================================
+   DOCHOMEO BRAND PALETTE TEXT SELECTION
+   Harmonized with the warm cream, sage-wash, and deep forest ink palette.
+   Replaces harsh solid black with a soothing, organic, editorial botanical wash.
+   ========================================================================== */
+::selection {
+  background-color: #d6e5d8;
+  color: #063b2d;
+}
+
+::-moz-selection {
+  background-color: #d6e5d8;
+  color: #063b2d;
+}
+
+/* On deep/dark surfaces (forest buttons, dark hero cards, badges), highlight in luminous ivory cream */
+.dark ::selection,
+[data-theme="dark"] ::selection,
+.bg-forest-deep ::selection,
+.bg-forest ::selection,
+.bg-ink ::selection,
+.bg-zinc-900 ::selection,
+.bg-black ::selection,
+[class*="bg-forest"] ::selection {
+  background-color: #f6f2ea;
+  color: #063b2d;
+}
+
+.dark ::-moz-selection,
+[data-theme="dark"] ::-moz-selection,
+.bg-forest-deep ::-moz-selection,
+.bg-forest ::-moz-selection,
+.bg-ink ::-moz-selection,
+.bg-zinc-900 ::-moz-selection,
+.bg-black ::-moz-selection,
+[class*="bg-forest"] ::-moz-selection {
+  background-color: #f6f2ea;
+  color: #063b2d;
+}
+
 html {
   scroll-behavior: auto !important;
   scrollbar-gutter: stable;
@@ -355,6 +395,11 @@ img[draggable="false"] {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.025em;
+  }
+
+  /* Elegant cursive/signature script face for human touches and personal doctor notes. */
+  .font-signature {
+    font-family: var(--font-signature), 'Caveat', 'Dancing Script', 'Alex Brush', 'Brush Script MT', cursive, sans-serif;
   }
 
   /* Procedural film grain. CSS only, no asset, kept under 4% so it reads as

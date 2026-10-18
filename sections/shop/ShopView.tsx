@@ -56,7 +56,7 @@ export function ShopView({ state, result }: ShopViewProps) {
 
             <h1
               id="shop-heading"
-              className="mt-3 font-serif text-4xl leading-[1.06] font-normal tracking-tight text-ink sm:text-5xl lg:text-[3.5rem]"
+              className="mt-3 font-display text-4xl leading-[1.06] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.5rem]"
             >
               {title}
             </h1>
