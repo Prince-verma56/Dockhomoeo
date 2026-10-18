@@ -85,14 +85,24 @@ export async function api<T>(
     ? `${path}${toQueryString(options.query)}`
     : `/api${path}${toQueryString(options.query)}`;
 
+  const isServer = typeof window === "undefined";
+  const configuredApi = process.env.API_URL;
+  const isLocalhost = !configuredApi || configuredApi.includes("localhost") || configuredApi.includes("127.0.0.1");
+  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+
+  // In production cloud environments (like Vercel), if API_URL points to localhost, no backend exists on port 4000.
+  // Instantly reject so resilient repositories use curated local data with 0ms delay instead of hanging on TCP timeouts.
+  if (isServer && isProduction && isLocalhost) {
+    throw new ApiError(503, "No backend instance configured at localhost in production.");
+  }
+
   // Browsers keep using the Next.js same-origin rewrite, so sessions and the
   // public API share one origin. Server Components run in Node, where fetch
   // cannot resolve a relative URL; their equivalent request uses the very
   // same backend origin configured by that rewrite.
-  const url =
-    typeof window === "undefined"
-      ? new URL(relativeUrl, process.env.API_URL ?? "http://localhost:4000").toString()
-      : relativeUrl;
+  const url = isServer
+    ? new URL(relativeUrl, configuredApi ?? "http://localhost:4000").toString()
+    : relativeUrl;
 
   // A FormData body (a file upload) is sent as multipart; the browser sets its boundary.
   const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
@@ -102,6 +112,9 @@ export async function api<T>(
   };
 
   let response: Response;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 1800);
+
   try {
     response = await fetch(url, {
       method: options.method ?? "GET",
@@ -109,13 +122,17 @@ export async function api<T>(
       body: isForm ? (options.body as FormData) : options.body ? JSON.stringify(options.body) : undefined,
       credentials: "include", // Ensures session cookies (dh_session, dh_user, dh_doctor) are sent
       cache: "no-store",
+      signal: controller.signal,
     });
   } catch (error) {
+    clearTimeout(timeoutId);
     // Next.js signals "render this route per request" (and similar) by
     // throwing from fetch; those must reach Next, not become a network error.
     unstable_rethrow(error);
-    // Otherwise fetch only rejects when no answer came back at all (offline, server down).
+    // Otherwise fetch only rejects when no answer came back at all (offline, server down, timed out).
     throw new ApiError(0, "We could not reach DocHomoeo. Check your connection and try again.");
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   const here = typeof window === "undefined" ? "" : window.location.pathname;

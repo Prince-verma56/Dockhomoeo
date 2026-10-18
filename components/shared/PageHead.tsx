@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { SplitHeading } from "@/components/shared/SplitHeading";
+import { Reveal } from "@/components/shared/Reveal";
 import { PageBreadcrumb, type Crumb } from "@/components/shared/PageBreadcrumb";
 
 type PageHeadProps = {
@@ -11,7 +12,7 @@ type PageHeadProps = {
   crumbs: Crumb[];
   eyebrow?: ReactNode;
   title: ReactNode;
-  /** Rise the title in on load (SplitHeading). Plain h1 otherwise. */
+  /** Rise the title in on load (SplitHeading). Plain h1 otherwise. Default: true */
   animate?: boolean;
   /** Supporting copy under the title, set at lede size and measure. */
   description?: ReactNode;
@@ -34,7 +35,7 @@ export function PageHead({
   crumbs,
   eyebrow,
   title,
-  animate = false,
+  animate = true,
   description,
   aside,
   children,
@@ -47,22 +48,40 @@ export function PageHead({
       className={cn("dh-head-arc dh-page-top", overlap && "dh-head-arc--overlap", className)}
     >
       <Container>
-        <PageBreadcrumb items={crumbs} className="mb-6" />
+        <Reveal immediate y={12} delay={0}>
+          <PageBreadcrumb items={crumbs} className="mb-6" />
+        </Reveal>
         <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
           <div className="min-w-0 max-w-3xl">
-            {eyebrow ? <Eyebrow className="mb-3.5">{eyebrow}</Eyebrow> : null}
+            {eyebrow ? (
+              <Reveal immediate y={12} delay={0.04}>
+                <Eyebrow className="mb-3.5">{eyebrow}</Eyebrow>
+              </Reveal>
+            ) : null}
             {animate ? (
-              <SplitHeading as="h1" id={id} immediate lines={[<Fragment key="title">{title}</Fragment>]} className="dh-title-page text-ink" />
+              <SplitHeading as="h1" id={id} immediate delay={0.08} lines={[<Fragment key="title">{title}</Fragment>]} className="dh-title-page text-ink" />
             ) : (
               <h1 id={id} className="dh-title-page text-ink">
                 {title}
               </h1>
             )}
-            {description ? <div className="dh-lede mt-4">{description}</div> : null}
+            {description ? (
+              <Reveal immediate y={14} delay={0.16}>
+                <div className="dh-lede mt-4">{description}</div>
+              </Reveal>
+            ) : null}
           </div>
-          {aside ? <div className="shrink-0">{aside}</div> : null}
+          {aside ? (
+            <Reveal immediate y={16} delay={0.22} className="shrink-0">
+              {aside}
+            </Reveal>
+          ) : null}
         </div>
-        {children ? <div className="mt-7">{children}</div> : null}
+        {children ? (
+          <Reveal immediate y={16} delay={0.26} className="mt-7">
+            {children}
+          </Reveal>
+        ) : null}
       </Container>
     </section>
   );

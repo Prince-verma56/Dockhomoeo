@@ -3,6 +3,8 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Reveal } from "@/components/shared/Reveal";
+import { SplitHeading } from "@/components/shared/SplitHeading";
 import type { ApiBrand } from "@/types/api/home";
 
 /**
@@ -410,23 +412,27 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
       <div className="relative z-10 mx-auto w-full max-w-[1560px] px-4 sm:px-6 lg:px-10 xl:px-12">
         {/* Header - Centered with Clean Frosted Eyebrow */}
         <div className="text-center max-w-xl mx-auto">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.2em] uppercase shadow-2xs">
-            <span className="size-1.5 rounded-full bg-[#0c503b]" />
-            <span>TRUSTED PARTNERS</span>
-          </div>
-          <h2
+          <Reveal y={12} delay={0}>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.2em] uppercase shadow-2xs">
+              <span className="size-1.5 rounded-full bg-[#0c503b]" />
+              <span>TRUSTED PARTNERS</span>
+            </div>
+          </Reveal>
+          <SplitHeading
             id="brands-heading"
+            lines={["Top Homeopathic Brands"]}
+            delay={0.06}
             className="mt-3 font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-[#071911] leading-tight"
-          >
-            Top Homeopathic Brands
-          </h2>
-          <p className="mt-2.5 text-[0.92rem] sm:text-[0.98rem] text-[#243d30] font-medium leading-relaxed max-w-lg mx-auto">
-            Authentic formulations from globally accredited manufacturers, tested for clinical purity and safety.
-          </p>
+          />
+          <Reveal y={16} delay={0.14}>
+            <p className="mt-2.5 text-[0.92rem] sm:text-[0.98rem] text-[#243d30] font-medium leading-relaxed max-w-lg mx-auto">
+              Authentic formulations from globally accredited manufacturers, tested for clinical purity and safety.
+            </p>
+          </Reveal>
         </div>
 
         {/* Brand Carousel with Navigation Arrows */}
-        <div className="relative mt-10 sm:mt-12 flex items-center">
+        <Reveal y={20} delay={0.18} scale={0.98} className="relative mt-10 sm:mt-12 flex items-center">
           
           {/* Left Arrow Button */}
           <button
@@ -465,7 +471,7 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
             <ChevronRight className="size-5 stroke-[2.2]" />
           </button>
 
-        </div>
+        </Reveal>
       </div>
     </section>
   );

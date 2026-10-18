@@ -1,9 +1,12 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import { Leaf, FlaskConical, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { Reveal } from "@/components/shared/Reveal";
+import { SplitHeading } from "@/components/shared/SplitHeading";
 import { shopHeading } from "@/lib/navigation/crumbs";
 import { Button } from "@/components/ui/button";
 import { activeFilterCount, listingHref, type SearchState } from "@/lib/search/searchState";
@@ -47,26 +50,33 @@ export function ShopView({ state, result }: ShopViewProps) {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#fbf9f4]/95 via-[#fbf9f4]/85 to-transparent sm:via-[#fbf9f4]/75" />
 
         <Container className="relative z-10">
-          <PageBreadcrumb items={crumbs} className="mb-4 text-xs font-medium text-muted-ink" structuredData={false} />
+          <Reveal immediate y={10} delay={0}>
+            <PageBreadcrumb items={crumbs} className="mb-4 text-xs font-medium text-muted-ink" structuredData={false} />
+          </Reveal>
 
           <div className="max-w-2xl">
-            <span className="inline-flex items-center rounded-full border border-[#ded5c2] bg-[#eee8db]/90 px-3 py-0.5 text-[0.6875rem] font-bold tracking-widest text-ink/75 uppercase backdrop-blur-xs">
-              SHOP
-            </span>
+            <Reveal immediate y={12} delay={0.04}>
+              <span className="inline-flex items-center rounded-full border border-[#ded5c2] bg-[#eee8db]/90 px-3 py-0.5 text-[0.6875rem] font-bold tracking-widest text-ink/75 uppercase backdrop-blur-xs">
+                SHOP
+              </span>
+            </Reveal>
 
-            <h1
+            <SplitHeading
               id="shop-heading"
+              lines={[<Fragment key="title">{title}</Fragment>]}
+              immediate
+              delay={0.08}
               className="mt-3 font-display text-4xl leading-[1.06] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.5rem]"
-            >
-              {title}
-            </h1>
+            />
 
-            <p className="mt-3 max-w-xl text-[0.9375rem] leading-relaxed text-[#55645d] sm:text-base">
-              Pure extracts. Gentle healing. Backed by nature and trusted homeopathy.
-            </p>
+            <Reveal immediate y={14} delay={0.16}>
+              <p className="mt-3 max-w-xl text-[0.9375rem] leading-relaxed text-[#55645d] sm:text-base">
+                Pure extracts. Gentle healing. Backed by nature and trusted homeopathy.
+              </p>
+            </Reveal>
 
             {/* Trust badges row */}
-            <div className="mt-6 flex flex-wrap items-center gap-4 sm:gap-7">
+            <Reveal immediate y={16} delay={0.22} stagger=":scope > *" className="mt-6 flex flex-wrap items-center gap-4 sm:gap-7">
               <div className="flex items-center gap-2.5">
                 <div className="grid size-9 place-items-center rounded-full border border-forest/20 bg-paper/85 text-forest shadow-xs backdrop-blur-xs">
                   <Leaf className="size-4" strokeWidth={1.8} />
@@ -93,7 +103,7 @@ export function ShopView({ state, result }: ShopViewProps) {
                   Trusted by<br />10K+ Families
                 </span>
               </div>
-            </div>
+            </Reveal>
           </div>
         </Container>
       </section>

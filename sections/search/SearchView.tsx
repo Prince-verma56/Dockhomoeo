@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, SearchX } from "lucide-react";
 import { Container } from "@/components/shared/Container";
+import { Reveal } from "@/components/shared/Reveal";
 import { SearchCombobox } from "@/components/search/SearchCombobox";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,47 +57,51 @@ export function SearchView({ state, result, suggestions }: SearchViewProps) {
           </Breadcrumb>
 
           {result === null ? (
-            <div className="max-w-3xl">
-              <h1
-                id="search-heading"
-                className="font-display text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
-              >
-                Search <span className="italic text-forest-deep">medicines</span>
-              </h1>
-              <p className="mt-4 max-w-xl text-base text-muted-ink sm:text-lg">
-                Look up a remedy by name, brand, dosage form or the health concern it
-                is used for.
-              </p>
-              <SearchCombobox
-                size="lg"
-                autoFocus
-                className="mt-8"
-                onNavigate={go}
-                pending={isPending}
-              />
-              <SuggestedSearches items={suggestions} className="mt-8" />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-              <div className="min-w-0">
+            <Reveal y={16}>
+              <div className="max-w-3xl">
                 <h1
                   id="search-heading"
-                  className="font-display text-3xl leading-tight tracking-tight wrap-break-word text-ink sm:text-4xl lg:text-[2.75rem]"
+                  className="font-display text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl"
                 >
-                  {result.total === 0 && activeFilterCount(state) === 0 ? "No results for " : "Results for "}
-                  <span className="italic text-forest-deep">“{state.q}”</span>
+                  Search <span className="italic text-forest-deep">medicines</span>
                 </h1>
-                <p role="status" className="mt-2 text-sm text-muted-ink">
-                  <ResultCount result={result} filtered={activeFilterCount(state) > 0} />
+                <p className="mt-4 max-w-xl text-base text-muted-ink sm:text-lg">
+                  Look up a remedy by name, brand, dosage form or the health concern it
+                  is used for.
                 </p>
+                <SearchCombobox
+                  size="lg"
+                  autoFocus
+                  className="mt-8"
+                  onNavigate={go}
+                  pending={isPending}
+                />
+                <SuggestedSearches items={suggestions} className="mt-8" />
               </div>
-              <SearchCombobox
-                defaultQuery={state.q}
-                className="lg:max-w-md"
-                onNavigate={go}
-                pending={isPending}
-              />
-            </div>
+            </Reveal>
+          ) : (
+            <Reveal y={16}>
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+                <div className="min-w-0">
+                  <h1
+                    id="search-heading"
+                    className="font-display text-3xl leading-tight tracking-tight wrap-break-word text-ink sm:text-4xl lg:text-[2.75rem]"
+                  >
+                    {result.total === 0 && activeFilterCount(state) === 0 ? "No results for " : "Results for "}
+                    <span className="italic text-forest-deep">“{state.q}”</span>
+                  </h1>
+                  <p role="status" className="mt-2 text-sm text-muted-ink">
+                    <ResultCount result={result} filtered={activeFilterCount(state) > 0} />
+                  </p>
+                </div>
+                <SearchCombobox
+                  defaultQuery={state.q}
+                  className="lg:max-w-md"
+                  onNavigate={go}
+                  pending={isPending}
+                />
+              </div>
+            </Reveal>
           )}
         </Container>
       </section>

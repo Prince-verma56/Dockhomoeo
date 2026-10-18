@@ -99,13 +99,43 @@ export async function FeaturedCollection() {
             size="md"
             lines={["Nature's care,", "in every form."]}
             description="Remedies grouped by how you prefer to take them — from dilutions to ointments."
+            className="max-w-xl"
           />
-          <Button asChild variant="brand" size="pill" className="w-fit shrink-0">
-            <Link href="/products">
-              Shop all products
-              <ArrowRight className="size-4" strokeWidth={1.8} />
-            </Link>
-          </Button>
+
+          {/* Right Header Alignment: Interactive Dosage Form Capsules & Shop CTA */}
+          <Reveal y={16} delay={0.12} className="flex flex-col items-start lg:items-end gap-3.5 shrink-0 max-w-lg w-full lg:w-auto">
+            {/* Quick Dosage Form Pills */}
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              {cards.map((c) => (
+                <Link
+                  key={c.form}
+                  href={`/products?form=${c.form}`}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-forest/15 bg-white/85 px-3 py-1.5 text-xs font-medium text-forest hover:bg-forest hover:text-white transition-all duration-200 shadow-2xs backdrop-blur-xs"
+                >
+                  <span className="size-1.5 rounded-full bg-forest/40 group-hover:bg-white transition-colors" />
+                  <span>{c.name}</span>
+                  {c.count ? (
+                    <span className="text-[10px] text-ink/45 group-hover:text-white/80 font-mono">
+                      ({c.count})
+                    </span>
+                  ) : null}
+                </Link>
+              ))}
+            </div>
+
+            {/* Bottom Row: Trust Guarantee + Primary CTA Button */}
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
+              <span className="text-[11.5px] font-medium tracking-wide text-ink/50 uppercase hidden sm:inline-block">
+                German & Indian Lab Standards
+              </span>
+              <Button asChild variant="brand" size="pill" className="w-fit shrink-0 shadow-xs">
+                <Link href="/products">
+                  Shop all products
+                  <ArrowRight className="size-4" strokeWidth={1.8} />
+                </Link>
+              </Button>
+            </div>
+          </Reveal>
         </div>
 
         <Reveal y={20}>

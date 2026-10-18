@@ -117,6 +117,16 @@ export function useSectionTimeline<T extends HTMLElement = HTMLElement>(
 
     try {
       ctx = gsap.context(() => {
+        const safeQuery = (s: string) => {
+          const trimmed = s.trim();
+          const selWithScope = /^[>+~]/.test(trimmed) ? `:scope ${trimmed}` : trimmed;
+          try {
+            return Array.from(root.querySelectorAll(selWithScope));
+          } catch {
+            return [];
+          }
+        };
+
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: root,
@@ -125,14 +135,14 @@ export function useSectionTimeline<T extends HTMLElement = HTMLElement>(
           },
           onComplete: () => {
             for (const { sel } of steps) {
-              const targets = root.querySelectorAll(sel);
+              const targets = safeQuery(sel);
               gsap.set(targets, { clearProps: "opacity,transform,clipPath" });
             }
           },
         });
 
         for (const { sel, variant, at = 0 } of steps) {
-          const targets = root.querySelectorAll(sel);
+          const targets = safeQuery(sel);
           if (targets.length === 0) continue;
 
           const v = VARIANTS[variant];

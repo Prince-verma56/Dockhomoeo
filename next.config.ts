@@ -3,10 +3,15 @@ import type { NextConfig } from "next";
 const API_URL = process.env.API_URL ?? "http://localhost:4000";
 
 const nextConfig: NextConfig = {
+  compress: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react", "gsap"],
+  },
   env: {
     NEXT_PUBLIC_BUILD_TIME: String(Date.now()),
   },
   images: {
+    formats: ["image/avif", "image/webp"],
     // The hero's social-proof avatars are remote placeholders. next/image
     // refuses remote hosts unless they are declared here.
     remotePatterns: [

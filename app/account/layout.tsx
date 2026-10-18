@@ -10,6 +10,7 @@ import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { loginHref } from "@/lib/auth/navigation";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/shared/Reveal";
 
 const accountNav = [
   { name: "Overview", href: "/account", icon: User },
@@ -56,63 +57,67 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
       <SiteHeader />
 
       <main id="main" className="flex-1 pb-20 sm:pb-24">
-        <div className="dh-head-arc dh-page-top mb-8 md:mb-12">
-          <Container width="wide">
-            <h1 className="dh-title-page text-ink">My account</h1>
-            <p className="mt-3 text-base text-muted-ink sm:text-lg">
-              {user ? `Hello, ${displayName(user)}. ` : null}Your consultations, orders, prescriptions, addresses and profile.
-            </p>
-          </Container>
-        </div>
+        <Reveal y={16}>
+          <div className="dh-head-arc dh-page-top mb-8 md:mb-12">
+            <Container width="wide">
+              <h1 className="dh-title-page text-ink">My account</h1>
+              <p className="mt-3 text-base text-muted-ink sm:text-lg">
+                {user ? `Hello, ${displayName(user)}. ` : null}Your consultations, orders, prescriptions, addresses and profile.
+              </p>
+            </Container>
+          </div>
+        </Reveal>
 
         <Container width="wide">
-          <div className="flex flex-col gap-8 md:flex-row lg:gap-14">
-            <aside className="w-full shrink-0 md:w-60 lg:w-64">
-              {/* Phones: a scrollable row of sections. From md: a column. */}
-              <nav aria-label="Account" className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
-                <ul className="flex gap-2 md:flex-col md:gap-1">
-                  {accountNav.map((item) => {
-                    const active = isCurrent(pathname, item.href);
-                    return (
-                      <li key={item.href} className="shrink-0">
-                        <Link
-                          href={item.href}
-                          aria-current={active ? "page" : undefined}
-                          className={cn(
-                            "group flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-forest/30 focus-visible:outline-none md:py-3",
-                            active
-                              ? "bg-forest/8 text-forest-deep"
-                              : "border border-line/70 text-muted-ink hover:bg-forest/5 hover:text-ink md:border-transparent",
-                          )}
-                        >
-                          <span className="flex items-center gap-3">
-                            <item.icon aria-hidden className={cn("size-4.5", active ? "text-forest" : "text-muted-ink")} strokeWidth={1.7} />
-                            {item.name}
-                          </span>
-                          <ChevronRight
-                            aria-hidden
-                            className={cn("hidden size-4 md:block", active ? "text-forest" : "text-transparent group-hover:text-muted-ink")}
-                          />
-                        </Link>
-                      </li>
-                    );
-                  })}
-                  <li className="shrink-0 md:mt-3 md:border-t md:border-line/70 md:pt-3">
-                    <button
-                      type="button"
-                      onClick={() => void logout()}
-                      className="flex w-full items-center gap-3 rounded-xl border border-line/70 px-4 py-2.5 text-sm font-medium whitespace-nowrap text-destructive transition-colors hover:bg-destructive/6 focus-visible:ring-2 focus-visible:ring-destructive/30 focus-visible:outline-none md:border-transparent md:py-3"
-                    >
-                      <LogOut aria-hidden className="size-4.5" strokeWidth={1.7} />
-                      Log out
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </aside>
+          <Reveal y={20}>
+            <div className="flex flex-col gap-8 md:flex-row lg:gap-14">
+              <aside className="w-full shrink-0 md:w-60 lg:w-64">
+                {/* Phones: a scrollable row of sections. From md: a column. */}
+                <nav aria-label="Account" className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
+                  <ul className="flex gap-2 md:flex-col md:gap-1">
+                    {accountNav.map((item) => {
+                      const active = isCurrent(pathname, item.href);
+                      return (
+                        <li key={item.href} className="shrink-0">
+                          <Link
+                            href={item.href}
+                            aria-current={active ? "page" : undefined}
+                            className={cn(
+                              "group flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-forest/30 focus-visible:outline-none md:py-3",
+                              active
+                                ? "bg-forest/8 text-forest-deep"
+                                : "border border-line/70 text-muted-ink hover:bg-forest/5 hover:text-ink md:border-transparent",
+                            )}
+                          >
+                            <span className="flex items-center gap-3">
+                              <item.icon aria-hidden className={cn("size-4.5", active ? "text-forest" : "text-muted-ink")} strokeWidth={1.7} />
+                              {item.name}
+                            </span>
+                            <ChevronRight
+                              aria-hidden
+                              className={cn("hidden size-4 md:block", active ? "text-forest" : "text-transparent group-hover:text-muted-ink")}
+                            />
+                          </Link>
+                        </li>
+                      );
+                    })}
+                    <li className="shrink-0 md:mt-3 md:border-t md:border-line/70 md:pt-3">
+                      <button
+                        type="button"
+                        onClick={() => void logout()}
+                        className="flex w-full items-center gap-3 rounded-xl border border-line/70 px-4 py-2.5 text-sm font-medium whitespace-nowrap text-destructive transition-colors hover:bg-destructive/6 focus-visible:ring-2 focus-visible:ring-destructive/30 focus-visible:outline-none md:border-transparent md:py-3"
+                      >
+                        <LogOut aria-hidden className="size-4.5" strokeWidth={1.7} />
+                        Log out
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </aside>
 
-            <div className="min-w-0 flex-1">{children}</div>
-          </div>
+              <div className="min-w-0 flex-1">{children}</div>
+            </div>
+          </Reveal>
         </Container>
       </main>
 

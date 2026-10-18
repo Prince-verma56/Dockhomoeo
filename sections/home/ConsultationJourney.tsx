@@ -174,6 +174,14 @@ export function ConsultationJourney() {
         "-=0.25"
       );
 
+      // 3b. Header live clinic card entrance
+      tl.fromTo(
+        "[data-anim='header-action-card']",
+        { opacity: 0, y: 16, scale: 0.97 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" },
+        "-=0.25"
+      );
+
       // 4. SVG wave path draws swiftly from left to right
       const wavePath = container.querySelector("[data-anim='wave-path']");
       if (wavePath) {
@@ -277,34 +285,87 @@ export function ConsultationJourney() {
       {/* ----------------------------------------------------------------- */}
       <div className="relative z-10 mx-auto w-full max-w-[1560px] px-4 sm:px-6 lg:px-10 xl:px-12">
         
-        {/* Eyebrow & Headline with Mask Container */}
-        <div className="max-w-2xl">
-          {/* Eyebrow Pill Badge */}
-          <div data-anim="eyebrow" className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md border border-forest/15 px-4 py-1.5 shadow-2xs">
-            <span className="size-1.5 rounded-full bg-forest animate-pulse" />
-            <span className="text-[0.74rem] font-bold tracking-[0.18em] text-forest uppercase">
-              HOW IT WORKS
-            </span>
-          </div>
+        {/* Top Header: Editorial Headline on Left + Live Clinic Action Hub on Right */}
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-12">
+          {/* Left Column: Eyebrow & Headline with Mask Container */}
+          <div className="max-w-2xl">
+            {/* Eyebrow Pill Badge */}
+            <div data-anim="eyebrow" className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md border border-forest/15 px-4 py-1.5 shadow-2xs">
+              <span className="size-1.5 rounded-full bg-forest animate-pulse" />
+              <span className="text-[0.74rem] font-bold tracking-[0.18em] text-forest uppercase">
+                HOW IT WORKS
+              </span>
+            </div>
 
-          {/* Mask Reveal Headline */}
-          <div className="overflow-hidden mt-3.5">
-            <h2
-              id="journey-heading"
-              data-anim="heading-mask"
-              className="font-display text-4xl sm:text-5xl lg:text-[3.35rem] font-bold tracking-tight text-[#11241b] leading-[1.08]"
+            {/* Mask Reveal Headline */}
+            <div className="overflow-hidden mt-3.5">
+              <h2
+                id="journey-heading"
+                data-anim="heading-mask"
+                className="font-display text-4xl sm:text-5xl lg:text-[3.35rem] font-bold tracking-tight text-[#11241b] leading-[1.08]"
+              >
+                A Simple Path to Better Health
+              </h2>
+            </div>
+
+            {/* Subtitle */}
+            <p
+              data-anim="subtitle"
+              className="mt-3 text-[0.95rem] sm:text-[1.02rem] text-[#33483e] leading-relaxed max-w-xl font-normal"
             >
-              A Simple Path to Better Health
-            </h2>
+              Consult verified homoeopathic doctors from the comfort of your home, track your treatment, and receive genuine medicines at your doorstep.
+            </p>
           </div>
 
-          {/* Subtitle */}
-          <p
-            data-anim="subtitle"
-            className="mt-3 text-[0.95rem] sm:text-[1.02rem] text-[#33483e] leading-relaxed max-w-xl font-normal"
+          {/* Right Column: Live Clinic & Quick Consultation Hub Card */}
+          <div
+            data-anim="header-action-card"
+            className="w-full lg:w-auto lg:max-w-md shrink-0 flex flex-col gap-3 rounded-2xl bg-white/85 hover:bg-white/95 backdrop-blur-xl border border-forest/15 p-4 sm:p-5 shadow-[0_12px_32px_rgba(20,40,30,0.06)] transition-all"
           >
-            Consult verified homoeopathic doctors from the comfort of your home, track your treatment, and receive genuine medicines at your doorstep.
-          </p>
+            {/* Top Row: Live Indicator + Verified Doctors Badge */}
+            <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] pb-3">
+              <div className="flex items-center gap-2">
+                <span className="relative flex size-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-600" />
+                </span>
+                <span className="text-[11px] font-bold tracking-wider text-forest uppercase">
+                  Live Clinic Active
+                </span>
+              </div>
+              <span className="rounded-full bg-forest/10 px-2.5 py-0.5 text-[10.5px] font-semibold text-forest">
+                Avg. wait &lt; 15 mins
+              </span>
+            </div>
+
+            {/* Middle Row: 3 Quick Guarantees */}
+            <div className="grid grid-cols-3 gap-2 py-1 text-center">
+              <div className="rounded-xl bg-forest/[0.04] p-2">
+                <p className="text-[11.5px] font-bold text-ink">100% Vetted</p>
+                <p className="text-[10px] text-[#485e52]">BHMS / MD</p>
+              </div>
+              <div className="rounded-xl bg-forest/[0.04] p-2">
+                <p className="text-[11.5px] font-bold text-ink">Video &amp; Audio</p>
+                <p className="text-[10px] text-[#485e52]">Private Call</p>
+              </div>
+              <div className="rounded-xl bg-forest/[0.04] p-2">
+                <p className="text-[11.5px] font-bold text-ink">Digital Rx</p>
+                <p className="text-[10px] text-[#485e52]">Valid Anywhere</p>
+              </div>
+            </div>
+
+            {/* Action Button */}
+            <Link
+              href="/doctors"
+              className="group/btn inline-flex items-center justify-between w-full rounded-xl bg-forest px-4.5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-forest/90 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <Video className="size-3.5" />
+                <span>Book Video Consultation</span>
+              </div>
+              <ArrowRight className="size-3.5 transition-transform group-hover/btn:translate-x-1" />
+            </Link>
+          </div>
         </div>
 
         {/* ----------------------------------------------------------------- */}

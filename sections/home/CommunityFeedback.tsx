@@ -16,6 +16,8 @@ import {
   Users,
 } from "lucide-react";
 import MorphPopover from "@/components/kokonutui/morph-popover";
+import { Reveal } from "@/components/shared/Reveal";
+import { SplitHeading } from "@/components/shared/SplitHeading";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_CARDS = [
@@ -83,38 +85,41 @@ export function CommunityFeedback() {
           {/* Left Column (7 cols): Editorial Typography, Arched Cards, Button */}
           <div className="lg:col-span-7 flex flex-col justify-center">
             {/* Eyebrow Row */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-white/80 px-3.5 py-1 text-xs font-semibold text-forest shadow-2xs backdrop-blur-xs">
-                <MessageSquare className="size-3.5 text-forest" />
-                <span className="tracking-wider uppercase text-[11px]">
-                  Patient Voice
+            <Reveal y={12} delay={0}>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-white/80 px-3.5 py-1 text-xs font-semibold text-forest shadow-2xs backdrop-blur-xs">
+                  <MessageSquare className="size-3.5 text-forest" />
+                  <span className="tracking-wider uppercase text-[11px]">
+                    Patient Voice
+                  </span>
                 </span>
-              </span>
-              <span className="h-px w-8 bg-ink/20 hidden sm:inline-block" />
-              <span className="text-xs sm:text-sm text-ink/75 font-medium">
-                Your experience. A healthier tomorrow.
-              </span>
-            </div>
+                <span className="h-px w-8 bg-ink/20 hidden sm:inline-block" />
+                <span className="text-xs sm:text-sm text-ink/75 font-medium">
+                  Your experience. A healthier tomorrow.
+                </span>
+              </div>
+            </Reveal>
 
-            {/* Headline with Plus Jakarta Sans (font-sans font-bold) */}
-            <h2
+            {/* Headline with Plus Jakarta Sans */}
+            <SplitHeading
               id="feedback-heading"
+              lines={[
+                "Share your experience,",
+                "help us care better.",
+              ]}
+              delay={0.06}
               className="mt-4 font-sans text-3xl sm:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-[#14251f] leading-[1.12]"
-            >
-              Share your experience, <br />
-              help us{" "}
-              <em className="font-display italic font-normal text-[#0d5a43]">
-                care better.
-              </em>
-            </h2>
+            />
 
-            <p className="mt-3.5 max-w-xl text-sm sm:text-base text-ink/80 leading-relaxed font-normal">
-              Share your feedback on consultations, product quality, or
-              remedies — and help us improve, for a healthier community.
-            </p>
+            <Reveal y={16} delay={0.14}>
+              <p className="mt-3.5 max-w-xl text-sm sm:text-base text-ink/80 leading-relaxed font-normal">
+                Share your feedback on consultations, product quality, or
+                remedies — and help us improve, for a healthier community.
+              </p>
+            </Reveal>
 
-            {/* 4 Arched Category Showcase Cards - Uniform, balanced, no misleading link arrows or tick badges */}
-            <div className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5 w-full max-w-2xl">
+            {/* 4 Arched Category Showcase Cards */}
+            <Reveal y={20} delay={0.2} stagger="button" className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5 w-full max-w-2xl">
               {CATEGORY_CARDS.map((card) => {
                 const Icon = card.icon;
                 const isSelected = activeCategory === card.id;
@@ -137,6 +142,7 @@ export function CommunityFeedback() {
                         src={card.image}
                         alt={card.label}
                         fill
+                        sizes="(max-width: 640px) 50vw, 160px"
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <div
@@ -168,10 +174,10 @@ export function CommunityFeedback() {
                   </button>
                 );
               })}
-            </div>
+            </Reveal>
 
             {/* Action Row: Balanced "Share your feedback" Button + Context Indicators */}
-            <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <Reveal y={16} delay={0.26} className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <MorphPopover
                 label="Share your feedback"
                 placeholder={`Tell our medical council about your thoughts on ${activeCategory.toLowerCase()}...`}
@@ -196,11 +202,11 @@ export function CommunityFeedback() {
                   <span>Direct to medical council</span>
                 </span>
               </div>
-            </div>
+            </Reveal>
           </div>
 
           {/* Right Column (5 cols): Signature Script + True Glassmorphism Card + Community Badge */}
-          <div className="lg:col-span-5 flex flex-col items-center lg:items-end justify-center">
+          <Reveal y={24} delay={0.16} className="lg:col-span-5 flex flex-col items-center lg:items-end justify-center">
             {/* Authentic Medical Council Signature Endorsement (Natural floating handwritten script, no artificial box/glassmorphism) */}
             <div className="w-full max-w-[340px] text-right mb-4 pr-2">
               <p className="font-signature text-3xl sm:text-[2.2rem] lg:text-[2.5rem] font-bold text-[#094231] leading-[1.12] drop-shadow-[0_1px_3px_rgba(255,255,255,0.95)] -rotate-1 select-none">
@@ -268,6 +274,7 @@ export function CommunityFeedback() {
                     src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=64&h=64&q=80"
                     alt="Community member"
                     fill
+                    sizes="26px"
                     className="object-cover"
                   />
                 </div>
@@ -276,6 +283,7 @@ export function CommunityFeedback() {
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64&q=80"
                     alt="Community member"
                     fill
+                    sizes="26px"
                     className="object-cover"
                   />
                 </div>
@@ -284,6 +292,7 @@ export function CommunityFeedback() {
                     src="/Images/doctors/care-support.jpg"
                     alt="Care Lead"
                     fill
+                    sizes="26px"
                     className="object-cover"
                   />
                 </div>
@@ -292,11 +301,11 @@ export function CommunityFeedback() {
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
 
         {/* Bottom 3 Trust Pillars spanning cleanly across the container as designed */}
-        <div className="mt-12 sm:mt-16 flex flex-wrap items-center justify-between gap-6 border-t border-ink/10 pt-6">
+        <Reveal y={16} delay={0.24} stagger=":scope > *" className="mt-12 sm:mt-16 flex flex-wrap items-center justify-between gap-6 border-t border-ink/10 pt-6">
           <div className="flex items-center gap-3">
             <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-forest/10 text-forest shadow-2xs">
               <ShieldCheck className="size-5" />
@@ -326,7 +335,7 @@ export function CommunityFeedback() {
               <p className="text-muted-ink text-[11px]">For a better care experience tomorrow</p>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {/* Bottom Edge Seamless Color Fade into Health Insights (#f6f2ea) - No hard blur seams */}

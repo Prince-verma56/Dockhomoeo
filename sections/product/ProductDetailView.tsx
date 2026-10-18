@@ -48,6 +48,7 @@ import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { productCrumbs } from "@/lib/navigation/crumbs";
 import { SafeRichText } from "@/components/shared/SafeRichText";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/shared/Reveal";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { QuantityStepper } from "@/components/commerce/QuantityStepper";
 import { PincodeCheck } from "@/components/commerce/PincodeCheck";
@@ -551,44 +552,48 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
         {/* 2. SECOND SECTION: KEY CLINICAL BENEFITS GRID                     */}
         {/* ================================================================ */}
         <section className="mt-12 sm:mt-16 pt-8 border-t border-line-soft/80">
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span className="text-[11px] font-bold tracking-wider uppercase text-[#0d5a43] dark:text-emerald-400">
-                CLINICAL ACTION & THERAPEUTIC TARGETS
+          <Reveal y={16}>
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[11px] font-bold tracking-wider uppercase text-[#0d5a43] dark:text-emerald-400">
+                  CLINICAL ACTION & THERAPEUTIC TARGETS
+                </span>
+                <h2 className="font-display text-xl sm:text-2xl font-bold text-ink dark:text-white mt-1">
+                  Key Clinical Benefits
+                </h2>
+              </div>
+              <span className="self-start sm:self-auto text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 inline-flex items-center gap-1.5">
+                <CheckCircle2 className="size-3.5" />
+                <span>Standardised Homeopathic Grade</span>
               </span>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-ink dark:text-white mt-1">
-                Key Clinical Benefits
-              </h2>
             </div>
-            <span className="self-start sm:self-auto text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 inline-flex items-center gap-1.5">
-              <CheckCircle2 className="size-3.5" />
-              <span>Standardised Homeopathic Grade</span>
-            </span>
-          </div>
+          </Reveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {clinicalProfile.keyBenefits.map((b: RemedyBenefit) => {
-              const Icon = BENEFIT_ICONS[b.icon] ?? ShieldCheck;
-              return (
-                <div
-                  key={b.title}
-                  className="flex flex-col justify-between p-5 rounded-3xl bg-white dark:bg-[#0c1e17] border border-line-soft/80 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-md hover:border-[#0d5a43]/30 transition-all group"
-                >
-                  <div>
-                    <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500/10 text-[#0d5a43] dark:text-emerald-400 mb-3.5 group-hover:bg-[#0d5a43] group-hover:text-white transition-colors">
-                      <Icon className="size-5" strokeWidth={1.9} />
-                    </span>
-                    <h3 className="text-sm font-bold text-ink dark:text-white leading-snug">
-                      {b.title}
-                    </h3>
-                    <p className="text-xs text-muted-ink dark:text-white/70 mt-1.5 leading-relaxed">
-                      {b.desc}
-                    </p>
+          <Reveal y={20} stagger={0.06}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {clinicalProfile.keyBenefits.map((b: RemedyBenefit) => {
+                const Icon = BENEFIT_ICONS[b.icon] ?? ShieldCheck;
+                return (
+                  <div
+                    key={b.title}
+                    className="flex flex-col justify-between p-5 rounded-3xl bg-white dark:bg-[#0c1e17] border border-line-soft/80 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-md hover:border-[#0d5a43]/30 transition-all group"
+                  >
+                    <div>
+                      <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500/10 text-[#0d5a43] dark:text-emerald-400 mb-3.5 group-hover:bg-[#0d5a43] group-hover:text-white transition-colors">
+                        <Icon className="size-5" strokeWidth={1.9} />
+                      </span>
+                      <h3 className="text-sm font-bold text-ink dark:text-white leading-snug">
+                        {b.title}
+                      </h3>
+                      <p className="text-xs text-muted-ink dark:text-white/70 mt-1.5 leading-relaxed">
+                        {b.desc}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </Reveal>
         </section>
 
         {/* ================================================================ */}
@@ -995,66 +1000,70 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
         {/* ================================================================ */}
         {/* 4. DOCTOR CONSULTATION ASSISTANCE CARD                            */}
         {/* ================================================================ */}
-        <section className="mt-10 sm:mt-12 rounded-3xl border border-[#0d5a43]/20 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#0d5a43] text-white shadow-xs">
-                <Stethoscope className="size-6" />
-              </span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display text-base sm:text-lg font-bold text-ink dark:text-white">
-                    Need Personalized Clinical Guidance?
-                  </h3>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0d5a43] dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
-                    <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                    Doctors Available
-                  </span>
+        <Reveal y={20}>
+          <section className="mt-10 sm:mt-12 rounded-3xl border border-[#0d5a43]/20 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div className="flex items-start gap-4">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#0d5a43] text-white shadow-xs">
+                  <Stethoscope className="size-6" />
+                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display text-base sm:text-lg font-bold text-ink dark:text-white">
+                      Need Personalized Clinical Guidance?
+                    </h3>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0d5a43] dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                      <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      Doctors Available
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-ink dark:text-white/70 mt-1 max-w-xl leading-relaxed">
+                    Connect with verified BHMS & MD Homoeopaths on DocHomoeo for individualized remedy selection, potencies, and dietary posology advice.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-muted-ink dark:text-white/70 mt-1 max-w-xl leading-relaxed">
-                  Connect with verified BHMS & MD Homoeopaths on DocHomoeo for individualized remedy selection, potencies, and dietary posology advice.
-                </p>
               </div>
-            </div>
 
-            <Link
-              href="/doctors"
-              className="w-full sm:w-auto h-11 px-6 rounded-full bg-[#0d5a43] hover:bg-[#074231] active:scale-[0.98] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all shrink-0"
-            >
-              <span>Consult Doctor Online</span>
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </section>
+              <Link
+                href="/doctors"
+                className="w-full sm:w-auto h-11 px-6 rounded-full bg-[#0d5a43] hover:bg-[#074231] active:scale-[0.98] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all shrink-0"
+              >
+                <span>Consult Doctor Online</span>
+                <ArrowRight className="size-4" />
+              </Link>
+            </div>
+          </section>
+        </Reveal>
 
         {/* ================================================================ */}
         {/* 5. "YOU MAY ALSO CONSIDER" 4-CARD FULL GRID                       */}
         {/* ================================================================ */}
         {product.related.length > 0 ? (
-          <section aria-labelledby="related-heading" className="mt-14 sm:mt-18 border-t border-line-soft pt-10 sm:pt-12">
-            <div className="mb-6 sm:mb-8 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <h2 id="related-heading" className="font-display text-xl sm:text-2xl font-bold tracking-tight text-ink dark:text-white">
-                  You may also consider
-                </h2>
-                <span className="hidden sm:inline-block h-px w-12 bg-line-soft" />
+          <Reveal y={24} stagger={0.06}>
+            <section aria-labelledby="related-heading" className="mt-14 sm:mt-18 border-t border-line-soft pt-10 sm:pt-12">
+              <div className="mb-6 sm:mb-8 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <h2 id="related-heading" className="font-display text-xl sm:text-2xl font-bold tracking-tight text-ink dark:text-white">
+                    You may also consider
+                  </h2>
+                  <span className="hidden sm:inline-block h-px w-12 bg-line-soft" />
+                </div>
+                <Link
+                  href="/products"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0d5a43] dark:text-emerald-400 underline-offset-4 hover:underline"
+                >
+                  <span>All products</span>
+                  <ArrowRight className="size-4" />
+                </Link>
               </div>
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0d5a43] dark:text-emerald-400 underline-offset-4 hover:underline"
-              >
-                <span>All products</span>
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
-            <ul className="grid grid-cols-2 gap-3 sm:gap-4.5 lg:grid-cols-4">
-              {product.related.map((item) => (
-                <li key={item.id} className="min-w-0">
-                  <ProductCard product={mapApiCardToProduct(item)} />
-                </li>
-              ))}
-            </ul>
-          </section>
+              <ul className="grid grid-cols-2 gap-3 sm:gap-4.5 lg:grid-cols-4">
+                {product.related.map((item) => (
+                  <li key={item.id} className="min-w-0">
+                    <ProductCard product={mapApiCardToProduct(item)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </Reveal>
         ) : null}
       </Container>
 

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { SplitHeading } from "@/components/shared/SplitHeading";
+import { Reveal } from "@/components/shared/Reveal";
 
 type SectionHeadingProps = {
   /** One entry per visual line of the display heading. */
@@ -49,27 +50,38 @@ export function SectionHeading({
         className,
       )}
     >
-      {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+      {eyebrow ? (
+        <Reveal y={12} delay={0}>
+          <Eyebrow>{eyebrow}</Eyebrow>
+        </Reveal>
+      ) : null}
 
       <SplitHeading
         as={as}
         id={id}
         lines={lines}
+        delay={0.06}
         className={cn("text-ink", SIZES[size], headingClassName)}
       />
 
       {description ? (
-        <p
-          className={cn(
-            "max-w-[46ch] text-[0.9375rem] leading-relaxed text-muted-ink",
-            align === "center" && "mx-auto",
-          )}
-        >
-          {description}
-        </p>
+        <Reveal y={16} delay={0.14}>
+          <p
+            className={cn(
+              "max-w-[46ch] text-[0.9375rem] leading-relaxed text-muted-ink",
+              align === "center" && "mx-auto",
+            )}
+          >
+            {description}
+          </p>
+        </Reveal>
       ) : null}
 
-      {action ? <div className="pt-1">{action}</div> : null}
+      {action ? (
+        <Reveal y={16} delay={0.22}>
+          <div className="pt-1">{action}</div>
+        </Reveal>
+      ) : null}
     </div>
   );
 }

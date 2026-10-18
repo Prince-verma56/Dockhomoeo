@@ -26,23 +26,15 @@ export const HERO_TRIM_SECONDS: number | null = null;
 const REVEAL_LEAD_SECONDS = 1;
 
 /** Delay before the hero text, leaves, and navbar reveal after video playback starts */
-const REVEAL_DELAY_MS = 2400;
+const REVEAL_DELAY_MS = 600;
 
 /** Playback never started (slow network, autoplay refused): show the copy anyway. */
-const START_TIMEOUT_MS = 3800;
+const START_TIMEOUT_MS = 1200;
 
 /** Playback stalled mid-way while buffering: show the copy rather than wait on the network. */
-const STALL_TIMEOUT_MS = 2500;
+const STALL_TIMEOUT_MS = 1000;
 
 const HERO_COMPLETED_KEY = "dochomoeo_hero_completed";
-
-// Immediately purge any legacy localStorage flags so the intro is never permanently blocked
-if (typeof window !== "undefined") {
-  try {
-    localStorage.removeItem(HERO_COMPLETED_KEY);
-    localStorage.removeItem("dochomoeo_hero_played");
-  } catch {}
-}
 
 const checkBuildSession = () => {
   if (typeof window === "undefined") return;
@@ -146,7 +138,8 @@ export function HeroPlaybackProvider({
     if (revealedRef.current) return;
     revealedRef.current = true;
     setRevealed(true);
-  }, []);
+    markCompleted();
+  }, [markCompleted]);
 
   const skipIntro = useCallback(() => {
     setSkippedByVisitor(true);

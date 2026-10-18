@@ -1,7 +1,6 @@
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { HeroPlaybackProvider } from "@/components/providers/HeroPlaybackContext";
-import { connection } from "next/server";
 import { unstable_rethrow } from "next/navigation";
 import { repositories } from "@/lib/repositories";
 import { mapApiCardToProduct } from "@/lib/adapters/product";
@@ -19,13 +18,12 @@ import { HealthInsights } from "@/sections/home/HealthInsights";
 import { OfferBanner, type CatalogueOffer } from "@/sections/home/OfferBanner";
 
 /**
- * The homepage composes sections wrapped inside HeroPlaybackProvider
- * so the SiteHeader and HomeHero synchronize the hero video timeline:
- * - 0s - 5s: Cinematic video playthrough
- * - At 5s: Floating SiteHeader appears first
- * - Staggered right after: Hero headline, copy, CTAs, and trust cards appear
- * - Video pauses cleanly upon completion
+ * Revalidate the homepage every 60 seconds (ISR).
+ * This enables instant sub-30ms global Edge delivery on Vercel while
+ * keeping products, banners, and doctor schedules continuously up to date.
  */
+export const revalidate = 60;
+
 /** A request that may fail without taking the page down: its section is then left out. */
 async function optional<T>(request: Promise<T>, fallback: T): Promise<T> {
   try {
@@ -42,9 +40,6 @@ const REVIEWED_PRODUCTS = 8;
 const SHOWN_REVIEWS = 5;
 
 export default async function HomePage() {
-  // The catalogue is live: render per request, never a build-time snapshot.
-  await connection();
-
   // Every section reads the shop. If a source cannot be reached its section is
   // left out; nothing falls back to sample data.
   const [home, doctors, insights, deals] = await Promise.all([

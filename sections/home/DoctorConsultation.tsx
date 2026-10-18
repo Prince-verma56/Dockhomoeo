@@ -14,6 +14,8 @@ import {
   Video,
 } from "lucide-react";
 import { formatRupees } from "@/lib/formatters/price";
+import { Reveal } from "@/components/shared/Reveal";
+import { SplitHeading } from "@/components/shared/SplitHeading";
 import type { ApiDoctorCard, ApiNextSlot } from "@/types/api/care";
 
 export type ConsultationData = {
@@ -151,7 +153,7 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
             ) : null}
 
             {/* Bottom Row: Doctor Card + Modality Pill (Sitting on the marble desk) */}
-            <div className="relative z-20 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mt-auto lg:pb-6 xl:pb-8">
+            <Reveal y={24} delay={0.1} className="relative z-20 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mt-auto lg:pb-6 xl:pb-8">
               
               {/* Component A: a real doctor (bottom-left), or an honest note while none is listed */}
               <div className="w-full sm:w-[310px] xl:w-[335px] shrink-0">
@@ -254,7 +256,7 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
                 </div>
               </div>
 
-            </div>
+            </Reveal>
 
           </div>
 
@@ -263,26 +265,30 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
           {/* ============================================================== */}
           <div className="lg:col-span-5 w-full flex flex-col justify-center lg:pl-10 xl:pl-16 2xl:pl-20">
             
-            {/* Eyebrow - Clean typography without generic AI dash lines */}
-            <div className="text-[0.78rem] font-semibold tracking-[0.16em] text-forest uppercase">
-              ONLINE CONSULTATION
-            </div>
+            {/* Eyebrow */}
+            <Reveal y={12} delay={0}>
+              <div className="text-[0.78rem] font-semibold tracking-[0.16em] text-forest uppercase">
+                ONLINE CONSULTATION
+              </div>
+            </Reveal>
 
             {/* Display Headline */}
-            <h2
+            <SplitHeading
               id="consultation-heading"
+              lines={["Expert Doctors.", "Personalised Care."]}
+              delay={0.06}
               className="mt-3 font-display text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.65rem] font-bold tracking-tight text-ink leading-[1.06]"
-            >
-              Expert Doctors.<br />Personalised Care.
-            </h2>
+            />
 
             {/* Subtitle */}
-            <p className="mt-3.5 text-[0.94rem] sm:text-[0.98rem] text-[#2c4035] leading-relaxed max-w-lg font-normal">
-              Consult experienced homeopathic doctors from the comfort of your home. Get personalised guidance for a healthier, happier tomorrow.
-            </p>
+            <Reveal y={16} delay={0.16}>
+              <p className="mt-3.5 text-[0.94rem] sm:text-[0.98rem] text-[#2c4035] leading-relaxed max-w-lg font-normal">
+                Consult experienced homeopathic doctors from the comfort of your home. Get personalised guidance for a healthier, happier tomorrow.
+              </p>
+            </Reveal>
 
             {/* 4 Feature Items with Circular Frosted Badges and Hairline Dividers */}
-            <div className="mt-6 flex flex-col divide-y divide-black/[0.06] border-y border-black/[0.06] max-w-lg">
+            <Reveal y={18} delay={0.22} stagger=":scope > *" className="mt-6 flex flex-col divide-y divide-black/[0.06] border-y border-black/[0.06] max-w-lg">
               
               {/* Item 1: the two modes the backend books (VIDEO, AUDIO) */}
               <div className="flex items-center gap-3.5 sm:gap-4 py-2.5 sm:py-3">
@@ -324,28 +330,30 @@ export function DoctorConsultation({ doctors, nextSlot }: ConsultationData) {
                 </span>
               </div>
 
-            </div>
+            </Reveal>
 
             {/* Action Buttons */}
-            <div className="mt-6 flex flex-wrap items-center gap-4 sm:gap-5">
-              <Link
-                href="/doctors"
-                className="inline-flex items-center justify-center gap-2.5 rounded-full bg-forest px-7 py-3 text-sm sm:text-base font-semibold text-white shadow-[0_6px_22px_rgba(12,80,59,0.3)] transition-all duration-300 hover:bg-forest-deep hover:shadow-[0_10px_30px_rgba(12,80,59,0.42)] active:scale-95"
-              >
-                <span>Find a Doctor</span>
-                <ArrowRight className="size-4 stroke-[2]" />
-              </Link>
+            <Reveal y={16} delay={0.28}>
+              <div className="mt-6 flex flex-wrap items-center gap-4 sm:gap-5">
+                <Link
+                  href="/doctors"
+                  className="inline-flex items-center justify-center gap-2.5 rounded-full bg-forest px-7 py-3 text-sm sm:text-base font-semibold text-white shadow-[0_6px_22px_rgba(12,80,59,0.3)] transition-all duration-300 hover:bg-forest-deep hover:shadow-[0_10px_30px_rgba(12,80,59,0.42)] active:scale-95"
+                >
+                  <span>Find a Doctor</span>
+                  <ArrowRight className="size-4 stroke-[2]" />
+                </Link>
 
-              <Link
-                href="#how-it-works"
-                className="group inline-flex items-center gap-3 text-sm sm:text-base font-semibold text-ink hover:text-forest transition-colors"
-              >
-                <span className="size-8 rounded-full bg-forest text-white grid place-items-center shadow-xs group-hover:scale-105 group-hover:bg-forest-deep transition-all">
-                  <Play className="size-3.5 fill-current ml-0.5" />
-                </span>
-                <span>How It Works</span>
-              </Link>
-            </div>
+                <Link
+                  href="#how-it-works"
+                  className="group inline-flex items-center gap-3 text-sm sm:text-base font-semibold text-ink hover:text-forest transition-colors"
+                >
+                  <span className="size-8 rounded-full bg-forest text-white grid place-items-center shadow-xs group-hover:scale-105 group-hover:bg-forest-deep transition-all">
+                    <Play className="size-3.5 fill-current ml-0.5" />
+                  </span>
+                  <span>How It Works</span>
+                </Link>
+              </div>
+            </Reveal>
 
           </div>
 

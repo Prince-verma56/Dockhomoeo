@@ -4,6 +4,7 @@ import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvide
 import { CartProvider } from "@/components/providers/CartProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { CartDrawer } from "@/components/commerce/CartDrawer";
+import { PageTransitionLoader } from "@/components/navigation/PageTransitionLoader";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -54,11 +55,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           // note about script tags; the script itself executes correctly.
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=document.documentElement;if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;d.classList.add("dh-motion");setTimeout(function(){if(!d.hasAttribute("data-motion-ready"))d.classList.remove("dh-motion")},4000)}catch(e){}})()`,
+            __html: `(function(){try{var d=document.documentElement;if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;d.classList.add("dh-motion");setTimeout(function(){if(!d.hasAttribute("data-motion-ready"))d.classList.remove("dh-motion")},1500)}catch(e){}})()`,
           }}
         />
       </head>
       <body suppressHydrationWarning className="flex min-h-full flex-col font-sans">
+        <PageTransitionLoader />
         <AuthProvider>
           <CartProvider>
             <SmoothScrollProvider>{children}</SmoothScrollProvider>

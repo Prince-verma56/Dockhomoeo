@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
+import { Reveal } from "@/components/shared/Reveal";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { Link001 } from "@/components/ui/skiper-ui/skiper40";
 import { useCart } from "@/components/providers/CartProvider";
@@ -336,265 +337,276 @@ export function CategoryShowcaseView({
         {/* SECTION 1: BROWSE BY HEALTH CONCERN (SIGNATURE BENTO GRID) */}
         {/* ========================================================== */}
         <section id="health-concerns" aria-labelledby="health-concerns-heading" className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <h2 id="health-concerns-heading" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink">
-                Browse by health concern
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-ink mt-1 max-w-xl">
-                Explore remedies for your specific wellness needs, carefully curated from trusted manufacturers.
-              </p>
-            </div>
+          <Reveal y={16}>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <h2 id="health-concerns-heading" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink">
+                  Browse by health concern
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-ink mt-1 max-w-xl">
+                  Explore remedies for your specific wellness needs, carefully curated from trusted manufacturers.
+                </p>
+              </div>
 
-            <div>
-              <Link001 href="/products" tone="forest" className="text-xs sm:text-sm font-semibold">
-                View all concerns
-              </Link001>
+              <div>
+                <Link001 href="/products" tone="forest" className="text-xs sm:text-sm font-semibold">
+                  View all concerns
+                </Link001>
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Bento Grid: 12-column layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4.5 sm:gap-5 items-stretch">
-            
-            {/* Left Tall Lead Card: IMMUNITY */}
-            <div className="lg:col-span-5 relative rounded-3xl overflow-hidden shadow-soft border border-line-soft group flex flex-col justify-between p-6 sm:p-8 min-h-[460px] lg:min-h-[520px]">
-              {/* Background Photo */}
-              <img
-                src={leadConcern.image}
-                alt={leadConcern.name}
-                className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none"
-                draggable={false}
-              />
-
-              {/* Gradient Overlay for crystal clear typography */}
-              <div className="absolute inset-0 bg-linear-to-b from-black/65 via-black/35 to-black/80 pointer-events-none" />
-
-              {/* Top Details */}
-              <div className="relative z-10 space-y-4">
-                <span className="inline-flex items-center rounded-full bg-amber-400/90 text-amber-950 font-black text-[10px] tracking-wider uppercase px-3 py-1 shadow-xs">
-                  MOST EXPLORED
-                </span>
-
-                <div>
-                  <h3 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                    {leadConcern.name}
-                  </h3>
-                  <p className="text-xs sm:text-sm font-semibold text-white/80 mt-1">
-                    {leadConcern.remedyCount} remedies
-                  </p>
-                </div>
-
-                {/* 3 Value bullets */}
-                <div className="space-y-3 pt-2">
-                  {leadConcern.benefits?.map((b) => {
-                    const Icon = b.icon;
-                    return (
-                      <div key={b.text} className="flex items-center gap-2.5 text-xs sm:text-[13px] text-white/90">
-                        <span className="grid size-6 place-items-center rounded-full bg-white/15 text-white backdrop-blur-xs shrink-0">
-                          <Icon className="size-3.5" />
-                        </span>
-                        <span className="font-medium drop-shadow-2xs">{b.text}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Bottom Action */}
-              <div className="relative z-10 pt-6">
-                <Link
-                  href={`/products?category=${leadConcern.slug}`}
-                  className="size-11 sm:size-12 rounded-full bg-cream text-forest-deep flex items-center justify-center shadow-soft transition-all duration-300 group-hover:scale-108 group-hover:bg-white"
-                  aria-label={`Explore ${leadConcern.name}`}
-                >
-                  <ArrowRight className="size-5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Right 7 Columns: 2x2 Grid + Bottom Wide Card */}
-            <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-5 justify-between">
+          <Reveal y={24} stagger={0.06}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4.5 sm:gap-5 items-stretch">
               
-              {/* 2x2 Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                {rightConcerns.slice(0, 4).map((item) => (
+              {/* Left Tall Lead Card: IMMUNITY */}
+              <div className="lg:col-span-5 relative rounded-3xl overflow-hidden shadow-soft border border-line-soft group flex flex-col justify-between p-6 sm:p-8 min-h-[460px] lg:min-h-[520px]">
+                {/* Background Photo */}
+                <img
+                  src={leadConcern.image}
+                  alt={leadConcern.name}
+                  className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none"
+                  draggable={false}
+                />
+
+                {/* Gradient Overlay for crystal clear typography */}
+                <div className="absolute inset-0 bg-linear-to-b from-black/65 via-black/35 to-black/80 pointer-events-none" />
+
+                {/* Top Details */}
+                <div className="relative z-10 space-y-4">
+                  <span className="inline-flex items-center rounded-full bg-amber-400/90 text-amber-950 font-black text-[10px] tracking-wider uppercase px-3 py-1 shadow-xs">
+                    MOST EXPLORED
+                  </span>
+
+                  <div>
+                    <h3 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                      {leadConcern.name}
+                    </h3>
+                    <p className="text-xs sm:text-sm font-semibold text-white/80 mt-1">
+                      {leadConcern.remedyCount} remedies
+                    </p>
+                  </div>
+
+                  {/* 3 Value bullets */}
+                  <div className="space-y-3 pt-2">
+                    {leadConcern.benefits?.map((b) => {
+                      const Icon = b.icon;
+                      return (
+                        <div key={b.text} className="flex items-center gap-2.5 text-xs sm:text-[13px] text-white/90">
+                          <span className="grid size-6 place-items-center rounded-full bg-white/15 text-white backdrop-blur-xs shrink-0">
+                            <Icon className="size-3.5" />
+                          </span>
+                          <span className="font-medium drop-shadow-2xs">{b.text}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Bottom Action */}
+                <div className="relative z-10 pt-6">
                   <Link
-                    key={item.id}
-                    href={`/products?category=${item.slug}`}
-                    className="group relative rounded-3xl overflow-hidden shadow-soft border border-line-soft h-[165px] sm:h-[180px] p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                    href={`/products?category=${leadConcern.slug}`}
+                    className="size-11 sm:size-12 rounded-full bg-cream text-forest-deep flex items-center justify-center shadow-soft transition-all duration-300 group-hover:scale-108 group-hover:bg-white"
+                    aria-label={`Explore ${leadConcern.name}`}
+                  >
+                    <ArrowRight className="size-5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right 7 Columns: 2x2 Grid + Bottom Wide Card */}
+              <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-5 justify-between">
+                
+                {/* 2x2 Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                  {rightConcerns.slice(0, 4).map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/products?category=${item.slug}`}
+                      className="group relative rounded-3xl overflow-hidden shadow-soft border border-line-soft h-[165px] sm:h-[180px] p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none"
+                        draggable={false}
+                      />
+                      <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/30 to-black/75 pointer-events-none" />
+
+                      <div className="relative z-10">
+                        <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-white/80 mt-0.5 font-medium">
+                          {item.remedyCount} remedies
+                        </p>
+                      </div>
+
+                      <div className="relative z-10">
+                        <span className="size-9 rounded-full bg-cream/90 text-forest-deep flex items-center justify-center shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-white">
+                          <ArrowRight className="size-4" />
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Bottom Full-Width Card: Joint & Bone */}
+                {rightConcerns[4] ? (
+                  <Link
+                    href={`/products?category=${rightConcerns[4].slug}`}
+                    className="group relative rounded-3xl overflow-hidden shadow-soft border border-line-soft h-[140px] sm:h-[150px] p-5 sm:p-6 flex items-center justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
                   >
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={rightConcerns[4].image}
+                      alt={rightConcerns[4].name}
                       className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none"
                       draggable={false}
                     />
-                    <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/30 to-black/75 pointer-events-none" />
+                    <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/45 to-black/30 pointer-events-none" />
 
                     <div className="relative z-10">
-                      <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight">
-                        {item.name}
+                      <h3 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                        {rightConcerns[4].name}
                       </h3>
-                      <p className="text-xs text-white/80 mt-0.5 font-medium">
-                        {item.remedyCount} remedies
+                      <p className="text-xs text-white/85 mt-1 font-medium">
+                        {rightConcerns[4].remedyCount} remedies
                       </p>
                     </div>
 
                     <div className="relative z-10">
-                      <span className="size-9 rounded-full bg-cream/90 text-forest-deep flex items-center justify-center shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-white">
-                        <ArrowRight className="size-4" />
+                      <span className="size-10 sm:size-11 rounded-full bg-cream/95 text-forest-deep flex items-center justify-center shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-white">
+                        <ArrowRight className="size-4.5" />
                       </span>
                     </div>
                   </Link>
-                ))}
+                ) : null}
+
               </div>
 
-              {/* Bottom Full-Width Card: Joint & Bone */}
-              {rightConcerns[4] ? (
-                <Link
-                  href={`/products?category=${rightConcerns[4].slug}`}
-                  className="group relative rounded-3xl overflow-hidden shadow-soft border border-line-soft h-[140px] sm:h-[150px] p-5 sm:p-6 flex items-center justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
-                >
-                  <img
-                    src={rightConcerns[4].image}
-                    alt={rightConcerns[4].name}
-                    className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none"
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/45 to-black/30 pointer-events-none" />
-
-                  <div className="relative z-10">
-                    <h3 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                      {rightConcerns[4].name}
-                    </h3>
-                    <p className="text-xs text-white/85 mt-1 font-medium">
-                      {rightConcerns[4].remedyCount} remedies
-                    </p>
-                  </div>
-
-                  <div className="relative z-10">
-                    <span className="size-10 sm:size-11 rounded-full bg-cream/95 text-forest-deep flex items-center justify-center shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-white">
-                      <ArrowRight className="size-4.5" />
-                    </span>
-                  </div>
-                </Link>
-              ) : null}
-
             </div>
-
-          </div>
+          </Reveal>
         </section>
 
         {/* ========================================================== */}
         {/* SECTION 2: CHOOSE YOUR FORMAT (5 CARDS WITH IMAGES & ICONS) */}
         {/* ========================================================== */}
         <section id="product-formats" aria-labelledby="product-formats-heading" className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <h2 id="product-formats-heading" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink">
-                Choose your format
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-ink mt-1 max-w-xl">
-                Same trusted remedies, in the form that suits you.
-              </p>
-            </div>
+          <Reveal y={16}>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <h2 id="product-formats-heading" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink">
+                  Choose your format
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-ink mt-1 max-w-xl">
+                  Same trusted remedies, in the form that suits you.
+                </p>
+              </div>
 
-            <div>
-              <Link001 href="/products" tone="forest" className="text-xs sm:text-sm font-semibold">
-                View all formats
-              </Link001>
+              <div>
+                <Link001 href="/products" tone="forest" className="text-xs sm:text-sm font-semibold">
+                  View all formats
+                </Link001>
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* 5 Format Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4.5">
-            {PRODUCT_FORMATS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.title}
-                  href={`/products?form=${item.form}`}
-                  className="group relative rounded-2xl border border-line-soft bg-paper overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1.5 hover:border-forest/40 hover:shadow-lift flex flex-col justify-between"
-                >
-                  {/* Top Image Showcase */}
-                  <div className="relative aspect-4/3 w-full overflow-hidden bg-cream/30">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-106 pointer-events-none select-none"
-                      draggable={false}
-                    />
-                  </div>
-
-                  {/* Bottom Format Details */}
-                  <div className="p-3.5 sm:p-4 bg-white flex items-center justify-between gap-2 border-t border-line-soft/60">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="grid size-8 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs shrink-0">
-                        <Icon className="size-4" />
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="font-display font-bold text-xs sm:text-[13px] text-ink truncate">
-                          {item.title}
-                        </h3>
-                        <p className="text-[10px] text-muted-ink mt-0.5">
-                          {item.count} products
-                        </p>
-                      </div>
+          <Reveal y={20} stagger={0.05}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4.5">
+              {PRODUCT_FORMATS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.title}
+                    href={`/products?form=${item.form}`}
+                    className="group relative rounded-2xl border border-line-soft bg-paper overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1.5 hover:border-forest/40 hover:shadow-lift flex flex-col justify-between"
+                  >
+                    {/* Top Image Showcase */}
+                    <div className="relative aspect-4/3 w-full overflow-hidden bg-cream/30">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-106 pointer-events-none select-none"
+                        draggable={false}
+                      />
                     </div>
 
-                    <span className="grid size-7 place-items-center rounded-full bg-canvas text-forest group-hover:bg-forest group-hover:text-cream transition-colors shrink-0">
-                      <ArrowRight className="size-3" />
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                    {/* Bottom Format Details */}
+                    <div className="p-3.5 sm:p-4 bg-white flex items-center justify-between gap-2 border-t border-line-soft/60">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="grid size-8 place-items-center rounded-xl bg-sage-wash text-forest shadow-2xs shrink-0">
+                          <Icon className="size-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <h3 className="font-display font-bold text-xs sm:text-[13px] text-ink truncate">
+                            {item.title}
+                          </h3>
+                          <p className="text-[10px] text-muted-ink mt-0.5">
+                            {item.count} products
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="grid size-7 place-items-center rounded-full bg-canvas text-forest group-hover:bg-forest group-hover:text-cream transition-colors shrink-0">
+                        <ArrowRight className="size-3" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </Reveal>
         </section>
 
         {/* ========================================================== */}
         {/* SECTION 3: POPULAR FOR EVERYDAY WELLNESS (CAROUSEL SLIDER)  */}
         {/* ========================================================== */}
         <section id="popular-remedies" aria-labelledby="popular-remedies-heading" className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <h2 id="popular-remedies-heading" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink">
-                Popular for everyday wellness
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-ink mt-1 max-w-xl">
-                Handpicked remedies from trusted manufacturers.
-              </p>
-            </div>
+          <Reveal y={16}>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <h2 id="popular-remedies-heading" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink">
+                  Popular for everyday wellness
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-ink mt-1 max-w-xl">
+                  Handpicked remedies from trusted manufacturers.
+                </p>
+              </div>
 
-            <div className="flex items-center gap-3">
-              <Link001 href="/products" tone="forest" className="text-xs sm:text-sm font-semibold mr-2">
-                View all products
-              </Link001>
+              <div className="flex items-center gap-3">
+                <Link001 href="/products" tone="forest" className="text-xs sm:text-sm font-semibold mr-2">
+                  View all products
+                </Link001>
 
-              {/* Prev / Next Carousel Controls */}
-              <button
-                type="button"
-                onClick={scrollPrev}
-                disabled={!canScrollPrev}
-                aria-label="Previous products"
-                className="grid size-9 place-items-center rounded-full border border-line-soft bg-paper text-ink shadow-2xs hover:border-forest/40 hover:text-forest transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={scrollNext}
-                disabled={!canScrollNext}
-                aria-label="Next products"
-                className="grid size-9 place-items-center rounded-full border border-line-soft bg-paper text-ink shadow-2xs hover:border-forest/40 hover:text-forest transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-              >
-                <ChevronRight className="size-4" />
-              </button>
+                {/* Prev / Next Carousel Controls */}
+                <button
+                  type="button"
+                  onClick={scrollPrev}
+                  disabled={!canScrollPrev}
+                  aria-label="Previous products"
+                  className="grid size-9 place-items-center rounded-full border border-line-soft bg-paper text-ink shadow-2xs hover:border-forest/40 hover:text-forest transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollNext}
+                  disabled={!canScrollNext}
+                  aria-label="Next products"
+                  className="grid size-9 place-items-center rounded-full border border-line-soft bg-paper text-ink shadow-2xs hover:border-forest/40 hover:text-forest transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Smooth Momentum Embla Carousel */}
-          <div ref={emblaRef} className="overflow-hidden pb-2 pt-1 -mx-2 px-2 select-none">
+          <Reveal y={20}>
+            <div ref={emblaRef} className="overflow-hidden pb-2 pt-1 -mx-2 px-2 select-none">
             <div className="flex gap-4 sm:gap-5">
               {DEFAULT_POPULAR_REMEDIES.map((product) => {
                 const isFavourited = favourites.isFavourite(product.slug);
@@ -715,6 +727,7 @@ export function CategoryShowcaseView({
               })}
             </div>
           </div>
+          </Reveal>
         </section>
 
         {/* ========================================================== */}
@@ -722,63 +735,65 @@ export function CategoryShowcaseView({
         {/* ========================================================== */}
         <section aria-labelledby="trust-props-heading" className="pt-2 border-t border-line-soft/80">
           <h2 id="trust-props-heading" className="sr-only">DocHomoeo Commitments</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5 sm:gap-6">
-            
-            {/* Box 1: Verified Manufacturers */}
-            <div className="group rounded-2xl border border-line-soft bg-paper p-5 flex items-center justify-between shadow-2xs hover:border-forest/30 hover:shadow-soft transition-all duration-300">
-              <div className="flex items-center gap-3.5">
-                <span className="grid size-11 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
-                  <Leaf className="size-5" />
-                </span>
-                <div>
-                  <h3 className="font-display font-bold text-sm text-ink leading-tight">
-                    Verified manufacturers
-                  </h3>
-                  <p className="text-xs text-muted-ink mt-0.5">
-                    Trusted names in homeopathy
-                  </p>
+          <Reveal y={20} stagger={0.06}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5 sm:gap-6">
+              
+              {/* Box 1: Verified Manufacturers */}
+              <div className="group rounded-2xl border border-line-soft bg-paper p-5 flex items-center justify-between shadow-2xs hover:border-forest/30 hover:shadow-soft transition-all duration-300">
+                <div className="flex items-center gap-3.5">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                    <Leaf className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-ink leading-tight">
+                      Verified manufacturers
+                    </h3>
+                    <p className="text-xs text-muted-ink mt-0.5">
+                      Trusted names in homeopathy
+                    </p>
+                  </div>
                 </div>
+                <ArrowRight className="size-4 text-muted-ink group-hover:text-forest group-hover:translate-x-1 transition-all" />
               </div>
-              <ArrowRight className="size-4 text-muted-ink group-hover:text-forest group-hover:translate-x-1 transition-all" />
-            </div>
 
-            {/* Box 2: Clear Product Information */}
-            <div className="group rounded-2xl border border-line-soft bg-paper p-5 flex items-center justify-between shadow-2xs hover:border-forest/30 hover:shadow-soft transition-all duration-300">
-              <div className="flex items-center gap-3.5">
-                <span className="grid size-11 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
-                  <FileText className="size-5" />
-                </span>
-                <div>
-                  <h3 className="font-display font-bold text-sm text-ink leading-tight">
-                    Clear product information
-                  </h3>
-                  <p className="text-xs text-muted-ink mt-0.5">
-                    Know what you&apos;re choosing
-                  </p>
+              {/* Box 2: Clear Product Information */}
+              <div className="group rounded-2xl border border-line-soft bg-paper p-5 flex items-center justify-between shadow-2xs hover:border-forest/30 hover:shadow-soft transition-all duration-300">
+                <div className="flex items-center gap-3.5">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                    <FileText className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-ink leading-tight">
+                      Clear product information
+                    </h3>
+                    <p className="text-xs text-muted-ink mt-0.5">
+                      Know what you&apos;re choosing
+                    </p>
+                  </div>
                 </div>
+                <ArrowRight className="size-4 text-muted-ink group-hover:text-forest group-hover:translate-x-1 transition-all" />
               </div>
-              <ArrowRight className="size-4 text-muted-ink group-hover:text-forest group-hover:translate-x-1 transition-all" />
-            </div>
 
-            {/* Box 3: Care When You Need It */}
-            <div className="group rounded-2xl border border-line-soft bg-paper p-5 flex items-center justify-between shadow-2xs hover:border-forest/30 hover:shadow-soft transition-all duration-300">
-              <div className="flex items-center gap-3.5">
-                <span className="grid size-11 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
-                  <Heart className="size-5" />
-                </span>
-                <div>
-                  <h3 className="font-display font-bold text-sm text-ink leading-tight">
-                    Care when you need it
-                  </h3>
-                  <p className="text-xs text-muted-ink mt-0.5">
-                    Expert guidance, always
-                  </p>
+              {/* Box 3: Care When You Need It */}
+              <div className="group rounded-2xl border border-line-soft bg-paper p-5 flex items-center justify-between shadow-2xs hover:border-forest/30 hover:shadow-soft transition-all duration-300">
+                <div className="flex items-center gap-3.5">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                    <Heart className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-ink leading-tight">
+                      Care when you need it
+                    </h3>
+                    <p className="text-xs text-muted-ink mt-0.5">
+                      Expert guidance, always
+                    </p>
+                  </div>
                 </div>
+                <ArrowRight className="size-4 text-muted-ink group-hover:text-forest group-hover:translate-x-1 transition-all" />
               </div>
-              <ArrowRight className="size-4 text-muted-ink group-hover:text-forest group-hover:translate-x-1 transition-all" />
-            </div>
 
-          </div>
+            </div>
+          </Reveal>
         </section>
 
       </Container>

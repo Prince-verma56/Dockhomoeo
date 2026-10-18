@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/shared/Reveal";
 
 export const metadata: Metadata = {
   title: "Quality standards",
@@ -66,66 +67,72 @@ export default function QualityPage() {
         {/* Principles Grid */}
         <section className="py-16 md:py-24 bg-canvas">
           <Container width="wide">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-10">
-              {principles.map((principle) => {
-                const Icon = principle.icon;
-                return (
-                  <div 
-                    key={principle.title} 
-                    className="group flex flex-col rounded-2xl bg-paper p-8 sm:p-10 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift border border-line-soft hover:border-forest/30"
-                  >
-                    <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-wash text-forest-deep transition-colors duration-300 group-hover:bg-forest-deep group-hover:text-white">
-                      <Icon className="size-8" />
+            <Reveal y={24} stagger={0.06}>
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-10">
+                {principles.map((principle) => {
+                  const Icon = principle.icon;
+                  return (
+                    <div 
+                      key={principle.title} 
+                      className="group flex flex-col rounded-2xl bg-paper p-8 sm:p-10 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift border border-line-soft hover:border-forest/30"
+                    >
+                      <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-sage-wash text-forest-deep transition-colors duration-300 group-hover:bg-forest-deep group-hover:text-white">
+                        <Icon className="size-8" />
+                      </div>
+                      <h3 className="mb-3 font-display text-2xl text-ink">
+                        {principle.title}
+                      </h3>
+                      <p className="text-muted-ink leading-relaxed text-base">
+                        {principle.description}
+                      </p>
                     </div>
-                    <h3 className="mb-3 font-display text-2xl text-ink">
-                      {principle.title}
-                    </h3>
-                    <p className="text-muted-ink leading-relaxed text-base">
-                      {principle.description}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </Reveal>
           </Container>
         </section>
 
         {/* Disclaimer / Responsible Info section */}
         <section className="py-16 md:py-24 bg-canvas border-t border-line-soft">
           <Container width="narrow">
-            <div className="rounded-2xl bg-paper p-8 sm:p-12 border border-line-soft shadow-soft text-center">
-              <h2 className="mb-8 font-display text-4xl text-ink sm:text-5xl">
-                Responsible Health Information
-              </h2>
-              <div className="space-y-6 text-xl text-muted-ink leading-relaxed max-w-2xl mx-auto">
-                <p>
-                  While we strive to provide comprehensive product details, DocHomoeo is a discovery and commerce platform, not a medical authority.
-                </p>
-                <p>
-                  The information presented on our platform—including health insights, product descriptions, and category guides—is intended for educational and organizational purposes only. It is not meant to replace professional medical advice, diagnosis, or treatment.
-                </p>
-                <p className="font-bold text-ink">
-                  Always seek the advice of your physician or qualified homoeopathic practitioner with any questions you may have regarding a medical condition or before starting any new treatment.
-                </p>
+            <Reveal y={20}>
+              <div className="rounded-2xl bg-paper p-8 sm:p-12 border border-line-soft shadow-soft text-center">
+                <h2 className="mb-8 font-display text-4xl text-ink sm:text-5xl">
+                  Responsible Health Information
+                </h2>
+                <div className="space-y-6 text-xl text-muted-ink leading-relaxed max-w-2xl mx-auto">
+                  <p>
+                    While we strive to provide comprehensive product details, DocHomoeo is a discovery and commerce platform, not a medical authority.
+                  </p>
+                  <p>
+                    The information presented on our platform—including health insights, product descriptions, and category guides—is intended for educational and organizational purposes only. It is not meant to replace professional medical advice, diagnosis, or treatment.
+                  </p>
+                  <p className="font-bold text-ink">
+                    Always seek the advice of your physician or qualified homoeopathic practitioner with any questions you may have regarding a medical condition or before starting any new treatment.
+                  </p>
+                </div>
               </div>
-            </div>
+            </Reveal>
           </Container>
         </section>
 
         {/* CTA */}
         <section className="py-24 text-center bg-forest-abyss">
           <Container width="narrow">
-            <h2 className="mb-10 font-display text-4xl text-white sm:text-5xl">
-              Trust in every step
-            </h2>
-            <div className="flex justify-center">
-              <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-sage-wash h-14 px-10 text-lg font-bold">
-                <Link href="/brands">
-                  View Our Brands
-                  <ArrowRight className="ml-3 size-5" />
-                </Link>
-              </Button>
-            </div>
+            <Reveal y={20} scale={0.98}>
+              <h2 className="mb-10 font-display text-4xl text-white sm:text-5xl">
+                Trust in every step
+              </h2>
+              <div className="flex justify-center">
+                <Button asChild size="lg" className="rounded-2xl bg-white text-forest-abyss hover:bg-sage-wash h-14 px-10 text-lg font-bold">
+                  <Link href="/brands">
+                    View Our Brands
+                    <ArrowRight className="ml-3 size-5" />
+                  </Link>
+                </Button>
+              </div>
+            </Reveal>
           </Container>
         </section>
       </main>

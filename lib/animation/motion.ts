@@ -9,25 +9,50 @@ export const EASE = {
   premium: "power3.out",
   /** Shorter settle. Cards, list items, small entrances. */
   soft: "power2.out",
+  /** Subtle spring/bounce for interactive elements. */
+  expressive: "back.out(1.2)",
+  /** Smooth gentle sine deceleration for ambient motion. */
+  smooth: "sine.out",
   /** Linear, for scrub-linked parallax only. */
   scrub: "none",
 } as const;
 
 export const DURATION = {
+  instant: 0.15,
   fast: 0.22,
+  normal: 0.36,
   medium: 0.52,
-  slow: 0.94,
+  slow: 0.85,
+  editorial: 1.05,
 } as const;
 
 /** Stagger steps, kept small so groups read as one gesture. */
 export const STAGGER = {
-  tight: 0.055,
-  line: 0.09,
-  card: 0.085,
+  tight: 0.045,
+  line: 0.08,
+  card: 0.075,
+  relaxed: 0.11,
 } as const;
 
-/** Shared cubic-bezier for Motion-driven micro-interactions. */
+/** Standard viewport trigger start positions for ScrollTrigger. */
+export const SCROLL_START = {
+  immediate: "top 95%",
+  section: "top 85%",
+  subtle: "top 80%",
+  deep: "top 72%",
+} as const;
+
+/** Shared cubic-bezier for Motion and CSS transitions. */
 export const EASE_PREMIUM_BEZIER = [0.22, 1, 0.36, 1] as const;
+export const EASE_SOFT_BEZIER = [0.25, 0.8, 0.25, 1] as const;
+
+/** Pre-computed CSS transition strings for micro-interactions. */
+export const TRANSITIONS = {
+  fast: "150ms cubic-bezier(0.22, 1, 0.36, 1)",
+  medium: "280ms cubic-bezier(0.22, 1, 0.36, 1)",
+  smooth: "450ms cubic-bezier(0.22, 1, 0.36, 1)",
+  card: "box-shadow 350ms cubic-bezier(0.22, 1, 0.36, 1), transform 350ms cubic-bezier(0.22, 1, 0.36, 1), border-color 350ms cubic-bezier(0.22, 1, 0.36, 1)",
+} as const;
 
 /**
  * Single source for the reduced-motion check. Read at animation setup time

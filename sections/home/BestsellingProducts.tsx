@@ -6,6 +6,8 @@ import { ArrowRight, BadgeCheck, Factory, MapPin, PackageSearch, RotateCw, Spark
 import { motion, useReducedMotion } from "motion/react";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { MomentumRail, RailSlide } from "@/components/kokonutui/carousel-cards";
+import { Reveal } from "@/components/shared/Reveal";
+import { SplitHeading } from "@/components/shared/SplitHeading";
 import type { Product } from "@/types/product";
 
 /** One of the shop's home rails (GET /api/shop/home `rails`), its cards already mapped for ProductCard. */
@@ -64,49 +66,55 @@ export function BestsellingProducts({
           {/* Editorial column */}
           <div className="flex shrink-0 flex-col justify-between lg:w-[20rem] xl:w-[23rem]">
             <div>
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-forest/20 bg-paper/80 px-3 py-1 text-[0.6875rem] font-semibold tracking-[0.14em] text-forest uppercase">
-                <Sparkles aria-hidden className="size-3.5" />
-                Top picks
-              </p>
-              <h2
+              <Reveal y={12} delay={0}>
+                <p className="inline-flex items-center gap-1.5 rounded-full border border-forest/20 bg-paper/80 px-3 py-1 text-[0.6875rem] font-semibold tracking-[0.14em] text-forest uppercase">
+                  <Sparkles aria-hidden className="size-3.5" />
+                  Top picks
+                </p>
+              </Reveal>
+              <SplitHeading
                 id="bestsellers-heading"
+                lines={["Bestselling", "medicines"]}
+                delay={0.06}
                 className="mt-4 font-display text-[2.5rem] leading-[1.02] tracking-tight text-ink sm:text-5xl xl:text-[3.5rem]"
-              >
-                Bestselling
-                <br />
-                medicines
-              </h2>
-              <p className="dh-body mt-4 text-[0.9375rem]">
-                Our most popular remedies, from the licensed manufacturers we stock.
-              </p>
-              <Link
-                href={rails[0]?.href ?? "/products"}
-                className="group mt-7 inline-flex h-12 items-center gap-2.5 rounded-full bg-forest pr-2 pl-6 text-sm font-semibold text-cream shadow-soft transition-[background-color,box-shadow] duration-300 hover:bg-forest-deep hover:shadow-lift"
-              >
-                View all bestsellers
-                <span className="grid size-8 place-items-center rounded-full bg-cream/15 transition-transform duration-300 group-hover:translate-x-0.5">
-                  <ArrowRight aria-hidden className="size-4" />
-                </span>
-              </Link>
+              />
+              <Reveal y={16} delay={0.16}>
+                <p className="dh-body mt-4 text-[0.9375rem]">
+                  Our most popular remedies, from the licensed manufacturers we stock.
+                </p>
+              </Reveal>
+              <Reveal y={16} delay={0.24}>
+                <Link
+                  href={rails[0]?.href ?? "/products"}
+                  className="group mt-7 inline-flex h-12 items-center gap-2.5 rounded-full bg-forest pr-2 pl-6 text-sm font-semibold text-cream shadow-soft transition-[background-color,box-shadow] duration-300 hover:bg-forest-deep hover:shadow-lift"
+                >
+                  View all bestsellers
+                  <span className="grid size-8 place-items-center rounded-full bg-cream/15 transition-transform duration-300 group-hover:translate-x-0.5">
+                    <ArrowRight aria-hidden className="size-4" />
+                  </span>
+                </Link>
+              </Reveal>
             </div>
 
-            <ul className="mt-9 hidden flex-col gap-4 border-t border-forest/12 pt-6 lg:flex">
-              {assurances.map(({ icon: Icon, title, detail }) => (
-                <li key={title} className="flex items-center gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full border border-line-soft bg-paper text-forest">
-                    <Icon aria-hidden className="size-4" strokeWidth={1.9} />
-                  </span>
-                  <span className="text-[0.8125rem] leading-tight text-ink">
-                    <span className="block font-semibold">{title}</span>
-                    <span className="text-xs text-muted-ink">{detail}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <Reveal y={18} delay={0.28} stagger="li">
+              <ul className="mt-9 hidden flex-col gap-4 border-t border-forest/12 pt-6 lg:flex">
+                {assurances.map(({ icon: Icon, title, detail }) => (
+                  <li key={title} className="flex items-center gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full border border-line-soft bg-paper text-forest">
+                      <Icon aria-hidden className="size-4" strokeWidth={1.9} />
+                    </span>
+                    <span className="text-[0.8125rem] leading-tight text-ink">
+                      <span className="block font-semibold">{title}</span>
+                      <span className="text-xs text-muted-ink">{detail}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
           </div>
 
           {/* Rail, or an honest panel when there is nothing to show */}
-          <div className="min-w-0 flex-1">
+          <Reveal y={24} delay={0.12} className="min-w-0 flex-1">
             {rail ? (
             <MomentumRail
               key={rail.key}
@@ -206,7 +214,7 @@ export function BestsellingProducts({
                 </div>
               </div>
             )}
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

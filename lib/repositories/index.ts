@@ -39,6 +39,14 @@ import type { ApiProductListingResponse, ApiSearchFilters, ApiSuggestResponse } 
 import type { ApiInsightDetail, ApiInsightListingResponse } from "@/types/api/insight";
 import type { ApiDoctorCard, ApiDoctorDetail, ApiDoctorSlot, ApiNextSlot, ApiConsultingStream } from "@/types/api/care";
 import type { ApiServiceabilityResult } from "@/types/api/serviceability";
+import type {
+  ApiQuote,
+  ApiQuoteLineInput,
+  ApiCheckoutPayload,
+  ApiCheckoutResponse,
+  ApiOrderDetail,
+  ApiPaymentMethod,
+} from "@/types/api/cart";
 
 export const usingMockData = false;
 
@@ -205,6 +213,49 @@ class ResilientServiceabilityRepository implements IServiceabilityRepository {
   }
 }
 
+class ResilientCartRepository implements ICartRepository {
+  private api = new ApiCartRepository();
+  private local = new LocalCartRepository();
+
+  async getQuote(
+    lines: ApiQuoteLineInput[],
+    couponCode?: string,
+    paymentMethod?: ApiPaymentMethod,
+  ): Promise<ApiQuote> {
+    try {
+      const quote = await this.api.getQuote(lines, couponCode, paymentMethod);
+      if (quote) return quote;
+      return await this.local.getQuote(lines, couponCode, paymentMethod);
+    } catch {
+      return this.local.getQuote(lines, couponCode, paymentMethod);
+    }
+  }
+
+  async checkout(payload: ApiCheckoutPayload): Promise<ApiCheckoutResponse> {
+    try {
+      return await this.api.checkout(payload);
+    } catch {
+      return this.local.checkout(payload);
+    }
+  }
+
+  async getOrder(orderId: number): Promise<ApiOrderDetail | null> {
+    try {
+      return await this.api.getOrder(orderId);
+    } catch {
+      return this.local.getOrder(orderId);
+    }
+  }
+
+  async payOrder(orderId: number): Promise<{ payUrl: string }> {
+    try {
+      return await this.api.payOrder(orderId);
+    } catch {
+      return this.local.payOrder();
+    }
+  }
+}
+
 // ── Dependency Injection Container ─────────────────────────────────────────────
 const auth = new ApiAuthRepository();
 
@@ -212,7 +263,7 @@ export const repositories = {
   home: new ResilientHomeRepository() as IHomeRepository,
   product: new ResilientProductRepository() as IProductRepository,
   search: new ResilientSearchRepository() as ISearchRepository,
-  cart: new ApiCartRepository() as ICartRepository,
+  cart: new ResilientCartRepository() as ICartRepository,
   serviceability: new ResilientServiceabilityRepository() as IServiceabilityRepository,
   insight: new ResilientInsightRepository() as IInsightRepository,
   auth: auth as IAuthRepository,

@@ -6,6 +6,7 @@ import { Container } from "@/components/shared/Container";
 import { ContactForm } from "./ContactForm";
 import { ContactFaqs } from "@/sections/contact/ContactFaqs";
 import { FAQ_GROUPS } from "@/data/faqs";
+import { Reveal } from "@/components/shared/Reveal";
 
 export const metadata: Metadata = {
   title: "Contact us",
@@ -40,51 +41,53 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px] lg:gap-16">
-              {/* Form Column */}
-              <div className="dh-pad-card-lg rounded-[1.5rem] border border-line-soft bg-paper shadow-soft">
-                <h2 className="dh-title-section mb-7 text-ink">
-                  Send us a message
-                </h2>
-                <ContactForm />
+            <Reveal y={24}>
+              <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px] lg:gap-16">
+                {/* Form Column */}
+                <div className="dh-pad-card-lg rounded-[1.5rem] border border-line-soft bg-paper shadow-soft">
+                  <h2 className="dh-title-section mb-7 text-ink">
+                    Send us a message
+                  </h2>
+                  <ContactForm />
+                </div>
+
+                {/* Info Column */}
+                <div className="flex flex-col gap-9 lg:pt-8">
+                  <div>
+                    <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-sage-wash text-forest-deep">
+                      <MessageSquare className="size-5" />
+                    </div>
+                    <h3 className="dh-title-card mb-2 text-ink">Order Support</h3>
+                    <p className="dh-body">
+                      Need help tracking your order or managing a return? Contact our support team directly.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-sage-wash text-forest-deep">
+                      <Mail className="size-5" />
+                    </div>
+                    <h3 className="dh-title-card mb-2 text-ink">General Enquiries</h3>
+                    <p className="dh-body">
+                      hello@dochomoeo.com<br/>
+                      We aim to respond within 24-48 hours.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-sage-wash text-forest-deep">
+                      <MapPin className="size-5" />
+                    </div>
+                    <h3 className="dh-title-card mb-2 text-ink">Corporate Office</h3>
+                    <p className="dh-body">
+                      DocHomoeo Wellness<br/>
+                      (Demo Location)<br/>
+                      Health & Commerce Hub
+                    </p>
+                  </div>
+                </div>
               </div>
-
-              {/* Info Column */}
-              <div className="flex flex-col gap-9 lg:pt-8">
-                <div>
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-sage-wash text-forest-deep">
-                    <MessageSquare className="size-5" />
-                  </div>
-                  <h3 className="dh-title-card mb-2 text-ink">Order Support</h3>
-                  <p className="dh-body">
-                    Need help tracking your order or managing a return? Contact our support team directly.
-                  </p>
-                </div>
-
-                <div>
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-sage-wash text-forest-deep">
-                    <Mail className="size-5" />
-                  </div>
-                  <h3 className="dh-title-card mb-2 text-ink">General Enquiries</h3>
-                  <p className="dh-body">
-                    hello@dochomoeo.com<br/>
-                    We aim to respond within 24-48 hours.
-                  </p>
-                </div>
-
-                <div>
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-sage-wash text-forest-deep">
-                    <MapPin className="size-5" />
-                  </div>
-                  <h3 className="dh-title-card mb-2 text-ink">Corporate Office</h3>
-                  <p className="dh-body">
-                    DocHomoeo Wellness<br/>
-                    (Demo Location)<br/>
-                    Health & Commerce Hub
-                  </p>
-                </div>
-              </div>
-            </div>
+            </Reveal>
           </Container>
           <div className="absolute top-0 right-0 -z-10 h-full w-full max-w-3xl bg-gradient-to-bl from-forest-deep/10 to-transparent blur-3xl opacity-60" />
         </section>

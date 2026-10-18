@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Container } from "@/components/shared/Container";
 import { Wordmark } from "@/components/navigation/Wordmark";
+import { Reveal } from "@/components/shared/Reveal";
 import { Link000 } from "@/components/ui/skiper-ui/skiper40";
 import { BellButton } from "@/components/kokonutui/bell-button";
 import {
@@ -82,7 +83,8 @@ export function SiteFooter() {
     // The top hairline separates the footer from pages that end on a dark section.
     <footer className="border-t border-white/10 bg-forest-abyss text-cream">
       <Container width="wide" className="pt-12 pb-7 md:pt-14 md:pb-8">
-        <div className="grid gap-10 md:grid-cols-2 md:gap-x-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)_minmax(0,1.2fr)] lg:gap-x-14">
+        <Reveal y={18}>
+          <div className="grid gap-10 md:grid-cols-2 md:gap-x-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)_minmax(0,1.2fr)] lg:gap-x-14">
           {/* --------------------------------------------------- brand area */}
           <div>
             <Wordmark tone="dark" />
@@ -221,6 +223,7 @@ export function SiteFooter() {
             </div>
           </div>
         </div>
+      </Reveal>
 
         {/* --------------------------------------------------- brand signature watermark */}
         <div
