@@ -82,7 +82,7 @@ export function SiteHeader() {
   }, [isHome]);
 
   const navItemClass = cn(
-    "inline-flex h-9 items-center rounded-full bg-transparent px-2.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors min-[1400px]:px-3.5",
+    "inline-flex h-9 items-center rounded-full bg-transparent px-2.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors min-[1400px]:px-3.5 cursor-pointer",
     "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43]",
     !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]",
   );
@@ -105,7 +105,7 @@ export function SiteHeader() {
         </div>
 
         {/* Wordmark logo */}
-        <Wordmark className="shrink-0" />
+        <Wordmark className="shrink-0" isNavVisible={isNavVisible} />
 
         {/* Desktop navigation with magnetic dock animation. Every label is a link;
             Shop's panel opens from hover or its own chevron (components/navigation/ShopMegaMenu). */}

@@ -55,6 +55,83 @@ const SCOPES: { key: Scope; label: string }[] = [
 
 const GROUP_LABELS = { product: "Medicines", category: "Categories", brand: "Brands" } as const;
 
+const CONCERN_IMAGE_MAP: Record<string, string> = {
+  immunity: "/Images/HealthGoals/immunity.webp",
+  "skin-care": "/Images/HealthGoals/skincare.webp",
+  skincare: "/Images/HealthGoals/skincare.webp",
+  "hair-care": "/Images/HealthGoals/haircare.webp",
+  haircare: "/Images/HealthGoals/haircare.webp",
+  digestive: "/Images/HealthGoals/digestive.webp",
+  "women-s-health": "/Images/HealthGoals/womens-health.webp",
+  womens: "/Images/HealthGoals/womens-health.webp",
+  "women-health": "/Images/HealthGoals/womens-health.webp",
+  respiratory: "/Images/HealthGoals/respiratory.webp",
+  "sleep-stress": "/Images/HealthGoals/sleep-stress.webp",
+  sleep: "/Images/HealthGoals/sleep-stress.webp",
+  children: "/Images/HealthGoals/children.webp",
+  "joint-bone": "/Images/HealthGoals/joint-bone.webp",
+};
+
+export function getConcernImage(slug?: string, name?: string): string | null {
+  if (slug) {
+    const s = slug.toLowerCase();
+    for (const [key, path] of Object.entries(CONCERN_IMAGE_MAP)) {
+      if (s.includes(key)) return path;
+    }
+  }
+  if (name) {
+    const n = name.toLowerCase();
+    if (n.includes("immunit")) return "/Images/HealthGoals/immunity.webp";
+    if (n.includes("skin")) return "/Images/HealthGoals/skincare.webp";
+    if (n.includes("hair")) return "/Images/HealthGoals/haircare.webp";
+    if (n.includes("digest") || n.includes("gut")) return "/Images/HealthGoals/digestive.webp";
+    if (n.includes("women")) return "/Images/HealthGoals/womens-health.webp";
+    if (n.includes("breath") || n.includes("respirat")) return "/Images/HealthGoals/respiratory.webp";
+    if (n.includes("sleep") || n.includes("calm") || n.includes("stress")) return "/Images/HealthGoals/sleep-stress.webp";
+    if (n.includes("child")) return "/Images/HealthGoals/children.webp";
+    if (n.includes("joint") || n.includes("bone")) return "/Images/HealthGoals/joint-bone.webp";
+  }
+  return null;
+}
+
+const BRAND_LOGO_MAP: Record<string, string> = {
+  sbl: "/Images/brands/sbl-logo.png",
+  "dr-reckeweg": "/Images/brands/reckeweg-logo.png",
+  reckeweg: "/Images/brands/reckeweg-logo.png",
+  bakson: "/Images/brands/bakson-logo.png",
+  boiron: "/Images/brands/boiron-logo.png",
+  schwabe: "/Images/brands/schwabe-logo.png",
+  "lord-s": "/Images/brands/lords-logo.png",
+  lords: "/Images/brands/lords-logo.png",
+  adel: "/Images/brands/adel-logo.png",
+  weleda: "/Images/brands/weleda-logo.png",
+  hahnemann: "/Images/brands/hahnemann-logo.png",
+  pflueger: "/Images/brands/pflueger-logo.png",
+  "doc-homeo": "/Images/LogoGIF/dochomoeo_logo_final_frame.png",
+  dochomeo: "/Images/LogoGIF/dochomoeo_logo_final_frame.png",
+};
+
+export function getBrandLogo(slug?: string, name?: string): string | null {
+  if (slug) {
+    const s = slug.toLowerCase();
+    for (const [key, path] of Object.entries(BRAND_LOGO_MAP)) {
+      if (s.includes(key)) return path;
+    }
+  }
+  if (name) {
+    const n = name.toLowerCase();
+    if (n.includes("reckeweg")) return "/Images/brands/reckeweg-logo.png";
+    if (n.includes("sbl")) return "/Images/brands/sbl-logo.png";
+    if (n.includes("bakson")) return "/Images/brands/bakson-logo.png";
+    if (n.includes("boiron")) return "/Images/brands/boiron-logo.png";
+    if (n.includes("schwabe")) return "/Images/brands/schwabe-logo.png";
+    if (n.includes("lord")) return "/Images/brands/lords-logo.png";
+    if (n.includes("adel")) return "/Images/brands/adel-logo.png";
+    if (n.includes("homeo") || n.includes("dochomeo")) return "/Images/LogoGIF/dochomoeo_logo_final_frame.png";
+  }
+  return null;
+}
+
 /* ------------------------------------------------------------- recent queries */
 
 function readRecent(): string[] {
@@ -122,7 +199,7 @@ export function SearchTrigger({ variant = "field", className }: { variant?: "fie
         aria-haspopup="dialog"
         aria-label="Search medicines, brands and health concerns"
         className={cn(
-          "grid size-9 place-items-center rounded-full text-ink transition-colors hover:bg-black/5 hover:text-forest",
+          "grid size-9 place-items-center rounded-full text-ink transition-colors hover:bg-black/5 hover:text-forest cursor-pointer",
           className,
         )}
       >
@@ -138,13 +215,13 @@ export function SearchTrigger({ variant = "field", className }: { variant?: "fie
       aria-haspopup="dialog"
       aria-keyshortcuts="Control+K Meta+K /"
       className={cn(
-        "group flex h-10 w-[210px] items-center gap-2.5 rounded-full border border-black/10 bg-white/80 pr-2 pl-3.5 text-left shadow-sm backdrop-blur-sm transition-[border-color,background-color,box-shadow] duration-300 hover:border-forest/30 hover:bg-white lg:w-[250px] xl:w-[240px] min-[1400px]:w-[280px]",
+        "group flex h-10 w-[210px] items-center gap-2.5 rounded-full border border-white/80 dark:border-white/15 bg-white/75 dark:bg-white/10 pr-2.5 pl-3.5 text-left shadow-2xs backdrop-blur-md transition-all duration-300 hover:border-forest/40 hover:bg-white/95 hover:shadow-xs cursor-pointer lg:w-[250px] xl:w-[240px] min-[1400px]:w-[280px]",
         className,
       )}
     >
-      <Search aria-hidden className="size-4 shrink-0 text-muted-ink transition-colors group-hover:text-forest" strokeWidth={1.9} />
+      <Search aria-hidden className="size-4 shrink-0 text-forest/75 transition-colors group-hover:text-forest" strokeWidth={2} />
       <span className="min-w-0 flex-1 truncate text-sm text-muted-ink">Search medicines, ailments…</span>
-      <kbd className="hidden shrink-0 rounded-md border border-line bg-canvas px-1.5 py-0.5 font-sans text-[0.6875rem] font-medium text-muted-ink lg:inline-block">
+      <kbd className="hidden shrink-0 rounded-md border border-line-soft bg-paper/90 px-1.5 py-0.5 font-sans text-[0.6875rem] font-bold text-muted-ink lg:inline-block shadow-2xs">
         {shortcut}
       </kbd>
     </Link>
@@ -209,13 +286,15 @@ export function SearchPalette() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[60] bg-ink/25 backdrop-blur-[3px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200" />
+        <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-md transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
           aria-describedby={undefined}
           className={cn(
-            "fixed z-[61] flex flex-col overflow-hidden bg-paper outline-none",
-            // Phones: the whole screen. From sm: a centred panel near the top.
-            "inset-0 sm:inset-auto sm:top-[10vh] sm:left-1/2 sm:max-h-[min(80vh,46rem)] sm:w-[min(44rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:rounded-[1.5rem] sm:border sm:border-line-soft sm:shadow-float",
+            "fixed z-[61] flex flex-col overflow-hidden outline-none",
+            "bg-white/95 dark:bg-[#0c1e17]/96 backdrop-blur-3xl",
+            "sm:border sm:border-white/80 dark:sm:border-white/15",
+            "sm:shadow-[0_30px_90px_-20px_rgba(12,80,59,0.28),0_10px_40px_-10px_rgba(0,0,0,0.15),inset_0_1px_2px_rgba(255,255,255,0.95)]",
+            "inset-0 sm:inset-auto sm:top-[10vh] sm:left-1/2 sm:max-h-[min(82vh,48rem)] sm:w-[min(46rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:rounded-[2rem]",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98] data-[state=open]:slide-in-from-top-2 data-[state=open]:duration-200",
           )}
         >
@@ -387,7 +466,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
           event.preventDefault();
           if (trimmed) go(searchHref({ q: trimmed }), trimmed);
         }}
-        className="flex items-center gap-2 border-b border-line-soft px-4 sm:px-5"
+        className="flex items-center gap-2.5 border-b border-line-soft/80 bg-white/40 dark:bg-white/[0.03] backdrop-blur-md px-5 sm:px-6"
       >
         <label htmlFor={`${baseId}-input`} className="sr-only">
           Search medicines, brands and health concerns
@@ -395,7 +474,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
         {isPending ? (
           <Loader2 aria-hidden className="size-5 shrink-0 text-forest motion-safe:animate-spin" />
         ) : (
-          <Search aria-hidden className="size-5 shrink-0 text-forest" strokeWidth={1.9} />
+          <Search aria-hidden className="size-5 shrink-0 text-forest" strokeWidth={2} />
         )}
         <input
           ref={inputRef}
@@ -415,7 +494,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
           autoFocus
           maxLength={MAX_QUERY_LENGTH}
           value={query}
-          placeholder="Search medicines, brands…"
+          placeholder="Search medicines, brands, ailments…"
           // The dialog itself is the focus context; the site-wide focus ring
           // (unlayered, so classes cannot override it) would box the field.
           style={{ outline: "none" }}
@@ -435,14 +514,14 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
               setActiveId(null);
               inputRef.current?.focus();
             }}
-            className="grid size-8 shrink-0 place-items-center rounded-full text-muted-ink transition-colors hover:bg-ink/5 hover:text-ink"
+            className="grid size-8 shrink-0 place-items-center rounded-full text-muted-ink transition-colors hover:bg-ink/5 hover:text-ink cursor-pointer"
           >
             <X aria-hidden className="size-4" />
           </button>
         ) : null}
         <Dialog.Close
           aria-label="Cancel search"
-          className="shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-forest transition-colors hover:bg-forest/8 sm:border sm:border-line sm:px-1.5 sm:py-0.5 sm:text-[0.6875rem] sm:text-muted-ink sm:hover:bg-canvas"
+          className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-forest transition-colors hover:bg-forest/10 border border-forest/20 bg-forest/5 cursor-pointer"
         >
           <span className="sm:hidden">Cancel</span>
           <span className="hidden sm:inline">Esc</span>
@@ -539,9 +618,14 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
             {browse?.concerns.length ? (
               <ChipRow className="mt-5 justify-center">
                 {browse.concerns.slice(0, 6).map((concern) => (
-                  <Chip key={concern.slug} href={`/products?category=${encodeURIComponent(concern.slug)}`} onNavigate={go}>
+                  <VisualChip
+                    key={concern.slug}
+                    href={`/products?category=${encodeURIComponent(concern.slug)}`}
+                    image={getConcernImage(concern.slug, concern.name)}
+                    onNavigate={go}
+                  >
                     {concern.name}
-                  </Chip>
+                  </VisualChip>
                 ))}
               </ChipRow>
             ) : null}
@@ -552,19 +636,19 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Footer: keyboard hints and the full-results link */}
-      <div className="hidden items-center justify-between gap-4 border-t border-line-soft bg-canvas/70 px-5 py-2.5 text-xs text-muted-ink sm:flex">
+      <div className="hidden items-center justify-between gap-4 border-t border-line-soft/80 bg-white/60 dark:bg-black/25 backdrop-blur-md px-6 py-3 text-xs text-muted-ink sm:flex">
         <span className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 font-medium">
             <Kbd>↑</Kbd>
             <Kbd>↓</Kbd> to move
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 font-medium">
             <Kbd>
               <CornerDownLeft className="size-3" />
             </Kbd>
             to open
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 font-medium">
             <Kbd>Esc</Kbd> to close
           </span>
         </span>
@@ -572,13 +656,13 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={() => go(searchHref({ q: trimmed }), trimmed)}
-            className="inline-flex items-center gap-1.5 font-semibold text-forest hover:text-forest-deep"
+            className="inline-flex items-center gap-1.5 font-bold text-forest hover:text-forest-deep cursor-pointer transition-colors"
           >
             All results for “{trimmed.length > 24 ? `${trimmed.slice(0, 24)}…` : trimmed}”
             <ArrowRight aria-hidden className="size-3.5" />
           </button>
         ) : (
-          <Link href="/products" onClick={onClose} className="inline-flex items-center gap-1.5 font-semibold text-forest hover:text-forest-deep">
+          <Link href="/products" onClick={onClose} className="inline-flex items-center gap-1.5 font-bold text-forest hover:text-forest-deep cursor-pointer transition-colors">
             Browse all products
             <ArrowRight aria-hidden className="size-3.5" />
           </Link>
@@ -663,29 +747,53 @@ function OptionRow({
         </>
       ) : option.kind === "product" ? (
         <>
-          <ProductThumb imageUrl={option.image} name={option.label} sizes="44px" className="size-11 shrink-0 rounded-lg" />
+          <ProductThumb imageUrl={option.image} name={option.label} sizes="44px" className="size-11 shrink-0 rounded-xl border border-line-soft shadow-2xs" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate">
+            <span className="block truncate font-medium">
               <Highlight text={option.label} query={query} />
             </span>
             {option.brand ? <span className="block truncate text-xs text-muted-ink">{option.brand}</span> : null}
           </span>
-          <span className="shrink-0 text-sm font-semibold tabular-nums">{formatPrice({ amount: option.price, currency: "INR" })}</span>
+          <span className="shrink-0 text-sm font-bold tabular-nums text-forest-deep">{formatPrice({ amount: option.price, currency: "INR" })}</span>
+        </>
+      ) : option.kind === "category" ? (
+        <>
+          <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-sage-wash/70 border border-forest/15 shadow-2xs">
+            {getConcernImage(undefined, option.label) ? (
+              <img
+                src={getConcernImage(undefined, option.label)!}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              <LayoutGrid aria-hidden className="size-4 text-forest" strokeWidth={1.8} />
+            )}
+          </span>
+          <span className="min-w-0 flex-1 truncate font-medium">
+            <Highlight text={option.label} query={query} />
+          </span>
+          <span className="shrink-0 rounded-full bg-forest/8 px-2.5 py-0.5 text-[0.6875rem] font-bold text-forest border border-forest/15">
+            Category
+          </span>
         </>
       ) : (
         <>
-          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink/5 text-muted-ink">
-            {option.kind === "category" ? (
-              <LayoutGrid aria-hidden className="size-4" strokeWidth={1.8} />
+          <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-white border border-line-soft p-1 shadow-2xs">
+            {getBrandLogo(undefined, option.label) ? (
+              <img
+                src={getBrandLogo(undefined, option.label)!}
+                alt=""
+                className="size-full object-contain"
+              />
             ) : (
-              <Factory aria-hidden className="size-4" strokeWidth={1.8} />
+              <Factory aria-hidden className="size-4 text-forest" strokeWidth={1.8} />
             )}
           </span>
-          <span className="min-w-0 flex-1 truncate">
+          <span className="min-w-0 flex-1 truncate font-medium">
             <Highlight text={option.label} query={query} />
           </span>
-          <span className="shrink-0 rounded-full bg-canvas px-2 py-0.5 text-[0.6875rem] text-muted-ink">
-            {option.kind === "category" ? "Category" : "Brand"}
+          <span className="shrink-0 rounded-full bg-canvas px-2.5 py-0.5 text-[0.6875rem] font-bold text-muted-ink border border-line-soft">
+            Brand
           </span>
         </>
       )}
@@ -696,13 +804,13 @@ function OptionRow({
 function BrowseSuggestions({ browse, onNavigate }: { browse: Browse | null; onNavigate: (href: string) => void }) {
   if (!browse) {
     return (
-      <div className="space-y-5 px-5 pt-2 pb-6" aria-hidden>
+      <div className="space-y-6 px-6 pt-3 pb-6" aria-hidden>
         {[0, 1].map((row) => (
           <div key={row}>
-            <div className="h-3 w-32 rounded bg-ink/6" />
-            <div className="mt-3 flex flex-wrap gap-2">
-              {[88, 110, 72, 120, 96].map((w, i) => (
-                <div key={i} className="h-9 rounded-full bg-ink/5 motion-safe:animate-pulse" style={{ width: w }} />
+            <div className="h-3 w-36 rounded bg-ink/6" />
+            <div className="mt-3.5 flex flex-wrap gap-2.5">
+              {[120, 140, 110, 150, 130].map((w, i) => (
+                <div key={i} className="h-10 rounded-full bg-ink/5 motion-safe:animate-pulse" style={{ width: w }} />
               ))}
             </div>
           </div>
@@ -712,29 +820,42 @@ function BrowseSuggestions({ browse, onNavigate }: { browse: Browse | null; onNa
   }
 
   return (
-    <div className="space-y-5 px-5 pt-2 pb-6">
+    <div className="space-y-6 px-6 pt-3 pb-6">
       {browse.concerns.length ? (
         <section aria-label="Browse by health concern">
-          <p className="dh-eyebrow text-[0.66rem] text-muted-ink">Browse by health concern</p>
-          <ChipRow className="mt-3">
+          <p className="dh-eyebrow text-[0.6875rem] font-bold text-forest-deep tracking-wider uppercase">Browse by health concern</p>
+          <div className="mt-3 flex flex-wrap gap-2.5">
             {browse.concerns.map((concern) => (
-              <Chip key={concern.slug} href={`/products?category=${encodeURIComponent(concern.slug)}`} count={concern.count} onNavigate={onNavigate}>
+              <VisualChip
+                key={concern.slug}
+                href={`/products?category=${encodeURIComponent(concern.slug)}`}
+                image={getConcernImage(concern.slug, concern.name)}
+                count={concern.count}
+                onNavigate={onNavigate}
+              >
                 {concern.name}
-              </Chip>
+              </VisualChip>
             ))}
-          </ChipRow>
+          </div>
         </section>
       ) : null}
+
       {browse.brands.length ? (
         <section aria-label="Popular brands">
-          <p className="dh-eyebrow text-[0.66rem] text-muted-ink">Brands</p>
-          <ChipRow className="mt-3">
+          <p className="dh-eyebrow text-[0.6875rem] font-bold text-forest-deep tracking-wider uppercase">Brands</p>
+          <div className="mt-3 flex flex-wrap gap-2.5">
             {browse.brands.map((brand) => (
-              <Chip key={brand.slug} href={`/brands/${encodeURIComponent(brand.slug)}`} count={brand.count} onNavigate={onNavigate}>
+              <VisualChip
+                key={brand.slug}
+                href={`/brands/${encodeURIComponent(brand.slug)}`}
+                image={getBrandLogo(brand.slug, brand.name)}
+                count={brand.count}
+                onNavigate={onNavigate}
+              >
                 {brand.name}
-              </Chip>
+              </VisualChip>
             ))}
-          </ChipRow>
+          </div>
         </section>
       ) : null}
     </div>
@@ -742,16 +863,18 @@ function BrowseSuggestions({ browse, onNavigate }: { browse: Browse | null; onNa
 }
 
 function ChipRow({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("flex flex-wrap gap-2", className)}>{children}</div>;
+  return <div className={cn("flex flex-wrap gap-2.5", className)}>{children}</div>;
 }
 
-function Chip({
+function VisualChip({
   href,
+  image,
   count,
   children,
   onNavigate,
 }: {
   href: string;
+  image?: string | null;
   count?: number;
   children: ReactNode;
   onNavigate: (href: string) => void;
@@ -763,11 +886,28 @@ function Chip({
         event.preventDefault();
         onNavigate(href);
       }}
-      className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line-soft bg-paper px-3.5 text-[0.8125rem] text-ink transition-colors hover:border-forest/40 hover:bg-sage-wash/50 hover:text-forest"
+      className={cn(
+        "group/chip inline-flex h-10 sm:h-11 items-center gap-2.5 rounded-full border border-line-soft/80 bg-white/70 dark:bg-white/5 backdrop-blur-md",
+        image ? "pl-1.5 pr-3.5" : "px-3.5",
+        "text-xs sm:text-[0.84rem] font-semibold text-ink shadow-2xs hover:shadow-xs",
+        "hover:border-forest/40 hover:bg-white dark:hover:bg-white/10 hover:text-forest transition-all duration-200 cursor-pointer hover:scale-[1.02]",
+      )}
     >
-      {children}
+      {image ? (
+        <span className="relative grid size-7 sm:size-7.5 shrink-0 place-items-center overflow-hidden rounded-full bg-sage-wash/60 border border-forest/15 shadow-2xs">
+          <img
+            src={image}
+            alt=""
+            draggable={false}
+            className="size-full object-cover object-center pointer-events-none select-none transition-transform duration-300 group-hover/chip:scale-110"
+          />
+        </span>
+      ) : null}
+
+      <span className="truncate">{children}</span>
+
       {count !== undefined ? (
-        <span className="text-xs text-muted-ink tabular-nums">
+        <span className="ml-0.5 rounded-full bg-forest/8 px-2 py-0.5 text-[0.6875rem] font-bold text-forest-deep tabular-nums">
           {count}
           <span className="sr-only"> products</span>
         </span>

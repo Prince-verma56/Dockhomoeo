@@ -856,7 +856,7 @@ export const mockDoctors: ApiDoctorCard[] = [
     id: 3,
     slug: "dr-amit-verma",
     displayName: "Dr. Amit Verma",
-    photoUrl: "/Images/Editorial/chamomilla-pellet-bottle.webp",
+    photoUrl: "/Images/doctors/step-doctor-laptop.jpg",
     qualification: "BHMS, PGCR",
     specialization: "Pediatrics & Respiratory Care",
     experienceYears: 14,

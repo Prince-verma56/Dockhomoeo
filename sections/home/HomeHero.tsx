@@ -42,6 +42,7 @@ export function HomeHero() {
 
   // Appearance state from context
   const contentVisible = playback ? playback.contentVisible : true;
+  const isInstant = Boolean(playback?.hasSkipped || playback?.isCompleted);
 
   // Section ref for scroll trigger tracking
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -61,8 +62,29 @@ export function HomeHero() {
   // Guard to ensure entrance triggers only once
   const hasEnteredRef = useRef(false);
 
-  // 1. Set initial off-screen positions for directional corner entrance
+  // 1. Set initial positions: resting position if already completed, off-screen only for first-time visits
   useEffect(() => {
+    if (isInstant) {
+      if (leftLeafEntranceRef.current) {
+        gsap.set(leftLeafEntranceRef.current, {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          opacity: 1,
+        });
+      }
+      if (rightLeafEntranceRef.current) {
+        gsap.set(rightLeafEntranceRef.current, {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          opacity: 1,
+        });
+      }
+      hasEnteredRef.current = true;
+      return;
+    }
+
     if (leftLeafEntranceRef.current) {
       gsap.set(leftLeafEntranceRef.current, {
         x: -260,
@@ -79,11 +101,11 @@ export function HomeHero() {
         opacity: 0,
       });
     }
-  }, []);
+  }, [isInstant]);
 
-  // 2. Trigger smooth first-time entrance from left-bottom and right-bottom corners
+  // 2. Trigger smooth first-time entrance from left-bottom and right-bottom corners (only on first-time uncompleted visit)
   useEffect(() => {
-    if (!contentVisible || hasEnteredRef.current) return;
+    if (isInstant || !contentVisible || hasEnteredRef.current) return;
     hasEnteredRef.current = true;
 
     const timer = setTimeout(() => {
@@ -94,7 +116,7 @@ export function HomeHero() {
           y: 0,
           rotation: 0,
           opacity: 1,
-          duration: playback?.hasSkipped ? 0 : 1.8,
+          duration: 1.8,
           ease: "power3.out",
         });
       }
@@ -106,14 +128,14 @@ export function HomeHero() {
           y: 0,
           rotation: 0,
           opacity: 1,
-          duration: playback?.hasSkipped ? 0 : 1.8,
+          duration: 1.8,
           ease: "power3.out",
         });
       }
-    }, playback?.hasSkipped ? 0 : 280);
+    }, 280);
 
     return () => clearTimeout(timer);
-  }, [contentVisible, playback?.hasSkipped]);
+  }, [contentVisible, isInstant]);
 
   // 3. Scroll-tracked scrub animation (Outer layer) & Ambient Yoyo Sway (Inner layer)
   useEffect(() => {
@@ -265,9 +287,9 @@ export function HomeHero() {
                   contentVisible
                     ? "translate-y-0 opacity-100"
                     : "translate-y-full opacity-0",
-                  playback?.hasSkipped && "!transition-none !duration-0"
+                  isInstant && "!transition-none !duration-0"
                 )}
-                style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "80ms" }}
+                style={{ transitionDelay: isInstant ? "0ms" : "80ms" }}
               >
                 <span className="text-[0.75rem] sm:text-[0.8125rem] font-bold tracking-[0.22em] uppercase text-[#0d5a43] drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
                   Natural Healing. Real Results.
@@ -286,9 +308,9 @@ export function HomeHero() {
                     contentVisible
                       ? "translate-y-0 opacity-100"
                       : "translate-y-[120%] opacity-0",
-                    playback?.hasSkipped && "!transition-none !duration-0"
+                    isInstant && "!transition-none !duration-0"
                   )}
-                  style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "140ms" }}
+                  style={{ transitionDelay: isInstant ? "0ms" : "140ms" }}
                 >
                   Gentle Care
                 </span>
@@ -301,9 +323,9 @@ export function HomeHero() {
                     contentVisible
                       ? "translate-y-0 opacity-100"
                       : "translate-y-[120%] opacity-0",
-                    playback?.hasSkipped && "!transition-none !duration-0"
+                    isInstant && "!transition-none !duration-0"
                   )}
-                  style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "260ms" }}
+                  style={{ transitionDelay: isInstant ? "0ms" : "260ms" }}
                 >
                   For a Healthier
                 </span>
@@ -316,9 +338,9 @@ export function HomeHero() {
                     contentVisible
                       ? "translate-y-0 opacity-100"
                       : "translate-y-[120%] opacity-0",
-                    playback?.hasSkipped && "!transition-none !duration-0"
+                    isInstant && "!transition-none !duration-0"
                   )}
-                  style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "380ms" }}
+                  style={{ transitionDelay: isInstant ? "0ms" : "380ms" }}
                 >
                   <em className="font-display italic font-normal text-[#0d5a43]">
                     Tomorrow
@@ -334,9 +356,9 @@ export function HomeHero() {
                 contentVisible
                   ? "translate-y-0 opacity-100 filter-none"
                   : "translate-y-8 opacity-0 blur-xs",
-                playback?.hasSkipped && "!transition-none !duration-0"
+                isInstant && "!transition-none !duration-0"
               )}
-              style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "480ms" }}
+              style={{ transitionDelay: isInstant ? "0ms" : "480ms" }}
             >
               <div className="rounded-2xl bg-white/35 backdrop-blur-md border border-white/60 px-5 py-3 shadow-[0_4px_24px_rgba(20,37,31,0.05)] max-w-[42ch]">
                 <p className="text-[0.9375rem] sm:text-[1rem] leading-relaxed text-[#14251f] font-semibold">
@@ -353,9 +375,9 @@ export function HomeHero() {
                 contentVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-8 opacity-0",
-                playback?.hasSkipped && "!transition-none !duration-0"
+                isInstant && "!transition-none !duration-0"
               )}
-              style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "580ms" }}
+              style={{ transitionDelay: isInstant ? "0ms" : "580ms" }}
             >
               <Link
                 href="/products"
@@ -381,9 +403,9 @@ export function HomeHero() {
                 contentVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-8 opacity-0",
-                playback?.hasSkipped && "!transition-none !duration-0"
+                isInstant && "!transition-none !duration-0"
               )}
-              style={{ transitionDelay: playback?.hasSkipped ? "0ms" : "680ms" }}
+              style={{ transitionDelay: isInstant ? "0ms" : "680ms" }}
             >
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 rounded-full bg-white/40 backdrop-blur-md border border-white/60 px-5 py-2.5 shadow-[0_4px_24px_rgba(20,37,31,0.06)] w-fit">
                 {/* Promises every order keeps (no unverified counts or ratings) */}
@@ -432,9 +454,9 @@ export function HomeHero() {
                   contentVisible
                     ? "translate-x-0 opacity-100"
                     : "translate-x-12 opacity-0",
-                  playback?.hasSkipped && "!transition-none !duration-0"
+                  isInstant && "!transition-none !duration-0"
                 )}
-                style={{ transitionDelay: playback?.hasSkipped ? "0ms" : `${250 + i * 110}ms` }}
+                style={{ transitionDelay: isInstant ? "0ms" : `${250 + i * 110}ms` }}
               >
                 <GlassmorphicCard
                   icon={card.icon}

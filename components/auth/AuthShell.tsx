@@ -21,9 +21,7 @@ export function AuthShell({ children, footer }: { children: ReactNode; footer?: 
           aria-hidden
           className="pointer-events-none absolute -top-32 -right-40 size-[28rem] rounded-full bg-forest/40 blur-3xl"
         />
-        <Link href="/" className="relative w-fit rounded-md focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:outline-none">
-          <Wordmark tone="dark" />
-        </Link>
+        <Wordmark tone="dark" className="relative w-fit" />
         <div className="relative max-w-sm">
           <p className="font-display text-5xl leading-[1.05] text-cream">Heal naturally, with care you can trust.</p>
           <ul className="mt-10 space-y-4">
@@ -42,9 +40,9 @@ export function AuthShell({ children, footer }: { children: ReactNode; footer?: 
 
       <main id="main" className="flex flex-1 flex-col px-4 py-8 sm:px-8 lg:items-center lg:justify-center lg:py-16">
         <div className="mx-auto w-full max-w-[26rem]">
-          <Link href="/" className="mb-10 block w-fit lg:hidden">
+          <div className="mb-10 block w-fit lg:hidden">
             <Wordmark tone="light" />
-          </Link>
+          </div>
           {children}
           {footer ? <div className="mt-8 border-t border-line/70 pt-6 text-sm text-muted-ink">{footer}</div> : null}
         </div>

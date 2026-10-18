@@ -34,12 +34,43 @@ const START_TIMEOUT_MS = 3800;
 /** Playback stalled mid-way while buffering: show the copy rather than wait on the network. */
 const STALL_TIMEOUT_MS = 2500;
 
+const HERO_COMPLETED_KEY = "dochomoeo_hero_completed";
+
+// Immediately purge any legacy localStorage flags so the intro is never permanently blocked
+if (typeof window !== "undefined") {
+  try {
+    localStorage.removeItem(HERO_COMPLETED_KEY);
+    localStorage.removeItem("dochomoeo_hero_played");
+  } catch {}
+}
+
+const checkBuildSession = () => {
+  if (typeof window === "undefined") return;
+  try {
+    const currentBuild = process.env.NEXT_PUBLIC_BUILD_TIME;
+    if (currentBuild) {
+      const storedBuild = sessionStorage.getItem("dochomoeo_build_time");
+      if (storedBuild !== currentBuild) {
+        // Dev server was restarted: clear completed flags so video and animations play from the start!
+        sessionStorage.removeItem(HERO_COMPLETED_KEY);
+        sessionStorage.setItem("dochomoeo_build_time", currentBuild);
+      }
+    }
+  } catch {}
+};
+
 /**
- * Whether this visit skips the intro: prefers reduced motion.
+ * Whether this visit skips the intro: prefers reduced motion or completed within this specific session.
  */
 const getIntroSkipped = () => {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
+  try {
+    checkBuildSession();
+    return sessionStorage.getItem(HERO_COMPLETED_KEY) === "true";
+  } catch {
+    return false;
+  }
 };
 const getServerIntroSkipped = () => false;
 const subscribeNever = () => () => {};
@@ -104,6 +135,13 @@ export function HeroPlaybackProvider({
   const contentVisible = hasSkipped || revealed;
   const navVisible = hasSkipped || revealed;
 
+  const markCompleted = useCallback(() => {
+    setIsCompleted(true);
+    try {
+      sessionStorage.setItem(HERO_COMPLETED_KEY, "true");
+    } catch {}
+  }, []);
+
   const reveal = useCallback(() => {
     if (revealedRef.current) return;
     revealedRef.current = true;
@@ -112,16 +150,18 @@ export function HeroPlaybackProvider({
 
   const skipIntro = useCallback(() => {
     setSkippedByVisitor(true);
+    markCompleted();
     reveal();
     const video = videoRef.current;
     if (video) showLastFrame(video);
-  }, [reveal]);
+  }, [markCompleted, reveal]);
 
   useEffect(() => {
     const video = videoRef.current;
     const skip = getIntroSkipped();
     if (skip) {
       revealedRef.current = true;
+      setIsCompleted(true);
     }
 
     if (!video) {
@@ -146,6 +186,10 @@ export function HeroPlaybackProvider({
       }
     };
     const onPlaying = () => {
+      if (skip) {
+        showLastFrame(video);
+        return;
+      }
       if (video.currentTime < HERO_START_TIME) {
         seekToStartTime(video);
       }
@@ -170,12 +214,16 @@ export function HeroPlaybackProvider({
         return;
       }
 
+      if (video.currentTime >= video.duration - 0.25) {
+        markCompleted();
+      }
+
       if (revealedRef.current) return;
       const remaining = (video.duration - video.currentTime) / (video.playbackRate || 1);
       if (remaining <= REVEAL_LEAD_SECONDS) reveal();
     };
     const onEnded = () => {
-      setIsCompleted(true);
+      markCompleted();
       setIsPlaying(false);
       reveal();
     };
@@ -213,7 +261,7 @@ export function HeroPlaybackProvider({
       video.removeEventListener("ended", onEnded);
       video.removeEventListener("error", reveal);
     };
-  }, [reveal]);
+  }, [markCompleted, reveal]);
 
   // Scrolling past the top reveals the copy straight away.
   useEffect(() => {
@@ -261,6 +309,10 @@ export function HeroPlaybackProvider({
   const replay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
+    try {
+      sessionStorage.removeItem(HERO_COMPLETED_KEY);
+      localStorage.removeItem(HERO_COMPLETED_KEY);
+    } catch {}
     applyRate(video);
     video.currentTime = HERO_START_TIME;
     setIsCompleted(false);

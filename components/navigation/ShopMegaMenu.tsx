@@ -1,14 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, ChevronDown } from "lucide-react";
-import { Link000, Link001 } from "@/components/ui/skiper-ui/skiper40";
+import { ArrowRight, Award, ChevronDown, Package, Sparkles } from "lucide-react";
 import { MagneticItem } from "@/components/ui/magnetic-dock";
 import { cn } from "@/lib/utils";
 import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
-import { shopMenu, type NavLink } from "@/components/navigation/navLinks";
 
 /** Hover intent: long enough to ignore a pointer crossing the bar, short enough to feel immediate. */
 const OPEN_DELAY = 90;
@@ -21,20 +20,70 @@ type ShopMegaMenuProps = {
   active?: boolean;
 };
 
+interface CuratedItem {
+  title: string;
+  subtitle: string;
+  href: string;
+  image: string;
+}
+
+const CURATED_COLLECTIONS: CuratedItem[] = [
+  {
+    title: "Drops & Dilutions",
+    subtitle: "Potent liquid remedies",
+    href: "/products?form=drops",
+    image: "/Images/Editorial/eucalyptus-dropper-bottle.webp",
+  },
+  {
+    title: "Tablets & Pellets",
+    subtitle: "Biochemics & globules",
+    href: "/products?form=tablets",
+    image: "/Images/Editorial/chamomilla-pellet-bottle.webp",
+  },
+  {
+    title: "Mother Tinctures",
+    subtitle: "Standardized Q extracts",
+    href: "/products?form=tincture",
+    image: "/Images/Products/schwabe-alfalfa.jpg",
+  },
+  {
+    title: "Creams & Ointments",
+    subtitle: "External herbal care",
+    href: "/products?form=cream",
+    image: "/Images/Editorial/arnica-cream-tube.webp",
+  },
+  {
+    title: "Immunity Boosters",
+    subtitle: "Daily holistic defense",
+    href: "/products?category=immunity",
+    image: "/Images/HealthGoals/immunity.webp",
+  },
+  {
+    title: "Skin & Complexion",
+    subtitle: "Gentle natural radiance",
+    href: "/products?category=skin-care",
+    image: "/Images/HealthGoals/skincare.webp",
+  },
+  {
+    title: "Digestive Balance",
+    subtitle: "Gut & metabolic ease",
+    href: "/products?category=digestive",
+    image: "/Images/HealthGoals/digestive.webp",
+  },
+  {
+    title: "Sleep & Calm",
+    subtitle: "Restoration & rest",
+    href: "/products?category=sleep-stress",
+    image: "/Images/HealthGoals/sleep-stress.webp",
+  },
+];
+
 /**
- * Shop in the desktop header, following the WAI-ARIA disclosure navigation
- * pattern rather than a menu: "Shop" is a real link to /products, and the
- * chevron beside it is the only control that toggles the panel.
- *
- * - Mouse/pen hover over the group opens the panel without navigating; the
- *   panel hangs from a padded bridge so moving into it never closes it.
- * - Touch never "hovers": a tap on Shop navigates, a tap on the chevron toggles.
- * - A click or keyboard toggle pins the panel open until Escape, a click or
- *   focus outside, or a second toggle.
- * - ArrowDown on the chevron opens and moves into the panel; arrows move
- *   between links there; Escape closes and returns focus to the chevron.
+ * ShopMegaMenu — luxury frosted glassmorphic drawer matching the reference design.
+ * Features 2-column curated image cards and a featured collection spotlight card.
  */
 export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
   const timer = useRef<number | undefined>(undefined);
@@ -43,6 +92,10 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const clearTimer = () => window.clearTimeout(timer.current);
 
@@ -148,8 +201,6 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                 setOpen(true);
                 setPinned(true);
               } else if (!pinned) {
-                // Already open from hover: a click confirms it rather than
-                // snapping it shut under the pointer.
                 setPinned(true);
               } else {
                 close();
@@ -160,11 +211,10 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                 event.preventDefault();
                 setOpen(true);
                 setPinned(true);
-                // The panel mounts on this render; focus once it exists.
                 requestAnimationFrame(() => focusPanelLink(0));
               }
             }}
-            className="mr-1 grid size-7 place-items-center rounded-full text-current transition-colors hover:bg-[#0d5a43]/10"
+            className="mr-1 grid size-7 place-items-center rounded-full text-current transition-colors hover:bg-[#0d5a43]/10 cursor-pointer"
           >
             <ChevronDown
               aria-hidden
@@ -175,37 +225,167 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
         </div>
       </MagneticItem>
 
+      {/* Fullscreen Frosted Backdrop Blur Scrim portaled directly to document.body */}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open ? (
+              <motion.div
+                key="shop-full-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                onClick={() => close()}
+                aria-hidden="true"
+                className="fixed inset-0 z-40 bg-black/40 backdrop-blur-md transition-all pointer-events-auto cursor-pointer"
+              />
+            ) : null}
+          </AnimatePresence>,
+          document.body,
+        )}
+
+      {/* Mega Menu Dropdown Panel */}
       <AnimatePresence>
         {open ? (
-          // The top padding is the hover bridge between the bar and the panel.
-          <div className="absolute top-full left-0 z-50 pt-3" id={panelId}>
+          <div className="absolute top-full -left-20 lg:-left-28 z-50 pt-3" id={panelId}>
             <motion.div
               ref={panelRef}
               onKeyDown={onPanelKeyDown}
-              initial={reducedMotion ? false : { opacity: 0, y: -6, scale: 0.99 }}
+              initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -6, scale: 0.99 }}
+              exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: DURATION.fast, ease: EASE_PREMIUM_BEZIER }}
-              className="w-[520px] overflow-hidden rounded-3xl border border-line-soft bg-paper p-6 shadow-[0_24px_60px_-12px_rgba(13,90,67,0.18),0_10px_28px_-6px_rgba(0,0,0,0.08)] ring-1 ring-ink/5"
+              className="w-[830px] lg:w-[890px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[2rem] border border-white/90 dark:border-white/15 bg-white/98 dark:bg-[#0c1e17]/98 backdrop-blur-3xl p-6 lg:p-7 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.35),0_10px_40px_-10px_rgba(13,90,67,0.2),inset_0_1px_2px_rgba(255,255,255,0.95)] ring-1 ring-black/5"
             >
-              <div className="grid grid-cols-2 gap-x-8">
-                <MenuColumn title="By form" links={shopMenu.byForm} onNavigate={() => close()} />
-                <MenuColumn title="By health goal" links={shopMenu.byGoal} onNavigate={() => close()} />
-              </div>
-              <ul className="-mx-6 -mb-6 mt-6 flex items-center justify-between border-t border-line/75 bg-cream/70 px-6 py-3.5">
-                {shopMenu.more.map((link) => (
-                  <li key={link.href}>
-                    <Link001
-                      href={link.href}
+              {/* Main Content Grid: Left 2-column Curated List + Right Featured Highlight Card */}
+              <div className="grid grid-cols-[1fr_290px] lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 items-stretch">
+                
+                {/* Left Area: Curated Collections Header & 2-column Grid */}
+                <div>
+                  <div className="flex items-center justify-between mb-3.5">
+                    <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#0d5a43] dark:text-emerald-400">
+                      Curated Collections
+                    </span>
+                    <Link
+                      href="/categories"
                       onClick={() => close()}
-                      tone="forest"
-                      className="px-2 py-1 text-[0.8125rem] font-semibold"
+                      className="text-xs font-semibold text-[#55635d] hover:text-[#0d5a43] transition-colors cursor-pointer"
                     >
-                      {link.label}
-                    </Link001>
-                  </li>
-                ))}
-              </ul>
+                      View all →
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                    {CURATED_COLLECTIONS.map((item) => (
+                      <Link
+                        key={item.title}
+                        href={item.href}
+                        onClick={() => close()}
+                        className="group flex items-center gap-3 rounded-2xl p-2 transition-all duration-200 hover:bg-[#0d5a43]/8 hover:translate-x-0.5 cursor-pointer"
+                      >
+                        {/* Rounded thumbnail image matching reference design */}
+                        <div className="relative size-11 lg:size-12 shrink-0 overflow-hidden rounded-xl bg-white/70 border border-white/80 shadow-2xs">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="size-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none select-none"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        {/* Title and subtext */}
+                        <div className="min-w-0 flex-1 leading-snug">
+                          <span className="block font-bold text-[0.84rem] lg:text-[0.875rem] text-[#14251f] tracking-tight group-hover:text-[#0d5a43] transition-colors truncate">
+                            {item.title}
+                          </span>
+                          <span className="block text-[0.7rem] lg:text-[0.72rem] text-[#55635d] font-medium tracking-tight truncate mt-0.5">
+                            {item.subtitle}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Area: Large Featured Spotlight Card matching reference image */}
+                <Link
+                  href="/products?form=tincture"
+                  onClick={() => close()}
+                  className="group relative flex flex-col justify-end overflow-hidden rounded-2xl p-5 lg:p-6 text-white shadow-md transition-all duration-300 hover:shadow-xl hover:scale-[1.01] cursor-pointer min-h-[290px]"
+                >
+                  {/* Photo with subtle hover zoom */}
+                  <img
+                    src="/Images/SeasonalEditBG.webp"
+                    alt="Botanical Mother Tinctures"
+                    className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none"
+                  />
+
+                  {/* Dark gradient scrim for crystal clear white typography */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 transition-opacity duration-300 group-hover:opacity-90 pointer-events-none"
+                  />
+
+                  {/* Text details */}
+                  <div className="relative z-10 flex flex-col gap-1.5">
+                    <span className="w-fit rounded-full bg-white/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold tracking-widest uppercase text-white shadow-xs border border-white/25">
+                      New Arrival
+                    </span>
+                    <h3 className="font-display text-lg lg:text-xl font-bold leading-tight tracking-tight text-white drop-shadow-sm mt-1">
+                      Botanical Mother Tinctures
+                    </h3>
+                    <p className="line-clamp-2 text-xs leading-relaxed text-white/80 mt-0.5">
+                      Standardized classical formulations from licensed European &amp; Indian pharmacopoeias.
+                    </p>
+                    <div className="mt-2.5 flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase text-emerald-300 group-hover:text-white transition-colors">
+                      <span>Explore Ritual</span>
+                      <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+
+              </div>
+
+              {/* Bottom Frosted Bar with Quick Shortcuts */}
+              <div className="-mx-6 lg:-mx-7 -mb-6 lg:-mb-7 mt-6 flex items-center justify-between border-t border-white/60 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-md px-6 py-3.5">
+                <div className="flex items-center gap-5 lg:gap-7">
+                  <Link
+                    href="/products"
+                    onClick={() => close()}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d5a43] hover:text-[#063b2d] transition-colors cursor-pointer"
+                  >
+                    <Package className="size-3.5" />
+                    <span>Shop All Products</span>
+                  </Link>
+                  <Link
+                    href="/categories"
+                    onClick={() => close()}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="size-3.5" />
+                    <span>All Categories</span>
+                  </Link>
+                  <Link
+                    href="/brands"
+                    onClick={() => close()}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors cursor-pointer"
+                  >
+                    <Award className="size-3.5" />
+                    <span>Certified Brands</span>
+                  </Link>
+                </div>
+
+                <Link
+                  href="/doctors"
+                  onClick={() => close()}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d5a43] hover:text-[#063b2d] transition-colors cursor-pointer group"
+                >
+                  <span>Consult a Doctor</span>
+                  <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+
             </motion.div>
           </div>
         ) : null}
@@ -214,35 +394,3 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
   );
 }
 
-function MenuColumn({
-  title,
-  links,
-  onNavigate,
-}: {
-  title: string;
-  links: NavLink[];
-  onNavigate: () => void;
-}) {
-  const headingId = useId();
-  return (
-    <div>
-      <span id={headingId} className="mb-2.5 inline-block rounded-full bg-forest/8 px-2.5 py-0.5 text-[11px] font-semibold tracking-wider text-forest uppercase">
-        {title}
-      </span>
-      <ul aria-labelledby={headingId} className="flex flex-col gap-1.5 py-1">
-        {links.map((link) => (
-          <li key={link.href}>
-            <Link000
-              href={link.href}
-              onClick={onNavigate}
-              tone="ink"
-              className="w-fit py-1 px-1 text-[0.875rem] font-medium"
-            >
-              {link.label}
-            </Link000>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
