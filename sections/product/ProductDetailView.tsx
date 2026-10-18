@@ -116,9 +116,9 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
   const [dosageOpen, setDosageOpen] = useState(true);
   const [ingredientsOpen, setIngredientsOpen] = useState(true);
   const [safetyOpen, setSafetyOpen] = useState(false);
-  const [faqsOpen, setFaqsOpen] = useState(true);
+  const [faqsOpen, setFaqsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const addedTimer = useRef<number | undefined>(undefined);
   const mediaRef = useRef<HTMLDivElement>(null);
