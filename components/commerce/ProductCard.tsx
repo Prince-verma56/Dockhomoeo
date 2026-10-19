@@ -113,7 +113,7 @@ export function ProductCard({
           </div>
         ) : cardDiscount > 0 ? (
           <div className="absolute top-3 left-3 z-3">
-            <span className="inline-flex h-[24px] items-center rounded-full bg-forest-deep px-2.5 text-[0.6875rem] font-bold tracking-wide text-cream shadow-xs">
+            <span className="inline-flex h-[24px] items-center rounded-full bg-red-600 px-2.5 text-[0.6875rem] font-bold tracking-wide text-white shadow-xs">
               {cardDiscount}% OFF
             </span>
           </div>

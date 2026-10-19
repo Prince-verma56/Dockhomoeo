@@ -43,7 +43,7 @@ export function ProductPrice({
       </div>
 
       {showSaving && saving ? (
-        <span className="text-[10px] sm:text-[11px] font-bold text-forest mt-0.5 truncate">
+        <span className="text-[10px] sm:text-[11px] font-bold text-red-600 mt-0.5 truncate">
           {saving}% off
         </span>
       ) : null}

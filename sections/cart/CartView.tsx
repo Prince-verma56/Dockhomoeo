@@ -22,6 +22,9 @@ import { buildCartView, type CartLineView } from "@/lib/cart/cartView";
 import { formatRupees } from "@/lib/formatters/price";
 import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
 import { CouponField } from "./CouponField";
+import { FastDeliveryTimer } from "@/components/commerce/FastDeliveryTimer";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { cartCrumbs } from "@/lib/navigation/crumbs";
 
 export function CartView() {
   const cart = useCart();
@@ -120,36 +123,49 @@ export function CartView() {
           </div>
         </Container>
       </section>
+
+      {/* Mobile Sticky Bottom Checkout Bar (Image 3) */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0c1e17]/95 backdrop-blur-md border-t border-line-soft shadow-[0_-4px_25px_rgba(0,0,0,0.08)]">
+        {/* Fast Delivery Urgency Timer Bar (Image 3 green circle) */}
+        <FastDeliveryTimer showDiscountUrgency={false} className="rounded-none border-x-0 border-t-0 py-1.5 text-[11px]" />
+
+        <div className="px-4 py-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display text-lg font-extrabold text-ink dark:text-white tabular-nums">
+                {formatRupees(totals.total)}
+              </span>
+              {totals.savings > 0 ? (
+                <span className="text-xs text-muted-ink line-through tabular-nums">
+                  {formatRupees(totals.subtotal + totals.savings)}
+                </span>
+              ) : null}
+            </div>
+            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 block truncate">
+              {totals.savings > 0 ? `You save ${formatRupees(totals.savings)}` : "Amount payable"}
+            </span>
+          </div>
+
+          <Button asChild variant="brand" size="default" className="h-10 px-6 rounded-full text-xs font-bold bg-[#0d5a43] hover:bg-[#074231] text-white shadow-sm shrink-0">
+            <Link href="/checkout">
+              Place order
+              <ArrowRight className="size-3.5 ml-1" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </>
   );
 }
 
 export function CartBreadcrumb({ current, via }: { current: string; via?: { label: string; href: string } }) {
-  return (
-    <Breadcrumb className="mb-5">
-      <BreadcrumbList className="text-[0.8125rem] text-muted-ink">
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild className="-my-2 py-2 hover:text-forest">
-            <Link href="/">Home</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        {via ? (
-          <>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild className="-my-2 py-2 hover:text-forest">
-                <Link href={via.href}>{via.label}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </>
-        ) : null}
-        <BreadcrumbItem>
-          <BreadcrumbPage className="text-ink">{current}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
-  );
+  const items = via
+    ? [{ name: via.label, href: via.href }, { name: current, href: "" }]
+    : current.toLowerCase() === "cart"
+      ? cartCrumbs()
+      : [{ name: current, href: "" }];
+
+  return <PageBreadcrumb items={items} className="mb-5" structuredData={false} />;
 }
 
 function CartRow({

@@ -177,9 +177,14 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
       >
         <div
           data-state={open ? "open" : "closed"}
+          style={open ? { backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)" } : undefined}
           className={cn(
-            "flex items-center rounded-full transition-colors",
-            (open || active) && "bg-[#0d5a43]/10 text-[#0d5a43]",
+            "flex items-center rounded-full transition-all duration-200",
+            open
+              ? "bg-white/90 dark:bg-[#081a13]/90 border border-white/95 dark:border-white/25 text-[#0d5a43] dark:text-emerald-300 shadow-sm"
+              : active
+                ? "bg-[#0d5a43]/10 text-[#0d5a43]"
+                : "hover:bg-white/40 dark:hover:bg-white/10 hover:backdrop-blur-md",
           )}
         >
           <Link
@@ -215,7 +220,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                 requestAnimationFrame(() => focusPanelLink(0));
               }
             }}
-            className="mr-1 grid size-7 place-items-center rounded-full text-current transition-colors hover:bg-[#0d5a43]/10 cursor-pointer"
+            className="mr-1 grid size-7 place-items-center rounded-full text-current transition-colors hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
           >
             <ChevronDown
               aria-hidden
@@ -226,7 +231,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
         </div>
       </MagneticItem>
 
-      {/* Fullscreen Frosted Backdrop Blur Scrim portaled directly to document.body */}
+      {/* Smooth Frosted Backdrop Veil: enhances mega-menu contrast and legibility over the hero */}
       {mounted &&
         createPortal(
           <AnimatePresence>
@@ -236,10 +241,14 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => close()}
                 aria-hidden="true"
-                className="fixed inset-0 z-40 bg-black/40 backdrop-blur-md transition-all pointer-events-auto cursor-pointer"
+                style={{
+                  backdropFilter: "blur(12px) saturate(140%)",
+                  WebkitBackdropFilter: "blur(12px) saturate(140%)",
+                }}
+                className="fixed inset-0 z-40 bg-black/25 dark:bg-black/55 transition-opacity pointer-events-auto cursor-pointer"
               />
             ) : null}
           </AnimatePresence>,
@@ -249,18 +258,40 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
       {/* Mega Menu Dropdown Panel */}
       <AnimatePresence>
         {open ? (
-          <div className="absolute top-full -left-20 lg:-left-28 z-50 pt-3" id={panelId}>
+          <div className="absolute top-full left-0 sm:-left-4 lg:-left-6 z-50 pt-2" id={panelId}>
             <motion.div
               ref={panelRef}
               onKeyDown={onPanelKeyDown}
-              initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.98 }}
+              initial={reducedMotion ? false : { opacity: 0, y: -6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8, scale: 0.98 }}
+              exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -6, scale: 0.98 }}
               transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-              className="w-[830px] lg:w-[890px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[2rem] border border-white/90 dark:border-white/15 bg-white/98 dark:bg-[#0c1e17]/98 backdrop-blur-3xl p-6 lg:p-7 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.35),0_10px_40px_-10px_rgba(13,90,67,0.2),inset_0_1px_2px_rgba(255,255,255,0.95)] ring-1 ring-black/5"
+              style={{
+                backdropFilter: "blur(30px) saturate(180%)",
+                WebkitBackdropFilter: "blur(30px) saturate(180%)",
+              }}
+              className="relative w-[720px] lg:w-[760px] max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-[2rem] border border-white/90 dark:border-white/20 bg-gradient-to-b from-white/96 via-white/90 to-white/95 dark:from-[#081a13]/96 dark:via-[#081a13]/90 dark:to-[#081a13]/94 p-5 lg:p-6 shadow-[0_24px_70px_-15px_rgba(0,0,0,0.25),0_10px_30px_-10px_rgba(13,90,67,0.15),inset_0_1.5px_1px_0_rgba(255,255,255,1)]"
             >
+              {/* Luminous Ambient Glass Sheen & Refraction Overlays */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-28 -left-28 size-84 rounded-full bg-gradient-to-br from-emerald-400/20 via-teal-300/10 to-transparent blur-3xl opacity-75"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-28 -right-28 size-84 rounded-full bg-gradient-to-tl from-emerald-600/15 via-emerald-300/10 to-transparent blur-3xl opacity-75"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white to-transparent opacity-95"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 left-0 w-[1.5px] bg-gradient-to-b from-white/95 via-white/20 to-transparent"
+              />
+
               {/* Main Content Grid: Left 2-column Curated List + Right Featured Highlight Card */}
-              <div className="grid grid-cols-[1fr_290px] lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 items-stretch">
+              <div className="relative z-10 grid grid-cols-[1fr_290px] lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 items-stretch">
                 
                 {/* Left Area: Curated Collections Header & 2-column Grid */}
                 <div>
@@ -271,7 +302,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                     <Link
                       href="/categories"
                       onClick={() => close()}
-                      className="text-xs font-semibold text-[#55635d] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
+                      className="text-xs font-semibold text-[#4d6259] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
                     >
                       View all →
                     </Link>
@@ -291,7 +322,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                           onMouseEnter={() => setHoveredCollection(item.title)}
                           className="group relative flex items-center gap-3 rounded-2xl p-2 cursor-pointer z-10"
                         >
-                          {/* Smooth Shifting Animated Background Highlight */}
+                          {/* Smooth Shifting Animated Frosted Glass Highlight */}
                           {isHovered ? (
                             <motion.div
                               layoutId="mega-curated-hover"
@@ -304,12 +335,14 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                                 damping: 35,
                                 mass: 0.18,
                               }}
-                              className="absolute inset-0 rounded-2xl bg-[#0d5a43]/10 dark:bg-emerald-500/15 pointer-events-none -z-10"
+                              className="absolute inset-0 rounded-2xl bg-[#0d5a43]/8 dark:bg-white/10 border border-[#0d5a43]/15 dark:border-white/15 shadow-2xs pointer-events-none -z-10"
                             />
                           ) : null}
 
-                          {/* Rounded thumbnail image matching reference design */}
-                          <div className="relative size-11 lg:size-12 shrink-0 overflow-hidden rounded-xl bg-white/70 border border-white/80 shadow-2xs">
+                          {/* Rounded thumbnail image with frosted glass container */}
+                          <div 
+                            className="relative size-11 lg:size-12 shrink-0 overflow-hidden rounded-xl bg-white dark:bg-black/35 border border-line-soft/80 dark:border-white/20 shadow-2xs"
+                          >
                             <img
                               src={item.image}
                               alt={item.title}
@@ -331,7 +364,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                             >
                               {item.title}
                             </span>
-                            <span className="block text-[0.7rem] lg:text-[0.72rem] text-[#55635d] dark:text-[#889891] font-medium tracking-tight truncate mt-0.5">
+                            <span className="block text-[0.7rem] lg:text-[0.72rem] text-[#4d6259] dark:text-[#90a29b] font-medium tracking-tight truncate mt-0.5">
                               {item.subtitle}
                             </span>
                           </div>
@@ -345,7 +378,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                 <Link
                   href="/products?form=tincture"
                   onClick={() => close()}
-                  className="group relative flex flex-col justify-end overflow-hidden rounded-2xl p-5 lg:p-6 text-white shadow-md transition-all duration-300 hover:shadow-xl hover:scale-[1.01] cursor-pointer min-h-[290px]"
+                  className="group relative flex flex-col justify-end overflow-hidden rounded-2xl p-5 lg:p-6 text-white shadow-md border border-white/25 dark:border-white/15 transition-all duration-300 hover:shadow-xl hover:scale-[1.01] cursor-pointer min-h-[290px]"
                 >
                   {/* Photo with subtle hover zoom */}
                   <img
@@ -362,7 +395,13 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
 
                   {/* Text details */}
                   <div className="relative z-10 flex flex-col gap-1.5">
-                    <span className="w-fit rounded-full bg-white/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold tracking-widest uppercase text-white shadow-xs border border-white/25">
+                    <span 
+                      style={{
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
+                      }}
+                      className="w-fit rounded-full bg-black/30 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold tracking-widest uppercase text-white shadow-xs border border-white/25"
+                    >
                       New Arrival
                     </span>
                     <h3 className="font-display text-lg lg:text-xl font-bold leading-tight tracking-tight text-white drop-shadow-sm mt-1">
@@ -380,8 +419,14 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
 
               </div>
 
-              {/* Bottom Frosted Bar with Quick Shortcuts */}
-              <div className="-mx-6 lg:-mx-7 -mb-6 lg:-mb-7 mt-6 flex items-center justify-between border-t border-white/60 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-md px-6 py-3.5">
+              {/* Bottom Frosted Glass Bar with Quick Shortcuts */}
+              <div 
+                style={{
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                }}
+                className="relative z-10 -mx-6 lg:-mx-7 -mb-6 lg:-mb-7 mt-6 flex items-center justify-between border-t border-line-soft/80 dark:border-white/10 bg-white/60 dark:bg-black/35 px-6 py-3.5"
+              >
                 <div className="flex items-center gap-5 lg:gap-7">
                   <Link
                     href="/products"
@@ -394,7 +439,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                   <Link
                     href="/categories"
                     onClick={() => close()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#32453e] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
                   >
                     <Sparkles className="size-3.5" />
                     <span>All Categories</span>
@@ -402,7 +447,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                   <Link
                     href="/brands"
                     onClick={() => close()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3a4943] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#32453e] hover:text-[#0d5a43] transition-colors duration-100 cursor-pointer"
                   >
                     <Award className="size-3.5" />
                     <span>Certified Brands</span>

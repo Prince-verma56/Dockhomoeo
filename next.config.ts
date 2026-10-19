@@ -20,10 +20,14 @@ const nextConfig: NextConfig = {
   },
   // Proxy API and upload calls to the backend on port 4000
   async rewrites() {
-    return [
-      { source: "/api/:path*", destination: `${API_URL}/api/:path*` },
-      { source: "/uploads/:path*", destination: `${API_URL}/uploads/:path*` },
-    ];
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        { source: "/api/:path*", destination: `${API_URL}/api/:path*` },
+        { source: "/uploads/:path*", destination: `${API_URL}/uploads/:path*` },
+      ],
+    };
   },
 };
 

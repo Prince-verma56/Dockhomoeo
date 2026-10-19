@@ -68,6 +68,27 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 /** The prescription an order is being placed for (only its id and number, never its contents). */
 export type LinkedPrescription = { id: number; number: string };
 const PRESCRIPTION_KEY = "dochomoeo_cart_prescription_v1";
+const COUPON_KEY = "dochomoeo_cart_coupon_v1";
+
+function readCoupon(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const val = window.localStorage.getItem(COUPON_KEY);
+    return val && typeof val === "string" && val.trim().length > 0 ? val.trim().toUpperCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCoupon(code: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (code && code.trim().length > 0) window.localStorage.setItem(COUPON_KEY, code.trim().toUpperCase());
+    else window.localStorage.removeItem(COUPON_KEY);
+  } catch {
+    // Without storage the coupon lasts for this session only.
+  }
+}
 
 function readPrescription(): LinkedPrescription | null {
   if (typeof window === "undefined") return null;
@@ -94,7 +115,24 @@ const QUOTE_DEBOUNCE_MS = 250;
 export function CartProvider({ children }: { children: ReactNode }) {
   const cart = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [isOpen, setIsOpen] = useState(false);
-  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [couponCode, setCouponCodeState] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = readCoupon();
+    if (saved) setCouponCodeState(saved);
+  }, []);
+
+  const applyCoupon = useCallback((code: string) => {
+    const cleaned = code.trim().toUpperCase() || null;
+    writeCoupon(cleaned);
+    setCouponCodeState(cleaned);
+  }, []);
+
+  const removeCoupon = useCallback(() => {
+    writeCoupon(null);
+    setCouponCodeState(null);
+  }, []);
+
   const [paymentMethod, setPaymentMethod] = useState<ApiPaymentMethod>("COD");
   const [attempt, setAttempt] = useState(0);
   const [lastQuote, setLastQuote] = useState<{ key: string; quote: ApiQuote } | null>(null);
@@ -201,8 +239,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     },
     isQuoteLoading: quoteStatus === "loading",
     couponCode,
-    applyCoupon: (code) => setCouponCode(code.trim().toUpperCase() || null),
-    removeCoupon: () => setCouponCode(null),
+    applyCoupon,
+    removeCoupon,
     paymentMethod,
     setPaymentMethod,
     droppedCount,
@@ -217,7 +255,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setPrescription,
     clearCart: () => {
       cartStore.clear();
-      setCouponCode(null);
+      removeCoupon();
       setDroppedCount(0);
       setPrescription(null);
     },

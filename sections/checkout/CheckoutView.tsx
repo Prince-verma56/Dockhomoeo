@@ -44,6 +44,8 @@ import type { ApiAddress } from "@/types/api/account";
 import type { ApiServiceabilityResult } from "@/types/api/serviceability";
 import { CartBreadcrumb } from "@/sections/cart/CartView";
 import { CheckoutPrescription } from "@/sections/checkout/CheckoutPrescription";
+import { CouponField } from "@/sections/cart/CouponField";
+import { AvailableCouponOffers } from "@/components/commerce/AvailableCouponOffers";
 
 const FIELD_LABELS: Record<CheckoutField, string> = {
   fullName: "Full name",
@@ -499,12 +501,19 @@ export function CheckoutView() {
               </fieldset>
             </form>
 
-            <aside aria-label="Your order" className="lg:sticky lg:top-28 lg:self-start">
+            <aside aria-label="Your order" className="lg:sticky lg:top-28 lg:self-start space-y-4">
               <OrderSummary
                 totals={totals}
                 heading="Your order"
                 updating={cart.quoteStatus === "loading"}
-                leading={<OrderLines lines={lines} />}
+                leading={
+                  <>
+                    <OrderLines lines={lines} />
+                    <div className="pt-3 pb-2 border-b border-line-soft">
+                      <CouponField />
+                    </div>
+                  </>
+                }
               >
                 {cart.quoteStatus === "error" ? (
                   <div role="alert" className="flex items-start justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-ink">

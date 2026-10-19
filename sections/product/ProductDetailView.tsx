@@ -59,6 +59,10 @@ import { useCart } from "@/components/providers/CartProvider";
 import { useFavourites } from "@/lib/favourites/favourites";
 import { BellButton } from "@/components/kokonutui/bell-button";
 import { getRemedyClinicalProfile, type RemedyBenefit } from "@/lib/products/remedyKnowledge";
+import { ProductReviewsSection } from "@/sections/product/ProductReviewsSection";
+import { ReelVideoReviews } from "@/sections/home/ReelVideoReviews";
+import { AvailableCouponOffers } from "@/components/commerce/AvailableCouponOffers";
+import { FastDeliveryTimer } from "@/components/commerce/FastDeliveryTimer";
 import type { ApiProductDetail, ApiProductVariant } from "@/types/api/product";
 import type { ProductForm } from "@/types/product";
 
@@ -91,6 +95,56 @@ const BENEFIT_ICONS = {
   Leaf,
   Sparkles,
 } as const;
+
+/**
+ * High-trust product assurance indicators supported by clinical and quality standards.
+ * Rendered beneath the sticky gallery on desktop, and following delivery details on mobile.
+ */
+function ProductAssuranceGrid({ className }: { className?: string }) {
+  return (
+    <div className={cn("grid grid-cols-2 gap-2.5", className)} aria-label="Product assurances and standards">
+      <div className="flex items-start gap-2.5 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 sm:p-3 shadow-2xs">
+        <span className="grid size-7 place-items-center rounded-xl bg-emerald-500/10 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5">
+          <ShieldCheck className="size-4" strokeWidth={2} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-ink dark:text-white leading-tight">100% Genuine & Sealed</p>
+          <p className="text-[11px] text-muted-ink mt-0.5 leading-snug">Direct verified manufacturer batch</p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-2.5 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 sm:p-3 shadow-2xs">
+        <span className="grid size-7 place-items-center rounded-xl bg-emerald-500/10 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5">
+          <Award className="size-4" strokeWidth={2} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-ink dark:text-white leading-tight">Standardised Potency</p>
+          <p className="text-[11px] text-muted-ink mt-0.5 leading-snug">HPI & German Ph. Eur. standards</p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-2.5 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 sm:p-3 shadow-2xs">
+        <span className="grid size-7 place-items-center rounded-xl bg-emerald-500/10 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5">
+          <Leaf className="size-4" strokeWidth={2} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-ink dark:text-white leading-tight">Pure Botanical Active</p>
+          <p className="text-[11px] text-muted-ink mt-0.5 leading-snug">Zero harsh synthetic chemicals</p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-2.5 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 sm:p-3 shadow-2xs">
+        <span className="grid size-7 place-items-center rounded-xl bg-emerald-500/10 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5">
+          <PackageCheck className="size-4" strokeWidth={2} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-ink dark:text-white leading-tight">Climate-Safe Dispatch</p>
+          <p className="text-[11px] text-muted-ink mt-0.5 leading-snug">Maintains therapeutic integrity</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function ProductDetailView({ product }: { product: ApiProductDetail }) {
   const initial = product.variants.find((v) => v.isDefault) ?? product.variants[0];
@@ -220,28 +274,28 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
     product.description.toLowerCase().includes("testing");
 
   return (
-    <div className="bg-[#fbfaf6] dark:bg-[#07130e] pt-24 pb-28 sm:pb-20 lg:pt-28 lg:pb-24 overflow-x-hidden min-h-screen">
+    <div className="bg-[#fbfaf6] dark:bg-[#07130e] pt-24 pb-28 sm:pb-20 lg:pt-28 lg:pb-24 overflow-x-clip min-h-screen">
       <Container className="max-w-[1260px] w-full px-4 sm:px-6 lg:px-8">
         <PageBreadcrumb items={crumbs} className="mb-5 sm:mb-6" structuredData={false} />
 
         {/* ================================================================ */}
         {/* 1. FIRST VIEWPORT: BALANCED 2-COLUMN PRODUCT PURCHASE EXPERIENCE  */}
         {/* ================================================================ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 w-full items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 w-full items-stretch">
           
           {/* -------------------------------------------------------------- */}
-          {/* LEFT: PREMIUM IMAGE GALLERY (Desktop: 6-7 cols, Mobile: Top)    */}
+          {/* LEFT: RESTRAINED STICKY GALLERY & ASSURANCE (6 cols desktop)   */}
           {/* -------------------------------------------------------------- */}
-          <div className="lg:col-span-7 w-full min-w-0">
-            <div className="space-y-3.5 sticky top-28">
+          <div className="lg:col-span-6 w-full min-w-0">
+            <div className="space-y-4 lg:sticky lg:top-28">
               {/* Main Display Stage */}
               <div
                 ref={mediaRef}
-                className="group relative overflow-hidden rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] shadow-[0_8px_30px_rgba(0,0,0,0.04)] aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] w-full flex items-center justify-center transition-all"
+                className="group relative overflow-hidden rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] shadow-[0_8px_30px_rgba(0,0,0,0.04)] aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] max-h-[460px] sm:max-h-[500px] w-full flex items-center justify-center transition-all"
               >
                 {/* Verified Discount Badge */}
                 {discountPercent > 0 ? (
-                  <span className="absolute top-4 left-4 z-10 rounded-full bg-[#0d5a43] px-3 py-1 text-xs font-bold tracking-wide text-white shadow-xs">
+                  <span className="absolute top-4 left-4 z-10 rounded-full bg-red-600 px-3 py-1 text-xs font-bold tracking-wide text-white shadow-xs">
                     {discountPercent}% OFF
                   </span>
                 ) : null}
@@ -333,13 +387,17 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
                   );
                 })}
               </div>
+
+              {/* Desktop Product Assurance Strip (Intelligently sits beneath gallery in sticky view) */}
+              <ProductAssuranceGrid className="hidden lg:grid pt-1" />
             </div>
           </div>
 
+
           {/* -------------------------------------------------------------- */}
-          {/* RIGHT: CLEAR PURCHASE PANEL (Immediate purchase on mobile!)   */}
+          {/* RIGHT: CLEAR PURCHASE PANEL (6 cols desktop, full on mobile)   */}
           {/* -------------------------------------------------------------- */}
-          <div className="lg:col-span-5 w-full min-w-0 space-y-5">
+          <div className="lg:col-span-6 w-full min-w-0 space-y-5">
             
             {/* 1. Identity & Title */}
             <div className="space-y-2">
@@ -400,7 +458,7 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
                       <span className="text-base sm:text-lg text-muted-ink/70 line-through tabular-nums font-normal">
                         {formatRupees(variant.mrp)}
                       </span>
-                      <span className="rounded-full bg-[#0d5a43] px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-2xs">
+                      <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-2xs">
                         {discountPercent}% OFF
                       </span>
                       <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
@@ -453,7 +511,7 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
                           <div className="flex items-center gap-1.5">
                             <span className="block font-semibold">{option.title}</span>
                             {optDiscount > 0 ? (
-                              <span className="text-[10px] font-bold text-[#0d5a43] dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                              <span className="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">
                                 {optDiscount}% off
                               </span>
                             ) : null}
@@ -525,25 +583,14 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
             {/* 3. Delivery Availability (Pincode Check) */}
             <PincodeCheck />
 
-            {/* 4. Trust Credentials */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-ink dark:text-white">
-              <div className="flex items-center gap-2 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 shadow-2xs">
-                <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                <span className="text-[11px] font-semibold leading-tight">Quality checked</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 shadow-2xs">
-                <Leaf className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                <span className="text-[11px] font-semibold leading-tight">Safe & natural</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 shadow-2xs">
-                <PackageCheck className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                <span className="text-[11px] font-semibold leading-tight">100% Genuine</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-2xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-2.5 shadow-2xs">
-                <Truck className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                <span className="text-[11px] font-semibold leading-tight">Fast delivery</span>
-              </div>
-            </div>
+            {/* Fast Delivery Urgency Countdown Timer (Image 3) */}
+            <FastDeliveryTimer showDiscountUrgency={true} />
+
+            {/* Mobile Product Assurance Strip (Follows mobile content priority after delivery details) */}
+            <ProductAssuranceGrid className="lg:hidden" />
+
+            {/* Available Coupon Offers Card */}
+            <AvailableCouponOffers />
 
           </div>
         </div>
@@ -1035,11 +1082,28 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
         </Reveal>
 
         {/* ================================================================ */}
-        {/* 5. "YOU MAY ALSO CONSIDER" 4-CARD FULL GRID                       */}
+        {/* 5. VERIFIED PRODUCT REVIEWS & CUSTOMER PHOTOS                     */}
         {/* ================================================================ */}
-        {product.related.length > 0 ? (
+        <Reveal y={24} stagger={0.06}>
+          <ProductReviewsSection product={product} />
+        </Reveal>
+      </Container>
+
+      {/* ================================================================ */}
+      {/* 6. REEL VIDEO REVIEWS & REAL RECOVERY STORIES                     */}
+      {/* ================================================================ */}
+      <ReelVideoReviews
+        title="Watch Video Reviews & Patient Experiences"
+        subtitle="Real patients and verified practitioners share their genuine clinical recovery journeys, unboxing, and tips."
+      />
+
+      {/* ================================================================ */}
+      {/* 7. "YOU MAY ALSO CONSIDER" 4-CARD FULL GRID                       */}
+      {/* ================================================================ */}
+      {product.related.length > 0 ? (
+        <Container className="max-w-[1260px] w-full px-4 sm:px-6 lg:px-8">
           <Reveal y={24} stagger={0.06}>
-            <section aria-labelledby="related-heading" className="mt-14 sm:mt-18 border-t border-line-soft pt-10 sm:pt-12">
+            <section aria-labelledby="related-heading" className="mt-12 sm:mt-16 border-t border-line-soft pt-10 sm:pt-12">
               <div className="mb-6 sm:mb-8 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <h2 id="related-heading" className="font-display text-xl sm:text-2xl font-bold tracking-tight text-ink dark:text-white">
@@ -1064,8 +1128,8 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
               </ul>
             </section>
           </Reveal>
-        ) : null}
-      </Container>
+        </Container>
+      ) : null}
 
       {/* ================================================================ */}
       {/* 6. MOBILE STICKY BOTTOM PURCHASE BAR                              */}
@@ -1080,9 +1144,14 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
               {variant ? formatRupees(variant.price) : "₹0"}
             </span>
             {hasDiscount && variant ? (
-              <span className="text-xs text-muted-ink line-through tabular-nums">
-                {formatRupees(variant.mrp)}
-              </span>
+              <>
+                <span className="text-xs text-muted-ink line-through tabular-nums">
+                  {formatRupees(variant.mrp)}
+                </span>
+                <span className="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
+                  {discountPercent}% OFF
+                </span>
+              </>
             ) : null}
           </div>
         </div>

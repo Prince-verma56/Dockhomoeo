@@ -6,4 +6,7 @@ export interface ApiServiceabilityResult {
   deliveryDays: number | null;
   city: string | null;
   state: string | null;
+  estimatedDate?: string | null;
+  estimatedDayName?: string | null;
 }
+

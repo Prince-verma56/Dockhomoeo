@@ -31,8 +31,8 @@ export function AccountMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger aria-label={`Account menu for ${displayName(user)}`} className="ml-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-forest/40">
-        <Avatar className="size-9 border border-white/40 shadow-sm transition-transform hover:scale-105 active:scale-95 bg-white/50 backdrop-blur-md text-forest-deep">
+      <DropdownMenuTrigger aria-label={`Account menu for ${displayName(user)}`} className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0d5a43]/40 cursor-pointer">
+        <Avatar className="size-10 border border-line-soft/80 shadow-2xs transition-transform hover:scale-105 active:scale-95 bg-white/70 dark:bg-white/10 backdrop-blur-md text-[#0d5a43] dark:text-emerald-400">
           <AvatarFallback className="bg-transparent font-semibold">
             {initials}
           </AvatarFallback>

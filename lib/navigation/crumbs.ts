@@ -5,16 +5,71 @@ import type { ApiProductListingResponse } from "@/types/api/search";
 export type Crumb = { name: string; href: string };
 
 /**
- * Breadcrumb trails that both a client view (the visible trail) and its
- * server page (the JSON-LD) need, kept here so the two never disagree.
+ * Standardized Breadcrumb trails across the DocHomoeo storefront.
+ * Canonical hierarchies:
+ * - Product detail: Home > Products > Product Name
+ * - Brand detail: Home > Brands > Brand Name
+ * - Category directory: Home > Categories
+ * - Brand directory: Home > Brands
+ * - Search results: Home > Search > Search Query
+ * - Cart: Home > Cart
+ * - Checkout: Home > Cart > Checkout
+ * - Order confirmation: Home > Cart > Checkout > Order Confirmation
  */
 
-/** Products → category chain (the shop's `trail`) → the product. */
+/** Product detail: Products -> Product Name */
 export function productCrumbs(product: ApiProductDetail): Crumb[] {
   return [
     { name: "Products", href: "/products" },
-    ...product.trail.map((step) => ({ name: step.name, href: `/products?category=${encodeURIComponent(step.slug)}` })),
     { name: product.name, href: `/product/${product.slug}` },
+  ];
+}
+
+/** Cart: Home > Cart */
+export function cartCrumbs(): Crumb[] {
+  return [{ name: "Cart", href: "/cart" }];
+}
+
+/** Checkout: Home > Cart > Checkout */
+export function checkoutCrumbs(): Crumb[] {
+  return [
+    { name: "Cart", href: "/cart" },
+    { name: "Checkout", href: "/checkout" },
+  ];
+}
+
+/** Order confirmation: Home > Cart > Checkout > Order Confirmation */
+export function orderConfirmationCrumbs(): Crumb[] {
+  return [
+    { name: "Cart", href: "/cart" },
+    { name: "Checkout", href: "/checkout" },
+    { name: "Order Confirmation", href: "/thankyou" },
+  ];
+}
+
+/** Brand detail: Home > Brands > Brand Name */
+export function brandCrumbs(brandName: string, brandSlug: string): Crumb[] {
+  return [
+    { name: "Brands", href: "/brands" },
+    { name: brandName, href: `/brands/${brandSlug}` },
+  ];
+}
+
+/** Brand directory: Home > Brands */
+export function brandDirectoryCrumbs(): Crumb[] {
+  return [{ name: "Brands", href: "/brands" }];
+}
+
+/** Category directory: Home > Categories */
+export function categoryDirectoryCrumbs(): Crumb[] {
+  return [{ name: "Categories", href: "/categories" }];
+}
+
+/** Search results: Home > Search > Search Query */
+export function searchCrumbs(query: string): Crumb[] {
+  return [
+    { name: "Search", href: "/search" },
+    { name: query, href: `/search?q=${encodeURIComponent(query)}` },
   ];
 }
 

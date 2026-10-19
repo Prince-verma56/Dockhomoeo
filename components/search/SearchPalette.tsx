@@ -179,7 +179,13 @@ const noopSubscribe = () => () => {};
  * The header's search entry. Looks like a field, behaves like a button: one
  * click opens the palette with the cursor already in it.
  */
-export function SearchTrigger({ variant = "field", className }: { variant?: "field" | "icon"; className?: string }) {
+export function SearchTrigger({
+  variant = "field",
+  className,
+}: {
+  variant?: "field" | "icon" | "header";
+  className?: string;
+}) {
   const shortcut = useSyncExternalStore(
     noopSubscribe,
     () => (/Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘K" : "Ctrl K"),
@@ -188,34 +194,62 @@ export function SearchTrigger({ variant = "field", className }: { variant?: "fie
 
   const open = (event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     openSearch();
   };
 
   if (variant === "icon") {
     return (
-      <Link
-        href="/search"
+      <button
+        type="button"
         onClick={open}
         aria-haspopup="dialog"
         aria-label="Search medicines, brands and health concerns"
         className={cn(
-          "grid size-9 place-items-center rounded-full text-ink transition-colors hover:bg-black/5 hover:text-forest cursor-pointer",
+          "grid size-10 place-items-center rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors cursor-pointer shrink-0",
           className,
         )}
       >
-        <Search aria-hidden className="size-[18px]" strokeWidth={1.75} />
-      </Link>
+        <Search aria-hidden className="size-5" strokeWidth={1.85} />
+      </button>
+    );
+  }
+
+  if (variant === "header") {
+    return (
+      <button
+        type="button"
+        onClick={open}
+        aria-haspopup="dialog"
+        aria-keyshortcuts="Control+K Meta+K /"
+        aria-label="Search medicines, dilutions, brands and health goals"
+        className={cn(
+          "group flex h-10 w-full items-center gap-2.5 sm:gap-3 rounded-full",
+          "border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-white/5 pr-2.5 sm:pr-3 pl-3.5 sm:pl-4 text-left",
+          "shadow-2xs backdrop-blur-md transition-all duration-200",
+          "hover:border-[#0d5a43]/50 hover:bg-white dark:hover:bg-[#0c1e17] hover:shadow-xs cursor-pointer",
+          className,
+        )}
+      >
+        <Search aria-hidden className="size-4 sm:size-4.5 shrink-0 text-[#0d5a43] dark:text-emerald-400 transition-colors" strokeWidth={2.2} />
+        <span className="min-w-0 flex-1 truncate text-xs sm:text-sm text-muted-ink/80 group-hover:text-ink font-medium">
+          Search for medicines, dilutions, brands, health goals…
+        </span>
+        <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-lg border border-line-soft bg-paper/90 dark:bg-white/10 px-2 py-0.5 font-sans text-[11px] font-bold text-muted-ink shadow-2xs shrink-0">
+          {shortcut}
+        </kbd>
+      </button>
     );
   }
 
   return (
-    <Link
-      href="/search"
+    <button
+      type="button"
       onClick={open}
       aria-haspopup="dialog"
       aria-keyshortcuts="Control+K Meta+K /"
       className={cn(
-        "group flex h-10 w-[210px] items-center gap-2.5 rounded-full border border-white/80 dark:border-white/15 bg-white/75 dark:bg-white/10 pr-2.5 pl-3.5 text-left shadow-2xs backdrop-blur-md transition-all duration-300 hover:border-forest/40 hover:bg-white/95 hover:shadow-xs cursor-pointer lg:w-[250px] xl:w-[240px] min-[1400px]:w-[280px]",
+        "group flex h-10 w-[210px] items-center gap-2.5 rounded-full border border-black/[0.08] dark:border-white/15 bg-white/75 dark:bg-white/10 pr-2.5 pl-3.5 text-left shadow-2xs backdrop-blur-md transition-all duration-300 hover:border-forest/40 hover:bg-white/95 hover:shadow-xs cursor-pointer lg:w-[250px] xl:w-[240px] min-[1400px]:w-[280px]",
         className,
       )}
     >
@@ -224,7 +258,7 @@ export function SearchTrigger({ variant = "field", className }: { variant?: "fie
       <kbd className="hidden shrink-0 rounded-md border border-line-soft bg-paper/90 px-1.5 py-0.5 font-sans text-[0.6875rem] font-bold text-muted-ink lg:inline-block shadow-2xs">
         {shortcut}
       </kbd>
-    </Link>
+    </button>
   );
 }
 

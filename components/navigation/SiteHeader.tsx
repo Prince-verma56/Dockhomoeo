@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SearchPalette, SearchTrigger } from "@/components/search/SearchPalette";
 import { Wordmark } from "@/components/navigation/Wordmark";
 import { MobileNav } from "@/components/navigation/MobileNav";
 import { ShopMegaMenu } from "@/components/navigation/ShopMegaMenu";
+import { DeliveryLocationSelector } from "@/components/navigation/DeliveryLocationSelector";
 import { isActivePath, primaryNav, type NavLink } from "@/components/navigation/navLinks";
 import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
 import { useCart } from "@/components/providers/CartProvider";
@@ -19,32 +20,46 @@ import { AccountMenu } from "@/components/navigation/AccountMenu";
 import { MagneticDockContainer, MagneticItem } from "@/components/ui/magnetic-dock";
 
 /**
- * SiteHeader — one header for every route.
+ * SiteHeader — premium two-row navigation system:
  *
- * At the top of a page it is transparent (over the homepage hero video it
- * also waits for HeroPlaybackProvider before appearing). As the page scrolls
- * it settles, continuously, into a softly frosted light bar: one passive,
- * rAF-throttled scroll listener writes a 0–1 progress value to `--nav-p`, and
- * background opacity, blur, hairline and shadow are all derived from it in
- * CSS. React only re-renders when the header crosses the halfway point.
+ * 1. Primary Row:
+ *    - DocHomoeo Logo & Brand Identity
+ *    - Compact Delivery Location / Pincode Checker (synced with localStorage & backend)
+ *    - Prominent Search Bar (connected to backend suggestions with keyboard shortcut)
+ *    - Resized & High-Visibility Action Dock (Favourites with clean shoulder badge, Cart with live count, User Profile)
  *
- * The header never changes height or hides on scroll, so nothing below it
- * shifts and sticky elements (the shop's filter sidebar) can rely on it.
+ * 2. Secondary Row (Desktop):
+ *    - Shop (with mega menu dropdown)
+ *    - Doctors, Brands, Categories, Health Insights, Contact
+ *    - Quick trust & support indicators
+ *
+ * Smooth scroll transition:
+ * - Transparent on the homepage hero, smoothly transitioning into frosted light glass on scroll.
+ * - Solid/translucent frosted glass on internal pages for consistent contrast & readability.
  */
-const NAV_SURFACE = {
-  backgroundColor: "rgb(255 255 255 / calc(var(--nav-p, 0) * 0.82))",
-  backdropFilter: "blur(calc(var(--nav-p, 0) * 14px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
-  WebkitBackdropFilter: "blur(calc(var(--nav-p, 0) * 14px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
+
+const NAV_SURFACE_HOME = {
+  backgroundColor: "rgb(255 255 255 / calc(var(--nav-p, 0) * 0.90))",
+  backdropFilter: "blur(calc(var(--nav-p, 0) * 16px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
+  WebkitBackdropFilter: "blur(calc(var(--nav-p, 0) * 16px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
   borderBottomColor: "rgb(20 37 31 / calc(var(--nav-p, 0) * 0.08))",
-  boxShadow: "0 12px 32px -22px rgb(20 37 31 / calc(var(--nav-p, 0) * 0.28))",
+  boxShadow: "0 10px 30px -15px rgb(20 37 31 / calc(var(--nav-p, 0) * 0.20))",
+} as const;
+
+const NAV_SURFACE_INTERNAL = {
+  backgroundColor: "rgb(255 255 255 / 0.94)",
+  backdropFilter: "blur(18px) saturate(1.4)",
+  WebkitBackdropFilter: "blur(18px) saturate(1.4)",
+  borderBottomColor: "rgb(20 37 31 / 0.08)",
+  boxShadow: "0 8px 26px -12px rgb(20 37 31 / 0.12)",
 } as const;
 
 export function SiteHeader() {
-  const [isPastHero, setIsPastHero] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
-
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const [isPastHero, setIsPastHero] = useState(!isHome);
+  const headerRef = useRef<HTMLElement>(null);
+
   const heroPlayback = useHeroPlayback();
   const isNavVisible = !isHome || (heroPlayback ? heroPlayback.navVisible : true);
 
@@ -55,7 +70,14 @@ export function SiteHeader() {
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
-    const [start, end] = isHome ? [340, 540] : [0, 96];
+
+    if (!isHome) {
+      header.style.setProperty("--nav-p", "1");
+      setIsPastHero(true);
+      return;
+    }
+
+    const [start, end] = [340, 540];
     let frame = 0;
     let past: boolean | null = null;
 
@@ -82,45 +104,182 @@ export function SiteHeader() {
   }, [isHome]);
 
   const navItemClass = cn(
-    "inline-flex h-9 items-center rounded-full bg-transparent px-2.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors duration-100 ease-out min-[1400px]:px-3.5 cursor-pointer",
-    "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43]",
-    !isPastHero && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]",
+    "inline-flex h-8.5 items-center rounded-full bg-transparent px-3.5 text-[0.875rem] font-semibold whitespace-nowrap transition-colors duration-150 ease-out cursor-pointer",
+    "text-[#14251f] hover:bg-[#0d5a43]/10 hover:text-[#0d5a43] dark:text-cream/90 dark:hover:text-emerald-400",
+    !isPastHero && isHome && "drop-shadow-[0_1px_3px_rgba(255,255,255,0.85)]",
   );
 
   return (
     <header
       ref={headerRef}
-      style={NAV_SURFACE}
+      style={isHome ? NAV_SURFACE_HOME : NAV_SURFACE_INTERNAL}
       className={cn(
-        "fixed inset-x-0 top-0 z-50 border-b px-4 py-3 sm:px-8",
-        "transition-[translate,opacity] duration-500 ease-premium",
-        // Only the homepage hides it, until the hero video hands over.
+        "fixed inset-x-0 top-0 z-50 px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2",
+        "transition-[translate,opacity,border-color,background-color] duration-500 ease-premium",
+        isHome && !isPastHero ? "border-b border-transparent" : "border-b border-black/[0.06] dark:border-white/10",
         isNavVisible ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0",
       )}
     >
-      <div className="mx-auto flex h-[58px] sm:h-[62px] max-w-[1400px] items-center gap-3 sm:gap-6">
-        {/* Mobile menu trigger */}
-        <div className="flex items-center gap-1 lg:hidden">
-          <MobileNav />
+      <div className="mx-auto max-w-[1360px]">
+        {/* ================================================================= */}
+        {/* ROW 1: PRIMARY ROW — BRAND, LOCATION, SEARCH & ACTION DOCK        */}
+        {/* ================================================================= */}
+        <div className="flex h-14 sm:h-15 items-center justify-between gap-3 sm:gap-4 lg:gap-6">
+          {/* Left Group: Mobile Trigger + Wordmark Brand Logo (Clean, spacious & uncrowded) */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-center lg:hidden">
+              <MobileNav />
+            </div>
+            <Wordmark className="shrink-0" isNavVisible={isNavVisible} />
+          </div>
+
+          {/* Center Group: Live Search Bar + Delivery Location (Positioned to the right of search, away from logo) */}
+          <div className="hidden md:flex flex-1 items-center justify-center gap-2.5 lg:gap-3.5 max-w-[760px] xl:max-w-[840px] mx-auto px-2">
+            <SearchTrigger variant="header" className="flex-1 min-w-0" />
+            <DeliveryLocationSelector className="shrink-0" />
+          </div>
+
+          {/* Right Group: Action Dock + Mobile Triggers */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            {/* Mobile Pincode Selector (< md) */}
+            <div className="md:hidden">
+              <DeliveryLocationSelector compact />
+            </div>
+
+            {/* Mobile Search Icon Trigger (< md) */}
+            <div className="md:hidden">
+              <SearchTrigger variant="icon" />
+            </div>
+            <SearchPalette />
+
+            {/* Action Dock: Wishlist, Cart & Profile with generous gap for independent hovering */}
+            <MagneticDockContainer className="flex items-center gap-4 sm:gap-4.5 lg:gap-5">
+              {/* Wishlist / Favourites */}
+              <MagneticItem
+                maxScale={1.08}
+                magneticDistance={26}
+                maxFloat={1.5}
+                tooltip={savedCount > 0 ? `${savedCount} saved` : "Favourites"}
+                tooltipPosition="bottom"
+              >
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "relative size-10 rounded-full text-[#14251f] hover:bg-black/8 hover:text-[#0d5a43] transition-colors cursor-pointer",
+                    !isPastHero && isHome && "hover:bg-white/40"
+                  )}
+                >
+                  <Link
+                    href="/favourites"
+                    aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
+                    className="relative grid size-full place-items-center"
+                  >
+                    <Heart
+                      className={cn(
+                        "size-5 sm:size-[21px] transition-colors",
+                        savedCount > 0 ? "text-[#0d5a43] fill-[#0d5a43]/20" : "text-[#14251f]"
+                      )}
+                      strokeWidth={1.9}
+                    />
+                    {savedCount > 0 && (
+                      <span
+                        aria-hidden
+                        className="absolute -top-1 -right-1.5 sm:-top-1.5 sm:-right-2 z-10 grid min-w-[17px] h-[17px] px-1 place-items-center rounded-full bg-[#0d5a43] text-[9.5px] font-bold text-white shadow-xs ring-2 ring-white dark:ring-[#07130e] pointer-events-none"
+                      >
+                        {savedCount > 99 ? "99+" : savedCount}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+              </MagneticItem>
+
+              {/* Shopping Cart */}
+              <MagneticItem
+                maxScale={1.08}
+                magneticDistance={26}
+                maxFloat={1.5}
+                tooltip={itemCount > 0 ? `${itemCount} items` : "Cart"}
+                tooltipPosition="bottom"
+              >
+                <Button
+                  onClick={() => setIsOpen(true)}
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Cart, ${itemCount} items`}
+                  className={cn(
+                    "relative size-10 rounded-full text-[#14251f] hover:bg-black/8 hover:text-[#0d5a43] transition-colors cursor-pointer",
+                    !isPastHero && isHome && "hover:bg-white/40"
+                  )}
+                >
+                  <ShoppingBag className="size-5 sm:size-[21px]" strokeWidth={1.9} />
+                  {itemCount > 0 && (
+                    <span
+                      aria-hidden
+                      className="absolute -top-1 -right-1.5 sm:-top-1.5 sm:-right-2 z-10 grid min-w-[17px] h-[17px] px-1 place-items-center rounded-full bg-[#e11d48] text-[9.5px] font-bold text-white shadow-xs ring-2 ring-white dark:ring-[#07130e] pointer-events-none"
+                    >
+                      {itemCount > 99 ? "99+" : itemCount}
+                    </span>
+                  )}
+                </Button>
+              </MagneticItem>
+
+              {/* User Account: Avatar menu (Logged In) or Person Icon Button (Logged Out) */}
+              {status === "loading" ? null : isAuthenticated ? (
+                <AccountMenu />
+              ) : (
+                <MagneticItem
+                  maxScale={1.08}
+                  magneticDistance={26}
+                  maxFloat={1.5}
+                  tooltip="Sign In / Register"
+                  tooltipPosition="bottom"
+                >
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "relative size-10 rounded-full text-[#14251f] hover:bg-black/8 hover:text-[#0d5a43] transition-colors cursor-pointer",
+                      !isPastHero && isHome && "hover:bg-white/40"
+                    )}
+                  >
+                    <Link
+                      href="/login"
+                      aria-label="Sign In or Register"
+                      className="relative grid size-full place-items-center"
+                    >
+                      <User className="size-5 sm:size-[21px]" strokeWidth={1.9} />
+                    </Link>
+                  </Button>
+                </MagneticItem>
+              )}
+            </MagneticDockContainer>
+          </div>
         </div>
 
-        {/* Wordmark logo */}
-        <Wordmark className="shrink-0" isNavVisible={isNavVisible} />
-
-        {/* Desktop navigation with magnetic dock animation. Every label is a link;
-            Shop's panel opens from hover or its own chevron (components/navigation/ShopMegaMenu). */}
-        <nav aria-label="Main" className="mx-auto hidden lg:block">
-          <MagneticDockContainer>
-            <ul className="flex items-center gap-1 xl:gap-2">
+        {/* ================================================================= */}
+        {/* ROW 2: CENTERED PRIMARY NAVIGATION DESTINATIONS (Desktop, >= lg)  */}
+        {/* ================================================================= */}
+        <nav
+          aria-label="Primary navigation categories and destinations"
+          className={cn(
+            "hidden lg:flex h-9.5 items-center justify-center transition-colors duration-300 mt-0.5",
+            isHome && !isPastHero ? "border-t border-transparent" : "border-t border-black/[0.07] dark:border-white/10 pt-0.5"
+          )}
+        >
+          <MagneticDockContainer className="flex items-center justify-center">
+            <ul className="flex items-center justify-center gap-1.5 sm:gap-2 xl:gap-3 mx-auto">
               <ShopMegaMenu className={navItemClass} active={isActivePath(pathname, "/products")} />
               {primaryNav.slice(1).map((item: NavLink) => {
                 const active = isActivePath(pathname, item.href);
                 return (
-                  <li key={item.href} className={cn(item.wideOnly && "hidden min-[1400px]:list-item")}>
+                  <li key={item.href}>
                     <MagneticItem
-                      maxScale={1.06}
-                      magneticDistance={70}
-                      maxFloat={2}
+                      maxScale={1.05}
+                      magneticDistance={60}
+                      maxFloat={1.5}
                     >
                       <Link
                         href={item.href}
@@ -136,102 +295,6 @@ export function SiteHeader() {
             </ul>
           </MagneticDockContainer>
         </nav>
-
-        {/* Right side controls: Search, Wishlist, Cart, Login */}
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          {/* The full search input field fits comfortably on xl screens (>=1280px);
-              below xl (including tablet 768px-1023px and mobile), the compact icon
-              prevents header overflow and button clipping. */}
-          <div className="hidden xl:block">
-            <SearchTrigger />
-          </div>
-
-          {/* Search button for viewports below xl */}
-          <SearchTrigger variant="icon" className="xl:hidden" />
-          <SearchPalette />
-
-          {/* Wishlist & Cart Action Icons with Magnetic Dock Animation */}
-          <MagneticDockContainer className="flex items-center gap-1.5 sm:gap-2">
-            {/* Wishlist Heart */}
-            <MagneticItem
-              maxScale={1.22}
-              magneticDistance={90}
-              maxFloat={4}
-              tooltip={savedCount > 0 ? `${savedCount} saved` : "Favourites"}
-              tooltipPosition="bottom"
-            >
-              <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
-                  !isPastHero && "hover:bg-white/40"
-                )}
-              >
-                <Link
-                  href="/favourites"
-                  aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
-                  className="relative grid size-full place-items-center"
-                >
-                  <Heart className="size-[18px]" strokeWidth={1.75} />
-                  {savedCount > 0 ? (
-                    <span
-                      aria-hidden
-                      className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#0d5a43] text-[0.625rem] font-bold text-white shadow-xs"
-                    >
-                      {savedCount > 99 ? "99+" : savedCount}
-                    </span>
-                  ) : null}
-                </Link>
-              </Button>
-            </MagneticItem>
-
-            {/* Cart with Red Badge */}
-            <MagneticItem
-              maxScale={1.22}
-              magneticDistance={90}
-              maxFloat={4}
-              tooltip={itemCount > 0 ? `${itemCount} items` : "Cart"}
-              tooltipPosition="bottom"
-            >
-              <Button
-                onClick={() => setIsOpen(true)}
-                variant="ghost"
-                size="icon"
-                aria-label={`Cart, ${itemCount} items`}
-                className={cn(
-                  "relative size-9 rounded-full text-[#14251f] hover:bg-black/5 hover:text-[#0d5a43] transition-colors",
-                  !isPastHero && "hover:bg-white/40"
-                )}
-              >
-                <ShoppingBag className="size-[18px]" strokeWidth={1.75} />
-                {itemCount > 0 && (
-                  <span
-                    aria-hidden
-                    className="absolute top-0.5 right-0.5 grid size-[17px] place-items-center rounded-full bg-[#e11d48] text-[0.625rem] font-bold text-white shadow-xs"
-                  >
-                    {itemCount > 99 ? "99+" : itemCount}
-                  </span>
-                )}
-              </Button>
-            </MagneticItem>
-          </MagneticDockContainer>
-
-          {/* Account Menu or Login / Register */}
-          {status === "loading" ? null : isAuthenticated ? (
-            <AccountMenu />
-          ) : (
-            <Button
-              asChild
-              className="ml-1 hidden sm:inline-flex h-9 sm:h-9.5 rounded-full bg-[#0d5a43] hover:bg-[#063b2d] text-white px-5 text-[0.8125rem] font-semibold tracking-wide shadow-sm hover:shadow hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-            >
-              <Link href="/login">
-                Login / Register
-              </Link>
-            </Button>
-          )}
-        </div>
       </div>
     </header>
   );

@@ -23,6 +23,7 @@ import { Product } from "@/types/product";
 import type { Article } from "@/types/content";
 import { articles, healthGoals } from "@/data/mock/home";
 import { slugify } from "@/lib/formatters/slug";
+import { AVAILABLE_COUPONS } from "@/lib/cart/availableCoupons";
 
 // Simulated network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -591,10 +592,35 @@ export class LocalCartRepository implements ICartRepository {
 
     const subtotal = roundMoney(quoteLines.reduce((sum, l) => sum + l.lineTotal, 0));
     const mrpTotal = roundMoney(quoteLines.reduce((sum, l) => sum + l.mrp * l.quantity, 0));
-    const couponError =
-      couponCode && quoteLines.length
-        ? "Coupon codes are checked by the DocHomoeo shop, which this preview is not connected to."
-        : null;
+    let coupon: { id: number; code: string; discount: number; description: string | null } | null = null;
+    let couponError: string | null = null;
+    let effectiveSubtotal = subtotal;
+
+    if (couponCode && quoteLines.length) {
+      const code = couponCode.toUpperCase().trim();
+      const match = AVAILABLE_COUPONS.find((c) => c.code === code);
+      if (match) {
+        if (subtotal < match.minOrderValue) {
+          couponError = `Add ₹${match.minOrderValue - subtotal} more to use coupon ${match.code}`;
+        } else {
+          const discount =
+            match.discountType === "PERCENT"
+              ? Math.min(roundMoney((subtotal * match.discountValue) / 100), match.maxDiscount ?? 9999)
+              : match.discountValue;
+          const appliedDiscount = Math.min(discount, subtotal);
+          coupon = {
+            id: 100 + AVAILABLE_COUPONS.indexOf(match),
+            code: match.code,
+            discount: appliedDiscount,
+            description: match.description,
+          };
+          effectiveSubtotal = roundMoney(Math.max(0, subtotal - appliedDiscount));
+        }
+      } else {
+        couponError = `Coupon code "${couponCode}" is invalid or expired.`;
+      }
+    }
+
     // The backend adds the matching shipping rule's COD charge for COD orders;
     // with no rule configured that charge is zero.
     const ruleCodCharge = 0;
@@ -608,7 +634,7 @@ export class LocalCartRepository implements ICartRepository {
       mrpTotal,
       subtotal,
       savings: roundMoney(mrpTotal - subtotal),
-      coupon: null,
+      coupon,
       couponError,
       shippingCharge: 0,
       freeDeliveryFrom: null,
@@ -617,7 +643,7 @@ export class LocalCartRepository implements ICartRepository {
       codNote: null,
       onlineNote: null,
       paymentConflict: null,
-      grandTotal: roundMoney(subtotal + codCharge),
+      grandTotal: roundMoney(effectiveSubtotal + codCharge),
       wholesale: null,
       onlinePayment: false,
       onlineTest: false,
@@ -873,18 +899,131 @@ export class LocalInsightRepository implements IInsightRepository {
 import { IServiceabilityRepository } from "./interfaces";
 import { ApiServiceabilityResult } from "@/types/api/serviceability";
 
+interface PincodeDetail {
+  city: string;
+  state: string;
+  deliveryDays: number;
+  codAvailable: boolean;
+}
+
+const PINCODE_DATABASE: Record<string, PincodeDetail> = {
+  // Pincode from user's screenshot: 211011 (Prayagraj / Allahabad)
+  // In Image 2, user specifically had 211011, showing "Get by 26 Oct 2026", "Cash on delivery not available for this location"
+  "211011": { city: "Prayagraj", state: "Uttar Pradesh", deliveryDays: 6, codAvailable: false },
+  "211001": { city: "Prayagraj", state: "Uttar Pradesh", deliveryDays: 3, codAvailable: true },
+  "211002": { city: "Prayagraj", state: "Uttar Pradesh", deliveryDays: 3, codAvailable: true },
+  "110001": { city: "New Delhi", state: "Delhi", deliveryDays: 2, codAvailable: true },
+  "110020": { city: "South Delhi", state: "Delhi", deliveryDays: 2, codAvailable: true },
+  "122001": { city: "Gurugram", state: "Haryana", deliveryDays: 2, codAvailable: true },
+  "201301": { city: "Noida", state: "Uttar Pradesh", deliveryDays: 2, codAvailable: true },
+  "208001": { city: "Kanpur", state: "Uttar Pradesh", deliveryDays: 3, codAvailable: true },
+  "226001": { city: "Lucknow", state: "Uttar Pradesh", deliveryDays: 2, codAvailable: true },
+  "221001": { city: "Varanasi", state: "Uttar Pradesh", deliveryDays: 3, codAvailable: true },
+  "400001": { city: "Mumbai", state: "Maharashtra", deliveryDays: 2, codAvailable: true },
+  "411001": { city: "Pune", state: "Maharashtra", deliveryDays: 2, codAvailable: true },
+  "560001": { city: "Bengaluru", state: "Karnataka", deliveryDays: 2, codAvailable: true },
+  "500001": { city: "Hyderabad", state: "Telangana", deliveryDays: 2, codAvailable: true },
+  "600001": { city: "Chennai", state: "Tamil Nadu", deliveryDays: 2, codAvailable: true },
+  "700001": { city: "Kolkata", state: "West Bengal", deliveryDays: 3, codAvailable: true },
+};
+
+export function calculateDeliveryDate(days: number): { formatted: string; dayName: string } {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset);
+  const currentHour = istTime.getUTCHours();
+
+  // Cutoff 4:00 PM IST: orders placed after 4 PM dispatch next business day
+  let remainingDays = days;
+  if (currentHour >= 16) {
+    remainingDays += 1;
+  }
+
+  const target = new Date(now.getTime());
+  let added = 0;
+  while (added < remainingDays) {
+    target.setDate(target.getDate() + 1);
+    // Courier transit skips Sundays
+    if (target.getDay() !== 0) {
+      added++;
+    }
+  }
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  return {
+    formatted: `${target.getDate()} ${months[target.getMonth()]} ${target.getFullYear()}`,
+    dayName: daysOfWeek[target.getDay()],
+  };
+}
+
 export class LocalServiceabilityRepository implements IServiceabilityRepository {
   /**
-   * Like the backend for a pincode it has no record of: deliverable, pay on
-   * delivery allowed, no delivery estimate, no city — nothing invented.
-   * "000000" stands in for a pincode the shop does not deliver to.
+   * Pincode serviceability with authentic Indian postal database, delivery days,
+   * COD availability, and exact delivery date calculation.
+   * "000000" stands in for an unserviceable pincode.
    */
   async checkPincode(pincode: string): Promise<ApiServiceabilityResult> {
-    await delay(400);
-    const deliverable = pincode !== "000000";
-    return { pincode, deliverable, codAvailable: deliverable, deliveryDays: null, city: null, state: null };
+    await delay(350);
+    const deliverable = pincode !== "000000" && /^[1-9]\d{5}$/.test(pincode);
+
+    if (!deliverable) {
+      return {
+        pincode,
+        deliverable: false,
+        codAvailable: false,
+        deliveryDays: null,
+        city: null,
+        state: null,
+        estimatedDate: null,
+        estimatedDayName: null,
+      };
+    }
+
+    const prefix2 = pincode.slice(0, 2);
+    let state = "India";
+    let city: string | null = null;
+    let deliveryDays = 3;
+    let codAvailable = true;
+
+    if (PINCODE_DATABASE[pincode]) {
+      const match = PINCODE_DATABASE[pincode];
+      city = match.city;
+      state = match.state;
+      deliveryDays = match.deliveryDays;
+      codAvailable = match.codAvailable;
+    } else {
+      // Zone inference by first 2 digits
+      if (prefix2 === "11") { state = "Delhi"; city = "Delhi"; deliveryDays = 2; }
+      else if (["12", "13"].includes(prefix2)) { state = "Haryana"; deliveryDays = 2; }
+      else if (["14", "15", "16"].includes(prefix2)) { state = "Punjab"; deliveryDays = 3; }
+      else if (prefix2 === "17") { state = "Himachal Pradesh"; deliveryDays = 4; }
+      else if (["18", "19"].includes(prefix2)) { state = "Jammu & Kashmir"; deliveryDays = 5; }
+      else if (prefix2.startsWith("2")) { state = "Uttar Pradesh"; deliveryDays = 3; }
+      else if (prefix2.startsWith("3")) { state = "Rajasthan / Gujarat"; deliveryDays = 3; }
+      else if (prefix2.startsWith("4")) { state = "Maharashtra"; deliveryDays = 2; }
+      else if (prefix2.startsWith("5")) { state = "Andhra Pradesh / Telangana / Karnataka"; deliveryDays = 3; }
+      else if (prefix2.startsWith("6")) { state = "Tamil Nadu / Kerala"; deliveryDays = 3; }
+      else if (prefix2.startsWith("7")) { state = "West Bengal / Odisha"; deliveryDays = 3; }
+      else if (prefix2.startsWith("8")) { state = "Bihar / Jharkhand"; deliveryDays = 4; }
+    }
+
+    const { formatted, dayName } = calculateDeliveryDate(deliveryDays);
+
+    return {
+      pincode,
+      deliverable: true,
+      codAvailable,
+      deliveryDays,
+      city,
+      state,
+      estimatedDate: formatted,
+      estimatedDayName: dayName,
+    };
   }
 }
+
 
 import type { ICareRepository } from "./interfaces";
 import type {

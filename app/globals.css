@@ -50,33 +50,42 @@ html {
 
 /* Custom luxury themed scrollbar for modals, drawers, and panels */
 .dh-custom-scrollbar,
-[data-lenis-prevent].dh-custom-scrollbar {
+[data-lenis-prevent].dh-custom-scrollbar,
+div[data-lenis-prevent] {
   scrollbar-width: thin !important;
-  scrollbar-color: rgba(13, 90, 67, 0.45) transparent !important;
+  scrollbar-color: #0d5a43 rgba(13, 90, 67, 0.08) !important;
   overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch !important;
 }
 
 .dh-custom-scrollbar::-webkit-scrollbar,
-[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar {
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar,
+div[data-lenis-prevent]::-webkit-scrollbar {
   width: 6px !important;
   height: 6px !important;
+  display: block !important;
 }
 
 .dh-custom-scrollbar::-webkit-scrollbar-track,
-[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent !important;
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-track,
+div[data-lenis-prevent]::-webkit-scrollbar-track {
+  background: rgba(13, 90, 67, 0.05) !important;
+  border-radius: 9999px !important;
 }
 
 .dh-custom-scrollbar::-webkit-scrollbar-thumb,
-[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(13, 90, 67, 0.4) !important;
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb,
+div[data-lenis-prevent]::-webkit-scrollbar-thumb {
+  background: #0d5a43 !important;
+  background-color: #0d5a43 !important;
   border-radius: 9999px !important;
 }
 
 .dh-custom-scrollbar::-webkit-scrollbar-thumb:hover,
-[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #0d5a43 !important;
+[data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb:hover,
+div[data-lenis-prevent]::-webkit-scrollbar-thumb:hover {
+  background: #074231 !important;
+  background-color: #074231 !important;
 }
 
 /* Eliminate native Windows scrollbar arrow buttons across all custom scrollbars */
@@ -94,18 +103,29 @@ html {
 }
 
 .dark .dh-custom-scrollbar,
-.dark [data-lenis-prevent].dh-custom-scrollbar {
-  scrollbar-color: rgba(52, 211, 153, 0.45) transparent !important;
+.dark [data-lenis-prevent].dh-custom-scrollbar,
+.dark div[data-lenis-prevent] {
+  scrollbar-color: #34d399 rgba(52, 211, 153, 0.1) !important;
+}
+
+.dark .dh-custom-scrollbar::-webkit-scrollbar-track,
+.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-track,
+.dark div[data-lenis-prevent]::-webkit-scrollbar-track {
+  background: rgba(52, 211, 153, 0.08) !important;
 }
 
 .dark .dh-custom-scrollbar::-webkit-scrollbar-thumb,
-.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(52, 211, 153, 0.4) !important;
+.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb,
+.dark div[data-lenis-prevent]::-webkit-scrollbar-thumb {
+  background: #34d399 !important;
+  background-color: #34d399 !important;
 }
 
 .dark .dh-custom-scrollbar::-webkit-scrollbar-thumb:hover,
-.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(52, 211, 153, 0.8) !important;
+.dark [data-lenis-prevent].dh-custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.dark div[data-lenis-prevent]::-webkit-scrollbar-thumb:hover {
+  background: #10b981 !important;
+  background-color: #10b981 !important;
 }
 
 /* Neutralize Radix / react-remove-scroll layout shift on Windows */

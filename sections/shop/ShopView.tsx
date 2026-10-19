@@ -43,7 +43,7 @@ export function ShopView({ state, result }: ShopViewProps) {
         {/* Luxury travertine & amber dropper bottle background image */}
         <div
           className="pointer-events-none absolute inset-0 select-none bg-cover bg-right lg:bg-[center_right_6%] opacity-90 transition-opacity duration-700"
-          style={{ backgroundImage: "url('/Images/ProductsHeroBG.jpg')" }}
+          style={{ backgroundImage: "url('/Images/ProductsHeroBG.webp')" }}
         />
 
         {/* Soft cream-to-transparent overlay ensuring supreme text contrast */}

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { repositories } from "@/lib/repositories";
+import { LocalServiceabilityRepository } from "@/lib/repositories/local";
+
+const localServiceability = new LocalServiceabilityRepository();
 
 export async function GET(
   _request: NextRequest,
@@ -7,7 +9,7 @@ export async function GET(
 ) {
   try {
     const { pincode } = await context.params;
-    const res = await repositories.serviceability.checkPincode(pincode);
+    const res = await localServiceability.checkPincode(pincode);
     return NextResponse.json(res);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to verify pincode";

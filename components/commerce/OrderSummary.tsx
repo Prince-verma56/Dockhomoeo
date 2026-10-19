@@ -2,18 +2,17 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { formatRupees } from "@/lib/formatters/price";
 import type { CartTotals } from "@/lib/cart/cartView";
+import { FastDeliveryTimer } from "@/components/commerce/FastDeliveryTimer";
+import { Percent, ShieldCheck } from "lucide-react";
 
 /**
- * The totals block shared by the cart and checkout. It only renders
- * `CartTotals` (lib/cart/cartView); it never adds anything up itself.
- *
- * The total is labelled an estimate on purpose: the shop prices the cart again
- * when the order is placed and refuses it if the figure moved.
+ * The totals block shared by the cart and checkout. It displays
+ * the full price details breakdown (MRP, Discount on MRP, Subtotal, Shipping, Amount Payable).
  */
 export function OrderSummary({
   totals,
   updating = false,
-  heading = "Order summary",
+  heading = "Price details",
   headingLevel: Heading = "h2",
   leading,
   children,
@@ -38,46 +37,97 @@ export function OrderSummary({
       ? totals.freeDeliveryFrom - totals.subtotal
       : null;
 
+  // Cart total at MRP before discount
+  const mrpTotal = totals.subtotal + totals.savings;
+  const totalSavings = totals.savings + (totals.coupon?.discount ?? 0);
+
   return (
-    <section aria-labelledby="order-summary-heading" className={cn("rounded-2xl border border-line-soft bg-paper shadow-soft p-6", className)}>
-      <Heading id="order-summary-heading" className="text-lg font-semibold text-ink">
+    <section aria-labelledby="order-summary-heading" className={cn("rounded-2xl border border-line-soft bg-paper dark:bg-[#0c1e17] shadow-soft p-5 sm:p-6", className)}>
+      <Heading id="order-summary-heading" className="text-base sm:text-lg font-bold text-ink dark:text-white">
         {heading}
       </Heading>
 
       {leading ? <div className="mt-4">{leading}</div> : null}
 
-      <dl className={cn("mt-5 space-y-3 text-sm transition-opacity duration-200", updating && "opacity-60")}>
+      <dl className={cn("mt-4 space-y-2.5 text-xs sm:text-sm transition-opacity duration-200", updating && "opacity-60")}>
+        {/* 1. Cart total (MRP) */}
         <div className="flex justify-between gap-4">
           <dt className="text-muted-ink">
-            Items ({totals.itemCount} {noun})
+            Cart total ({totals.itemCount} {noun})
           </dt>
-          <dd className="font-medium tabular-nums text-ink">{formatRupees(totals.subtotal)}</dd>
+          <dd className="font-semibold tabular-nums text-ink dark:text-white">
+            {totals.savings > 0 ? (
+              <span className="line-through text-muted-ink/75 mr-1.5 font-normal text-xs">
+                {formatRupees(mrpTotal)}
+              </span>
+            ) : null}
+            <span>{formatRupees(mrpTotal > 0 ? mrpTotal : totals.subtotal)}</span>
+          </dd>
         </div>
-        {totals.coupon ? (
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-ink">Coupon {totals.coupon.code}</dt>
-            <dd className="font-medium tabular-nums text-forest">−{formatRupees(totals.coupon.discount)}</dd>
+
+        {/* 2. Discount on MRP */}
+        {totals.savings > 0 ? (
+          <div className="flex justify-between gap-4 text-emerald-700 dark:text-emerald-400">
+            <dt className="font-medium">Discount on MRP</dt>
+            <dd className="font-bold tabular-nums">−{formatRupees(totals.savings)}</dd>
           </div>
         ) : null}
+
+        {/* 3. Shipping Charge */}
         <div className="flex justify-between gap-4">
-          <dt className="text-muted-ink">Delivery</dt>
-          <dd className={cn("font-medium tabular-nums", totals.shipping === 0 ? "text-forest" : "text-ink")}>{delivery}</dd>
+          <dt className="text-muted-ink">Shipping charge</dt>
+          <dd className={cn("font-medium tabular-nums", totals.shipping === 0 ? "font-bold text-emerald-700 dark:text-emerald-400" : "text-ink dark:text-white")}>
+            {delivery}
+          </dd>
         </div>
+
+        {/* 4. Sub total (Price after MRP discount) */}
+        <div className="flex justify-between gap-4 pt-1 border-t border-line-soft/60">
+          <dt className="text-muted-ink font-medium">Sub total</dt>
+          <dd className="font-bold tabular-nums text-ink dark:text-white">{formatRupees(totals.subtotal)}</dd>
+        </div>
+
+        {/* 5. Coupon Discount (if applied) */}
+        {totals.coupon ? (
+          <div className="flex justify-between gap-4 text-emerald-700 dark:text-emerald-400">
+            <dt className="font-medium">Coupon discount ({totals.coupon.code})</dt>
+            <dd className="font-bold tabular-nums">−{formatRupees(totals.coupon.discount)}</dd>
+          </div>
+        ) : null}
+
+        {/* 6. COD Charge */}
         {totals.codCharge > 0 ? (
           <div className="flex justify-between gap-4">
             <dt className="text-muted-ink">Pay-on-delivery charge</dt>
-            <dd className="font-medium tabular-nums text-ink">{formatRupees(totals.codCharge)}</dd>
+            <dd className="font-medium tabular-nums text-ink dark:text-white">{formatRupees(totals.codCharge)}</dd>
           </div>
         ) : null}
-        <div className="flex items-baseline justify-between gap-4 border-t border-line/70 pt-4">
-          <dt className="text-base font-semibold text-ink">Estimated total</dt>
-          <dd className="text-xl font-semibold tabular-nums text-ink">{formatRupees(totals.total)}</dd>
+
+        {/* 7. Amount Payable / Estimated Total */}
+        <div className="flex items-baseline justify-between gap-4 border-t border-line/80 pt-3 text-base">
+          <div>
+            <dt className="font-bold text-ink dark:text-white">Amount payable</dt>
+            <span className="text-[10px] text-muted-ink block font-normal">Inclusive of all taxes</span>
+          </div>
+          <dd className="text-xl font-extrabold tabular-nums text-ink dark:text-white">{formatRupees(totals.total)}</dd>
         </div>
       </dl>
 
-      <div className="mt-3 space-y-1.5 text-xs leading-relaxed text-muted-ink" aria-live="polite">
-        {totals.savings > 0 ? <p>Includes {formatRupees(totals.savings)} off MRP.</p> : null}
-        {toFree !== null && toFree > 0 ? <p>Add {formatRupees(toFree)} more for free delivery.</p> : null}
+      {/* Savings Highlight Badge (Image 3 style) */}
+      {totalSavings > 0 ? (
+        <div className="mt-3.5 flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+          <Percent className="size-3.5 text-emerald-600 shrink-0" />
+          <span>You saved {formatRupees(totalSavings)} on this order</span>
+        </div>
+      ) : null}
+
+      {/* Fast Delivery Urgency Timer (Image 3) */}
+      <div className="mt-3.5">
+        <FastDeliveryTimer showDiscountUrgency={true} />
+      </div>
+
+      <div className="mt-3 space-y-1 text-[11px] leading-relaxed text-muted-ink" aria-live="polite">
+        {toFree !== null && toFree > 0 ? <p className="text-emerald-700 dark:text-emerald-400 font-medium">Add {formatRupees(toFree)} more for free delivery.</p> : null}
         <p>
           {updating
             ? "Updating prices…"
@@ -87,7 +137,7 @@ export function OrderSummary({
         </p>
       </div>
 
-      {children ? <div className="mt-5 space-y-3">{children}</div> : null}
+      {children ? <div className="mt-4 space-y-3">{children}</div> : null}
     </section>
   );
 }

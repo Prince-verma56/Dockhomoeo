@@ -12,6 +12,8 @@ import { formatRupees } from "@/lib/formatters/price";
 import { EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
 import { toOrderConfirmation, type OrderConfirmation } from "@/lib/checkout/orderConfirmation";
 import { CheckoutError } from "@/lib/checkout/checkoutForm";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { orderConfirmationCrumbs } from "@/lib/navigation/crumbs";
 
 /** What the payment gateway said, as the backend passes it back (`?payment=`). */
 export type PaymentReturn = "success" | "pending" | "failed";
@@ -53,7 +55,8 @@ export function OrderConfirmationView({ orderId, payment = null }: { orderId: nu
 
   if (state.status === "loading") {
     return (
-      <Container className="max-w-3xl" >
+      <Container className="max-w-3xl">
+        <PageBreadcrumb items={orderConfirmationCrumbs()} className="mb-6" />
         <div role="status" className="space-y-4">
           <span className="sr-only">Loading your order…</span>
           <div aria-hidden className="mx-auto size-16 rounded-full bg-cream-sunk motion-safe:animate-pulse" />
@@ -100,6 +103,7 @@ export function OrderConfirmationView({ orderId, payment = null }: { orderId: nu
 function NoConfirmation() {
   return (
     <Container className="max-w-xl text-center">
+      <PageBreadcrumb items={orderConfirmationCrumbs()} className="mb-6 text-left" />
       <span className="mx-auto grid size-16 place-items-center rounded-full bg-cream-sunk text-muted-ink">
         <PackageSearch aria-hidden className="size-7" strokeWidth={1.6} />
       </span>
@@ -165,6 +169,7 @@ function Confirmation({ order, payment }: { order: OrderConfirmation; payment: P
 
   return (
     <Container className="max-w-3xl">
+      <PageBreadcrumb items={orderConfirmationCrumbs()} className="mb-6" />
       {order.preview ? (
         <p role="note" className="mb-8 flex items-start gap-2.5 rounded-xl border border-warm/40 bg-warm-soft/25 px-4 py-3 text-sm text-ink">
           <FlaskConical aria-hidden className="mt-0.5 size-4 shrink-0 text-warm" />
