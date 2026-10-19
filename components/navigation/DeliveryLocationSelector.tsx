@@ -201,14 +201,24 @@ export function DeliveryLocationSelector({
       {/* ------------------------------------------------------------------ */}
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[70] bg-black/45 backdrop-blur-sm transition-opacity duration-200" />
+          <Dialog.Overlay className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-[3px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-340 data-[state=closed]:duration-260 ease-out" />
           <Dialog.Content
             aria-describedby={`${baseId}-desc`}
+            style={{
+              backdropFilter: "blur(48px) saturate(200%) contrast(102%)",
+              WebkitBackdropFilter: "blur(48px) saturate(200%) contrast(102%)",
+            }}
             className={cn(
               "fixed z-[71] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-              "w-[min(94vw,490px)] rounded-[2rem] border border-white/80 dark:border-white/15",
-              "bg-white/95 dark:bg-[#0c1e17]/95 backdrop-blur-3xl p-6 sm:p-7 shadow-[0_30px_90px_-20px_rgba(13,90,67,0.28),0_12px_40px_-10px_rgba(0,0,0,0.18)] outline-none",
-              "animate-in fade-in zoom-in-95 duration-200"
+              "w-[min(94vw,490px)] rounded-[2rem] border border-white/90 dark:border-white/25",
+              "bg-gradient-to-b from-white/92 via-white/86 to-white/90 dark:from-[#0c1e17]/92 dark:via-[#0c1e17]/86 dark:to-[#0c1e17]/90 p-6 sm:p-7 shadow-[0_30px_90px_-20px_rgba(13,90,67,0.22),0_12px_40px_-10px_rgba(0,0,0,0.12),inset_0_1.5px_1px_0_rgba(255,255,255,0.95)] outline-none",
+              // Smooth, genuine opening & closing physical transitions
+              "data-[state=open]:animate-in data-[state=closed]:animate-out",
+              "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+              "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+              "data-[state=closed]:slide-out-to-top-[1.5%] data-[state=open]:slide-in-from-top-[1.5%]",
+              "data-[state=open]:duration-340 data-[state=closed]:duration-260",
+              "data-[state=open]:ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:ease-[cubic-bezier(0.25,1,0.5,1)]"
             )}
           >
             {/* Header */}

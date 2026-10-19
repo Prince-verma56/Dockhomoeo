@@ -69,21 +69,17 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       lenis.raf(time * 1000);
     };
     gsap.ticker.add(updateRaf);
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     // Safe, non-blocking refresh that never interrupts active user scrolling
     let refreshTimeout: ReturnType<typeof setTimeout> | null = null;
     const safeRefresh = () => {
       if (refreshTimeout) clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(() => {
-        // If the visitor is actively scrolling, defer until momentum completes
-        if (lenis.isScrolling) {
-          safeRefresh();
-          return;
-        }
+        if (lenis.isScrolling) return;
         lenis.resize();
         ScrollTrigger.refresh();
-      }, 250);
+      }, 350);
     };
 
     // Observe layout reflows smoothly

@@ -52,12 +52,20 @@ const checkBuildSession = () => {
 };
 
 /**
- * Whether this visit skips the intro: prefers reduced motion.
+ * Whether this visit skips the intro: prefers reduced motion or previously completed.
  */
 const getIntroSkipped = () => {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
-  return false;
+  try {
+    checkBuildSession();
+    return (
+      sessionStorage.getItem(HERO_COMPLETED_KEY) === "true" ||
+      localStorage.getItem(HERO_COMPLETED_KEY) === "true"
+    );
+  } catch {
+    return false;
+  }
 };
 const getServerIntroSkipped = () => false;
 const subscribeNever = () => () => {};
@@ -126,6 +134,7 @@ export function HeroPlaybackProvider({
     setIsCompleted(true);
     try {
       sessionStorage.setItem(HERO_COMPLETED_KEY, "true");
+      localStorage.setItem(HERO_COMPLETED_KEY, "true");
     } catch {}
   }, []);
 
@@ -133,7 +142,8 @@ export function HeroPlaybackProvider({
     if (revealedRef.current) return;
     revealedRef.current = true;
     setRevealed(true);
-  }, []);
+    markCompleted();
+  }, [markCompleted]);
 
   const skipIntro = useCallback(() => {
     setSkippedByVisitor(true);
@@ -149,6 +159,7 @@ export function HeroPlaybackProvider({
     if (skip) {
       revealedRef.current = true;
       setIsCompleted(true);
+      setRevealed(true);
     }
 
     if (!video) {
@@ -168,7 +179,9 @@ export function HeroPlaybackProvider({
       }
     };
     const onCanPlay = () => {
-      if (!skip && video.currentTime < HERO_START_TIME) {
+      if (skip) {
+        showLastFrame(video);
+      } else if (video.currentTime < HERO_START_TIME) {
         seekToStartTime(video);
       }
     };

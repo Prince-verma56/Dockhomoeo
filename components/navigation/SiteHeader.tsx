@@ -12,12 +12,12 @@ import { MobileNav } from "@/components/navigation/MobileNav";
 import { ShopMegaMenu } from "@/components/navigation/ShopMegaMenu";
 import { DeliveryLocationSelector } from "@/components/navigation/DeliveryLocationSelector";
 import { isActivePath, primaryNav, type NavLink } from "@/components/navigation/navLinks";
-import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
 import { useCart } from "@/components/providers/CartProvider";
 import { useFavourites } from "@/lib/favourites/favourites";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 import { MagneticDockContainer, MagneticItem } from "@/components/ui/magnetic-dock";
+import { WishlistHeartPull } from "@/components/navigation/WishlistHeartPull";
 
 /**
  * SiteHeader — premium two-row navigation system:
@@ -38,12 +38,20 @@ import { MagneticDockContainer, MagneticItem } from "@/components/ui/magnetic-do
  * - Solid/translucent frosted glass on internal pages for consistent contrast & readability.
  */
 
-const NAV_SURFACE_HOME = {
-  backgroundColor: "rgb(255 255 255 / calc(var(--nav-p, 0) * 0.90))",
-  backdropFilter: "blur(calc(var(--nav-p, 0) * 16px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
-  WebkitBackdropFilter: "blur(calc(var(--nav-p, 0) * 16px)) saturate(calc(1 + var(--nav-p, 0) * 0.35))",
-  borderBottomColor: "rgb(20 37 31 / calc(var(--nav-p, 0) * 0.08))",
-  boxShadow: "0 10px 30px -15px rgb(20 37 31 / calc(var(--nav-p, 0) * 0.20))",
+const NAV_SURFACE_HOME_SCROLLED = {
+  backgroundColor: "rgb(255 255 255 / 0.92)",
+  backdropFilter: "blur(16px) saturate(1.3)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.3)",
+  borderBottomColor: "rgb(20 37 31 / 0.08)",
+  boxShadow: "0 10px 30px -15px rgb(20 37 31 / 0.16)",
+} as const;
+
+const NAV_SURFACE_HOME_TOP = {
+  backgroundColor: "rgb(255 255 255 / 0.20)",
+  backdropFilter: "blur(6px)",
+  WebkitBackdropFilter: "blur(6px)",
+  borderBottomColor: "transparent",
+  boxShadow: "none",
 } as const;
 
 const NAV_SURFACE_INTERNAL = {
@@ -60,47 +68,24 @@ export function SiteHeader() {
   const [isPastHero, setIsPastHero] = useState(!isHome);
   const headerRef = useRef<HTMLElement>(null);
 
-  const heroPlayback = useHeroPlayback();
-  const isNavVisible = !isHome || (heroPlayback ? heroPlayback.navVisible : true);
-
   const { itemCount, setIsOpen } = useCart();
   const { count: savedCount } = useFavourites();
   const { status, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    const header = headerRef.current;
-    if (!header) return;
-
     if (!isHome) {
-      header.style.setProperty("--nav-p", "1");
       setIsPastHero(true);
       return;
     }
 
-    const [start, end] = [340, 540];
-    let frame = 0;
-    let past: boolean | null = null;
-
-    const update = () => {
-      frame = 0;
-      const progress = Math.min(1, Math.max(0, (window.scrollY - start) / (end - start)));
-      header.style.setProperty("--nav-p", progress.toFixed(3));
-      const nowPast = progress >= 0.5;
-      if (nowPast !== past) {
-        past = nowPast;
-        setIsPastHero(nowPast);
-      }
-    };
     const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
+      const past = window.scrollY > 40;
+      setIsPastHero(past);
     };
 
-    update();
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(frame);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
 
   const navItemClass = cn(
@@ -112,12 +97,12 @@ export function SiteHeader() {
   return (
     <header
       ref={headerRef}
-      style={isHome ? NAV_SURFACE_HOME : NAV_SURFACE_INTERNAL}
+      style={isHome ? (isPastHero ? NAV_SURFACE_HOME_SCROLLED : NAV_SURFACE_HOME_TOP) : NAV_SURFACE_INTERNAL}
       className={cn(
         "fixed inset-x-0 top-0 z-50 px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2",
-        "transition-[translate,opacity,border-color,background-color] duration-500 ease-premium",
+        "transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 ease-out",
         isHome && !isPastHero ? "border-b border-transparent" : "border-b border-black/[0.06] dark:border-white/10",
-        isNavVisible ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0",
+        "translate-y-0 opacity-100",
       )}
     >
       <div className="mx-auto max-w-[1360px]">
@@ -130,7 +115,7 @@ export function SiteHeader() {
             <div className="flex items-center lg:hidden">
               <MobileNav />
             </div>
-            <Wordmark className="shrink-0" isNavVisible={isNavVisible} />
+            <Wordmark className="shrink-0" isNavVisible={true} />
           </div>
 
           {/* Center Group: Live Search Bar + Delivery Location (Positioned to the right of search, away from logo) */}
@@ -154,46 +139,57 @@ export function SiteHeader() {
 
             {/* Action Dock: Wishlist, Cart & Profile with generous gap for independent hovering */}
             <MagneticDockContainer className="flex items-center gap-4 sm:gap-4.5 lg:gap-5">
-              {/* Wishlist / Favourites */}
-              <MagneticItem
-                maxScale={1.08}
-                magneticDistance={26}
-                maxFloat={1.5}
-                tooltip={savedCount > 0 ? `${savedCount} saved` : "Favourites"}
-                tooltipPosition="bottom"
-              >
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "relative size-10 rounded-full text-[#14251f] hover:bg-black/8 hover:text-[#0d5a43] transition-colors cursor-pointer",
-                    !isPastHero && isHome && "hover:bg-white/40"
-                  )}
+              {/* Wishlist / Favourites: Desktop Interactive Suspended Heart Pull */}
+              <div className="hidden lg:flex items-center justify-center">
+                <WishlistHeartPull
+                  savedCount={savedCount}
+                  isHome={isHome}
+                  isPastHero={isPastHero}
+                />
+              </div>
+
+              {/* Wishlist / Favourites: Mobile & Tablet Clean Heart Icon */}
+              <div className="flex lg:hidden items-center justify-center">
+                <MagneticItem
+                  maxScale={1.08}
+                  magneticDistance={26}
+                  maxFloat={1.5}
+                  tooltip={savedCount > 0 ? `${savedCount} saved` : "Favourites"}
+                  tooltipPosition="bottom"
                 >
-                  <Link
-                    href="/favourites"
-                    aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
-                    className="relative grid size-full place-items-center"
-                  >
-                    <Heart
-                      className={cn(
-                        "size-5 sm:size-[21px] transition-colors",
-                        savedCount > 0 ? "text-[#0d5a43] fill-[#0d5a43]/20" : "text-[#14251f]"
-                      )}
-                      strokeWidth={1.9}
-                    />
-                    {savedCount > 0 && (
-                      <span
-                        aria-hidden
-                        className="absolute -top-1 -right-1.5 sm:-top-1.5 sm:-right-2 z-10 grid min-w-[17px] h-[17px] px-1 place-items-center rounded-full bg-[#0d5a43] text-[9.5px] font-bold text-white shadow-xs ring-2 ring-white dark:ring-[#07130e] pointer-events-none"
-                      >
-                        {savedCount > 99 ? "99+" : savedCount}
-                      </span>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "relative size-10 rounded-full text-[#14251f] hover:bg-black/8 hover:text-[#0d5a43] transition-colors cursor-pointer",
+                      !isPastHero && isHome && "hover:bg-white/40"
                     )}
-                  </Link>
-                </Button>
-              </MagneticItem>
+                  >
+                    <Link
+                      href="/favourites"
+                      aria-label={savedCount > 0 ? `Favourites, ${savedCount} saved` : "Favourites"}
+                      className="relative grid size-full place-items-center"
+                    >
+                      <Heart
+                        className={cn(
+                          "size-5 sm:size-[21px] transition-colors",
+                          savedCount > 0 ? "text-[#0d5a43] fill-[#0d5a43]/20" : "text-[#14251f]"
+                        )}
+                        strokeWidth={1.9}
+                      />
+                      {savedCount > 0 && (
+                        <span
+                          aria-hidden
+                          className="absolute -top-1 -right-1.5 sm:-top-1.5 sm:-right-2 z-10 grid min-w-[17px] h-[17px] px-1 place-items-center rounded-full bg-[#0d5a43] text-[9.5px] font-bold text-white shadow-xs ring-2 ring-white dark:ring-[#07130e] pointer-events-none"
+                        >
+                          {savedCount > 99 ? "99+" : savedCount}
+                        </span>
+                      )}
+                    </Link>
+                  </Button>
+                </MagneticItem>
+              </div>
 
               {/* Shopping Cart */}
               <MagneticItem

@@ -1046,33 +1046,28 @@ footer :focus-visible {
 
 /* ==========================================================================
    DOCHOMEO LOGO GLASSY SHINING EFFECT
-   A luminous specular light beam sweeps across the logo from left to right,
-   pausing for 2 seconds before sweeping again.
+   A luminous specular light beam sweeps across the logo from left to right
+   for exactly 1.5 seconds after each GIF animation cycle.
    ========================================================================== */
 @keyframes logoGlassShine {
   0% {
     transform: translateX(-160%) skewX(-25deg);
     opacity: 0;
   }
-  4% {
+  12% {
     opacity: 0.95;
   }
-  26% {
-    transform: translateX(260%) skewX(-25deg);
+  88% {
     opacity: 0.95;
-  }
-  28% {
-    opacity: 0;
-    transform: translateX(260%) skewX(-25deg);
   }
   100% {
-    transform: translateX(-160%) skewX(-25deg);
+    transform: translateX(260%) skewX(-25deg);
     opacity: 0;
   }
 }
 
 .logo-shine-beam {
-  animation: logoGlassShine 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: logoGlassShine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform, opacity;
 }
 

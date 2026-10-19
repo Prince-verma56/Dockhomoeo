@@ -510,7 +510,7 @@ export function CheckoutView() {
                   <>
                     <OrderLines lines={lines} />
                     <div className="pt-3 pb-2 border-b border-line-soft">
-                      <CouponField />
+                      <CouponField isCheckout />
                     </div>
                   </>
                 }

@@ -1,21 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 const LOGO_GIF = "/Images/LogoGIF/dochomoeo_logo_animation.gif";
 const LOGO_STATIC = "/Images/LogoGIF/dochomoeo_logo_final_frame.png";
 const LOGO_DARK = "/Images/LogoGIF/dochomoeo_logo_dark.png";
-const LOGO_ANIMATION_DURATION_MS = 8390; // Exact duration of 29 frames in the logo GIF
+
+// Exact duration of 29 frames in the logo GIF (8.39s)
+const LOGO_ANIMATION_DURATION_MS = 8390;
+// Glassy specular shine sweep duration (1.5s)
+const SHINE_DURATION_MS = 1500;
+// Inter-cycle delay after shining finishes before replaying GIF (5.0s)
+const PAUSE_DURATION_MS = 5000;
 
 /**
  * DocHomoeo Brand Logo:
- * - Plays the official dochomoeo_logo_animation.gif from start to end once in the light navbar.
- * - When playback finishes, smoothly halts on the final frame (dochomoeo_logo_final_frame.png).
- * - For dark footers (tone="dark"), cleanly displays dochomoeo_logo_dark.png with zero background card.
- * - Activates a sleek glassy shining effect that sweeps across the logo every 2 seconds.
+ * - Plays the official dochomoeo_logo_animation.gif from start to end in the navbar.
+ * - When playback finishes, immediately plays a glassy specular shine sweep across the logo for 1.5s.
+ * - After shining finishes, pauses for 5 seconds.
+ * - Then cleanly repeats: plays the GIF animation from frame 0 -> 1.5s shine -> 5s pause -> repeat.
+ * - For dark footers (tone="dark"), cleanly displays dochomoeo_logo_dark.png with zero GIF overhead.
  */
 export function Wordmark({
   className,
@@ -29,51 +35,43 @@ export function Wordmark({
   isNavVisible?: boolean;
 }) {
   const isDark = tone === "dark";
-  const [isCompleted, setIsCompleted] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [gifSrc, setGifSrc] = useState<string | null>(null);
+  const [stage, setStage] = useState<"gif" | "shine" | "pause">("gif");
+  const [gifKey, setGifKey] = useState<number>(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    if (isDark) return; // Footer logo stays static and clean without GIF overhead
+    setGifKey(Date.now());
+  }, []);
 
-    let alreadyCompleted = false;
-    try {
-      const currentBuild = process.env.NEXT_PUBLIC_BUILD_TIME;
-      if (currentBuild) {
-        const storedBuild = sessionStorage.getItem("dochomoeo_logo_build_time");
-        if (storedBuild !== currentBuild) {
-          sessionStorage.removeItem("dochomoeo_logo_completed");
-          sessionStorage.setItem("dochomoeo_logo_build_time", currentBuild);
-        }
-      }
-      alreadyCompleted = sessionStorage.getItem("dochomoeo_logo_completed") === "true";
-    } catch {}
+  useEffect(() => {
+    if (!mounted || isDark || !isNavVisible) return;
 
-    if (alreadyCompleted) {
-      setIsCompleted(true);
-      return;
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (stage === "gif") {
+      // 1. Play GIF for full animation duration (8390ms)
+      timerRef.current = setTimeout(() => {
+        setStage("shine");
+      }, LOGO_ANIMATION_DURATION_MS);
+    } else if (stage === "shine") {
+      // 2. Play glassy shining effect for 1.5 seconds (1500ms)
+      timerRef.current = setTimeout(() => {
+        setStage("pause");
+      }, SHINE_DURATION_MS);
+    } else if (stage === "pause") {
+      // 3. Pause for 5 seconds (5000ms), then replay GIF from frame 0
+      timerRef.current = setTimeout(() => {
+        setGifKey(Date.now());
+        setStage("gif");
+      }, PAUSE_DURATION_MS);
     }
 
-    // Only initiate GIF animation once the navbar is actually visible to the user
-    if (!isNavVisible) return;
-
-    // Slight ~180ms delay to sync with the navbar slide-down entrance
-    const startTimer = setTimeout(() => {
-      setGifSrc(`${LOGO_GIF}?start=${Date.now()}`);
-
-      const endTimer = setTimeout(() => {
-        setIsCompleted(true);
-        try {
-          sessionStorage.setItem("dochomoeo_logo_completed", "true");
-        } catch {}
-      }, LOGO_ANIMATION_DURATION_MS);
-
-      return () => clearTimeout(endTimer);
-    }, 180);
-
-    return () => clearTimeout(startTimer);
-  }, [isNavVisible, isDark]);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [stage, mounted, isDark, isNavVisible]);
 
   return (
     <Link
@@ -86,7 +84,7 @@ export function Wordmark({
       )}
     >
       <div className="relative flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.03]">
-        {/* Logo Container holding both GIF and Final Frame - scaled up for maximum visibility without increasing navbar height */}
+        {/* Logo Container holding GIF, Final Frame, and Specular Shine */}
         <div className="relative h-[56px] sm:h-[62px] aspect-[890/560] overflow-hidden scale-[1.08] sm:scale-[1.16] origin-left">
           {/* Dark Footer Variant: Pure transparent PNG with crisp contrast and no background block */}
           {isDark ? (
@@ -99,49 +97,49 @@ export function Wordmark({
             />
           ) : (
             <>
-              {/* Animated GIF: only loads and plays from start when the navbar animates into view */}
-              {mounted && !isCompleted && gifSrc && (
+              {/* Animated GIF: ONLY image rendered during the 'gif' stage */}
+              {mounted && stage === "gif" && gifKey > 0 && (
                 <img
-                  src={gifSrc}
-                  alt="DocHomoeo Logo"
+                  key={gifKey}
+                  src={`${LOGO_GIF}?t=${gifKey}`}
+                  alt="DocHomoeo Logo Animation"
                   width={890}
                   height={560}
-                  className={cn(
-                    "h-full w-full object-contain pointer-events-none select-none transition-opacity duration-300",
-                    isCompleted ? "opacity-0" : "opacity-100"
+                  className="h-full w-full object-contain pointer-events-none select-none"
+                />
+              )}
+
+              {/* Static Final Frame: Rendered ONLY when GIF has completed (during 'shine' and 'pause') */}
+              {mounted && stage !== "gif" && (
+                <div className="relative size-full">
+                  <img
+                    src={LOGO_STATIC}
+                    alt="DocHomoeo"
+                    width={890}
+                    height={560}
+                    className="h-full w-full object-contain pointer-events-none select-none"
+                  />
+
+                  {/* Glassy Specular Shine Effect: Sweeps for 1.5s immediately over the static image */}
+                  {stage === "shine" && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 overflow-hidden"
+                      style={{
+                        WebkitMaskImage: `url('${LOGO_STATIC}')`,
+                        maskImage: `url('${LOGO_STATIC}')`,
+                        WebkitMaskSize: "contain",
+                        maskSize: "contain",
+                        WebkitMaskRepeat: "no-repeat",
+                        maskRepeat: "no-repeat",
+                        WebkitMaskPosition: "center",
+                        maskPosition: "center",
+                      }}
+                    >
+                      <span className="logo-shine-beam absolute inset-y-0 w-2/5 bg-gradient-to-r from-transparent via-white/85 to-transparent pointer-events-none" />
+                    </span>
                   )}
-                />
-              )}
-
-              {/* Static Final Frame: displayed once completed to prevent replaying from start */}
-              {mounted && isCompleted && (
-                <img
-                  src={LOGO_STATIC}
-                  alt="DocHomoeo"
-                  width={890}
-                  height={560}
-                  className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
-                />
-              )}
-
-              {/* Glassy Specular Shine Effect — activates once logo finishes and repeats every 2 seconds */}
-              {mounted && isCompleted && (
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 overflow-hidden"
-                  style={{
-                    WebkitMaskImage: `url('${LOGO_STATIC}')`,
-                    maskImage: `url('${LOGO_STATIC}')`,
-                    WebkitMaskSize: "contain",
-                    maskSize: "contain",
-                    WebkitMaskRepeat: "no-repeat",
-                    maskRepeat: "no-repeat",
-                    WebkitMaskPosition: "center",
-                    maskPosition: "center",
-                  }}
-                >
-                  <span className="logo-shine-beam absolute inset-y-0 w-2/5 bg-gradient-to-r from-transparent via-white/85 to-transparent pointer-events-none" />
-                </span>
+                </div>
               )}
             </>
           )}
@@ -150,4 +148,3 @@ export function Wordmark({
     </Link>
   );
 }
-
