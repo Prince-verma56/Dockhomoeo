@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
+import { Home, ChevronRight } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -80,29 +81,44 @@ export function BreadcrumbJsonLd({ items }: { items: Crumb[] }) {
 
 /**
  * The visible breadcrumb with route-aware hierarchy and DocHomoeo design tokens.
- * The active (current) page is rendered in deep green (#0d5a43) and is not clickable.
+ * Features an architectural frosted-glass pill container, Home visual icon,
+ * clear active location badge, and smooth horizontal scrolling on mobile.
  */
 export function PageBreadcrumb({
   items,
   className,
   structuredData = true,
+  variant = "pill",
 }: {
   items: Crumb[];
   className?: string;
   structuredData?: boolean;
+  variant?: "pill" | "plain";
 }) {
   const trail = buildCanonicalTrail(items);
+  const isPill = variant === "pill";
 
   return (
     <>
-      <Breadcrumb className={cn("w-full overflow-hidden", className)}>
-        <BreadcrumbList className="flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs sm:text-[0.8125rem] text-muted-ink">
+      <Breadcrumb className={cn("w-fit max-w-full overflow-hidden", className)}>
+        <BreadcrumbList
+          className={cn(
+            "flex items-center gap-1 sm:gap-1.5 text-xs sm:text-[13px] text-muted-ink overflow-x-auto scrollbar-none flex-nowrap py-0.5",
+            isPill &&
+              "px-3 sm:px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-[#0c1e17]/80 backdrop-blur-md border border-black/[0.06] dark:border-white/10 shadow-[0_2px_10px_rgba(20,37,31,0.03)]"
+          )}
+        >
           {trail.map((crumb, index) => {
             const isLast = index === trail.length - 1;
+            const isHome = index === 0 && (crumb.name.toLowerCase() === "home" || crumb.href === "/");
+
             return isLast ? (
-              <BreadcrumbItem key={`${crumb.href}-${crumb.name}-${index}`} className="min-w-0">
+              <BreadcrumbItem key={`${crumb.href}-${crumb.name}-${index}`} className="min-w-0 shrink-0">
                 <BreadcrumbPage
-                  className="font-semibold text-[#0d5a43] dark:text-emerald-400 max-w-[170px] sm:max-w-[280px] md:max-w-md truncate inline-block align-bottom"
+                  className={cn(
+                    "font-semibold text-[#0d5a43] dark:text-emerald-400 max-w-[170px] sm:max-w-[280px] md:max-w-md truncate inline-block align-middle",
+                    isPill && "bg-[#0d5a43]/10 dark:bg-emerald-400/15 px-2.5 py-0.5 rounded-full text-[11.5px] sm:text-xs"
+                  )}
                   title={crumb.name}
                 >
                   {crumb.name}
@@ -110,17 +126,26 @@ export function PageBreadcrumb({
               </BreadcrumbItem>
             ) : (
               <Fragment key={`${crumb.href}-${crumb.name}-${index}`}>
-                <BreadcrumbItem className="min-w-0">
+                <BreadcrumbItem className="min-w-0 shrink-0">
                   <BreadcrumbLink
                     asChild
-                    className="-my-1.5 py-1.5 text-muted-ink hover:text-[#0d5a43] dark:hover:text-emerald-400 transition-colors max-w-[130px] sm:max-w-[200px] truncate inline-block align-bottom"
+                    className="group -my-1 py-1 text-muted-ink hover:text-[#0d5a43] dark:hover:text-emerald-400 font-medium transition-colors max-w-[130px] sm:max-w-[200px] truncate inline-flex items-center gap-1.5 align-middle"
                   >
                     <Link href={crumb.href} title={crumb.name}>
-                      {crumb.name}
+                      {isHome ? (
+                        <>
+                          <Home className="size-3.5 text-[#0d5a43]/75 group-hover:text-[#0d5a43] transition-colors shrink-0" strokeWidth={2.2} />
+                          <span className="hidden xs:inline">Home</span>
+                        </>
+                      ) : (
+                        crumb.name
+                      )}
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="text-muted-ink/75 dark:text-emerald-400/70 shrink-0" />
+                <BreadcrumbSeparator className="text-muted-ink/40 dark:text-emerald-400/40 shrink-0 mx-0.5">
+                  <ChevronRight className="size-3 stroke-[2.2]" />
+                </BreadcrumbSeparator>
               </Fragment>
             );
           })}

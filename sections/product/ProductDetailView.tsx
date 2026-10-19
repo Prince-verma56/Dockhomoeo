@@ -274,9 +274,9 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
     product.description.toLowerCase().includes("testing");
 
   return (
-    <div className="bg-[#fbfaf6] dark:bg-[#07130e] pt-24 pb-28 sm:pb-20 lg:pt-28 lg:pb-24 overflow-x-clip min-h-screen">
+    <div className="bg-[#fbfaf6] dark:bg-[#07130e] pt-28 sm:pt-32 lg:pt-36 pb-28 sm:pb-20 lg:pb-24 overflow-x-clip min-h-screen">
       <Container className="max-w-[1260px] w-full px-4 sm:px-6 lg:px-8">
-        <PageBreadcrumb items={crumbs} className="mb-5 sm:mb-6" structuredData={false} />
+        <PageBreadcrumb items={crumbs} className="mb-6 sm:mb-8" structuredData={false} />
 
         {/* ================================================================ */}
         {/* 1. FIRST VIEWPORT: BALANCED 2-COLUMN PRODUCT PURCHASE EXPERIENCE  */}
@@ -287,7 +287,7 @@ export function ProductDetailView({ product }: { product: ApiProductDetail }) {
           {/* LEFT: RESTRAINED STICKY GALLERY & ASSURANCE (6 cols desktop)   */}
           {/* -------------------------------------------------------------- */}
           <div className="lg:col-span-6 w-full min-w-0">
-            <div className="space-y-4 lg:sticky lg:top-28">
+            <div className="space-y-4 lg:sticky lg:top-[136px]">
               {/* Main Display Stage */}
               <div
                 ref={mediaRef}

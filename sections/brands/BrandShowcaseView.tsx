@@ -250,7 +250,7 @@ export function BrandShowcaseView({ brands }: BrandShowcaseViewProps) {
       });
 
   return (
-    <div className="bg-canvas pt-20 pb-16 sm:pt-24 sm:pb-20 overflow-x-hidden">
+    <div className="bg-canvas pt-28 sm:pt-32 lg:pt-36 pb-16 sm:pb-20 overflow-x-hidden">
       <Container className="max-w-[1260px] w-full px-4 sm:px-6 lg:px-8 space-y-16 sm:space-y-20 lg:space-y-24">
         
         {/* Breadcrumb */}

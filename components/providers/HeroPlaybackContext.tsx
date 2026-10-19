@@ -25,14 +25,14 @@ export const HERO_TRIM_SECONDS: number | null = null;
  */
 const REVEAL_LEAD_SECONDS = 1;
 
-/** Delay before the hero text, leaves, and navbar reveal after video playback starts */
-const REVEAL_DELAY_MS = 600;
+/** Delay before the hero text, leaves, and navbar reveal after video playback starts (delayed +1s for cinematic pacing) */
+const REVEAL_DELAY_MS = 1600;
 
 /** Playback never started (slow network, autoplay refused): show the copy anyway. */
-const START_TIMEOUT_MS = 1200;
+const START_TIMEOUT_MS = 2200;
 
 /** Playback stalled mid-way while buffering: show the copy rather than wait on the network. */
-const STALL_TIMEOUT_MS = 1000;
+const STALL_TIMEOUT_MS = 2000;
 
 const HERO_COMPLETED_KEY = "dochomoeo_hero_completed";
 

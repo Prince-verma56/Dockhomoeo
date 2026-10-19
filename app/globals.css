@@ -854,8 +854,8 @@ img[draggable="false"] {
   --dh-space-head: clamp(1.75rem, 1.4rem + 1vw, 2.5rem);
   --dh-pad-card: clamp(1.25rem, 1rem + 0.75vw, 1.75rem);
   --dh-pad-card-lg: clamp(1.5rem, 0.9rem + 2vw, 2.75rem);
-  /* Clears the fixed site header on every interior route. */
-  --dh-page-top: clamp(6.75rem, 6rem + 2vw, 8rem);
+  /* Clears the fixed 2-row site header on every interior route. */
+  --dh-page-top: clamp(7.5rem, 6.75rem + 2vw, 9rem);
 }
 
 @utility dh-section {

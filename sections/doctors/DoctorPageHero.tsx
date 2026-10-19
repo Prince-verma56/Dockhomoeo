@@ -24,7 +24,7 @@ export function DoctorPageHero({ doctor, onBookConsult }: DoctorPageHeroProps) {
   const minFee = fees.length ? Math.min(...fees) : 400;
 
   return (
-    <section className="relative pt-24 sm:pt-28 pb-10 sm:pb-14 bg-[#fbfaf6] dark:bg-[#07130e] border-b border-black/[0.06] dark:border-white/10 overflow-hidden">
+    <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-10 sm:pb-14 bg-[#fbfaf6] dark:bg-[#07130e] border-b border-black/[0.06] dark:border-white/10 overflow-hidden">
       {/* ------------------------------------------------------------- */}
       {/* 1. SCENIC TOP ATMOSPHERIC HEADER BANNER                       */}
       {/* ------------------------------------------------------------- */}
