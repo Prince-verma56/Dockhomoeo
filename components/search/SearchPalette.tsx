@@ -225,9 +225,9 @@ export function SearchTrigger({
         aria-label="Search medicines, dilutions, brands and health goals"
         className={cn(
           "group flex h-10 w-full items-center gap-2.5 sm:gap-3 rounded-full",
-          "border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-white/5 pr-2.5 sm:pr-3 pl-3.5 sm:pl-4 text-left",
-          "shadow-2xs backdrop-blur-md transition-all duration-200",
-          "hover:border-[#0d5a43]/50 hover:bg-white dark:hover:bg-[#0c1e17] hover:shadow-xs cursor-pointer",
+          "border border-white/50 dark:border-white/10 bg-white/40 dark:bg-white/10 pr-2.5 sm:pr-3 pl-3.5 sm:pl-4 text-left",
+          "shadow-2xs backdrop-blur-xl transition-all duration-200",
+          "hover:border-[#0d5a43]/50 hover:bg-white/60 dark:hover:bg-white/20 hover:shadow-xs cursor-pointer",
           className,
         )}
       >

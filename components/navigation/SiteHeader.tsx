@@ -39,27 +39,27 @@ import { WishlistHeartPull } from "@/components/navigation/WishlistHeartPull";
  */
 
 const NAV_SURFACE_HOME_SCROLLED = {
-  backgroundColor: "rgb(255 255 255 / 0.92)",
-  backdropFilter: "blur(16px) saturate(1.3)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.3)",
+  backgroundColor: "rgb(255 255 255 / 0.85)",
+  backdropFilter: "blur(24px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(24px) saturate(1.6)",
   borderBottomColor: "rgb(20 37 31 / 0.08)",
-  boxShadow: "0 10px 30px -15px rgb(20 37 31 / 0.16)",
+  boxShadow: "0 10px 30px -15px rgb(20 37 31 / 0.12)",
 } as const;
 
 const NAV_SURFACE_HOME_TOP = {
-  backgroundColor: "rgb(255 255 255 / 0.20)",
-  backdropFilter: "blur(6px)",
-  WebkitBackdropFilter: "blur(6px)",
+  backgroundColor: "transparent",
+  backdropFilter: "none",
+  WebkitBackdropFilter: "none",
   borderBottomColor: "transparent",
   boxShadow: "none",
 } as const;
 
 const NAV_SURFACE_INTERNAL = {
-  backgroundColor: "rgb(255 255 255 / 0.94)",
-  backdropFilter: "blur(18px) saturate(1.4)",
-  WebkitBackdropFilter: "blur(18px) saturate(1.4)",
+  backgroundColor: "rgb(255 255 255 / 0.88)",
+  backdropFilter: "blur(28px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(28px) saturate(1.6)",
   borderBottomColor: "rgb(20 37 31 / 0.08)",
-  boxShadow: "0 8px 26px -12px rgb(20 37 31 / 0.12)",
+  boxShadow: "0 8px 26px -12px rgb(20 37 31 / 0.10)",
 } as const;
 
 export function SiteHeader() {
@@ -100,7 +100,7 @@ export function SiteHeader() {
       style={isHome ? (isPastHero ? NAV_SURFACE_HOME_SCROLLED : NAV_SURFACE_HOME_TOP) : NAV_SURFACE_INTERNAL}
       className={cn(
         "fixed inset-x-0 top-0 z-50 px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2",
-        "transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 ease-out",
+        "transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
         isHome && !isPastHero ? "border-b border-transparent" : "border-b border-black/[0.06] dark:border-white/10",
         "translate-y-0 opacity-100",
       )}

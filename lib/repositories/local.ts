@@ -1103,6 +1103,23 @@ export const mockDoctors: ApiDoctorCard[] = [
     ratingAverage: 5.0,
     ratingCount: 184,
   },
+  {
+    id: 5,
+    slug: "dr-aditya-sharma",
+    displayName: "Dr. Aditya Sharma",
+    photoUrl: "/Images/reels/reel-doctor-advice.webp",
+    qualification: "MD (Homeopathy), Senior Consultant",
+    specialization: "Constitutional Prescribing & Chronic Care",
+    experienceYears: 15,
+    languages: ["English", "Hindi"],
+    bio: "Senior homoeopathic physician specializing in classical dilutions, sublingual dosage timing, and constitutional medicine with 15+ years of clinical excellence.",
+    clinicCity: "Delhi NCR",
+    videoFee: 600,
+    audioFee: 450,
+    slotMinutes: 20,
+    ratingAverage: 5.0,
+    ratingCount: 168,
+  },
 ];
 
 export const mockStreams: ApiConsultingStream[] = [

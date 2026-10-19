@@ -14,7 +14,6 @@ import {
   Pause,
   Play,
   RotateCcw,
-  Share2,
   ShoppingBag,
   Sparkles,
   Star,
@@ -196,7 +195,18 @@ export function ReelVideoReviews({
   const [isMuted, setIsMuted] = useState(true);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [likeCountMap, setLikeCountMap] = useState<Record<string, number>>({});
-  const [showShareToast, setShowShareToast] = useState(false);
+
+  // In-line (in-place) video playback states
+  const [inlinePlayingId, setInlinePlayingId] = useState<string | null>(null);
+  const [inlineMuted, setInlineMuted] = useState(true);
+  const [inlinePausedMap, setInlinePausedMap] = useState<Record<string, boolean>>({});
+  const inlineVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+
+  // Dynamic live time tracking & progress animation
+  const [inlineProgress, setInlineProgress] = useState(0);
+  const [modalProgress, setModalProgress] = useState(0);
+  const [modalCurrentTime, setModalCurrentTime] = useState("0:00");
+
   const [addedProductToast, setAddedProductToast] = useState(false);
 
   // Mouse drag-to-scroll & touch swipe states
@@ -210,6 +220,66 @@ export function ReelVideoReviews({
   const cart = useCart();
 
   const activeReel = activeReelIndex !== null ? reels[activeReelIndex] : null;
+
+  const handleInlineTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.duration) {
+      setInlineProgress((video.currentTime / video.duration) * 100);
+    }
+  };
+
+  const handleModalTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.duration) {
+      setModalProgress((video.currentTime / video.duration) * 100);
+      const mins = Math.floor(video.currentTime / 60);
+      const secs = Math.floor(video.currentTime % 60);
+      setModalCurrentTime(`${mins}:${secs < 10 ? "0" : ""}${secs}`);
+    }
+  };
+
+  const handleCardClick = (reel: VideoReelItem) => {
+    if (hasMovedRef.current || isDragging) return;
+
+    if (inlinePlayingId === reel.id) {
+      const isPaused = inlinePausedMap[reel.id] ?? false;
+      const vid = inlineVideoRefs.current[reel.id];
+      if (vid) {
+        if (isPaused) {
+          vid.play().catch(() => {});
+          setInlinePausedMap((prev) => ({ ...prev, [reel.id]: false }));
+        } else {
+          vid.pause();
+          setInlinePausedMap((prev) => ({ ...prev, [reel.id]: true }));
+        }
+      }
+    } else {
+      // Pause any previously playing inline video
+      if (inlinePlayingId && inlineVideoRefs.current[inlinePlayingId]) {
+        inlineVideoRefs.current[inlinePlayingId]?.pause();
+      }
+      setInlinePlayingId(reel.id);
+      setInlineProgress(0);
+      setInlinePausedMap((prev) => ({ ...prev, [reel.id]: false }));
+      const vid = inlineVideoRefs.current[reel.id];
+      if (vid) {
+        vid.currentTime = 0;
+        vid.play().catch(() => {});
+      }
+    }
+  };
+
+  const handleExpandReel = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    // Pause currently playing inline video
+    if (inlinePlayingId && inlineVideoRefs.current[inlinePlayingId]) {
+      inlineVideoRefs.current[inlinePlayingId]?.pause();
+    }
+    setModalProgress(0);
+    setModalCurrentTime("0:00");
+    setActiveReelIndex(index);
+    setIsPlaying(true);
+  };
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -284,14 +354,6 @@ export function ReelVideoReviews({
     }));
   };
 
-  const handleShare = (reel: VideoReelItem) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.origin + `#reel-${reel.id}`);
-      setShowShareToast(true);
-      setTimeout(() => setShowShareToast(false), 2000);
-    }
-  };
-
   const handleAddTaggedProduct = (reel: VideoReelItem) => {
     cart.addItem({
       variantId: 9999 + parseInt(reel.id.replace(/\D/g, "") || "1", 10),
@@ -356,7 +418,7 @@ export function ReelVideoReviews({
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
           className={cn(
-            "flex items-stretch gap-4 sm:gap-6 overflow-x-auto pb-6 scrollbar-none",
+            "flex items-stretch gap-4 sm:gap-6 overflow-x-auto pt-4 sm:pt-5 pb-6 scrollbar-none",
             "touch-pan-x overscroll-x-contain -mx-4 px-4 sm:mx-0 sm:px-0 select-none",
             isDragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x snap-mandatory"
           )}
@@ -364,56 +426,115 @@ export function ReelVideoReviews({
           {reels.map((reel, index) => {
             const isLiked = likedMap[reel.id];
             const currentLikes = likeCountMap[reel.id] ?? reel.likes;
+            const isThisInlinePlaying = inlinePlayingId === reel.id;
+            const isThisPaused = inlinePausedMap[reel.id] ?? false;
 
             return (
               <div
                 key={reel.id}
                 id={`reel-${reel.id}`}
-                onClick={(e) => {
-                  if (hasMovedRef.current) {
-                    e.preventDefault();
-                    return;
-                  }
-                  setActiveReelIndex(index);
-                  setIsPlaying(true);
-                }}
+                onClick={() => handleCardClick(reel)}
                 className="group relative flex-none w-[260px] sm:w-[280px] aspect-[9/16] rounded-3xl overflow-hidden border border-line-soft bg-black shadow-soft hover:shadow-lift transition-all duration-300 hover:-translate-y-1.5 cursor-pointer snap-start select-none"
               >
-                {/* 9:16 Video Thumbnail Poster */}
-                <img
-                  src={reel.thumbnailUrl}
-                  alt={reel.title}
-                  draggable={false}
-                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90 pointer-events-none select-none"
-                />
+                {/* 9:16 Video Player (Inline playback) or Thumbnail Poster */}
+                {isThisInlinePlaying ? (
+                  <>
+                    <video
+                      ref={(el) => {
+                        inlineVideoRefs.current[reel.id] = el;
+                      }}
+                      src={reel.videoUrl}
+                      poster={reel.thumbnailUrl}
+                      autoPlay
+                      loop
+                      playsInline
+                      muted={inlineMuted}
+                      onTimeUpdate={handleInlineTimeUpdate}
+                      className="absolute inset-0 size-full object-cover"
+                    />
+                    {/* Animated Time Progress Bar */}
+                    <div className="absolute top-0 inset-x-0 h-1 bg-white/20 z-30 overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-400 transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                        style={{ width: `${inlineProgress}%` }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <img
+                    src={reel.thumbnailUrl}
+                    alt={reel.title}
+                    draggable={false}
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90 pointer-events-none select-none"
+                  />
+                )}
 
                 {/* Dark Vignette Gradients for Text Legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/60 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-black/60 pointer-events-none" />
 
-                {/* Top Badge: Views & Rating */}
-                <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between text-[11px] font-bold text-white z-10">
+                {/* Top Bar: Left (Unified Views & Rating) + Right (Mute toggle + Expand icon) */}
+                <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between text-[11px] font-bold text-white z-20">
                   <div className="flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 border border-white/15 shadow-2xs">
-                    <Eye className="size-3 text-red-500 fill-current" />
-                    <span>{reel.views}</span>
+                    <span className="flex items-center gap-1 text-red-400 font-bold">
+                      <Eye className="size-3 fill-current" />
+                      <span>{reel.views}</span>
+                    </span>
+                    <span className="text-white/40">·</span>
+                    <span className="flex items-center gap-1 text-amber-300 font-bold">
+                      <Star className="size-3 fill-amber-400 text-amber-400" />
+                      <span>5.0</span>
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-2 py-1 border border-white/15">
-                    <Star className="size-3 fill-amber-400 text-amber-400" />
-                    <span>5.0</span>
+                  <div className="flex items-center gap-1.5">
+                    {/* Audio Mute/Unmute Toggle when playing inline */}
+                    {isThisInlinePlaying ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInlineMuted((m) => !m);
+                        }}
+                        aria-label={inlineMuted ? "Unmute audio" : "Mute audio"}
+                        title={inlineMuted ? "Unmute audio" : "Mute audio"}
+                        className="grid size-8 place-items-center rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 cursor-pointer shadow-xs"
+                      >
+                        {inlineMuted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+                      </button>
+                    ) : null}
+
+                    {/* Expand to Full View Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleExpandReel(e, index)}
+                      aria-label="Expand video to full view"
+                      title="Expand video to full view"
+                      className="grid size-8 place-items-center rounded-full bg-black/60 hover:bg-[#0d5a43] text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 cursor-pointer shadow-xs group/exp"
+                    >
+                      <Maximize2 className="size-3.5 transition-transform group-hover/exp:scale-110" />
+                    </button>
                   </div>
                 </div>
 
-                {/* Central Play Button Overlay */}
-                <div className="absolute inset-0 grid place-items-center z-10 pointer-events-none">
-                  <span className="grid size-14 place-items-center rounded-full bg-white/25 text-white backdrop-blur-md border border-white/40 shadow-lift transition-all duration-300 group-hover:scale-115 group-hover:bg-[#0d5a43] group-hover:text-white">
-                    <Play className="size-6 ml-0.5 fill-current" />
-                  </span>
-                </div>
+                {/* Central Play/Pause Button Overlay */}
+                {!isThisInlinePlaying ? (
+                  <div className="absolute inset-0 grid place-items-center z-10 pointer-events-none">
+                    <span className="grid size-14 place-items-center rounded-full bg-white/25 text-white backdrop-blur-md border border-white/40 shadow-lift transition-all duration-300 group-hover:scale-115 group-hover:bg-[#0d5a43] group-hover:text-white">
+                      <Play className="size-6 ml-0.5 fill-current" />
+                    </span>
+                  </div>
+                ) : isThisPaused ? (
+                  <div className="absolute inset-0 grid place-items-center z-10 pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                    <span className="grid size-14 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md border border-white/30 shadow-lift">
+                      <Play className="size-6 ml-0.5 fill-current" />
+                    </span>
+                  </div>
+                ) : null}
 
                 {/* Bottom Content: Creator Info, Title & Tagged Product */}
                 <div className="absolute bottom-0 inset-x-0 p-4 z-10 text-white flex flex-col justify-end space-y-2.5">
-                  {/* Creator */}
-                  <div className="flex items-center gap-2">
+                  {/* Creator - Non-clickable / Informational Only */}
+                  <div className="flex items-center gap-2 pointer-events-none select-none">
                     <div className="size-7 rounded-full overflow-hidden border border-white/40 bg-white/20 shrink-0">
                       <img
                         src={reel.creatorAvatar || reel.thumbnailUrl}
@@ -432,18 +553,13 @@ export function ReelVideoReviews({
                   </div>
 
                   {/* Reel Caption */}
-                  <p className="text-xs font-semibold text-white/95 line-clamp-2 leading-snug drop-shadow-xs">
+                  <p className="text-xs font-semibold text-white/95 line-clamp-2 leading-snug drop-shadow-xs select-none">
                     {reel.title}
                   </p>
 
                   {/* Tagged Product Pill (with RED % OFF badge!) */}
                   <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (hasMovedRef.current) return;
-                      handleAddTaggedProduct(reel);
-                    }}
-                    className="flex items-center justify-between gap-2 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 p-2 transition-all cursor-pointer"
+                    className="flex items-center justify-between gap-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 p-2 shadow-xs"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <img
@@ -469,13 +585,29 @@ export function ReelVideoReviews({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      aria-label="Add to cart"
-                      className="grid size-7 place-items-center rounded-xl bg-[#0d5a43] text-white shadow-xs shrink-0 hover:scale-105 active:scale-95"
-                    >
-                      <ShoppingBag className="size-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Link
+                        href={`/product/${reel.taggedProduct.slug}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="h-7 px-2.5 rounded-lg bg-white/20 hover:bg-white/35 active:scale-95 text-white text-[11px] font-bold transition-all flex items-center justify-center cursor-pointer shadow-xs border border-white/30"
+                      >
+                        View
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (hasMovedRef.current) return;
+                          handleAddTaggedProduct(reel);
+                        }}
+                        aria-label="Add to cart"
+                        className="grid size-7 place-items-center rounded-xl bg-[#0d5a43] hover:bg-[#074231] text-white shadow-xs shrink-0 hover:scale-105 active:scale-95 cursor-pointer"
+                      >
+                        <ShoppingBag className="size-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -535,6 +667,14 @@ export function ReelVideoReviews({
             className="relative h-[92vh] max-h-[820px] aspect-[9/16] w-auto max-w-[95vw] rounded-3xl overflow-hidden bg-black shadow-lift border border-white/10 flex flex-col justify-between"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Live Animated Time Progress Bar */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-white/20 z-30 overflow-hidden">
+              <div
+                className="h-full bg-emerald-400 transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                style={{ width: `${modalProgress}%` }}
+              />
+            </div>
+
             {/* HTML5 Video Element */}
             <video
               ref={videoModalRef}
@@ -544,6 +684,7 @@ export function ReelVideoReviews({
               loop
               playsInline
               muted={isMuted}
+              onTimeUpdate={handleModalTimeUpdate}
               onClick={() => setIsPlaying((p) => !p)}
               className="absolute inset-0 size-full object-cover cursor-pointer"
             />
@@ -555,9 +696,11 @@ export function ReelVideoReviews({
             <div className="relative z-20 flex items-center justify-between p-4 text-white">
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider">
-                  DocHomoeo Reel
+                  DocHomoeo Review
                 </span>
-                <span className="text-xs font-semibold text-white/80">{activeReel.duration}</span>
+                <span className="text-xs font-mono font-semibold text-white/90 tabular-nums">
+                  {modalCurrentTime} / {activeReel.duration}
+                </span>
               </div>
 
               {/* Sound & Play Controls */}
@@ -579,19 +722,21 @@ export function ReelVideoReviews({
               </div>
             </div>
 
-            {/* Right Action Icons (Like, Share, Views) */}
+            {/* Right Action Icons: High-trust ratings (Like & Views) */}
             <div className="absolute right-3.5 bottom-28 z-20 flex flex-col items-center gap-4 text-white">
-              {/* Like Button */}
+              {/* Like / Helpful Review Button */}
               <button
                 type="button"
                 onClick={() => handleToggleLike(activeReel.id, activeReel.likes)}
+                title="Helpful review"
+                aria-label="Mark review as helpful"
                 className="flex flex-col items-center gap-1 group cursor-pointer"
               >
                 <div
                   className={cn(
                     "grid size-11 place-items-center rounded-full backdrop-blur-md transition-all duration-200 group-hover:scale-110",
                     likedMap[activeReel.id]
-                      ? "bg-red-600 text-white"
+                      ? "bg-red-600 text-white shadow-lift"
                       : "bg-black/50 text-white hover:bg-black/70"
                   )}
                 >
@@ -602,20 +747,8 @@ export function ReelVideoReviews({
                 </span>
               </button>
 
-              {/* Share Button */}
-              <button
-                type="button"
-                onClick={() => handleShare(activeReel)}
-                className="flex flex-col items-center gap-1 group cursor-pointer"
-              >
-                <div className="grid size-11 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70 transition-all duration-200 group-hover:scale-110">
-                  <Share2 className="size-5" />
-                </div>
-                <span className="text-[11px] font-bold">Share</span>
-              </button>
-
               {/* Views */}
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1" title="Verified viewers">
                 <div className="grid size-11 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md">
                   <Eye className="size-5" />
                 </div>
@@ -625,13 +758,13 @@ export function ReelVideoReviews({
 
             {/* Bottom Section: Creator Info, Full Story & Tagged Product Card */}
             <div className="relative z-20 p-4 sm:p-5 pr-16 space-y-3 text-white">
-              {/* Creator details */}
-              <div className="flex items-center gap-2.5">
+              {/* Creator details - Strictly Non-Clickable / Informational Attribution Only */}
+              <div className="flex items-center gap-2.5 pointer-events-none select-none">
                 <div className="size-9 rounded-full overflow-hidden border-2 border-[#0d5a43] bg-white shrink-0">
                   <img
                     src={activeReel.creatorAvatar || activeReel.thumbnailUrl}
                     alt={activeReel.creatorName}
-                    className="size-full object-cover"
+                    className="size-full object-cover pointer-events-none select-none"
                   />
                 </div>
                 <div className="min-w-0">
@@ -649,7 +782,7 @@ export function ReelVideoReviews({
               </p>
 
               {/* Tagged Product Box inside Modal */}
-              <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/20 backdrop-blur-lg border border-white/30 p-2.5 shadow-lg">
+              <div className="relative z-30 flex items-center justify-between gap-3 rounded-2xl bg-white/20 backdrop-blur-lg border border-white/30 p-2.5 shadow-lg pointer-events-auto">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
                     src={activeReel.taggedProduct.imageUrl}
@@ -674,18 +807,25 @@ export function ReelVideoReviews({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 pointer-events-auto">
                   <button
                     type="button"
-                    onClick={() => handleAddTaggedProduct(activeReel)}
-                    className="h-8 px-3 rounded-full bg-[#0d5a43] hover:bg-[#074231] active:scale-95 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddTaggedProduct(activeReel);
+                    }}
+                    className="h-8.5 px-3.5 rounded-full bg-[#0d5a43] hover:bg-[#074231] active:scale-95 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer pointer-events-auto"
                   >
                     <ShoppingBag className="size-3.5" />
                     <span>Add</span>
                   </button>
                   <Link
                     href={`/product/${activeReel.taggedProduct.slug}`}
-                    className="h-8 px-2.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveReelIndex(null);
+                    }}
+                    className="h-8.5 px-4 rounded-full bg-white/25 hover:bg-white/40 active:scale-95 text-white text-xs font-bold transition-all flex items-center justify-center cursor-pointer shadow-xs border border-white/40 pointer-events-auto"
                   >
                     View
                   </Link>
@@ -695,12 +835,6 @@ export function ReelVideoReviews({
           </div>
 
           {/* Toast feedback */}
-          {showShareToast ? (
-            <div className="fixed bottom-8 z-50 rounded-full bg-black/90 text-white border border-white/20 px-5 py-2 text-xs font-bold shadow-lift animate-in fade-in slide-in-from-bottom-3 duration-200">
-              Link copied to clipboard!
-            </div>
-          ) : null}
-
           {addedProductToast ? (
             <div className="fixed bottom-8 z-50 rounded-full bg-[#0d5a43] text-white px-5 py-2 text-xs font-bold shadow-lift animate-in fade-in slide-in-from-bottom-3 duration-200 flex items-center gap-1.5">
               <CheckCircle2 className="size-4" />

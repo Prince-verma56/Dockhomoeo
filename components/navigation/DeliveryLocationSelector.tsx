@@ -165,8 +165,8 @@ export function DeliveryLocationSelector({
         className={cn(
           "group flex h-10 items-center rounded-full transition-all cursor-pointer text-left shrink-0",
           compact
-            ? "gap-1 px-2.5 border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-[#0c1e17] hover:border-[#0d5a43]/40"
-            : "gap-2 px-3 border border-black/[0.08] dark:border-white/10 bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-[#0c1e17] hover:border-[#0d5a43]/40 shadow-2xs",
+            ? "gap-1 px-2.5 border border-white/50 dark:border-white/10 bg-white/40 dark:bg-white/10 hover:bg-white/60 backdrop-blur-xl dark:hover:bg-white/20 hover:border-[#0d5a43]/40"
+            : "gap-2 px-3 border border-white/50 dark:border-white/10 bg-white/40 dark:bg-white/10 hover:bg-white/60 backdrop-blur-xl dark:hover:bg-white/20 hover:border-[#0d5a43]/40 shadow-2xs",
           className
         )}
       >
