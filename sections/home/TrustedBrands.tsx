@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldCheck, Award, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
 import { SplitHeading } from "@/components/shared/SplitHeading";
 import type { ApiBrand } from "@/types/api/home";
@@ -320,6 +320,73 @@ const homeopathicBrands = [
       </svg>
     ),
   },
+  {
+    id: "lord",
+    name: "Lord's Homoeopathic Laboratory",
+    href: "/products?brand=lords",
+    logo: (
+      <svg viewBox="0 0 160 50" fill="none" className="h-7.5 sm:h-8.5 w-auto">
+        <text
+          x="80"
+          y="27"
+          textAnchor="middle"
+          fontFamily="Georgia, serif"
+          fontWeight="700"
+          fontSize="24"
+          letterSpacing="0.03em"
+          fill="#111827"
+        >
+          Lord&apos;s
+        </text>
+        <text
+          x="80"
+          y="40"
+          textAnchor="middle"
+          fontFamily="system-ui, sans-serif"
+          fontWeight="700"
+          fontSize="6"
+          letterSpacing="0.22em"
+          fill="#0c503b"
+        >
+          HOMOEOPATHIC LABS
+        </text>
+      </svg>
+    ),
+  },
+  {
+    id: "dochomeo",
+    name: "DocHomoeo",
+    href: "/products?brand=dochomeo",
+    logo: (
+      <svg viewBox="0 0 160 50" fill="none" className="h-7 sm:h-8 w-auto">
+        <text
+          x="80"
+          y="27"
+          textAnchor="middle"
+          fontFamily="system-ui, sans-serif"
+          fontWeight="800"
+          fontSize="18"
+          letterSpacing="0.1em"
+          fill="#0c503b"
+        >
+          DOCHOMОEO
+        </text>
+        <line x1="35" y1="33" x2="125" y2="33" stroke="#0c503b" strokeWidth="1" strokeOpacity="0.3" />
+        <text
+          x="80"
+          y="42"
+          textAnchor="middle"
+          fontFamily="system-ui, sans-serif"
+          fontWeight="600"
+          fontSize="6"
+          letterSpacing="0.18em"
+          fill="#475569"
+        >
+          CLINICAL EXCELLENCE
+        </text>
+      </svg>
+    ),
+  },
 ];
 
 /**
@@ -340,7 +407,7 @@ const homeopathicBrands = [
  */
 function drawnLogoFor(brand: ApiBrand) {
   const text = `${brand.slug} ${brand.name}`.toLowerCase();
-  return homeopathicBrands.find((drawn) => text.includes(drawn.id))?.logo ?? null;
+  return homeopathicBrands.find((drawn) => text.includes(drawn.id) || drawn.id.includes(brand.slug.toLowerCase()))?.logo ?? null;
 }
 
 /**
@@ -350,15 +417,12 @@ function drawnLogoFor(brand: ApiBrand) {
  */
 export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    if (!scrollContainerRef.current) return;
-    const scrollAmount = 360;
-    scrollContainerRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
-  };
+  const isHoveredRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragScrollLeftRef = useRef(0);
+  const hasMovedRef = useRef(false);
+  const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // The shop's own brands when it has any; otherwise the makers drawn for this
   // section, each opening a search for that maker (never a brand page that may not exist).
@@ -368,12 +432,19 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
           key: String(brand.id),
           href: `/brands/${encodeURIComponent(brand.slug)}`,
           label: `${brand.name}, ${brand.productCount} ${brand.productCount === 1 ? "product" : "products"}`,
-          logo: drawnLogoFor(brand) ??
+          logo:
+            drawnLogoFor(brand) ??
             (brand.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- logos are any size and format the admin uploads
-              <img src={brand.logoUrl} alt="" draggable={false} className="max-h-12 w-auto max-w-36 object-contain pointer-events-none select-none" loading="lazy" />
+              <img
+                src={brand.logoUrl}
+                alt=""
+                draggable={false}
+                className="max-h-12 w-auto max-w-36 object-contain pointer-events-none select-none"
+                loading="lazy"
+              />
             ) : (
-              <span className="block max-w-36 text-center font-display text-lg leading-tight font-semibold tracking-tight text-[#0c1110]">
+              <span className="block max-w-36 text-center font-display text-lg leading-tight font-semibold tracking-tight text-[#0c1110] dark:text-white">
                 {brand.name}
               </span>
             )),
@@ -384,6 +455,120 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
           label: `Search for ${brand.name}`,
           logo: brand.logo,
         }));
+
+  // Render 3 consecutive sets for seamless 360-degree looping without any edge boundaries
+  const displayTiles = [...tiles, ...tiles, ...tiles];
+
+  // Continuous, butter-smooth auto-scroller moving towards the left
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Center scroll position on mount
+    const initOffset = container.scrollWidth / 3;
+    if (container.scrollLeft === 0 && initOffset > 0) {
+      container.scrollLeft = initOffset;
+    }
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+    const pixelsPerSecond = 46; // Calm, steady reading velocity
+
+    const step = (now: number) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      if (container && !isHoveredRef.current && !isDraggingRef.current) {
+        // Move to the left continuously
+        container.scrollLeft += pixelsPerSecond * dt;
+
+        const loopSegment = container.scrollWidth / 3;
+        if (loopSegment > 0) {
+          if (container.scrollLeft >= loopSegment * 2) {
+            container.scrollLeft -= loopSegment;
+          } else if (container.scrollLeft <= 0) {
+            container.scrollLeft += loopSegment;
+          }
+        }
+      }
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, [tiles.length]);
+
+  const scroll = (direction: "left" | "right") => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    isDraggingRef.current = true;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+
+    const scrollAmount = 360;
+    container.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+
+    resumeTimeoutRef.current = setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 1400);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    isDraggingRef.current = true;
+    dragStartXRef.current = e.pageX - container.offsetLeft;
+    dragScrollLeftRef.current = container.scrollLeft;
+    hasMovedRef.current = false;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - dragStartXRef.current) * 1.25;
+    if (Math.abs(walk) > 4) {
+      hasMovedRef.current = true;
+    }
+    container.scrollLeft = dragScrollLeftRef.current - walk;
+
+    const loopSegment = container.scrollWidth / 3;
+    if (loopSegment > 0) {
+      if (container.scrollLeft >= loopSegment * 2) {
+        container.scrollLeft -= loopSegment;
+        dragScrollLeftRef.current -= loopSegment;
+      } else if (container.scrollLeft <= 0) {
+        container.scrollLeft += loopSegment;
+        dragScrollLeftRef.current += loopSegment;
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isDraggingRef.current) return;
+    resumeTimeoutRef.current = setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 1400);
+  };
+
+  const handleTouchStart = () => {
+    isDraggingRef.current = true;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+  };
+
+  const handleTouchEnd = () => {
+    resumeTimeoutRef.current = setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 1400);
+  };
 
   return (
     <section
@@ -399,7 +584,7 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
         {/* Central soft organic green-gold radial aura */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(218,234,223,0.45)_0%,transparent_100%)]" />
 
-        {/* Ambient atmospheric aura without intrusive corner foliage */}
+        {/* Ambient atmospheric aura */}
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.03] via-transparent to-emerald-500/[0.03] pointer-events-none" />
 
         {/* Soft top connectivity blend */}
@@ -413,8 +598,8 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
         {/* Header - Centered with Clean Frosted Eyebrow */}
         <div className="text-center max-w-xl mx-auto">
           <Reveal y={12} delay={0}>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md border border-[#0c503b]/15 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] tracking-[0.2em] uppercase shadow-2xs">
-              <span className="size-1.5 rounded-full bg-[#0c503b]" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/85 dark:bg-white/10 backdrop-blur-md border border-[#0c503b]/20 px-3.5 py-1 text-[0.72rem] font-bold text-[#0c503b] dark:text-emerald-400 tracking-[0.2em] uppercase shadow-2xs">
+              <span className="size-1.5 rounded-full bg-[#0c503b] dark:bg-emerald-400 animate-pulse" />
               <span>TRUSTED PARTNERS</span>
             </div>
           </Reveal>
@@ -422,16 +607,16 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
             id="brands-heading"
             lines={["Top Homeopathic Brands"]}
             delay={0.06}
-            className="mt-3 font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-[#071911] leading-tight"
+            className="mt-3 font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-[#071911] dark:text-white leading-tight"
           />
           <Reveal y={16} delay={0.14}>
-            <p className="mt-2.5 text-[0.92rem] sm:text-[0.98rem] text-[#243d30] font-medium leading-relaxed max-w-lg mx-auto">
+            <p className="mt-2.5 text-[0.92rem] sm:text-[0.98rem] text-[#243d30] dark:text-emerald-100/80 font-medium leading-relaxed max-w-lg mx-auto">
               Authentic formulations from globally accredited manufacturers, tested for clinical purity and safety.
             </p>
           </Reveal>
         </div>
 
-        {/* Brand Carousel with Navigation Arrows */}
+        {/* Brand Carousel with Navigation Arrows & Continuous Left Auto-Scroll */}
         <Reveal y={20} delay={0.18} scale={0.98} className="relative mt-10 sm:mt-12 flex items-center">
           
           {/* Left Arrow Button */}
@@ -439,26 +624,50 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
             type="button"
             onClick={() => scroll("left")}
             aria-label="Scroll brands left"
-            className="hidden md:grid absolute -left-4 lg:-left-6 z-20 size-11 rounded-full bg-white/95 backdrop-blur-md border border-white shadow-[0_6px_22px_rgba(20,40,30,0.08)] place-items-center text-[#11241b] hover:bg-[#0c503b] hover:text-white hover:scale-105 active:scale-95 transition-all duration-300"
+            className="hidden md:grid absolute -left-3 lg:-left-5 z-20 size-11 lg:size-12 rounded-full bg-white/95 dark:bg-[#11241b]/95 backdrop-blur-md border border-black/8 dark:border-white/15 shadow-[0_6px_22px_rgba(20,40,30,0.1)] place-items-center text-[#11241b] dark:text-white hover:bg-[#0c503b] hover:text-white hover:scale-108 active:scale-95 transition-all duration-300 cursor-pointer"
           >
             <ChevronLeft className="size-5 stroke-[2.2]" />
           </button>
 
-          {/* Cards Track with edge fade mask for seamless rail entry */}
-          <div
-            ref={scrollContainerRef}
-            className="dh-rail-mask w-full flex items-center gap-4 sm:gap-5 overflow-x-auto scroll-smooth py-4 px-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {tiles.map((tile) => (
-              <Link
-                key={tile.key}
-                href={tile.href}
-                aria-label={tile.label}
-                className="group relative flex h-20 sm:h-[90px] w-42 sm:w-50 shrink-0 items-center justify-center rounded-2xl bg-white/85 hover:bg-white backdrop-blur-xl border border-white/90 shadow-[0_4px_20px_rgba(20,40,30,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:shadow-[0_12px_28px_rgba(12,80,59,0.12)] hover:-translate-y-1.5 px-4 transition-all duration-300"
-              >
-                <div className="transition-transform duration-300 group-hover:scale-105">{tile.logo}</div>
-              </Link>
-            ))}
+          {/* Masked Continuous Auto-Scroll Track */}
+          <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+            <div
+              ref={scrollContainerRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onMouseEnter={() => {
+                isHoveredRef.current = true;
+              }}
+              onMouseLeave={() => {
+                isHoveredRef.current = false;
+                handleMouseUp();
+              }}
+              className="w-full flex items-center gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scrollbar-none py-5 px-3 select-none cursor-grab active:cursor-grabbing"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {displayTiles.map((tile, idx) => (
+                <Link
+                  key={`${tile.key}-${idx}`}
+                  href={tile.href}
+                  aria-label={tile.label}
+                  draggable={false}
+                  onClick={(e) => {
+                    if (hasMovedRef.current) e.preventDefault();
+                  }}
+                  className="group relative flex h-20 sm:h-[92px] lg:h-[100px] w-44 sm:w-52 lg:w-56 shrink-0 items-center justify-center rounded-[22px] sm:rounded-[26px] bg-white/95 dark:bg-[#12221b]/95 hover:bg-white backdrop-blur-xl border border-black/[0.06] dark:border-white/10 shadow-[0_4px_22px_rgba(20,40,30,0.05),inset_0_1.5px_1.5px_rgba(255,255,255,1)] hover:border-[#0c503b]/35 hover:shadow-[0_16px_36px_rgba(12,80,59,0.14)] hover:-translate-y-1.5 px-4 sm:px-6 transition-all duration-300"
+                >
+                  <div className="transition-transform duration-300 group-hover:scale-108 pointer-events-none select-none flex items-center justify-center">
+                    {tile.logo}
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Right Arrow Button */}
@@ -466,11 +675,31 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
             type="button"
             onClick={() => scroll("right")}
             aria-label="Scroll brands right"
-            className="hidden md:grid absolute -right-4 lg:-right-6 z-20 size-11 rounded-full bg-white/95 backdrop-blur-md border border-white shadow-[0_6px_22px_rgba(20,40,30,0.08)] place-items-center text-[#11241b] hover:bg-[#0c503b] hover:text-white hover:scale-105 active:scale-95 transition-all duration-300"
+            className="hidden md:grid absolute -right-3 lg:-right-5 z-20 size-11 lg:size-12 rounded-full bg-white/95 dark:bg-[#11241b]/95 backdrop-blur-md border border-black/8 dark:border-white/15 shadow-[0_6px_22px_rgba(20,40,30,0.1)] place-items-center text-[#11241b] dark:text-white hover:bg-[#0c503b] hover:text-white hover:scale-108 active:scale-95 transition-all duration-300 cursor-pointer"
           >
             <ChevronRight className="size-5 stroke-[2.2]" />
           </button>
 
+        </Reveal>
+
+        {/* Trust Accreditation Pill Bar */}
+        <Reveal y={12} delay={0.24}>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs sm:text-[13px] text-[#2e473b] dark:text-emerald-300/85 font-medium select-none">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="size-4 text-[#0c503b] dark:text-emerald-400" />
+              100% Genuine &amp; Sealed
+            </span>
+            <span className="hidden sm:inline text-black/20 dark:text-white/20">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Award className="size-4 text-[#0c503b] dark:text-emerald-400" />
+              GMP &amp; German Ph. Eur. Accredited
+            </span>
+            <span className="hidden sm:inline text-black/20 dark:text-white/20">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles className="size-4 text-[#0c503b] dark:text-emerald-400" />
+              Direct Licensed Manufacturer Supply
+            </span>
+          </div>
         </Reveal>
       </div>
     </section>

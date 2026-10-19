@@ -52,17 +52,12 @@ const checkBuildSession = () => {
 };
 
 /**
- * Whether this visit skips the intro: prefers reduced motion or completed within this specific session.
+ * Whether this visit skips the intro: prefers reduced motion.
  */
 const getIntroSkipped = () => {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
-  try {
-    checkBuildSession();
-    return sessionStorage.getItem(HERO_COMPLETED_KEY) === "true";
-  } catch {
-    return false;
-  }
+  return false;
 };
 const getServerIntroSkipped = () => false;
 const subscribeNever = () => () => {};
@@ -138,8 +133,7 @@ export function HeroPlaybackProvider({
     if (revealedRef.current) return;
     revealedRef.current = true;
     setRevealed(true);
-    markCompleted();
-  }, [markCompleted]);
+  }, []);
 
   const skipIntro = useCallback(() => {
     setSkippedByVisitor(true);

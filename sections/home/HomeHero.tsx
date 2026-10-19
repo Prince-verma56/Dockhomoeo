@@ -42,7 +42,7 @@ export function HomeHero() {
 
   // Appearance state from context
   const contentVisible = playback ? playback.contentVisible : true;
-  const isInstant = Boolean(playback?.hasSkipped || playback?.isCompleted);
+  const isInstant = Boolean(playback?.hasSkipped);
 
   // Section ref for scroll trigger tracking
   const sectionRef = useRef<HTMLElement | null>(null);

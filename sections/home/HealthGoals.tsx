@@ -217,21 +217,22 @@ export function HealthGoals({ categories }: { categories: ApiCategory[] }) {
                   href={`/products?category=${encodeURIComponent(category.slug)}`}
                   className="group flex flex-col items-center shrink-0 w-[88px] sm:w-[98px] lg:w-[106px] select-none outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:rounded-2xl"
                 >
-                  {/* Generously Scaled Soft White Pedestal with 3D Botanical Sculpture */}
-                  <div className="relative size-[78px] sm:size-[86px] lg:size-[94px] rounded-[20px] sm:rounded-[24px] bg-white border border-[#e0e6e2] shadow-[0_4px_14px_rgba(0,0,0,0.04)] group-hover:shadow-[0_10px_24px_rgba(13,90,67,0.15)] group-hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center p-2 overflow-hidden">
+                  {/* Clean rounded container with edge-to-edge covering image */}
+                  <div className="relative size-[78px] sm:size-[86px] lg:size-[94px] rounded-[22px] sm:rounded-[26px] bg-[#f8f7f3] dark:bg-[#14231b] border border-black/[0.08] dark:border-white/10 shadow-[0_4px_14px_rgba(20,40,30,0.05)] group-hover:shadow-[0_12px_26px_rgba(13,90,67,0.16)] group-hover:-translate-y-1.5 transition-all duration-300 overflow-hidden">
                     {art ? (
                       // eslint-disable-next-line @next/next/no-img-element -- local sculptures and admin uploads of any size
                       <img
                         src={art}
-                        alt=""
-                        aria-hidden="true"
-                        className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300 drop-shadow-xs"
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                         loading="lazy"
                       />
                     ) : (
-                      <span aria-hidden className="font-display text-3xl text-forest/70">
-                        {category.name.slice(0, 1)}
-                      </span>
+                      <div className="size-full flex items-center justify-center">
+                        <span aria-hidden className="font-display text-3xl text-forest/70">
+                          {category.name.slice(0, 1)}
+                        </span>
+                      </div>
                     )}
                   </div>
 
