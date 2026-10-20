@@ -1071,6 +1071,53 @@ footer :focus-visible {
   will-change: transform, opacity;
 }
 
+.logo-shine-beam-loop {
+  animation: logoGlassShine 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes preloaderLogoFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.02);
+  }
+}
+
+.animate-preloader-float {
+  animation: preloaderLogoFloat 3s ease-in-out infinite;
+}
+
+@keyframes preloaderHaloPulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.12);
+  }
+}
+
+.animate-preloader-halo {
+  animation: preloaderHaloPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes preloaderShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-preloader-shimmer {
+  animation: preloaderShimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+
 /* ==========================================================================
    UNIVERSAL INTERACTIVE CURSOR SYSTEM
    Guarantees that all links, buttons, nav items, dropdowns, select options,

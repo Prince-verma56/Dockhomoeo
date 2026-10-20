@@ -8,6 +8,26 @@ import { prefersReducedMotion } from "@/lib/animation/motion";
 import { cn } from "@/lib/utils";
 
 const LOGO_SRC = "/Images/LogoGIF/dochomoeo_logo_final_frame.png";
+const LOGO_DARK_SRC = "/Images/LogoGIF/dochomoeo_logo_dark.png";
+
+function getRouteSubtitle(url: string): string {
+  try {
+    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "http://localhost");
+    const pathname = parsed.pathname;
+    if (pathname === "/") return "Welcome to DocHomoeo";
+    if (pathname.startsWith("/favourites")) return "Holistic Care & Favourites";
+    if (pathname.startsWith("/doctors")) return "Holistic Care & Expert Doctors";
+    if (pathname.startsWith("/products")) return "Curated Natural Remedies";
+    if (pathname.startsWith("/categories")) return "Classical Formulations & Categories";
+    if (pathname.startsWith("/brands")) return "Certified Pharmacopoeial Brands";
+    if (pathname.startsWith("/insights") || pathname.startsWith("/blog")) return "Evidence & Health Insights";
+    if (pathname.startsWith("/contact")) return "Patient Support & Consultation";
+    if (pathname.startsWith("/cart")) return "Your Remedies & Cart";
+    if (pathname.startsWith("/checkout")) return "Secure Holistic Checkout";
+    if (pathname.startsWith("/login") || pathname.startsWith("/account")) return "Personalized Patient Portal";
+  } catch {}
+  return "Holistic Care & Wellness";
+}
 
 type TransitionState = "idle" | "pulling" | "covering" | "navigating" | "revealing";
 
@@ -135,7 +155,7 @@ function RouteTransitionInner() {
           opacity: 0,
           y: -20,
           scale: 0.96,
-          duration: 0.26,
+          duration: 0.24,
           ease: "power2.in",
         },
         0
@@ -146,10 +166,10 @@ function RouteTransitionInner() {
       curtain,
       {
         yPercent: -100,
-        duration: 0.94,
+        duration: 0.82,
         ease: "power2.inOut",
       },
-      crest ? 0.08 : 0
+      crest ? 0.06 : 0
     );
   }, []);
 
@@ -160,7 +180,7 @@ function RouteTransitionInner() {
     // Dignified pause while covered so the transition feels physical, silky, and premium
     const timer = setTimeout(() => {
       executeReveal();
-    }, 380);
+    }, 350);
 
     return () => clearTimeout(timer);
   }, [pathname, searchParams, executeReveal]);
@@ -203,12 +223,12 @@ function RouteTransitionInner() {
       gsap.set(curtain, { yPercent: targetY, opacity: 1 });
 
       if (crest) {
-        const crestOpacity = Math.max(0, (progress - 0.22) / 0.5);
+        const crestOpacity = Math.max(0, (progress - 0.2) / 0.5);
         const crestY = (1 - progress) * -22;
         gsap.set(crest, {
           opacity: crestOpacity,
           y: crestY,
-          scale: 0.94 + progress * 0.06,
+          scale: 0.92 + progress * 0.08,
         });
       }
     };
@@ -261,10 +281,7 @@ function RouteTransitionInner() {
 
       // Update subtitle dynamically based on destination
       if (crestSubtitleRef.current) {
-        crestSubtitleRef.current.textContent =
-          window.location.pathname === "/favourites"
-            ? "Returning to Your Journey"
-            : "Holistic Care & Favourites";
+        crestSubtitleRef.current.textContent = getRouteSubtitle(targetUrl);
       }
 
       container.style.pointerEvents = "auto";
@@ -311,7 +328,7 @@ function RouteTransitionInner() {
 
       tl.to(curtain, {
         yPercent: 0,
-        duration: 0.96,
+        duration: 0.88,
         ease: "power2.out",
       });
 
@@ -322,10 +339,10 @@ function RouteTransitionInner() {
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.56,
+            duration: 0.52,
             ease: "power2.out",
           },
-          "-=0.52"
+          "-=0.48"
         );
       }
     };
@@ -345,7 +362,7 @@ function RouteTransitionInner() {
       if (!curtain || !container) return;
 
       if (crestSubtitleRef.current) {
-        crestSubtitleRef.current.textContent = "Holistic Care & Wellness";
+        crestSubtitleRef.current.textContent = getRouteSubtitle(targetUrl);
       }
 
       container.style.pointerEvents = "auto";
@@ -380,7 +397,7 @@ function RouteTransitionInner() {
         { yPercent: -100, opacity: 1 },
         {
           yPercent: 0,
-          duration: 0.76,
+          duration: 0.68,
           ease: "power2.out",
         }
       );
@@ -388,15 +405,15 @@ function RouteTransitionInner() {
       if (crest) {
         tl.fromTo(
           crest,
-          { opacity: 0, scale: 0.94, y: -16 },
+          { opacity: 0, scale: 0.9, y: -22 },
           {
             opacity: 1,
             scale: 1,
             y: 0,
-            duration: 0.46,
+            duration: 0.44,
             ease: "power2.out",
           },
-          "-=0.42"
+          "-=0.38"
         );
       }
     };
@@ -416,7 +433,7 @@ function RouteTransitionInner() {
     };
   }, [router, executeReveal]);
 
-  // Intercept links that explicitly request the full curtain transition (data-curtain-transition)
+  // Intercept internal route and tab links for a silky, seamless transition preloader
   useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -424,19 +441,46 @@ function RouteTransitionInner() {
 
       const target = e.target as HTMLElement | null;
       const anchor = target?.closest("a");
-      if (!anchor || !anchor.hasAttribute("data-curtain-transition")) return;
+      if (!anchor) return;
+
+      // Ignore links explicitly opting out or opening elsewhere
+      if (
+        anchor.hasAttribute("data-no-transition") ||
+        anchor.hasAttribute("data-no-curtain") ||
+        anchor.getAttribute("target") === "_blank" ||
+        anchor.hasAttribute("download")
+      ) {
+        return;
+      }
 
       const rawHref = anchor.getAttribute("href");
-      if (!rawHref || rawHref.startsWith("#")) return;
+      if (
+        !rawHref ||
+        rawHref.startsWith("#") ||
+        rawHref.startsWith("mailto:") ||
+        rawHref.startsWith("tel:") ||
+        rawHref.startsWith("javascript:")
+      ) {
+        return;
+      }
 
       try {
         const targetUrl = new URL(anchor.href, window.location.href);
+        // Only internal links within the same origin
         if (targetUrl.origin !== window.location.origin) return;
+
+        // Skip if navigating to the exact same current pathname and search
+        if (
+          targetUrl.pathname === window.location.pathname &&
+          targetUrl.search === window.location.search
+        ) {
+          return;
+        }
 
         e.preventDefault();
         e.stopPropagation();
 
-        navigateWithTransition(targetUrl.href);
+        navigateWithTransition(targetUrl.pathname + targetUrl.search + targetUrl.hash);
       } catch {}
     };
 
@@ -479,34 +523,67 @@ function RouteTransitionInner() {
           ref={crestRef}
           className="relative z-10 flex flex-col items-center justify-center text-center px-6 select-none opacity-0"
         >
-          {/* Logo Badge in Frosted Ivory Glass Capsule */}
-          <div className="relative size-20 sm:size-22 rounded-3xl bg-white/70 dark:bg-[#14231c]/70 backdrop-blur-md shadow-xl border border-[#0d5a43]/15 dark:border-white/10 p-4 flex items-center justify-center">
-            {/* Fine Warm Gold Accent Ring */}
-            <div className="absolute inset-0 rounded-3xl border border-[#d4af37]/25 pointer-events-none" />
+          {/* Large Unboxed Brand Logo with Ambient Glow and Specular Liquid Light Animation */}
+          <div className="relative flex flex-col items-center justify-center">
+            {/* Soft Ambient Radial Halo that pulses behind the logo */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-10 sm:-inset-14 rounded-full bg-[radial-gradient(circle,_rgba(13,90,67,0.18)_0%,_transparent_72%)] dark:bg-[radial-gradient(circle,_rgba(52,211,153,0.16)_0%,_transparent_72%)] animate-preloader-halo blur-2xl"
+            />
 
-            <div className="relative size-12 sm:size-14">
-              <Image
+            {/* Logo Container: Generous Size with Breathing Levitation Animation */}
+            <div className="relative w-[230px] sm:w-[280px] md:w-[320px] aspect-[890/560] animate-preloader-float">
+              {/* Light Theme: Vibrant Botanical Brand Logo */}
+              <img
                 src={LOGO_SRC}
                 alt="DocHomoeo"
-                width={56}
-                height={56}
-                priority
-                className="size-full object-contain"
+                width={890}
+                height={560}
+                className="size-full object-contain pointer-events-none select-none drop-shadow-[0_12px_28px_rgba(13,90,67,0.14)] block dark:hidden"
               />
-            </div>
-          </div>
 
-          {/* Typography */}
-          <div className="mt-5 space-y-1">
-            <h2 className="text-[13px] sm:text-[14px] font-semibold tracking-[0.38em] text-[#0d5a43] dark:text-emerald-400 uppercase font-sans">
-              DocHomoeo
-            </h2>
-            <p
-              ref={crestSubtitleRef}
-              className="text-[10px] sm:text-[11px] font-medium tracking-[0.26em] text-[#14251f]/60 dark:text-white/40 uppercase"
-            >
-              Holistic Care & Favourites
-            </p>
+              {/* Dark Theme: Crisp Luminous Inverted Wordmark */}
+              <img
+                src={LOGO_DARK_SRC}
+                alt="DocHomoeo"
+                width={890}
+                height={560}
+                className="size-full object-contain pointer-events-none select-none drop-shadow-[0_12px_28px_rgba(16,185,129,0.18)] hidden dark:block"
+              />
+
+              {/* Liquid Specular Light Sweep Animation Masked Directly to Logo Shapes */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+                style={{
+                  WebkitMaskImage: `url('${LOGO_SRC}')`,
+                  maskImage: `url('${LOGO_SRC}')`,
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                }}
+              >
+                <span className="logo-shine-beam-loop absolute inset-y-0 w-2/5 bg-gradient-to-r from-transparent via-white/85 to-transparent pointer-events-none" />
+              </span>
+            </div>
+
+            {/* Elegant Subtitle and Micro-Progress Shimmer Line */}
+            <div className="mt-2 sm:mt-3 flex flex-col items-center gap-2">
+              <p
+                ref={crestSubtitleRef}
+                className="text-[11px] sm:text-[12px] font-semibold tracking-[0.34em] uppercase text-[#0d5a43] dark:text-emerald-400 drop-shadow-xs"
+              >
+                Holistic Care &amp; Wellness
+              </p>
+
+              {/* Fine Luxury Accent Line with Center Shimmer */}
+              <div className="relative w-28 sm:w-36 h-[1.5px] overflow-hidden rounded-full bg-[#0d5a43]/15 dark:bg-white/15">
+                <div className="animate-preloader-shimmer absolute inset-y-0 w-1/2 rounded-full bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
