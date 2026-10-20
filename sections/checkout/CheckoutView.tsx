@@ -326,23 +326,89 @@ export function CheckoutView() {
 
   return (
     <>
-      <section aria-labelledby="checkout-heading" className="dh-page-top dh-section-b">
-        <Container>
-          <CartBreadcrumb current="Checkout" via={{ label: "Cart", href: "/cart" }} />
-          <h1 id="checkout-heading" className="dh-title-page text-ink">
-            Checkout
-          </h1>
-          <p className="mt-2 flex items-center gap-2 text-sm text-muted-ink">
-            <Lock aria-hidden className="size-3.5" />
-            We use these details to deliver your order, and save the address to your account only if you choose.
-          </p>
+      <section aria-labelledby="checkout-heading" className="dh-page-top dh-section-b relative overflow-x-clip">
+        {/* ========================================================================= */}
+        {/* BOTANICAL WATERCOLOR LEAF CORNER ACCENTS (MINIMIZED & CORNER-ALIGNED)     */}
+        {/* ========================================================================= */}
+        {/* Left Botanical Branch: shifted to the far top-left corner, rotated ~45 deg to the right */}
+        <div 
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute -left-3 sm:-left-5 md:-left-7 lg:-left-9 -top-3 sm:-top-5 md:-top-7 lg:-top-9 w-[55px] sm:w-[75px] md:w-[100px] lg:w-[125px] xl:w-[145px] 2xl:w-[165px] max-w-[15vw] opacity-75 sm:opacity-80 lg:opacity-85 dark:opacity-25 transition-all duration-300 origin-top-left rotate-[36deg] sm:rotate-[40deg] lg:rotate-[45deg] z-0"
+        >
+          <picture>
+            <source srcSet="/Images/PNGS/checkout-leaves-left.webp" type="image/webp" />
+            <img
+              src="/Images/PNGS/checkout-leaves-left.png"
+              alt=""
+              aria-hidden="true"
+              width={516}
+              height={1141}
+              loading="lazy"
+              className="w-full h-auto object-contain object-left-top pointer-events-none drop-shadow-[0_6px_16px_rgba(20,37,31,0.06)]"
+            />
+          </picture>
+        </div>
+
+        {/* Right Botanical Canopy: properly minimized and pinned to the far top-right corner */}
+        <div 
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute right-0 -top-3 sm:-top-5 md:-top-7 lg:-top-9 w-[70px] sm:w-[95px] md:w-[125px] lg:w-[155px] xl:w-[185px] 2xl:w-[215px] max-w-[18vw] opacity-75 sm:opacity-80 lg:opacity-85 dark:opacity-25 transition-all duration-300 origin-top-right rotate-0 sm:rotate-2 lg:rotate-3 z-0"
+        >
+          <picture>
+            <source srcSet="/Images/PNGS/checkout-leaves-right.webp" type="image/webp" />
+            <img
+              src="/Images/PNGS/checkout-leaves-right.png"
+              alt=""
+              aria-hidden="true"
+              width={774}
+              height={1089}
+              loading="lazy"
+              className="w-full h-auto object-contain object-right-top pointer-events-none drop-shadow-[0_6px_16px_rgba(20,37,31,0.06)]"
+            />
+          </picture>
+        </div>
+
+        <Container className="relative z-10">
+
+          <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4">
+            <div>
+              <CartBreadcrumb current="Checkout" via={{ label: "Cart", href: "/cart" }} />
+              <h1 id="checkout-heading" className="dh-title-page text-ink">
+                Checkout
+              </h1>
+              <p className="mt-2 flex items-center gap-2 text-sm text-muted-ink">
+                <Lock aria-hidden className="size-3.5" />
+                We use these details to deliver your order, and save the address to your account only if you choose.
+              </p>
+            </div>
+
+            {/* Elegant Botanical Motto with leaf sprig matching inspiration */}
+            <div className="hidden lg:flex items-center gap-2.5 pb-1 select-none">
+              <div className="relative w-7 h-5 shrink-0 opacity-85 dark:opacity-60 -rotate-12">
+                <img
+                  src="/Images/PNGS/checkout-leaves-sprig.webp"
+                  alt=""
+                  aria-hidden="true"
+                  className="size-full object-contain pointer-events-none"
+                />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif italic text-[0.95rem] font-medium text-forest/90 dark:text-emerald-300/90">
+                  Pure Care
+                </span>
+                <span className="font-serif italic text-xs text-forest/70 dark:text-emerald-400/70">
+                  for a Healthier Tomorrow
+                </span>
+              </div>
+            </div>
+          </div>
 
           <MobileOrderPeek lines={lines} total={totals.total} />
 
           <CheckoutPrescription userId={signedInUserId} />
 
-          <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14">
-            <form id="checkout-form" noValidate onSubmit={onSubmit} className="min-w-0 space-y-8">
+          <div className="mt-6 sm:mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14">
+            <form id="checkout-form" noValidate onSubmit={onSubmit} className="min-w-0 space-y-6 sm:space-y-8">
               {submitError ? (
                 <div
                   ref={alertRef}
@@ -565,10 +631,10 @@ function CheckoutSection({ step, title, icon, children }: { step: number; title:
   return (
     <section
       aria-labelledby={id}
-      className="border-t border-line-soft pt-6 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:fill-mode-both"
+      className="border-t border-line-soft pt-5 sm:pt-6 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:fill-mode-both"
       style={{ animationDelay: `${(step - 1) * 60}ms`, animationDuration: "var(--duration-medium)" }}
     >
-      <h2 id={id} className="mb-4 flex items-center gap-3 text-lg font-semibold text-ink">
+      <h2 id={id} className="mb-3.5 sm:mb-4 flex items-center gap-3 text-base sm:text-lg font-semibold text-ink">
         <span aria-hidden className="grid size-7 place-items-center rounded-full bg-forest/10 text-[0.8125rem] font-semibold text-forest">
           {step}
         </span>
@@ -936,7 +1002,7 @@ function SavedAddressPicker({
 function MobileOrderPeek({ lines, total }: { lines: CartLineView[]; total: number }) {
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   return (
-    <details className="group mt-6 rounded-xl border border-line/70 bg-cream lg:hidden">
+    <details className="group mt-4 sm:mt-6 rounded-xl border border-line/70 bg-cream lg:hidden">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium text-ink">
           Order summary · {count} {count === 1 ? "item" : "items"}
