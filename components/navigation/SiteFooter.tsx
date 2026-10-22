@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +22,16 @@ import { PaymentMethodsRow } from "@/components/shared/PaymentBadges";
 
 const footerGroups = [
   {
+    id: "company",
+    label: "Company",
+    links: [
+      { label: "About Us", href: "/about" },
+      { label: "Quality Standards", href: "/quality" },
+      { label: "Bulk Inquiry", href: "/inquiry" },
+      { label: "Find a Doctor", href: "/doctors" },
+    ],
+  },
+  {
     id: "shop",
     label: "Shop",
     links: [
@@ -33,27 +42,22 @@ const footerGroups = [
     ],
   },
   {
-    id: "care",
-    label: "Care",
-    links: [
-      { label: "Find a Doctor", href: "/doctors" },
-      { label: "My Prescriptions", href: "/account/prescriptions" },
-    ],
-  },
-  {
-    id: "about",
-    label: "About",
-    links: [
-      { label: "Our Story", href: "/about" },
-      { label: "Quality Standards", href: "/quality" },
-    ],
-  },
-  {
     id: "support",
-    label: "Support",
+    label: "Customer Support",
     links: [
       { label: "Contact Us", href: "/contact" },
       { label: "Track Order", href: "/account/orders" },
+      { label: "Return & Cancellation", href: "/return-cancellation" },
+      { label: "Shipping Policy", href: "/shipping-policy" },
+      { label: "Refund Policy", href: "/refund-policy" },
+    ],
+  },
+  {
+    id: "legal",
+    label: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
     ],
   },
 ];

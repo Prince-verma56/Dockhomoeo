@@ -21,11 +21,9 @@ import type { ApiDoctorCard, ApiNextSlot } from "@/types/api/care";
 export function DoctorCard({
   doctor,
   nextSlot,
-  onBookConsult,
 }: {
   doctor: ApiDoctorCard;
   nextSlot: ApiNextSlot | null;
-  onBookConsult?: (doctor: ApiDoctorCard) => void;
 }) {
   const router = useRouter();
 
@@ -176,21 +174,14 @@ export function DoctorCard({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onBookConsult) {
-              onBookConsult(doctor);
-            } else {
-              router.push(`/doctors/${doctor.slug}`);
-            }
-          }}
+        <Link
+          href={`/doctors/${doctor.slug}#booking-section`}
+          onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-1.5 rounded-full bg-[#0d5a43] hover:bg-[#074231] active:scale-95 text-white px-3.5 sm:px-4 py-2 text-xs font-bold transition-all shadow-xs cursor-pointer group/btn"
         >
           <span>Book Consultation</span>
           <ArrowRight className="size-3 transition-transform group-hover/btn:translate-x-0.5" />
-        </button>
+        </Link>
       </div>
     </article>
   );

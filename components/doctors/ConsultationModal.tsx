@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   CalendarDays,
   CheckCircle2,
   Clock,
-  Globe,
   Lock,
   Mail,
   Phone,
   ShieldCheck,
-  User,
   Video,
   X,
 } from "lucide-react";
@@ -44,6 +42,8 @@ const AVAILABLE_SLOTS = [
   "05:00 PM",
 ];
 
+const emptySubscribe = () => () => {};
+
 export function ConsultationModal({
   doctor,
   isOpen,
@@ -51,7 +51,7 @@ export function ConsultationModal({
   initialDate,
   initialSlot,
 }: ConsultationModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -64,20 +64,19 @@ export function ConsultationModal({
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (doctor) {
-      setMode(doctor.videoFee !== null ? "video" : "audio");
-      setSelectedLanguage(doctor.languages[0] ?? "English");
-      if (initialDate) setSelectedDate(initialDate);
-      if (initialSlot) setSelectedSlot(initialSlot);
-      setSubmitted(false);
-      setError(null);
-    }
-  }, [doctor, initialDate, initialSlot]);
+  // Sync initial parameters when modal opens
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (isOpen && !prevOpen && doctor) {
+    setPrevOpen(true);
+    setMode(doctor.videoFee !== null ? "video" : "audio");
+    setSelectedLanguage(doctor.languages[0] ?? "English");
+    if (initialDate) setSelectedDate(initialDate);
+    if (initialSlot) setSelectedSlot(initialSlot);
+    setSubmitted(false);
+    setError(null);
+  } else if (!isOpen && prevOpen) {
+    setPrevOpen(false);
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -172,25 +171,21 @@ export function ConsultationModal({
             </div>
 
             <div className="space-y-1.5">
+              <div className="mx-auto mb-2 inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-800">
+                <span>Frontend Simulation Preview</span>
+              </div>
               <h3 className="font-display text-2xl font-bold text-ink dark:text-white">
-                Consultation Confirmed!
+                Consultation Blueprint Prepared
               </h3>
               <p className="text-xs sm:text-sm text-muted-ink dark:text-white/70 max-w-sm mx-auto leading-relaxed">
-                Your appointment with{" "}
+                Your consultation request for{" "}
                 <strong className="text-forest font-semibold">
                   {doctor.displayName}
                 </strong>{" "}
-                has been reserved for{" "}
+                has been formatted for{" "}
                 <span className="font-semibold text-ink dark:text-white">
                   {selectedDate} at {selectedSlot}
-                </span>. Meeting access details have been sent to{" "}
-                <span className="font-semibold text-ink dark:text-white">
-                  {email}
-                </span>{" "}
-                and via SMS to{" "}
-                <span className="font-semibold text-ink dark:text-white">
-                  +91 {phone}
-                </span>.
+                </span>. In this preview mode, no live appointment is locked. To confirm a guaranteed appointment with digital prescription privileges, proceed to the live booking panel.
               </p>
             </div>
 
@@ -225,13 +220,22 @@ export function ConsultationModal({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full rounded-full bg-[#0d5a43] hover:bg-[#074231] text-white py-3 text-xs sm:text-sm font-bold transition-all shadow-sm cursor-pointer"
-            >
-              Done &amp; Return
-            </button>
+            <div className="flex flex-col gap-2 pt-1">
+              <a
+                href={`/doctors/${doctor.slug}#booking-section`}
+                onClick={onClose}
+                className="w-full text-center rounded-full bg-[#0d5a43] hover:bg-[#074231] text-white py-3 text-xs sm:text-sm font-bold transition-all shadow-sm cursor-pointer"
+              >
+                Go to Live Appointment Panel
+              </a>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full rounded-full border border-line-soft bg-transparent text-ink dark:text-white py-2 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         ) : (
           /* Consultation Booking Form with Fixed Header & Scrollable Body */

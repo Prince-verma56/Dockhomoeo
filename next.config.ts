@@ -18,6 +18,51 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
   },
+  // Permanent redirects for legacy website URL structures
+  async redirects() {
+    return [
+      {
+        source: "/ReturnCancellation",
+        destination: "/return-cancellation",
+        permanent: true,
+      },
+      {
+        source: "/returncancellation",
+        destination: "/return-cancellation",
+        permanent: true,
+      },
+      {
+        source: "/form.pdf",
+        destination: "/terms-and-conditions",
+        permanent: true,
+      },
+      {
+        source: "/shipping",
+        destination: "/shipping-policy",
+        permanent: true,
+      },
+      {
+        source: "/refundPolicy",
+        destination: "/refund-policy",
+        permanent: true,
+      },
+      {
+        source: "/refundpolicy",
+        destination: "/refund-policy",
+        permanent: true,
+      },
+      {
+        source: "/PrivacyPolicy",
+        destination: "/privacy-policy",
+        permanent: true,
+      },
+      {
+        source: "/privacypolicy",
+        destination: "/privacy-policy",
+        permanent: true,
+      },
+    ];
+  },
   // Proxy API and upload calls to the backend on port 4000
   async rewrites() {
     return {

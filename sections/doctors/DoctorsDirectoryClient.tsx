@@ -12,11 +12,9 @@ import {
   Search,
   Sparkles,
   Sprout,
-  Stethoscope,
 } from "lucide-react";
 import { DoctorCard } from "@/sections/doctors/DoctorCard";
 import { Reveal } from "@/components/shared/Reveal";
-import { ConsultationModal } from "@/components/doctors/ConsultationModal";
 import { cn } from "@/lib/utils";
 import type { ApiDoctorCard, ApiNextSlot } from "@/types/api/care";
 
@@ -42,19 +40,7 @@ export function DoctorsDirectoryClient({
 }: DoctorsDirectoryClientProps) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [selectedDoctor, setSelectedDoctor] = useState<ApiDoctorCard | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const handleOpenConsult = (doctor: ApiDoctorCard) => {
-    setSelectedDoctor(doctor);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseConsult = () => {
-    setIsModalOpen(false);
-    setSelectedDoctor(null);
-  };
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollContainerRef.current) return;
@@ -230,7 +216,6 @@ export function DoctorsDirectoryClient({
                     <DoctorCard
                       doctor={doctor}
                       nextSlot={nextSlots[doctor.id] ?? null}
-                      onBookConsult={handleOpenConsult}
                     />
                   </div>
                 ))}
@@ -239,13 +224,6 @@ export function DoctorsDirectoryClient({
           )}
         </div>
       </section>
-
-      {/* Pop-up Consultation Modal */}
-      <ConsultationModal
-        doctor={selectedDoctor}
-        isOpen={isModalOpen}
-        onClose={handleCloseConsult}
-      />
     </>
   );
 }

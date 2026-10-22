@@ -3,7 +3,21 @@
 import { useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AlertCircle, CheckCircle2, FileText, Loader2, Lock, Paperclip, Phone, Upload, Video, X } from "lucide-react";
+import {
+  AlertCircle,
+  CalendarX,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Loader2,
+  Lock,
+  Paperclip,
+  Phone,
+  ShieldCheck,
+  Upload,
+  Video,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldShell, TextField, describedBy, fieldInputClass } from "@/components/shared/FormField";
@@ -182,17 +196,47 @@ export function BookingPanel({
   return (
     <div>
       {slots.length === 0 ? (
-        <p className="mt-5 text-sm text-muted-ink">The doctor has no consulting hours on this day. Try another day.</p>
+        <div className="mt-4 rounded-2xl border border-line-soft bg-paper/60 p-6 text-center">
+          <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-xl bg-forest/10 text-forest">
+            <CalendarX className="size-5" />
+          </div>
+          <p className="text-sm font-semibold text-ink">No consulting hours on this day</p>
+          <p className="mt-1 text-xs text-muted-ink">
+            Dr. {doctor.displayName} does not have scheduled sessions for this date. Please choose another date above.
+          </p>
+        </div>
       ) : open.length === 0 ? (
-        <p className="mt-5 text-sm text-muted-ink">No time on this day can be booked. Try another day.</p>
+        <div className="mt-4 rounded-2xl border border-line-soft bg-paper/60 p-6 text-center">
+          <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+            <Clock className="size-5" />
+          </div>
+          <p className="text-sm font-semibold text-ink">All consultation slots are booked</p>
+          <p className="mt-1 text-xs text-muted-ink">
+            All appointments on this date have been reserved. Please check the next available day from the date strip.
+          </p>
+        </div>
       ) : (
-        <p className="mt-5 text-sm text-muted-ink">
-          {open.length} free {open.length === 1 ? "time" : "times"}, {doctor.slotMinutes} minutes each (India time). Choose one to book.
-        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs sm:text-sm text-muted-ink">
+            <strong className="text-forest font-semibold">{open.length} available</strong>{" "}
+            {open.length === 1 ? "slot" : "slots"}, {doctor.slotMinutes} mins each (IST). Select your preferred time:
+          </p>
+          {/* Status Legend */}
+          <div className="flex items-center gap-3 text-[11px] text-muted-ink">
+            <span className="flex items-center gap-1">
+              <span className="size-2 rounded-full bg-forest" />
+              Available
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="size-2 rounded-full bg-line-soft line-through" />
+              Booked
+            </span>
+          </div>
+        </div>
       )}
 
       {slots.length > 0 ? (
-        <div role="radiogroup" aria-label="Free times" className="mt-3 flex flex-wrap gap-2">
+        <div role="radiogroup" aria-label="Free times" className="mt-3.5 flex flex-wrap gap-2 sm:gap-2.5">
           {slots.map((s) => {
             const bookable = canBook(s);
             const active = s.startsAt === selected;
@@ -210,16 +254,16 @@ export function BookingPanel({
                   setFailure(null);
                 }}
                 className={cn(
-                  "inline-flex h-10 items-center gap-1.5 rounded-lg border px-3 text-sm tabular-nums transition-colors focus-visible:ring-2 focus-visible:ring-forest/40 focus-visible:outline-none",
+                  "inline-flex h-11 items-center gap-1.5 rounded-xl border px-3.5 text-xs sm:text-sm font-medium tabular-nums transition-all focus-visible:ring-2 focus-visible:ring-forest/40 focus-visible:outline-none cursor-pointer",
                   active
-                    ? "border-forest bg-forest text-cream"
+                    ? "border-forest-deep bg-forest-deep text-white shadow-sm ring-2 ring-forest-deep/20 font-bold"
                     : bookable
-                      ? "cursor-pointer border-forest/30 bg-forest/6 text-forest-deep hover:border-forest hover:bg-forest/10"
-                      : "cursor-not-allowed border-line bg-cream-sunk text-muted-ink line-through",
+                      ? "border-forest/30 bg-forest/5 text-forest-deep hover:border-forest hover:bg-forest/10 hover:shadow-xs"
+                      : "cursor-not-allowed border-line-soft bg-canvas/60 text-muted-ink/60 line-through opacity-70",
                 )}
               >
                 {s.mode === "AUDIO" ? <Phone aria-hidden className="size-3.5" /> : <Video aria-hidden className="size-3.5" />}
-                {s.time}
+                <span>{s.time}</span>
                 {reason ? <span className="sr-only">, {reason}</span> : null}
               </button>
             );
@@ -407,6 +451,52 @@ export function BookingPanel({
                     </label>
                   </>
                 ) : null}
+              </div>
+
+              {/* Consultation Summary & Fee Breakdown Review */}
+              <div className="rounded-2xl border border-line-soft bg-paper/80 p-4.5 sm:p-5 space-y-3 text-xs shadow-2xs">
+                <div className="flex items-center justify-between border-b border-line-soft pb-2.5">
+                  <span className="font-bold uppercase tracking-wider text-muted-ink text-[10px]">
+                    Booking Summary Review
+                  </span>
+                  <span className="font-semibold text-forest-deep flex items-center gap-1">
+                    <ShieldCheck className="size-3.5" />
+                    Verified Telehealth Slot
+                  </span>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-2 text-ink">
+                  <div>
+                    <span className="text-muted-ink block text-[11px]">Appointment Slot:</span>
+                    <span className="font-semibold">
+                      {new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }).format(new Date(slot.startsAt))} ({doctor.slotMinutes} mins)
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-ink block text-[11px]">Mode:</span>
+                    <span className="font-semibold capitalize">
+                      {chosenMode === "VIDEO" ? "High-Definition Video Call" : "Direct Phone Consultation"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-ink block text-[11px]">Patient Name:</span>
+                    <span className="font-semibold">{patientName || "Account Holder"} {patientAge ? `(${patientAge} yrs)` : ""}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-ink block text-[11px]">Digital Prescription:</span>
+                    <span className="font-semibold text-forest-deep">Signed Digital Copy Included</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-line-soft pt-2.5 text-sm font-bold">
+                  <span className="text-ink">Total Payable Fee:</span>
+                  <span className="text-forest-deep text-base tabular-nums">
+                    {fee !== null ? formatRupees(fee) : "—"}
+                  </span>
+                </div>
               </div>
 
               <div className="flex flex-col gap-3 border-t border-line/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
