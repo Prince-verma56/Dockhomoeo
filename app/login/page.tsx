@@ -177,6 +177,7 @@ function LoginContent() {
         </FormNotice>
       ) : null}
 
+
       {/* Segmented Mode Switcher */}
       <div
         role="tablist"
@@ -227,9 +228,26 @@ function LoginContent() {
       </div>
 
       {errors.form ? (
-        <FormNotice tone="error" className="mb-5">
-          {errors.form}
-        </FormNotice>
+        <div className="mb-5 space-y-2">
+          <FormNotice tone="error">
+            {errors.form}
+          </FormNotice>
+          {errors.form.toLowerCase().includes("mobile otp") ? (
+            <button
+              type="button"
+              onClick={() => {
+                setMode("code");
+                const digits = identifier.replace(/[\s+-]/g, "").replace(/^91(?=\d{10}$)/, "");
+                if (/^[6-9]\d{9}$/.test(digits)) setPhone(digits);
+                setErrors({});
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0d5a43] dark:text-emerald-400 hover:underline cursor-pointer"
+            >
+              <Smartphone className="size-3.5" />
+              <span>Switch to Mobile OTP sign-in</span>
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {mode === "code" ? (
@@ -282,7 +300,7 @@ function LoginContent() {
               </p>
             ) : (
               <p className="text-[11px] text-neutral-400 leading-tight">
-                We&apos;ll text you a 6-digit verification code.
+                We&apos;ll text you a 6-digit verification code. Fast &amp; passwordless sign-in.
               </p>
             )}
           </div>
@@ -321,7 +339,7 @@ function LoginContent() {
             className="w-full h-11 rounded-2xl border border-neutral-200 dark:border-white/10 bg-neutral-50/60 dark:bg-white/5 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer flex items-center justify-center gap-2"
           >
             <KeyRound className="size-3.5 text-neutral-400" />
-            <span>Sign in using Password</span>
+            <span>Sign in using Password (if created)</span>
           </button>
         </form>
       ) : (
@@ -336,6 +354,30 @@ function LoginContent() {
           noValidate
           className="space-y-4"
         >
+          {/* Helpful context for mobile OTP users */}
+          <div className="rounded-2xl border border-neutral-200/80 dark:border-white/10 bg-neutral-50/70 dark:bg-white/5 p-3.5 text-xs text-neutral-600 dark:text-neutral-300 flex items-start gap-2.5">
+            <span className="text-base select-none leading-none pt-0.5">💡</span>
+            <div className="space-y-1">
+              <p className="font-semibold text-neutral-900 dark:text-white text-xs">
+                First time or signed up via Mobile OTP?
+              </p>
+              <p className="text-[11.5px] text-neutral-500 dark:text-neutral-400 leading-snug">
+                You do not need a password. Switch to{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("code");
+                    setErrors({});
+                  }}
+                  className="font-bold text-[#0d5a43] dark:text-emerald-400 underline hover:no-underline cursor-pointer"
+                >
+                  Mobile OTP
+                </button>{" "}
+                to sign in with an instant SMS code. You can set a password in your Profile anytime.
+              </p>
+            </div>
+          </div>
+
           {/* Email / Mobile Identifier */}
           <div className="space-y-1.5">
             <label

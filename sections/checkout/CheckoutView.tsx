@@ -186,11 +186,14 @@ export function CheckoutView() {
       : []),
   ];
   const paymentChosen = paymentOptions.some((option) => option.value === cart.paymentMethod);
+  const firstPaymentOption = paymentOptions[0]?.value;
   // The current choice is no longer offered (a product is prepaid-only, the
   // pincode refuses COD…) and only one way remains: take it.
-  if (!paymentChosen && paymentOptions.length === 1 && cart.quoteStatus === "ready") {
-    cart.setPaymentMethod(paymentOptions[0].value);
-  }
+  useEffect(() => {
+    if (!paymentChosen && firstPaymentOption && cart.quoteStatus === "ready") {
+      cart.setPaymentMethod(firstPaymentOption);
+    }
+  }, [paymentChosen, firstPaymentOption, cart.quoteStatus, cart.setPaymentMethod]);
   const paymentNotes = quote?.paymentConflict
     ? [quote.paymentConflict]
     : [quote?.codNote, quote?.onlineNote].filter((note): note is string => Boolean(note));
@@ -246,6 +249,13 @@ export function CheckoutView() {
         // Online payment: the gateway's page takes over; the order waits for its answer.
         cart.clearCart();
         window.location.assign(result.payUrl);
+        return;
+      }
+      if (cart.paymentMethod === "ONLINE" && process.env.NODE_ENV !== "production") {
+        cart.clearCart();
+        router.replace(
+          `/demo/payment?order=${result.id}&total=${result.total}&orderNumber=${encodeURIComponent(result.orderNumber)}`
+        );
         return;
       }
       router.replace(`/thankyou?order=${result.id}`);
@@ -868,7 +878,11 @@ function PaymentChoice({
         </div>
       ) : null}
       {options.length === 0 ? (
-        <p className="text-sm text-muted-ink">Payment options appear once prices are checked.</p>
+        <p className="text-sm text-muted-ink">
+          {conflict
+            ? "Payment options unavailable due to item conflict. Please order prepaid-only and COD-only items separately."
+            : "Payment options will appear once items and delivery address are selected."}
+        </p>
       ) : (
         <div className="grid gap-3">
           {options.map((option) => {

@@ -6,23 +6,15 @@ import { Container } from "@/components/shared/Container";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { Reveal } from "@/components/shared/Reveal";
 import { repositories } from "@/lib/repositories";
-import { formLabel } from "@/lib/search/searchState";
-import { featuredCollections } from "@/data/mock/home";
-import { FORM_MEDIA } from "@/data/media";
 import { unstable_rethrow } from "next/navigation";
 import LightboxGrid, { type LightboxImage } from "@/components/kokonutui/lightbox-grid";
 
-/** Lines for forms the curated collection does not cover. */
-const FALLBACK_TAGLINES: Record<string, string> = {
-  oil: "Massage oils for topical care",
-};
-
 const IMAGE_DIMENSIONS: Record<string, { width: number; height: number }> = {
-  "/Images/eucalyptus-dropper-bottle.webp": { width: 1024, height: 1024 },
-  "/Images/chamomilla-pellet-bottle.webp": { width: 1024, height: 1024 },
+  "/Images/Editorial/eucalyptus-dropper-bottle.webp": { width: 1024, height: 1024 },
+  "/Images/Editorial/chamomilla-pellet-bottle.webp": { width: 1024, height: 1024 },
   "/Images/NaturesCareBG.webp": { width: 1672, height: 941 },
-  "/Images/massage-oil-bottle.webp": { width: 1024, height: 1024 },
-  "/Images/arnica-cream-tube.webp": { width: 1024, height: 1024 },
+  "/Images/Editorial/massage-oil-bottle.webp": { width: 1024, height: 1024 },
+  "/Images/Editorial/arnica-cream-tube.webp": { width: 1024, height: 1024 },
 };
 
 type FormCard = {
@@ -34,6 +26,52 @@ type FormCard = {
   src: string;
   position?: string;
 };
+
+const BASE_COLLECTIONS: {
+  form: string;
+  name: string;
+  tagline: string;
+  src: string;
+  position?: string;
+  facetKeys: string[];
+}[] = [
+  {
+    form: "drops",
+    name: "Drops & Dilutions",
+    tagline: "Natural healing in every drop",
+    src: "/Images/Editorial/eucalyptus-dropper-bottle.webp",
+    facetKeys: ["drops", "dilution", "dilutions"],
+  },
+  {
+    form: "tablets",
+    name: "Tablets & Pellets",
+    tagline: "Easy care for daily wellness",
+    src: "/Images/Editorial/chamomilla-pellet-bottle.webp",
+    facetKeys: ["tablets", "tablet", "pellets", "pellet"],
+  },
+  {
+    form: "tinctures",
+    name: "Mother Tinctures",
+    tagline: "Pure botanical extracts for deeper support",
+    src: "/Images/NaturesCareBG.webp",
+    position: "40% 60%",
+    facetKeys: ["mother tincture", "tincture", "tinctures"],
+  },
+  {
+    form: "creams",
+    name: "Creams & Ointments",
+    tagline: "Gentle care for skin and topical relief",
+    src: "/Images/Editorial/arnica-cream-tube.webp",
+    facetKeys: ["cream", "creams", "ointment", "ointments"],
+  },
+  {
+    form: "oil",
+    name: "Massage Oils",
+    tagline: "Therapeutic herbal oils for relief",
+    src: "/Images/Editorial/massage-oil-bottle.webp",
+    facetKeys: ["oil", "oils", "massage oil"],
+  },
+];
 
 /**
  * Featured collection, by dosage form: the most stocked form as a tall lead
@@ -47,31 +85,34 @@ export async function FeaturedCollection() {
     return null;
   });
 
-  const curatedCards: FormCard[] = featuredCollections.flatMap((collection) =>
-    collection.image
-      ? [{ form: collection.form, name: formLabel(collection.form), tagline: collection.tagline, count: null, src: collection.image, position: collection.imagePosition }]
-      : [],
-  );
+  const facetMap = new Map<string, number>();
+  for (const facet of catalogue?.facets.forms ?? []) {
+    facetMap.set(facet.value.toLowerCase().trim(), facet.count);
+  }
 
-  const liveCards: FormCard[] = (catalogue?.facets.forms ?? []).flatMap((facet) => {
-    const curated = featuredCollections.find((collection) => collection.form === facet.value);
-    const media = curated?.image
-      ? { src: curated.image, position: curated.imagePosition }
-      : FORM_MEDIA[facet.value];
-    if (!media || facet.count === 0) return [];
-    return [
-      {
-        form: facet.value,
-        name: formLabel(facet.value),
-        tagline: curated?.tagline ?? FALLBACK_TAGLINES[facet.value] ?? null,
-        count: facet.count,
-        src: media.src,
-        position: media.position,
-      },
-    ];
+  const cards: FormCard[] = BASE_COLLECTIONS.map((c) => {
+    let count: number | null = null;
+    let total = 0;
+    let found = false;
+    for (const key of c.facetKeys) {
+      const val = facetMap.get(key.toLowerCase());
+      if (val !== undefined) {
+        total += val;
+        found = true;
+      }
+    }
+    if (found) count = total;
+
+    return {
+      form: c.form,
+      name: c.name,
+      tagline: c.tagline,
+      count,
+      src: c.src,
+      position: c.position,
+    };
   });
 
-  const cards = liveCards.length > 0 ? liveCards : curatedCards;
   if (cards.length === 0) return null;
 
   const items: LightboxImage[] = cards.slice(0, 5).map((card) => {

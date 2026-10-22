@@ -32,7 +32,14 @@ import {
   LocalInsightRepository,
   LocalServiceabilityRepository,
   LocalCareRepository,
+  LocalAccountRepository,
+  LocalPrescriptionRepository,
+  LocalConsultationRepository,
 } from "./local";
+import type { ApiAccountOverview, ApiAddress, ApiAddressInput, ApiOrderSummary, ApiProfileInput } from "@/types/api/account";
+import type { ApiPrescription } from "@/types/api/prescription";
+import { CheckoutError } from "@/lib/checkout/checkoutForm";
+import type { ApiAppointment, ApiBookingInput, ApiBookingResult, ApiAppointmentPayResult, ApiConsultationFile } from "@/types/api/care";
 import type { ApiHomeResponse } from "@/types/api/home";
 import type { ApiProductDetail } from "@/types/api/product";
 import type { ApiProductListingResponse, ApiSearchFilters, ApiSuggestResponse } from "@/types/api/search";
@@ -157,7 +164,8 @@ class ResilientCareRepository implements ICareRepository {
   async listDoctors(query?: string): Promise<ApiDoctorCard[]> {
     try {
       const docs = await this.api.listDoctors(query);
-      if (docs && docs.length > 0) return docs;
+      const activeDocs = (docs || []).filter((d) => d.slug !== "dr-demo-doctor");
+      if (activeDocs.length > 0) return activeDocs;
       return await this.local.listDoctors(query);
     } catch {
       return this.local.listDoctors(query);
@@ -235,7 +243,10 @@ class ResilientCartRepository implements ICartRepository {
   async checkout(payload: ApiCheckoutPayload): Promise<ApiCheckoutResponse> {
     try {
       return await this.api.checkout(payload);
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof CheckoutError && err.status !== 0) {
+        throw err;
+      }
       return this.local.checkout(payload);
     }
   }
@@ -251,7 +262,10 @@ class ResilientCartRepository implements ICartRepository {
   async payOrder(orderId: number): Promise<{ payUrl: string }> {
     try {
       return await this.api.payOrder(orderId);
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof CheckoutError && err.status !== 0) {
+        throw err;
+      }
       return this.local.payOrder();
     }
   }
@@ -261,54 +275,15 @@ class ResilientAuthRepository implements IAuthRepository {
   private api = new ApiAuthRepository();
 
   async requestOtp(phone: string, options: { email?: string } = {}): Promise<ApiOtpRequestResult> {
-    try {
-      return await this.api.requestOtp(phone, options);
-    } catch {
-      // In local preview mode when Express server on 4000 is not active
-      return { ok: true, testMode: true };
-    }
+    return await this.api.requestOtp(phone, options);
   }
 
   async verifyOtp(phone: string, code: string): Promise<ApiUser> {
-    try {
-      return await this.api.verifyOtp(phone, code);
-    } catch {
-      return {
-        id: 1,
-        role: "CUSTOMER",
-        phone,
-        email: "patient@dochomoeo.com",
-        firstName: "DocHomoeo",
-        lastName: "Member",
-        gender: null,
-        dateOfBirth: null,
-        name: "DocHomoeo Member",
-        hasPassword: true,
-        doctor: null,
-        wholesale: false,
-      };
-    }
+    return await this.api.verifyOtp(phone, code);
   }
 
   async signUp(input: { phone: string; email: string; code: string }): Promise<ApiUser> {
-    try {
-      return await this.api.signUp(input);
-    } catch {
-      return {
-        id: 2,
-        role: "CUSTOMER",
-        phone: input.phone,
-        email: input.email,
-        firstName: "New",
-        lastName: "Member",
-        gender: null,
-        dateOfBirth: null,
-        name: "New Member",
-        hasPassword: true,
-        doctor: null,
-        wholesale: false,
-      };
-    }
+    return await this.api.signUp(input);
   }
 
   async passwordLogin(identifier: string, password: string): Promise<ApiUser> {
@@ -336,6 +311,161 @@ class ResilientAuthRepository implements IAuthRepository {
   }
 }
 
+class ResilientAccountRepository implements IAccountRepository {
+  private api: ApiAccountRepository;
+  private local = new LocalAccountRepository();
+
+  constructor(auth: IAuthRepository) {
+    this.api = new ApiAccountRepository(auth);
+  }
+
+  async getOverview(): Promise<ApiAccountOverview> {
+    try {
+      return await this.api.getOverview();
+    } catch {
+      return this.local.getOverview();
+    }
+  }
+
+  async updateProfile(input: ApiProfileInput): Promise<ApiUser> {
+    try {
+      return await this.api.updateProfile(input);
+    } catch {
+      return this.local.updateProfile(input);
+    }
+  }
+
+  async getAddresses(): Promise<ApiAddress[]> {
+    try {
+      return await this.api.getAddresses();
+    } catch {
+      return this.local.getAddresses();
+    }
+  }
+
+  async addAddress(input: ApiAddressInput): Promise<number> {
+    try {
+      return await this.api.addAddress(input);
+    } catch {
+      return this.local.addAddress(input);
+    }
+  }
+
+  async updateAddress(id: number, input: Partial<ApiAddressInput>): Promise<void> {
+    try {
+      await this.api.updateAddress(id, input);
+    } catch {
+      await this.local.updateAddress(id, input);
+    }
+  }
+
+  async deleteAddress(id: number): Promise<void> {
+    try {
+      await this.api.deleteAddress(id);
+    } catch {
+      await this.local.deleteAddress(id);
+    }
+  }
+
+  async setDefaultAddress(id: number): Promise<void> {
+    try {
+      await this.api.setDefaultAddress(id);
+    } catch {
+      await this.local.setDefaultAddress(id);
+    }
+  }
+
+  async getOrders(): Promise<ApiOrderSummary[]> {
+    try {
+      return await this.api.getOrders();
+    } catch {
+      return this.local.getOrders();
+    }
+  }
+
+  async getOrderById(id: number): Promise<ApiOrderDetail | null> {
+    try {
+      return await this.api.getOrderById(id);
+    } catch {
+      return this.local.getOrderById(id);
+    }
+  }
+}
+
+class ResilientPrescriptionRepository implements IPrescriptionRepository {
+  private api = new ApiPrescriptionRepository();
+  private local = new LocalPrescriptionRepository();
+
+  async getPrescriptions(): Promise<ApiPrescription[]> {
+    try {
+      return await this.api.getPrescriptions();
+    } catch {
+      return this.local.getPrescriptions();
+    }
+  }
+}
+
+class ResilientConsultationRepository implements IConsultationRepository {
+  private api = new ApiConsultationRepository();
+  private local = new LocalConsultationRepository();
+
+  async book(input: ApiBookingInput): Promise<ApiBookingResult> {
+    try {
+      return await this.api.book(input);
+    } catch {
+      return this.local.book(input);
+    }
+  }
+
+  async pay(id: number): Promise<ApiAppointmentPayResult> {
+    try {
+      return await this.api.pay(id);
+    } catch {
+      return this.local.pay(id);
+    }
+  }
+
+  async cancel(id: number): Promise<{ ok: true; refundDue: boolean }> {
+    try {
+      return await this.api.cancel(id);
+    } catch {
+      return this.local.cancel(id);
+    }
+  }
+
+  async rate(id: number, rating: number, comment: string | null): Promise<void> {
+    try {
+      await this.api.rate(id, rating, comment);
+    } catch {
+      await this.local.rate(id, rating, comment);
+    }
+  }
+
+  async list(): Promise<ApiAppointment[]> {
+    try {
+      return await this.api.list();
+    } catch {
+      return this.local.list();
+    }
+  }
+
+  async uploadFile(file: File): Promise<ApiConsultationFile> {
+    try {
+      return await this.api.uploadFile(file);
+    } catch {
+      return this.local.uploadFile(file);
+    }
+  }
+
+  async removeFile(id: number): Promise<void> {
+    try {
+      await this.api.removeFile(id);
+    } catch {
+      await this.local.removeFile(id);
+    }
+  }
+}
+
 // ── Dependency Injection Container ─────────────────────────────────────────────
 const auth = new ResilientAuthRepository();
 
@@ -347,9 +477,10 @@ export const repositories = {
   serviceability: new ResilientServiceabilityRepository() as IServiceabilityRepository,
   insight: new ResilientInsightRepository() as IInsightRepository,
   auth: auth as IAuthRepository,
-  account: new ApiAccountRepository(auth) as IAccountRepository,
-  prescription: new ApiPrescriptionRepository() as IPrescriptionRepository,
+  account: new ResilientAccountRepository(auth) as IAccountRepository,
+  prescription: new ResilientPrescriptionRepository() as IPrescriptionRepository,
   care: new ResilientCareRepository() as ICareRepository,
-  consultation: new ApiConsultationRepository() as IConsultationRepository,
+  consultation: new ResilientConsultationRepository() as IConsultationRepository,
 };
+
 

@@ -13,7 +13,7 @@ import { prisma } from "../lib/prisma";
 // Run with --remove to delete the demo doctor and all of that again.
 
 const PHONE = "9000000001"; // not a real subscriber number
-const FRONTEND_ENV = path.resolve(process.cwd(), "../frontend/.env.local");
+const FRONTEND_ENV = path.resolve(process.cwd(), "../.env.local");
 
 const remove = async () => {
   const user = await prisma.user.findUnique({ where: { phone: PHONE }, select: { id: true, doctorProfile: { select: { id: true } } } });

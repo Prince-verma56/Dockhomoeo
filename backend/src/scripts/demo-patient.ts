@@ -16,7 +16,7 @@ import { prisma } from "../lib/prisma";
 
 const PHONE = "9000000002"; // not a real subscriber number
 const DOCTOR_PHONE = "9000000001";
-const FRONTEND_ENV = path.resolve(process.cwd(), "../frontend/.env.local");
+const FRONTEND_ENV = path.resolve(process.cwd(), "../.env.local");
 
 const remove = async () => {
   const user = await prisma.user.findUnique({ where: { phone: PHONE }, select: { id: true } });

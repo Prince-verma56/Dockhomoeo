@@ -113,7 +113,8 @@ export async function api<T>(
 
   let response: Response;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 1800);
+  const timeoutMs = process.env.NODE_ENV === "development" ? 12000 : 5000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     response = await fetch(url, {

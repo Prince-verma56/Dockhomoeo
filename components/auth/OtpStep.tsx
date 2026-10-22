@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { FormNotice } from "@/components/shared/FormField";
 import { isOtp } from "@/lib/auth/navigation";
 import { describeError } from "@/lib/api";
@@ -135,7 +135,7 @@ export function OtpStep({
 
       {testMode ? (
         <FormNotice tone="info">
-          Development Mode: Live SMS disabled. Use the server test code (e.g. 123456).
+          Development Mode: Live SMS disabled. Enter the test code: <strong className="font-mono font-bold tracking-wider">123456</strong>
         </FormNotice>
       ) : null}
 

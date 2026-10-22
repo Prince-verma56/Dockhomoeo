@@ -120,7 +120,7 @@ export const deliverCode = async (phone: string, code: string, email?: string | 
     }
   }
   if (problems.length) console.error("[otp]", problems.join("; "));
-  return sent;
+  return { ...sent, error: problems.join("; ") };
 };
 
 // ───────────────────────────────────────────── is it really working?

@@ -9,16 +9,42 @@ import { Textarea } from "@/components/ui/textarea";
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate network delay for frontend-only state
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setError(null);
+
+    const form = e.currentTarget;
+    const name = (form.elements.namedItem("name") as HTMLInputElement)?.value || "";
+    const email = (form.elements.namedItem("email") as HTMLInputElement)?.value || "";
+    const purpose = (form.elements.namedItem("purpose") as HTMLSelectElement)?.value || "general";
+    const message = (form.elements.namedItem("message") as HTMLTextAreaElement)?.value || "";
+
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `[${purpose.toUpperCase()}] ${message}`,
+          category: "CONTACT",
+          email,
+          metadata: { name, purpose },
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "Failed to deliver message. Please try again.");
+      }
+
       setIsSuccess(true);
-    }, 800);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
@@ -27,9 +53,9 @@ export function ContactForm() {
         <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-forest-deep text-white">
           <CheckCircle2 className="size-8" />
         </div>
-        <h3 className="mb-2 font-display text-2xl text-ink">Message Prepared</h3>
+        <h3 className="mb-2 font-display text-2xl text-ink">Message Received</h3>
         <p className="text-muted-ink mb-6">
-          Your message has been prepared successfully. (Frontend simulation complete).
+          Thank you for reaching out. Your message has been sent to our customer care team and we will get back to you shortly.
         </p>
         <Button 
           variant="outline" 
@@ -100,6 +126,12 @@ export function ContactForm() {
           className="min-h-[150px] bg-white resize-y rounded-xl border-forest-abyss/10 focus-visible:ring-forest-deep/30"
         />
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <Button 
         type="submit" 

@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    qualities: [75, 95],
     // The hero's social-proof avatars are remote placeholders. next/image
     // refuses remote hosts unless they are declared here.
     remotePatterns: [
@@ -21,6 +22,11 @@ const nextConfig: NextConfig = {
   // Permanent redirects for legacy website URL structures
   async redirects() {
     return [
+      {
+        source: "/products/:slug((?!page$).+)",
+        destination: "/product/:slug",
+        permanent: false,
+      },
       {
         source: "/ReturnCancellation",
         destination: "/return-cancellation",
@@ -66,7 +72,10 @@ const nextConfig: NextConfig = {
   // Proxy API and upload calls to the backend on port 4000
   async rewrites() {
     return {
-      beforeFiles: [],
+      beforeFiles: [
+        { source: "/api/:path*", destination: `${API_URL}/api/:path*` },
+        { source: "/uploads/:path*", destination: `${API_URL}/uploads/:path*` },
+      ],
       afterFiles: [],
       fallback: [
         { source: "/api/:path*", destination: `${API_URL}/api/:path*` },

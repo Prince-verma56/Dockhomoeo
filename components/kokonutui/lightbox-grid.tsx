@@ -19,8 +19,7 @@ import {
   useTransform,
 } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Link001 } from "@/components/ui/skiper-ui/skiper40";
 import {
   type KeyboardEvent,
@@ -719,10 +718,10 @@ export default function LightboxGrid({
     return (
       <div
         className={cn(
-          "group relative isolate block h-full overflow-hidden rounded-[1.5rem] bg-sage-wash shadow-soft transition-all duration-500 hover:shadow-lift",
+          "group relative isolate block h-full w-full min-h-[240px] sm:min-h-[280px] overflow-hidden rounded-[1.5rem] bg-sage-wash shadow-soft transition-all duration-500 hover:shadow-lift",
           isLead
-            ? "aspect-4/3 sm:aspect-16/10 lg:aspect-auto"
-            : "aspect-4/5 sm:aspect-4/3 lg:aspect-auto"
+            ? "aspect-4/3 sm:aspect-16/10 lg:aspect-auto lg:min-h-[460px]"
+            : "aspect-4/5 sm:aspect-4/3 lg:aspect-auto lg:min-h-[240px]"
         )}
       >
         <button

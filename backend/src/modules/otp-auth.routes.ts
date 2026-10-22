@@ -25,18 +25,25 @@ const hash = (phone: string, code: string) => createHash("sha256").update(`${pho
 const requestLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { message: "Too many codes requested. Try again in a few minutes." } });
 const verifyLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false });
 
+const isLiveMode = env.OTP_MODE === "live" && !env.OTP_DEV_CODE;
+
 /**
  * Sends the code to the mobile number and, when there is one, the email address.
- * In test mode (OTP_DEV_CODE set) nothing is sent and the fixed code works.
+ * In live mode (default), calls the SMS provider (MSG91).
+ * In demo/mock mode, simulates dispatch without sending real SMS.
  */
 const sendCode = async (phone: string, code: string, email?: string | null) => {
-  if (env.OTP_DEV_CODE) {
-    console.log(`[otp] test mode: the code for ${phone}${email ? ` and ${email}` : ""} is ${env.OTP_DEV_CODE}`);
+  if (!isLiveMode && env.OTP_DEV_CODE) {
+    console.log(`[otp] demo mode: SMS dispatch simulated for phone ending in ${phone.slice(-4)}`);
     return;
   }
-  if (!otpSmsReady && !emailReady) throw new HttpError(503, "Text messages and email are not set up yet, so sign-in codes cannot be sent");
+  if (!otpSmsReady && !emailReady) {
+    throw new HttpError(503, "Text message gateway (MSG91) is not configured yet. Sign-in codes cannot be sent.");
+  }
   const sent = await deliverCode(phone, code, email);
-  if (!sent.sms && !sent.email) throw new HttpError(502, "We could not send the code just now. Please try again in a minute.");
+  if (!sent.sms && !sent.email) {
+    throw new HttpError(502, sent.error ? `SMS delivery failed: ${sent.error}` : "We could not deliver the SMS verification code. Please check the number and try again.");
+  }
 };
 
 otpAuthRoutes.post("/otp/request", requestLimiter, async (req, res) => {
@@ -52,11 +59,12 @@ otpAuthRoutes.post("/otp/request", requestLimiter, async (req, res) => {
   if (user && STAFF_ROLES.includes(user.role)) throw new HttpError(400, "This number belongs to a staff account. Use the admin sign-in instead.");
   if (mustExist && !user) throw new HttpError(404, "There is no account with this mobile number. Create your account first.");
 
-  const code = env.OTP_DEV_CODE ?? String(randomInt(100000, 1000000));
+  const isLive = isLiveMode;
+  const code = !isLive && env.OTP_DEV_CODE ? env.OTP_DEV_CODE : String(randomInt(100000, 1000000));
   await sendCode(phone, code, email ?? user?.email);
   await prisma.otpCode.deleteMany({ where: { phone, purpose: "LOGIN" } });
   await prisma.otpCode.create({ data: { phone, codeHash: hash(phone, code), expiresAt: new Date(Date.now() + OTP_MINUTES * 60 * 1000) } });
-  res.json({ ok: true, testMode: Boolean(env.OTP_DEV_CODE) });
+  res.json({ ok: true, testMode: !isLive, mode: isLive ? "live" : "demo" });
 });
 
 const sessionUser = async (userId: number) => {
@@ -121,13 +129,33 @@ const passwordLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standar
 otpAuthRoutes.post("/password-login", passwordLimiter, async (req, res) => {
   const { identifier, password } = z.object({ identifier: z.string().trim().min(3, "Enter your mobile number or email").max(160), password: z.string().min(1, "Enter your password") }).parse(req.body);
   const digits = identifier.replace(/[\s+-]/g, "").replace(/^91(?=\d{10}$)/, "");
-  const user = /^[6-9]\d{9}$/.test(digits)
+  const isPhone = /^[6-9]\d{9}$/.test(digits);
+  const user = isPhone
     ? await prisma.user.findUnique({ where: { phone: digits } })
-    : await prisma.user.findFirst({ where: { email: identifier.toLowerCase(), role: { in: ["DOCTOR", "CUSTOMER"] }, passwordHash: { not: null } }, orderBy: { role: "desc" } });
+    : await prisma.user.findFirst({ where: { email: identifier.toLowerCase(), role: { in: ["DOCTOR", "CUSTOMER"] } }, orderBy: { role: "desc" } });
 
-  const ok = user?.passwordHash && !STAFF_ROLES.includes(user.role) ? await bcrypt.compare(password, user.passwordHash) : false;
-  if (!user || !ok) throw new HttpError(401, "The mobile number, email or password is not right");
+  if (!user) {
+    throw new HttpError(
+      404,
+      isPhone
+        ? "No account found with this mobile number. Use Mobile OTP to sign in or create an account."
+        : "No account found with this email. Please check your email or create an account."
+    );
+  }
   if (!user.isActive) throw new HttpError(403, "This account is disabled");
+  if (STAFF_ROLES.includes(user.role)) throw new HttpError(400, "This is a staff account. Please use the admin sign-in.");
+
+  if (!user.passwordHash) {
+    throw new HttpError(
+      400,
+      "This account was created with Mobile OTP and does not have a password yet. Please use the Mobile OTP tab to sign in, or set a password in your Profile."
+    );
+  }
+
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) {
+    throw new HttpError(401, "The password you entered is incorrect. You can also sign in using Mobile OTP.");
+  }
 
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
   startSession(res, { id: user.id, role: user.role }, panelOf(req)); // signed in to the area they came from, and only that one

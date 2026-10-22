@@ -4,8 +4,15 @@ import {
   ISearchRepository,
   ICartRepository,
   IInsightRepository,
+  IAccountRepository,
+  IPrescriptionRepository,
+  IConsultationRepository,
 } from "./interfaces";
 import { mockProducts, mockVariantId } from "@/data/mock/products";
+import type { ApiAccountOverview, ApiAddress, ApiAddressInput, ApiOrderSummary, ApiProfileInput, ApiOrderStatus } from "@/types/api/account";
+import type { ApiPrescription } from "@/types/api/prescription";
+import type { ApiAppointment, ApiBookingInput, ApiBookingResult, ApiAppointmentPayResult, ApiConsultationFile } from "@/types/api/care";
+import type { ApiUser } from "@/types/api/auth";
 import { ApiHomeResponse } from "@/types/api/home";
 import { ApiProductDetail, ApiProductCard } from "@/types/api/product";
 import { ApiProductListingResponse, ApiSearchFilters, ApiSuggestResponse } from "@/types/api/search";
@@ -552,7 +559,7 @@ function savePreviewOrder(order: ApiOrderDetail) {
 }
 
 /** Newest first, like the account's order list. */
-const allOrders = (): ApiOrderDetail[] =>
+export const allOrders = (): ApiOrderDetail[] =>
   [...readPreviewOrders(), sampleOrder()].sort((a, b) => b.placedAt.localeCompare(a.placedAt));
 
 const roundMoney = (value: number) => Math.round(value * 100) / 100;
@@ -560,11 +567,18 @@ const roundMoney = (value: number) => Math.round(value * 100) / 100;
 export class LocalCartRepository implements ICartRepository {
   async getQuote(lines: ApiQuoteLineInput[], couponCode?: string, paymentMethod: ApiPaymentMethod = "COD"): Promise<ApiQuote> {
     await delay(300);
-    const known = lines.filter((l) => mockApiCards.some((c) => c.id === Math.floor(l.variantId / 1000)));
+    const findCard = (variantId: number) =>
+      mockApiCards.find(
+        (c) =>
+          c.variantId === variantId ||
+          c.id === Math.floor(variantId / 1000) ||
+          c.id === variantId
+      );
+    const known = lines.filter((l) => Boolean(findCard(l.variantId)));
     const removed = lines.filter((l) => !known.includes(l)).map((l) => l.variantId);
 
     const quoteLines = known.map((l) => {
-      const card = mockApiCards.find((c) => c.id === Math.floor(l.variantId / 1000))!;
+      const card = findCard(l.variantId)!;
       const p = mockProducts.find((prod) => prod.slug === card.slug);
       return {
         variantId: l.variantId,
@@ -645,7 +659,7 @@ export class LocalCartRepository implements ICartRepository {
       paymentConflict: null,
       grandTotal: roundMoney(effectiveSubtotal + codCharge),
       wholesale: null,
-      onlinePayment: false,
+      onlinePayment: true,
       onlineTest: false,
     };
   }
@@ -1206,4 +1220,241 @@ export class LocalCareRepository implements ICareRepository {
     return mockStreams;
   }
 }
+
+export class LocalAccountRepository implements IAccountRepository {
+  async getOverview(): Promise<ApiAccountOverview> {
+    await delay(150);
+    const orders = allOrders();
+    return {
+      counts: {
+        upcoming: 1,
+        consultationsDone: 1,
+        prescriptions: 1,
+        ordersOnTheWay: orders.filter((o) => o.status !== "DELIVERED" && o.status !== "CANCELLED").length,
+        addresses: 1,
+      },
+      orders: orders.slice(0, 5).map((o) => ({
+        id: o.id,
+        orderNumber: o.orderNumber,
+        status: o.status as ApiOrderStatus,
+        grandTotal: o.grandTotal,
+        placedAt: o.placedAt,
+        estimatedDelivery: o.estimatedDelivery,
+        itemCount: o.items.reduce((s, it) => s + it.quantity, 0),
+        firstItem: o.items[0] ? { productName: o.items[0].productName, imageUrl: o.items[0].imageUrl } : null,
+      })),
+      toDo: [
+        {
+          kind: "pay-order",
+          id: orders[0]?.id ?? 1001,
+          title: `Order ${orders[0]?.orderNumber ?? "DH-1001"} Confirmed`,
+          detail: "Cash on delivery confirmed. Expected in 2–4 days.",
+          amount: orders[0]?.grandTotal ?? 110,
+        },
+      ],
+    };
+  }
+
+  async updateProfile(input: ApiProfileInput): Promise<ApiUser> {
+    await delay(150);
+    return {
+      id: 1,
+      role: "CUSTOMER",
+      phone: "9876543210",
+      email: input.email || "patient@dochomoeo.com",
+      firstName: input.firstName || "DocHomoeo",
+      lastName: input.lastName || "Member",
+      gender: input.gender || null,
+      dateOfBirth: input.dateOfBirth || null,
+      name: `${input.firstName} ${input.lastName}`.trim() || "DocHomoeo Member",
+      hasPassword: true,
+      doctor: null,
+      wholesale: false,
+    };
+  }
+
+  async getAddresses(): Promise<ApiAddress[]> {
+    await delay(150);
+    return [
+      {
+        id: 1,
+        fullName: "DocHomoeo Member",
+        phone: "9876543210",
+        line1: "14/2 Civil Lines, Near High Court",
+        landmark: "Opposite Medical Square",
+        city: "Prayagraj",
+        state: "Uttar Pradesh",
+        pincode: "211011",
+        isDefault: true,
+      },
+    ];
+  }
+
+  async addAddress(input: ApiAddressInput): Promise<number> {
+    await delay(150);
+    return 2;
+  }
+
+  async updateAddress(id: number, input: Partial<ApiAddressInput>): Promise<void> {
+    await delay(150);
+  }
+
+  async deleteAddress(id: number): Promise<void> {
+    await delay(150);
+  }
+
+  async setDefaultAddress(id: number): Promise<void> {
+    await delay(150);
+  }
+
+  async getOrders(): Promise<ApiOrderSummary[]> {
+    await delay(150);
+    return allOrders().map((o) => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      status: o.status as ApiOrderStatus,
+      paymentMethod: o.paymentMethod,
+      paymentStatus: o.paymentStatus,
+      grandTotal: o.grandTotal,
+      placedAt: o.placedAt,
+      channel: o.channel,
+      estimatedDelivery: o.estimatedDelivery,
+      prescription: null,
+      items: o.items.map((it) => ({
+        productName: it.productName,
+        variantTitle: it.variantTitle,
+        quantity: it.quantity,
+        imageUrl: it.imageUrl,
+      })),
+      shipments: o.shipments,
+    }));
+  }
+
+  async getOrderById(id: number): Promise<ApiOrderDetail | null> {
+    await delay(150);
+    return allOrders().find((o) => o.id === id) ?? null;
+  }
+}
+
+export class LocalPrescriptionRepository implements IPrescriptionRepository {
+  async getPrescriptions(): Promise<ApiPrescription[]> {
+    await delay(150);
+    return [
+      {
+        id: 501,
+        prescriptionNumber: "RX-2026-0842",
+        patientName: "DocHomoeo Member",
+        diagnosis: "Seasonal Allergic Rhinitis & Sneezing",
+        advice: "Take 4 pills twice daily on an empty tongue. Store in a cool dark place away from camphor or coffee.",
+        followUpDate: new Date(Date.now() + 86400000 * 14).toISOString(),
+        issuedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+        doctor: {
+          displayName: "Dr. Rajesh Sharma",
+          qualification: "BHMS, MD (Homeopathy)",
+          registrationNumber: "CCH-MH-14892",
+        },
+        orders: [{ id: 1001, orderNumber: "DH-1001", status: "CONFIRMED" }],
+        items: [
+          {
+            id: 1,
+            medicineName: "Arnica Montana",
+            potency: "30C",
+            dosage: "4 pills",
+            frequency: "Twice daily",
+            duration: "14 days",
+            instructions: "Dissolve under tongue morning & night",
+            quantity: 1,
+            buy: {
+              variantId: 1001,
+              productName: "Arnica Montana 30C",
+              title: "30 ml",
+              price: 110,
+              inStock: true,
+              imageUrl: "/images/products/arnica-montana.jpg",
+            },
+          },
+        ],
+      },
+    ];
+  }
+}
+
+export class LocalConsultationRepository implements IConsultationRepository {
+  async book(input: ApiBookingInput): Promise<ApiBookingResult> {
+    await delay(200);
+    return {
+      id: 301,
+      appointmentNumber: `APT-${Date.now().toString().slice(-4)}`,
+      fee: 500,
+    };
+  }
+
+  async pay(id: number): Promise<ApiAppointmentPayResult> {
+    await delay(150);
+    return { ok: true, payUrl: `/patient/consultations?paid=${id}` };
+  }
+
+  async cancel(id: number): Promise<{ ok: true; refundDue: boolean }> {
+    await delay(150);
+    return { ok: true, refundDue: false };
+  }
+
+  async rate(id: number, rating: number, comment: string | null): Promise<void> {
+    await delay(150);
+  }
+
+  async list(): Promise<ApiAppointment[]> {
+    await delay(150);
+    return [
+      {
+        id: 301,
+        appointmentNumber: "APT-2026-1049",
+        patientName: "DocHomoeo Member",
+        mode: "Video Consultation",
+        scheduledAt: new Date(Date.now() + 86400000 * 2).toISOString(),
+        durationMinutes: 20,
+        status: "CONFIRMED",
+        fee: 500,
+        meetingUrl: "https://meet.dochomoeo.com/room/apt-1049",
+        symptoms: "Seasonal allergic sneezing, mild fatigue and nasal congestion.",
+        cancelledBy: null,
+        cancelReason: null,
+        files: [],
+        doctor: {
+          displayName: "Dr. Rajesh Sharma",
+          photoUrl: "/images/doctors/dr-rajesh-sharma.jpg",
+          specialization: "Chronic Diseases & Immunity",
+          slug: "dr-rajesh-sharma",
+        },
+        prescription: {
+          id: 501,
+          prescriptionNumber: "RX-2026-0842",
+          status: "ISSUED",
+        },
+        review: null,
+        paid: true,
+        refunded: 0,
+        canPay: false,
+        canCancel: true,
+        canRate: false,
+      },
+    ];
+  }
+
+  async uploadFile(file: File): Promise<ApiConsultationFile> {
+    await delay(200);
+    return {
+      id: 1,
+      fileName: file.name,
+      kind: "REPORT",
+      size: file.size,
+    };
+  }
+
+  async removeFile(id: number): Promise<void> {
+    await delay(100);
+  }
+}
+
+
 

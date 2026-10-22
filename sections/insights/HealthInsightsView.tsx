@@ -274,14 +274,27 @@ export function HealthInsightsView({
     setFeaturedIdx((prev) => (prev === FEATURED_ARTICLES.length - 1 ? 0 : prev + 1));
   };
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subscribeEmail || !subscribeEmail.includes("@")) return;
-    setSubscribeSuccess(true);
-    setTimeout(() => {
-      setSubscribeEmail("");
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Subscribe to health newsletter and wellness alerts",
+          category: "NEWSLETTER",
+          email: subscribeEmail,
+        }),
+      });
+      setSubscribeSuccess(true);
+      setTimeout(() => {
+        setSubscribeEmail("");
+        setSubscribeSuccess(false);
+      }, 3500);
+    } catch {
       setSubscribeSuccess(false);
-    }, 3500);
+    }
   };
 
   const handleNotifySubmit = (e: React.FormEvent) => {
@@ -1025,7 +1038,7 @@ export function HealthInsightsView({
                   </h3>
 
                   <p className="text-xs sm:text-sm text-muted-ink leading-relaxed">
-                    We're working on practical, expert-reviewed articles to help you with common health questions. Meanwhile, explore remedies and verified maker formulations.
+                    We&apos;re working on practical, expert-reviewed articles to help you with common health questions. Meanwhile, explore remedies and verified maker formulations.
                   </p>
 
                   <div className="pt-2">
@@ -1219,7 +1232,7 @@ export function HealthInsightsView({
             {notifySuccess ? (
               <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 flex items-center gap-3 text-emerald-800 text-xs font-semibold animate-in fade-in">
                 <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
-                <span>You're all set! We'll notify you as soon as the first monographs go live.</span>
+                <span>You&apos;re all set! We&apos;ll notify you as soon as the first monographs go live.</span>
               </div>
             ) : (
               <form onSubmit={handleNotifySubmit} className="space-y-3 pt-1">

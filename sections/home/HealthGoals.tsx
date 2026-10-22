@@ -18,8 +18,52 @@ import { gsap } from "@/lib/animation/gsap";
  * 4. Perfectly balanced vertical positioning after the Hero section without empty void gaps.
  * 5. Organic curved wave shape separator cradling the shelf and transitioning into Bestselling section.
  */
-/** The illustrated sculpture for a category, when one was made for a health goal of that slug. */
-const sculptureFor = (slug: string) => healthGoals.find((goal) => goal.id === slug)?.image ?? null;
+/** Mapping for category slugs to their dedicated 3D botanical sculptures */
+const SLUG_SCULPTURE_MAP: Record<string, string> = {
+  respiratory: "/Images/HealthGoals/respiratory.webp",
+  "skin-care": "/Images/HealthGoals/skincare.webp",
+  skincare: "/Images/HealthGoals/skincare.webp",
+  digestion: "/Images/HealthGoals/digestive.webp",
+  digestive: "/Images/HealthGoals/digestive.webp",
+  "body-care": "/Images/HealthGoals/haircare.webp",
+  bodycare: "/Images/HealthGoals/haircare.webp",
+  "hair-care": "/Images/HealthGoals/haircare.webp",
+  haircare: "/Images/HealthGoals/haircare.webp",
+  "first-aid": "/Images/HealthGoals/immunity.webp",
+  firstaid: "/Images/HealthGoals/immunity.webp",
+  immunity: "/Images/HealthGoals/immunity.webp",
+  wellness: "/Images/HealthGoals/sleep-stress.webp",
+  "sleep-stress": "/Images/HealthGoals/sleep-stress.webp",
+  "womens-health": "/Images/HealthGoals/womens-health.webp",
+  children: "/Images/HealthGoals/children.webp",
+  "joint-bone": "/Images/HealthGoals/joint-bone.webp",
+};
+
+/** The illustrated sculpture for a category, guaranteeing a valid 3D botanical icon */
+const sculptureFor = (slug: string, name?: string): string => {
+  const normSlug = (slug || "").toLowerCase().trim();
+  if (normSlug && SLUG_SCULPTURE_MAP[normSlug]) {
+    return SLUG_SCULPTURE_MAP[normSlug];
+  }
+
+  const matchedGoal = healthGoals.find(
+    (goal) => goal.id === normSlug || goal.name.toLowerCase() === (name || "").toLowerCase()
+  );
+  if (matchedGoal?.image) return matchedGoal.image;
+
+  const text = `${normSlug} ${(name || "").toLowerCase()}`;
+  if (text.includes("digest") || text.includes("gut") || text.includes("stomach")) return "/Images/HealthGoals/digestive.webp";
+  if (text.includes("skin") || text.includes("face") || text.includes("derma")) return "/Images/HealthGoals/skincare.webp";
+  if (text.includes("respir") || text.includes("breath") || text.includes("lung") || text.includes("cold")) return "/Images/HealthGoals/respiratory.webp";
+  if (text.includes("hair") || text.includes("scalp") || text.includes("body")) return "/Images/HealthGoals/haircare.webp";
+  if (text.includes("aid") || text.includes("immun") || text.includes("protect")) return "/Images/HealthGoals/immunity.webp";
+  if (text.includes("joint") || text.includes("bone") || text.includes("pain")) return "/Images/HealthGoals/joint-bone.webp";
+  if (text.includes("women")) return "/Images/HealthGoals/womens-health.webp";
+  if (text.includes("child") || text.includes("baby")) return "/Images/HealthGoals/children.webp";
+  if (text.includes("sleep") || text.includes("stress") || text.includes("well")) return "/Images/HealthGoals/sleep-stress.webp";
+
+  return "/Images/HealthGoals/immunity.webp";
+};
 
 /**
  * The shop's top-level categories (GET /api/shop/home `categories`, only
@@ -210,7 +254,7 @@ export function HealthGoals({ categories }: { categories: ApiCategory[] }) {
               className="flex-1 flex items-center gap-3 sm:gap-4 lg:gap-5 overflow-x-auto no-scrollbar scroll-smooth py-1.5 px-1"
             >
               {shelf.map((category) => {
-                const art = sculptureFor(category.slug) ?? category.imageUrl;
+                const art = sculptureFor(category.slug, category.name) || category.imageUrl;
                 return (
                 <Link
                   key={category.key}
@@ -226,6 +270,9 @@ export function HealthGoals({ categories }: { categories: ApiCategory[] }) {
                         alt={category.name}
                         className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                         loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/Images/HealthGoals/immunity.webp";
+                        }}
                       />
                     ) : (
                       <div className="size-full flex items-center justify-center">

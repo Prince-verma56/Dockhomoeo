@@ -38,7 +38,9 @@ const schema = z.object({
   SHIPROCKET_WEBHOOK_TOKEN: blankable,
   // This server's public address, once it has one: PhonePe posts payment results to it.
   PUBLIC_API_URL: blankable,
-  // Test mode: this fixed code signs anyone in and nothing is sent. Leave empty in production.
+  // Sign-in codes: "live" uses MSG91 provider delivery; "mock" or "demo" uses local test code
+  OTP_MODE: z.enum(["live", "mock", "demo"]).default("live"),
+  // Test mode: this fixed code signs anyone in and nothing is sent. Leave empty in production or live mode.
   OTP_DEV_CODE: z.preprocess((v) => (v === "" ? undefined : v), z.string().regex(/^\d{4,6}$/).optional()),
   // Used only while the PhonePe keys above are empty: online payments are recorded as paid without taking money.
   // Never true in production.

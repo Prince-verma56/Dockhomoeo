@@ -152,8 +152,18 @@ function Confirmation({ order, payment }: { order: OrderConfirmation; payment: P
     setPayError(null);
     try {
       const { payUrl } = await repositories.cart.payOrder(order.orderId);
-      window.location.assign(payUrl);
+      if (payUrl) {
+        window.location.assign(payUrl);
+        return;
+      }
     } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        const amount = order.totals?.total ?? 0;
+        window.location.assign(
+          `/demo/payment?order=${order.orderId}&total=${amount}&orderNumber=${encodeURIComponent(order.orderNumber)}`
+        );
+        return;
+      }
       payingRef.current = false;
       setPaying(false);
       setPayError(error instanceof CheckoutError ? error.message : "We couldn't open the payment page just now. Please try again.");

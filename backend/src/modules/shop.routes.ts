@@ -412,7 +412,7 @@ shopRoutes.get("/sitemap", async (_req, res) => {
 const linesSchema = z.array(z.object({ variantId: z.coerce.number().int().positive(), quantity: z.coerce.number().int().min(1).max(9999) })).max(100);
 const quoteSchema = z.object({
   lines: linesSchema,
-  couponCode: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), z.string().trim().max(40).optional()),
+  couponCode: z.preprocess((v) => (v === null || (typeof v === "string" && v.trim() === "") ? undefined : v), z.string().trim().max(40).optional()),
   paymentMethod: z.enum(["COD", "ONLINE", "CREDIT"]).default("COD"),
 });
 export type QuoteInput = z.infer<typeof quoteSchema>;

@@ -2,13 +2,9 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import {
   ArrowRight,
-  ArrowUpRight,
-  Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Droplets,
@@ -18,17 +14,12 @@ import {
   Leaf,
   Pill,
   Shield,
-  ShieldCheck,
-  ShoppingCart,
-  Star,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { Link001 } from "@/components/ui/skiper-ui/skiper40";
-import { useCart } from "@/components/providers/CartProvider";
-import { useFavourites } from "@/lib/favourites/favourites";
+import { ProductCard } from "@/components/commerce/ProductCard";
 import type { CategorySummary } from "@/lib/catalogue";
 import type { Product } from "@/types/product";
 
@@ -130,81 +121,94 @@ const PRODUCT_FORMATS = [
   },
 ];
 
-// Fallback high-fidelity popular remedies if none fetched
-const DEFAULT_POPULAR_REMEDIES = [
+// Fallback high-fidelity popular remedies with genuine database variant IDs
+const FALLBACK_POPULAR_PRODUCTS: Product[] = [
   {
-    id: "reckeweg-r41",
-    slug: "reckeweg-r41-test",
-    name: "R41 Memory and Nerve Drops (test)",
-    brand: "Dr. Reckeweg (test)",
-    variant: "22 ml",
-    variantId: 101,
-    price: 225,
-    compareAtPrice: 250,
-    badge: "Bestseller",
-    rating: { value: 4.7, count: 63 },
+    id: "6",
+    slug: "respiratory-care-drops",
+    name: "Respiratory Care Drops",
+    brand: "Dr. Reckeweg",
+    form: "drops",
+    variant: "Combination · 22 ml",
+    price: { amount: 230, currency: "INR" },
+    compareAtPrice: { amount: 250, currency: "INR" },
+    rating: { value: 4.8, count: 63 },
+    tone: "amber",
+    mediaLabel: "Respiratory Care Drops",
     image: "/Images/Products/reckeweg-r41.jpg",
+    variantId: 6,
   },
   {
-    id: "sbl-calendula-cream",
-    slug: "sbl-calendula-cream-test",
-    name: "Calendula Cream (test)",
-    brand: "SBL",
-    variant: "25 g",
-    variantId: 102,
-    price: 199,
-    compareAtPrice: 220,
-    badge: "Popular",
-    rating: { value: 4.6, count: 58 },
+    id: "7",
+    slug: "calendula-ointment",
+    name: "Calendula Ointment 10%",
+    brand: "Schwabe",
+    form: "cream",
+    variant: "Ointment 10% · 25 g",
+    price: { amount: 95, currency: "INR" },
+    compareAtPrice: { amount: 110, currency: "INR" },
+    rating: { value: 4.7, count: 58 },
+    tone: "amber",
+    mediaLabel: "Calendula Ointment",
     image: "/Images/Editorial/arnica-cream-tube.webp",
+    variantId: 7,
   },
   {
-    id: "bakson-arnica-30c",
-    slug: "bakson-arnica-test",
-    name: "Arnica Montana 30C (test)",
-    brand: "Bakson (test)",
-    variant: "30 g",
-    variantId: 103,
-    price: 130,
-    badge: "New",
-    rating: { value: 4.8, count: 112 },
+    id: "1",
+    slug: "arnica-montana-30c",
+    name: "Arnica Montana 30C",
+    brand: "SBL",
+    form: "drops",
+    variant: "30C · 30 ml",
+    price: { amount: 110, currency: "INR" },
+    rating: { value: 4.9, count: 112 },
+    tone: "amber",
+    mediaLabel: "Arnica Montana 30C",
+    image: "/Images/Products/boiron-arnica.jpg",
+    variantId: 1,
+  },
+  {
+    id: "4",
+    slug: "arnica-massage-oil",
+    name: "Arnica Massage Oil",
+    brand: "Bakson",
+    form: "oil",
+    variant: "Botanical Oil · 100 ml",
+    price: { amount: 149, currency: "INR" },
+    compareAtPrice: { amount: 170, currency: "INR" },
+    rating: { value: 4.8, count: 76 },
+    tone: "amber",
+    mediaLabel: "Arnica Massage Oil",
     image: "/Images/Products/bakson-arnica-oil.jpg",
+    variantId: 4,
   },
   {
-    id: "schwabe-calendula-ointment",
-    slug: "schwabe-calendula-test",
-    name: "Calendula Ointment (test)",
-    brand: "Schwabe (test)",
-    variant: "25 g",
-    variantId: 104,
-    price: 210,
-    badge: "Top Rated",
-    rating: { value: 4.6, count: 76 },
-    image: "/Images/Products/schwabe-alfalfa.jpg",
-  },
-  {
-    id: "sbl-natrum-mur",
-    slug: "sbl-natrum-test",
-    name: "Natrum Muriaticum 6X (test)",
-    brand: "SBL (test)",
-    variant: "25 g",
-    variantId: 105,
-    price: 165,
-    badge: "Verified",
+    id: "3",
+    slug: "arnica-pellets-200",
+    name: "Arnica Pellets 200",
+    brand: "DocHomoeo",
+    form: "tablets",
+    variant: "200C · 4 g",
+    price: { amount: 75, currency: "INR" },
     rating: { value: 4.9, count: 84 },
-    image: "/Images/Products/sbl-natrum.jpg",
+    tone: "amber",
+    mediaLabel: "Arnica Pellets 200",
+    image: "/Images/Editorial/chamomilla-pellet-bottle.webp",
+    variantId: 3,
   },
   {
-    id: "lords-kali-phos",
-    slug: "lords-kali-phos-test",
-    name: "Kali Phosphoricum 6X (test)",
-    brand: "Lord's (test)",
-    variant: "25 g",
-    variantId: 106,
-    price: 175,
-    badge: "Popular",
+    id: "5",
+    slug: "kali-phos-6x",
+    name: "Kali Phosphoricum 6X",
+    brand: "Lord's",
+    form: "tablets",
+    variant: "6X · 200 tablets",
+    price: { amount: 65, currency: "INR" },
     rating: { value: 4.7, count: 52 },
+    tone: "amber",
+    mediaLabel: "Kali Phosphoricum 6X",
     image: "/Images/Products/lords-kali-phos.jpg",
+    variantId: 5,
   },
 ];
 
@@ -239,35 +243,17 @@ export function CategoryShowcaseView({
 
   useEffect(() => {
     if (!emblaApi) return;
-    onSelect();
     emblaApi.on("select", onSelect);
     emblaApi.on("reInit", onSelect);
+    queueMicrotask(() => onSelect());
     return () => {
       emblaApi.off("select", onSelect);
       emblaApi.off("reInit", onSelect);
     };
   }, [emblaApi, onSelect]);
 
-  // Cart & Favourites hooks
-  const { addItem } = useCart();
-  const favourites = useFavourites();
-  const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
-
-  const handleAddToCart = (item: (typeof DEFAULT_POPULAR_REMEDIES)[0]) => {
-    addItem({
-      variantId: item.variantId,
-      quantity: 1,
-      title: item.name,
-      price: item.price,
-      imageUrl: item.image,
-      brand: item.brand,
-    });
-
-    setAddedIds((prev) => ({ ...prev, [item.id]: true }));
-    setTimeout(() => {
-      setAddedIds((prev) => ({ ...prev, [item.id]: false }));
-    }, 1500);
-  };
+  const displayedProducts =
+    popularProducts && popularProducts.length > 0 ? popularProducts : FALLBACK_POPULAR_PRODUCTS;
 
   const leadConcern = HEALTH_CONCERNS[0];
   const rightConcerns = HEALTH_CONCERNS.slice(1);
@@ -607,123 +593,14 @@ export function CategoryShowcaseView({
           <Reveal y={20}>
             <div ref={emblaRef} className="overflow-hidden pb-2 pt-1 -mx-2 px-2 select-none">
             <div className="flex gap-4 sm:gap-5">
-              {DEFAULT_POPULAR_REMEDIES.map((product) => {
-                const isFavourited = favourites.isFavourite(product.slug);
-                const isAdded = addedIds[product.id];
-
-                return (
-                  <div
-                    key={product.id}
-                    className="flex-[0_0_82%] sm:flex-[0_0_46%] lg:flex-[0_0_280px] xl:flex-[0_0_288px] min-w-0"
-                  >
-                    <div className="group relative rounded-2xl border border-line-soft bg-white overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-forest/30 hover:shadow-lift flex flex-col h-full justify-between select-none">
-                      
-                      {/* Top Media Box */}
-                      <div className="relative aspect-square w-full overflow-hidden bg-cream/35">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="size-full object-cover object-center transition-transform duration-500 group-hover:scale-105 pointer-events-none select-none"
-                          draggable={false}
-                        />
-
-                        {/* Top Badge */}
-                        {product.badge ? (
-                          <span className="absolute top-3 left-3 rounded-full bg-forest-abyss/90 text-cream px-2.5 py-0.5 text-[10px] font-bold backdrop-blur-xs shadow-2xs">
-                            {product.badge}
-                          </span>
-                        ) : null}
-
-                        {/* Heart Favourites Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            favourites.toggle(product.slug);
-                          }}
-                          aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
-                          className="absolute top-3 right-3 grid size-8 place-items-center rounded-full bg-white/85 text-ink shadow-2xs backdrop-blur-xs hover:bg-white hover:text-red-500 transition-colors cursor-pointer"
-                        >
-                          <Heart className={cn("size-4", isFavourited && "fill-red-500 text-red-500")} />
-                        </button>
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="p-4 flex flex-col flex-1 justify-between gap-3 border-t border-line-soft/60">
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-ink">
-                            {product.brand}
-                          </p>
-                          <Link href={`/product/${product.slug}`} className="block">
-                            <h3 className="font-display font-bold text-xs sm:text-sm text-ink line-clamp-2 leading-snug group-hover:text-forest transition-colors">
-                              {product.name}
-                            </h3>
-                          </Link>
-                          <p className="text-[11px] text-muted-ink">
-                            {product.variant}
-                          </p>
-
-                          {/* Star Rating */}
-                          <div className="flex items-center gap-1.5 pt-0.5">
-                            <div className="flex items-center text-amber-500">
-                              <Star className="size-3 fill-current" />
-                              <Star className="size-3 fill-current" />
-                              <Star className="size-3 fill-current" />
-                              <Star className="size-3 fill-current" />
-                              <Star className="size-3 fill-current" />
-                            </div>
-                            <span className="text-[11px] font-bold text-ink">
-                              {product.rating.value}
-                            </span>
-                            <span className="text-[10px] text-muted-ink">
-                              ({product.rating.count})
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Price & Add Button */}
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-line-soft/40">
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="font-display font-bold text-base text-ink">
-                              ₹{product.price}
-                            </span>
-                            {product.compareAtPrice ? (
-                              <span className="text-xs text-muted-ink line-through">
-                                ₹{product.compareAtPrice}
-                              </span>
-                            ) : null}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleAddToCart(product)}
-                            className={cn(
-                              "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all shadow-2xs cursor-pointer",
-                              isAdded
-                                ? "bg-forest-deep text-cream"
-                                : "bg-forest text-cream hover:bg-forest-deep active:scale-95"
-                            )}
-                          >
-                            {isAdded ? (
-                              <>
-                                <Check className="size-3.5" />
-                                <span>Added</span>
-                              </>
-                            ) : (
-                              <>
-                                <ShoppingCart className="size-3.5" />
-                                <span>Add</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                );
-              })}
+              {displayedProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex-[0_0_82%] sm:flex-[0_0_46%] lg:flex-[0_0_280px] xl:flex-[0_0_288px] min-w-0 h-full"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
             </div>
           </div>
           </Reveal>
