@@ -423,6 +423,8 @@ export function DoctorDetailClient({
                           <Link
                             href={`/doctors/${doctor.slug}${index === 0 ? "" : `?date=${day}`}`}
                             scroll={false}
+                            data-no-transition
+                            data-no-curtain
                             aria-current={isActive ? "date" : undefined}
                             className={cn(
                               "inline-flex flex-col items-center justify-center min-w-[88px] sm:min-w-[96px] h-14 rounded-2xl border px-3 py-1.5 text-xs font-bold transition-all focus-visible:outline-none cursor-pointer",

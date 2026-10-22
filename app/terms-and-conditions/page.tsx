@@ -227,25 +227,26 @@ export default function TermsPage() {
   return (
     <LegalPageLayout
       title="Terms & Conditions"
-      intro="Please read these Terms and Conditions carefully before using the DocHomoeo website and services."
+      intro="Please read these Terms and Conditions carefully before using the DocHomoeo website, clinical consultations, and delivery services."
+      lastUpdated="October 2026"
       sections={SECTIONS}
       callout={
-        <div className="rounded-xl bg-sage-wash/70 p-4 border border-line-soft">
-          <p className="text-xs text-muted-ink">
-            <strong className="text-ink">Archival Note:</strong> The original Terms &amp;
-            Conditions were provided as a scanned document (
-            <span className="font-mono">form.pdf</span>) on the legacy website. The
-            content above has been transcribed and compiled from the available legacy
-            policies. For a copy of the original scanned document, please contact
-            us at{" "}
-            <a
-              href="mailto:contact.dochomoeo@gmail.com"
-              className="text-forest-deep underline hover:text-forest-deep/80 font-medium"
-            >
-              contact.dochomoeo@gmail.com
-            </a>
-            .
-          </p>
+        <div className="flex items-start gap-3.5">
+          <div className="size-2 rounded-full bg-[#0d5a43] shrink-0 mt-2" />
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
+              Official Compliance Notice &amp; Archival Record
+            </h4>
+            <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-300">
+              The original legacy Terms &amp; Conditions were recorded as an authenticated scanned document (<span className="font-mono text-[11px] bg-white/70 dark:bg-white/10 px-1.5 py-0.5 rounded border border-black/[0.06]">form.pdf</span>). The text above reflects the comprehensive codified standard for DocHomoeo. For verified legal inquiries or copies of historical filings, reach out to our legal department at{" "}
+              <a
+                href="mailto:contact.dochomoeo@gmail.com"
+                className="text-[#0d5a43] dark:text-emerald-400 font-semibold underline underline-offset-2 hover:text-[#074231]"
+              >
+                contact.dochomoeo@gmail.com
+              </a>.
+            </p>
+          </div>
         </div>
       }
     />

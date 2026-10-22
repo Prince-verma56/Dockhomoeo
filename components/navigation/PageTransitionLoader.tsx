@@ -469,11 +469,8 @@ function RouteTransitionInner() {
         // Only internal links within the same origin
         if (targetUrl.origin !== window.location.origin) return;
 
-        // Skip if navigating to the exact same current pathname and search
-        if (
-          targetUrl.pathname === window.location.pathname &&
-          targetUrl.search === window.location.search
-        ) {
+        // Skip if staying on the same page (e.g. query param changes, filters, date tabs, or in-page hashes)
+        if (targetUrl.pathname === window.location.pathname) {
           return;
         }
 

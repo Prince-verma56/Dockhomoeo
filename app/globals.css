@@ -49,6 +49,14 @@ html {
   scroll-padding-top: 140px;
 }
 
+/* Disable scrollbar-gutter on full-page auth pages to prevent 15px right-side white/cream gutter gap */
+html:has([data-auth-page]),
+body:has([data-auth-page]) {
+  scrollbar-gutter: auto !important;
+  overflow-x: hidden !important;
+  background-color: #ffffff !important;
+}
+
 /* Custom luxury themed scrollbar for modals, drawers, and panels */
 .dh-custom-scrollbar,
 [data-lenis-prevent].dh-custom-scrollbar,
