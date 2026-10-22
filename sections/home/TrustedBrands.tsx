@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useCallback, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ShieldCheck, Award, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldCheck, Award, CheckCircle2 } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
 import { SplitHeading } from "@/components/shared/SplitHeading";
 import type { ApiBrand } from "@/types/api/home";
@@ -696,7 +696,7 @@ export function TrustedBrands({ brands }: { brands: ApiBrand[] }) {
             </span>
             <span className="hidden sm:inline text-black/20 dark:text-white/20">•</span>
             <span className="inline-flex items-center gap-1.5">
-              <Sparkles className="size-4 text-[#0c503b] dark:text-emerald-400" />
+              <CheckCircle2 className="size-4 text-[#0c503b] dark:text-emerald-400" />
               Direct Licensed Manufacturer Supply
             </span>
           </div>

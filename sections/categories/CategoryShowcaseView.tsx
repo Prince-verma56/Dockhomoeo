@@ -20,7 +20,6 @@ import {
   Shield,
   ShieldCheck,
   ShoppingCart,
-  Sparkles,
   Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -120,7 +119,7 @@ const PRODUCT_FORMATS = [
     form: "cream",
     count: 48,
     image: "/Images/Products/bakson-arnica-oil.jpg",
-    icon: Sparkles,
+    icon: Droplets,
   },
   {
     title: "Creams & Ointments",

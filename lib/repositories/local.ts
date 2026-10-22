@@ -1107,7 +1107,7 @@ export const mockDoctors: ApiDoctorCard[] = [
     id: 5,
     slug: "dr-aditya-sharma",
     displayName: "Dr. Aditya Sharma",
-    photoUrl: "/Images/reels/reel-doctor-advice.webp",
+    photoUrl: "/Images/doctors/dr-aditya-sharma.jpg",
     qualification: "MD (Homeopathy), Senior Consultant",
     specialization: "Constitutional Prescribing & Chronic Care",
     experienceYears: 15,

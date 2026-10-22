@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, Loader2, Sparkles, Tag, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Tag, X } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { formatRupees } from "@/lib/formatters/price";
 import { AVAILABLE_COUPONS } from "@/lib/cart/availableCoupons";
@@ -236,7 +236,7 @@ export function CouponField({ isCheckout = false }: { isCheckout?: boolean }) {
       <div className="pt-1.5 border-t border-line-soft/60 space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-bold text-muted-ink flex items-center gap-1">
-            <Sparkles className="size-3 text-[#0d5a43] dark:text-emerald-400" />
+            <Tag className="size-3 text-[#0d5a43] dark:text-emerald-400" />
             <span>Available Offers ({AVAILABLE_COUPONS.length}):</span>
           </p>
           <span className="text-[10px] text-muted-ink/80 flex items-center gap-1">

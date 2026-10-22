@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Copy, ChevronRight, Sparkles, Tag, Percent, X } from "lucide-react";
+import { Check, Copy, ChevronRight, Tag, Percent, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AVAILABLE_COUPONS, type AvailableCoupon } from "@/lib/cart/availableCoupons";
 import { useCart } from "@/components/providers/CartProvider";
@@ -221,7 +221,7 @@ export function AvailableCouponOffers({
             </button>
 
             <div className="flex items-center gap-2 mb-1 shrink-0 pr-8">
-              <Sparkles className="size-5 text-[#0d5a43] dark:text-emerald-400 shrink-0" />
+              <Tag className="size-5 text-[#0d5a43] dark:text-emerald-400 shrink-0" />
               <h3 className="font-display text-xl font-bold text-ink dark:text-white">
                 All Available Coupon Offers
               </h3>

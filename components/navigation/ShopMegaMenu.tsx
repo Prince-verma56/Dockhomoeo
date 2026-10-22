@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Award, ChevronDown, Package, Sparkles } from "lucide-react";
+import { ArrowRight, Award, ChevronDown, LayoutGrid, Package } from "lucide-react";
 import { MagneticItem } from "@/components/ui/magnetic-dock";
 import { cn } from "@/lib/utils";
 import { DURATION, EASE_PREMIUM_BEZIER } from "@/lib/animation/motion";
@@ -435,7 +435,7 @@ export function ShopMegaMenu({ className, active = false }: ShopMegaMenuProps) {
                     onClick={() => close()}
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#32453e] hover:text-[#0d5a43] dark:text-white/80 dark:hover:text-emerald-300 transition-colors duration-100 cursor-pointer"
                   >
-                    <Sparkles className="size-3.5" />
+                    <LayoutGrid className="size-3.5" />
                     <span>All Categories</span>
                   </Link>
                   <Link

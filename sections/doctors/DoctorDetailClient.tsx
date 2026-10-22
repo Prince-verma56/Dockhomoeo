@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
+  Award,
+  CalendarClock,
   CalendarDays,
   CheckCircle2,
   ChevronDown,
@@ -18,13 +20,11 @@ import {
   PackageCheck,
   Phone,
   ShieldCheck,
-  Sparkles,
   Star,
   UserCheck,
   Video,
 } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { Reveal } from "@/components/shared/Reveal";
 import { DoctorPageHero } from "@/sections/doctors/DoctorPageHero";
 import { ConsultationModal } from "@/components/doctors/ConsultationModal";
 import { BookingPanel } from "@/sections/doctors/BookingPanel";
@@ -61,6 +61,9 @@ export function DoctorDetailClient({
   const [modalSlot, setModalSlot] = useState<string | undefined>(undefined);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const fees = [doctor.videoFee, doctor.audioFee].filter((f): f is number => f !== null);
+  const minFee = fees.length ? Math.min(...fees) : 400;
+
   const dayIndex = days.indexOf(date);
   const currentDayLabel =
     dayIndex === 0
@@ -94,6 +97,11 @@ export function DoctorDetailClient({
       : new Intl.DateTimeFormat("en-IN", { timeZone: "UTC", weekday: "short", day: "numeric" }).format(
           new Date(`${iso}T00:00:00Z`)
         );
+
+  const firstAvailableSlot = slots.find((s) => s.available);
+  const earliestSlotText = firstAvailableSlot
+    ? `${currentDayLabel}, ${firstAvailableSlot.time} IST`
+    : "Tomorrow, 10:30 AM IST";
 
   const reviews =
     doctor.slug === "dr-amit-verma"
@@ -208,554 +216,542 @@ export function DoctorDetailClient({
   return (
     <div className="min-h-screen bg-[#fbfaf6] dark:bg-[#07130e] text-ink dark:text-white">
       {/* --------------------------------------------------------------- */}
-      {/* 1. EDITORIAL HERO SECTION                                       */}
+      {/* 1. MINIMAL HEADER & BREADCRUMBS                                 */}
       {/* --------------------------------------------------------------- */}
       <DoctorPageHero doctor={doctor} onBookConsult={scrollToBooking} />
 
       {/* --------------------------------------------------------------- */}
-      {/* 2. MAIN 2-COLUMN SPACIOUS CONTENT AREA                          */}
+      {/* 2. MAIN SPLIT CONSULTATION STUDIO (Direct Reference Inspiration) */}
       {/* --------------------------------------------------------------- */}
-      <Container width="wide" className="py-12 sm:py-16 lg:py-20">
+      <Container width="wide" className="py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-start">
           
           {/* ============================================================ */}
-          {/* LEFT / MAIN COLUMN (8 COLS): SCHEDULER, BIO, TIMELINE, REVIEWS */}
+          {/* LEFT: THE DR. MAYA CHEN PROFILE CARD (Reference Image 4)      */}
           {/* ============================================================ */}
-          <div className="lg:col-span-8 space-y-12 lg:space-y-16">
-            
-            {/* ----------------------------------------------------------- */}
-            {/* PRIMARY EXPERIENCE: REFINED APPOINTMENT SCHEDULER           */}
-            {/* ----------------------------------------------------------- */}
-            <Reveal y={20}>
-              <section
-                id="booking-section"
-                aria-labelledby="slots-heading"
-                className="scroll-mt-28 rounded-[32px] sm:rounded-[36px] border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 sm:p-9 lg:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-line-soft/70">
-                  <div className="flex items-start sm:items-center gap-3.5">
-                    <span className="grid size-11 place-items-center rounded-2xl bg-[#0d5a43]/10 text-[#0d5a43] dark:text-emerald-400 shrink-0">
-                      <CalendarDays className="size-5.5" />
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
+            <div className="rounded-[32px] p-6 sm:p-7 bg-white dark:bg-[#0c1e17] border border-black/[0.06] dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] space-y-5">
+              
+              {/* Doctor Avatar + Identity Header */}
+              <div className="flex items-start gap-4">
+                <div className="relative size-20 sm:size-22 rounded-2xl overflow-hidden bg-[#f3f1e8] dark:bg-white/5 shrink-0 border border-black/5 dark:border-white/10">
+                  {doctor.photoUrl ? (
+                    <Image
+                      src={doctor.photoUrl}
+                      alt={doctor.displayName}
+                      fill
+                      quality={95}
+                      sizes="88px"
+                      className="object-cover object-top"
+                      priority
+                    />
+                  ) : (
+                    <div className="size-full bg-[#0d5a43]/10 grid place-items-center text-[#0d5a43] font-bold text-2xl">
+                      {doctor.displayName.charAt(0)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-white truncate">
+                      {doctor.displayName}
+                    </h1>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 px-2 py-0.5 text-[10.5px] font-bold shrink-0">
+                      <CheckCircle2 className="size-3 text-emerald-600" />
+                      <span>Verified</span>
                     </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h2 id="slots-heading" className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink dark:text-white">
-                          Select Appointment Time
-                        </h2>
-                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                          IST (India Time)
-                        </span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-ink dark:text-white/60 mt-0.5">
-                        Choose an available day and reserve an unhurried {doctor.slotMinutes}-minute private consultation
-                      </p>
-                    </div>
                   </div>
 
-                  {/* Instant Modal Trigger Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleOpenModal()}
-                    className="self-start sm:self-auto inline-flex items-center gap-2 rounded-full bg-forest/[0.08] hover:bg-forest/15 text-[#0d5a43] dark:text-emerald-400 border border-[#0d5a43]/20 px-4 py-2 text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Sparkles className="size-3.5" />
-                    <span>Quick Form Booking</span>
-                  </button>
-                </div>
-
-                {/* Day Selection Strip */}
-                <div className="mb-7">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink block mb-3">
-                    Available Dates
-                  </span>
-                  <nav aria-label="Choose a day" className="-mx-2 overflow-x-auto px-2 pb-2 no-scrollbar">
-                    <ul className="flex gap-2.5">
-                      {days.map((day, index) => {
-                        const isActive = day === date;
-                        return (
-                          <li key={day} className="shrink-0">
-                            <Link
-                              href={`/doctors/${doctor.slug}${index === 0 ? "" : `?date=${day}`}`}
-                              scroll={false}
-                              aria-current={isActive ? "date" : undefined}
-                              className={cn(
-                                "inline-flex flex-col items-center justify-center min-w-[88px] sm:min-w-[100px] h-14 rounded-2xl border px-3.5 py-1.5 text-xs font-bold transition-all focus-visible:outline-none cursor-pointer",
-                                isActive
-                                  ? "border-[#0d5a43] bg-[#0d5a43] text-white shadow-sm ring-2 ring-[#0d5a43]/20 scale-102"
-                                  : "border-line-soft bg-paper/60 dark:bg-white/5 text-ink dark:text-white hover:border-[#0d5a43]/40 hover:bg-paper"
-                              )}
-                            >
-                              <span className="text-[11px] font-medium opacity-90">
-                                {index === 0 ? "Today" : index === 1 ? "Tomorrow" : dayLabel(day, index).split(" ")[0]}
-                              </span>
-                              <span className="text-sm font-extrabold mt-0.5">
-                                {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "UTC" }).format(
-                                  new Date(`${day}T00:00:00Z`)
-                                )}
-                              </span>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </nav>
-                </div>
-
-                {/* Booking Panel / Slot Selector */}
-                <div className="pt-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink block mb-3">
-                    Consultation Slots ({currentDayLabel})
-                  </span>
-                  <BookingPanel
-                    key={date}
-                    doctor={doctor}
-                    date={date}
-                    slots={slots}
-                    initialSlot={slotParam}
-                  />
-                </div>
-              </section>
-            </Reveal>
-
-            {/* ----------------------------------------------------------- */}
-            {/* ABOUT THE DOCTOR (EDITORIAL ESSAY & CLINICAL PROFILE)       */}
-            {/* ----------------------------------------------------------- */}
-            {doctor.bio ? (
-              <Reveal y={20}>
-                <section aria-labelledby="about-heading" className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 place-items-center rounded-2xl bg-[#0d5a43]/10 text-[#0d5a43] dark:text-emerald-400">
-                      <HeartHandshake className="size-5" />
-                    </span>
-                    <div>
-                      <span className="text-[11px] font-bold uppercase tracking-widest text-[#0d5a43] dark:text-emerald-400">
-                        CLINICAL BACKGROUND & PHILOSOPHY
-                      </span>
-                      <h2 id="about-heading" className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white">
-                        About {doctor.displayName}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[32px] border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-7 sm:p-9 shadow-xs space-y-5">
-                    <p className="text-sm sm:text-base leading-relaxed text-ink/85 dark:text-white/80 whitespace-pre-line font-normal">
-                      {doctor.bio}
-                    </p>
-
-                    {/* Highlights Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-4 border-t border-line-soft/70">
-                      <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-paper/60 dark:bg-white/5 border border-line-soft">
-                        <ShieldCheck className="size-5 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5" />
-                        <div>
-                          <h4 className="text-xs font-bold text-ink dark:text-white">Council Certified Homoeopath</h4>
-                          <p className="text-[11px] text-muted-ink dark:text-white/60 mt-0.5">
-                            Formally accredited under Central Council of Homoeopathy (CCH) guidelines.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-paper/60 dark:bg-white/5 border border-line-soft">
-                        <Clock className="size-5 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5" />
-                        <div>
-                          <h4 className="text-xs font-bold text-ink dark:text-white">Unhurried Case-Taking</h4>
-                          <p className="text-[11px] text-muted-ink dark:text-white/60 mt-0.5">
-                            Deep constitutional evaluation covering physiological, environmental, and emotional health factors.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </Reveal>
-            ) : null}
-
-            {/* ----------------------------------------------------------- */}
-            {/* THE CONSULTATION JOURNEY (CONNECTED HORIZONTAL PROCESS)     */}
-            {/* ----------------------------------------------------------- */}
-            <Reveal y={24} stagger={0.08}>
-              <section aria-labelledby="journey-heading" className="space-y-6">
-                <div>
-                  <span className="text-[11px] font-bold tracking-widest uppercase text-[#0d5a43] dark:text-emerald-400">
-                    SEAMLESS · CONFIDENTIAL · PERSONALISED
-                  </span>
-                  <h2 id="journey-heading" className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white mt-1">
-                    How your teleconsultation works
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted-ink dark:text-white/60 mt-1">
-                    Four effortless steps to private holistic healthcare with {doctor.displayName}.
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium line-clamp-2">
+                    {[doctor.specialization, doctor.qualification].filter(Boolean).join(" · ")}
                   </p>
                 </div>
+              </div>
 
-                {/* Connected Step Track */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 relative">
-                  {/* Step 1 */}
-                  <div className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between pb-3.5 border-b border-line-soft/60">
-                        <span className="inline-flex items-center justify-center size-8 rounded-xl bg-forest/10 text-[#0d5a43] dark:text-emerald-400 font-display font-extrabold text-xs">
-                          01
-                        </span>
-                        <CalendarDays className="size-5 text-[#0d5a43] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="font-display font-bold text-base text-ink dark:text-white mt-4">
-                        Select Slot
-                      </h3>
-                      <p className="text-xs text-muted-ink dark:text-white/70 mt-1.5 leading-relaxed">
-                        Choose an available consultation time on the calendar that fits your day.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between pb-3.5 border-b border-line-soft/60">
-                        <span className="inline-flex items-center justify-center size-8 rounded-xl bg-forest/10 text-[#0d5a43] dark:text-emerald-400 font-display font-extrabold text-xs">
-                          02
-                        </span>
-                        <FileText className="size-5 text-[#0d5a43] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="font-display font-bold text-base text-ink dark:text-white mt-4">
-                        Share Health Intake
-                      </h3>
-                      <p className="text-xs text-muted-ink dark:text-white/70 mt-1.5 leading-relaxed">
-                        Submit your symptoms and prior medical reports via encrypted health intake.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between pb-3.5 border-b border-line-soft/60">
-                        <span className="inline-flex items-center justify-center size-8 rounded-xl bg-forest/10 text-[#0d5a43] dark:text-emerald-400 font-display font-extrabold text-xs">
-                          03
-                        </span>
-                        <Video className="size-5 text-[#0d5a43] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="font-display font-bold text-base text-ink dark:text-white mt-4">
-                        Private Teleconsult
-                      </h3>
-                      <p className="text-xs text-muted-ink dark:text-white/70 mt-1.5 leading-relaxed">
-                        Join an HD video or direct phone call for unhurried case-taking with Dr. Amit.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Step 4 */}
-                  <div className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between pb-3.5 border-b border-line-soft/60">
-                        <span className="inline-flex items-center justify-center size-8 rounded-xl bg-forest/10 text-[#0d5a43] dark:text-emerald-400 font-display font-extrabold text-xs">
-                          04
-                        </span>
-                        <PackageCheck className="size-5 text-[#0d5a43] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="font-display font-bold text-base text-ink dark:text-white mt-4">
-                        Prescription &amp; Delivery
-                      </h3>
-                      <p className="text-xs text-muted-ink dark:text-white/70 mt-1.5 leading-relaxed">
-                        Instant digital prescription and 1-click doorstep delivery of genuine remedies.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </Reveal>
-
-            {/* ----------------------------------------------------------- */}
-            {/* VERIFIED PATIENT REVIEWS & CLINICAL OUTCOMES                */}
-            {/* ----------------------------------------------------------- */}
-            <Reveal y={24} stagger={0.06}>
-              <section aria-labelledby="reviews-heading" className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                  <div>
-                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#0d5a43] dark:text-emerald-400">
-                      PATIENT EXPERIENCES
-                    </span>
-                    <h2 id="reviews-heading" className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white mt-1">
-                      Verified Patient Reviews
-                    </h2>
-                  </div>
-
-                  {/* Overall Rating Pill */}
-                  <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white dark:bg-[#0c1e17] border border-line-soft/80 shadow-2xs">
-                    <div className="flex items-center gap-1 text-amber-500">
-                      <Star className="size-4 fill-amber-500 text-amber-500" />
-                      <span className="font-display font-bold text-base text-ink dark:text-white">
-                        {doctor.ratingAverage.toFixed(1)}
-                      </span>
-                    </div>
-                    <span className="text-line-soft">·</span>
-                    <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                      {doctor.ratingCount} verified consults
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  {reviews.map((rev, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-0.5 text-amber-500">
-                            {[...Array(rev.rating)].map((_, i) => (
-                              <Star key={i} className="size-3.5 fill-current" />
-                            ))}
-                          </div>
-                          <span className="text-[11px] text-muted-ink">{rev.date}</span>
-                        </div>
-
-                        <span className="inline-block rounded-full bg-forest/8 px-2.5 py-0.5 text-[11px] font-semibold text-[#0d5a43] dark:text-emerald-400">
-                          {rev.tag}
-                        </span>
-
-                        <p className="text-xs sm:text-sm text-ink/85 dark:text-white/80 leading-relaxed italic">
-                          &ldquo;{rev.comment}&rdquo;
-                        </p>
-                      </div>
-
-                      <div className="pt-3 border-t border-line-soft/60 flex items-center justify-between text-xs">
-                        <div>
-                          <h4 className="font-bold text-ink dark:text-white">{rev.author}</h4>
-                          <span className="text-[11px] text-muted-ink">{rev.city}</span>
-                        </div>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="size-3" />
-                          Verified
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </Reveal>
-
-            {/* ----------------------------------------------------------- */}
-            {/* FREQUENTLY ASKED QUESTIONS (ACCESSIBLE ACCORDION)           */}
-            {/* ----------------------------------------------------------- */}
-            <Reveal y={20}>
-              <section aria-labelledby="faqs-heading" className="space-y-6">
-                <div>
-                  <span className="text-[11px] font-bold tracking-widest uppercase text-[#0d5a43] dark:text-emerald-400">
-                    COMMON QUESTIONS
+              {/* Next Available Highlight Box (Directly inspired by Reference Image 4) */}
+              <div className="rounded-2xl bg-[#eff8f3] dark:bg-emerald-950/30 border border-[#d2edd9] dark:border-emerald-500/20 p-4 space-y-1">
+                <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-300">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-500 dark:text-neutral-400">
+                    Next Available
                   </span>
-                  <h2 id="faqs-heading" className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white mt-1">
-                    Frequently Asked Questions
-                  </h2>
+                  <CalendarDays className="size-4 text-emerald-600" />
+                </div>
+                <p className="font-display text-lg sm:text-xl font-bold text-neutral-900 dark:text-white">
+                  {earliestSlotText}
+                </p>
+                <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                  In-person &amp; virtual homoeopathic care
+                </p>
+              </div>
+
+              {/* Key Clinical Specs Table (Hairline Divided Rows, Reference Image 4) */}
+              <div className="divide-y divide-neutral-100 dark:divide-white/5 text-xs sm:text-[13px] pt-1">
+                <div className="flex justify-between py-2.5">
+                  <span className="text-neutral-500 dark:text-neutral-400">Patient rating</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white flex items-center gap-1">
+                    <Star className="size-3.5 fill-amber-500 text-amber-500" />
+                    <span>{doctor.ratingAverage.toFixed(1)} / 5</span>
+                    <span className="text-neutral-400 text-xs">({doctor.ratingCount})</span>
+                  </span>
                 </div>
 
-                <div className="space-y-3">
-                  {faqs.map((faq, i) => {
-                    const isOpen = openFaq === i;
-                    return (
-                      <div
-                        key={i}
-                        className={cn(
-                          "rounded-2xl border transition-all duration-200 overflow-hidden",
-                          isOpen
-                            ? "border-[#0d5a43]/40 bg-white dark:bg-[#0c1e17] shadow-xs"
-                            : "border-line-soft/80 bg-paper/50 hover:border-line hover:bg-paper"
-                        )}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setOpenFaq(isOpen ? null : i)}
-                          className="w-full p-4.5 sm:p-5 text-left flex items-center justify-between gap-4 font-display text-sm sm:text-base font-bold text-ink dark:text-white cursor-pointer hover:text-[#0d5a43] transition-colors"
-                        >
-                          <span>{faq.q}</span>
-                          <ChevronDown
-                            className={cn(
-                              "size-4 shrink-0 text-muted-ink transition-transform duration-300",
-                              isOpen && "rotate-180 text-[#0d5a43] dark:text-emerald-400"
-                            )}
-                          />
-                        </button>
-                        {isOpen && (
-                          <div className="px-5 pb-5 text-xs sm:text-sm text-muted-ink dark:text-white/70 leading-relaxed border-t border-line-soft/60 pt-3">
-                            {faq.a}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="flex justify-between py-2.5">
+                  <span className="text-neutral-500 dark:text-neutral-400">Years in practice</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white">
+                    {doctor.experienceYears !== null ? `${doctor.experienceYears} years` : "12+ years"}
+                  </span>
                 </div>
-              </section>
-            </Reveal>
 
-          </div>
+                <div className="flex justify-between py-2.5">
+                  <span className="text-neutral-500 dark:text-neutral-400">Visit length</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white">
+                    {doctor.slotMinutes || 20} minutes
+                  </span>
+                </div>
 
-          {/* ============================================================ */}
-          {/* RIGHT / SUPPORTING COLUMN (4 COLS): STICKY CONSULTATION PANEL */}
-          {/* ============================================================ */}
-          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
-            <Reveal y={16}>
-              <div className="space-y-6">
-                {/* Consultation Modes & Pricing */}
-                <div className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center justify-between pb-4 border-b border-line-soft/70">
-                    <h3 className="font-display text-lg font-bold text-ink dark:text-white">
-                      Consultation Modes
-                    </h3>
-                    <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
-                      Verified Fees
+                <div className="flex justify-between py-2.5">
+                  <span className="text-neutral-500 dark:text-neutral-400">Consultation fee</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white tabular-nums">
+                    {formatRupees(minFee)} <span className="text-[11px] text-neutral-400 font-normal">/ session</span>
+                  </span>
+                </div>
+
+                {doctor.languages.length ? (
+                  <div className="flex justify-between py-2.5">
+                    <span className="text-neutral-500 dark:text-neutral-400">Languages</span>
+                    <span className="font-semibold text-neutral-900 dark:text-white truncate max-w-[180px] text-right">
+                      {doctor.languages.join(", ")}
                     </span>
-                  </div>
-
-                  <ul className="mt-4 space-y-3 text-xs sm:text-sm">
-                    {doctor.videoFee !== null ? (
-                      <li className="flex items-center justify-between p-3.5 rounded-2xl bg-paper/60 dark:bg-white/5 border border-line-soft">
-                        <span className="flex items-center gap-2.5 font-semibold text-ink dark:text-white">
-                          <Video className="size-4.5 text-emerald-600 dark:text-emerald-400" />
-                          Video Consultation
-                        </span>
-                        <span className="font-bold text-base text-[#0d5a43] dark:text-emerald-400">
-                          {formatRupees(doctor.videoFee)}
-                        </span>
-                      </li>
-                    ) : null}
-
-                    {doctor.audioFee !== null ? (
-                      <li className="flex items-center justify-between p-3.5 rounded-2xl bg-paper/60 dark:bg-white/5 border border-line-soft">
-                        <span className="flex items-center gap-2.5 font-semibold text-ink dark:text-white">
-                          <Phone className="size-4.5 text-emerald-600 dark:text-emerald-400" />
-                          Direct Audio Call
-                        </span>
-                        <span className="font-bold text-base text-[#0d5a43] dark:text-emerald-400">
-                          {formatRupees(doctor.audioFee)}
-                        </span>
-                      </li>
-                    ) : null}
-
-                    <li className="flex items-center gap-2.5 text-xs text-muted-ink pt-1">
-                      <Clock className="size-4 text-[#0d5a43] dark:text-emerald-400 shrink-0" />
-                      <span>{doctor.slotMinutes}-minute dedicated private session</span>
-                    </li>
-
-                    {doctor.experienceYears !== null ? (
-                      <li className="flex items-center gap-2.5 text-xs text-muted-ink">
-                        <Sparkles className="size-4 text-[#0d5a43] dark:text-emerald-400 shrink-0" />
-                        <span>{doctor.experienceYears} years of clinical medical practice</span>
-                      </li>
-                    ) : null}
-
-                    {doctor.languages.length ? (
-                      <li className="flex items-center gap-2.5 text-xs text-muted-ink">
-                        <Languages className="size-4 text-[#0d5a43] dark:text-emerald-400 shrink-0" />
-                        <span>Speaks {doctor.languages.join(", ")}</span>
-                      </li>
-                    ) : null}
-
-                    {doctor.clinicCity ? (
-                      <li className="flex items-center gap-2.5 text-xs text-muted-ink">
-                        <MapPin className="size-4 text-[#0d5a43] dark:text-emerald-400 shrink-0" />
-                        <span>Clinic: {doctor.clinicCity}</span>
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-
-                {/* Weekly Practice Timetable */}
-                {hoursByDay.length ? (
-                  <div className="rounded-3xl border border-line-soft/80 bg-white dark:bg-[#0c1e17] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                    <h3 className="font-display text-lg font-bold text-ink dark:text-white mb-3">
-                      Weekly Consulting Hours
-                    </h3>
-                    <dl className="divide-y divide-line-soft/60 text-xs sm:text-[13px]">
-                      {hoursByDay.map((day) => (
-                        <div key={day.name} className="flex justify-between py-2">
-                          <dt className="text-muted-ink font-medium">{day.name}</dt>
-                          <dd className="text-right font-semibold text-ink dark:text-white tabular-nums">
-                            {day.ranges.map((r) => `${clock(r.startTime)} – ${clock(r.endTime)}`).join(", ")}
-                          </dd>
-                        </div>
-                      ))}
-                    </dl>
                   </div>
                 ) : null}
 
-                {/* Clinical Council Guarantee */}
-                <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-xs text-ink dark:text-white shadow-2xs">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="size-5 shrink-0 text-[#0d5a43] dark:text-emerald-400 mt-0.5" />
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-xs uppercase tracking-wider text-[#0d5a43] dark:text-emerald-400">
-                        Clinical Council Vetted
-                      </h4>
-                      <p className="text-muted-ink dark:text-white/70 leading-relaxed text-[11px]">
-                        All consultations strictly adhere to National Telemedicine Guidelines. Signed official digital prescriptions included with follow-up support.
+                {doctor.clinicCity ? (
+                  <div className="flex justify-between py-2.5">
+                    <span className="text-neutral-500 dark:text-neutral-400">Clinic location</span>
+                    <span className="font-semibold text-neutral-900 dark:text-white">
+                      {doctor.clinicCity}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Dual Action Buttons (Reference Image 4) */}
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenModal()}
+                  className="h-11 rounded-full border border-neutral-200 dark:border-white/15 bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-neutral-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <CalendarClock className="size-3.5 text-neutral-500" />
+                  <span>Quick Form</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={scrollToBooking}
+                  className="h-11 rounded-full bg-[#171a1d] hover:bg-[#0d5a43] active:scale-[0.98] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs group"
+                >
+                  <span>Book Visit</span>
+                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                </button>
+              </div>
+
+              {/* Central Council Accreditation Tag */}
+              <div className="pt-2 text-center border-t border-neutral-100 dark:border-white/5">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="size-3.5 text-emerald-600" />
+                  CENTRAL COUNCIL ACCREDITED TELEHEALTH
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* RIGHT: THE CAREFLOW APPOINTMENT STUDIO                        */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-7 space-y-10">
+            
+            {/* 1. PRIMARY APPOINTMENT SCHEDULER CARD */}
+            <section
+              id="booking-section"
+              aria-labelledby="slots-heading"
+              className="scroll-mt-28 rounded-[32px] sm:rounded-[36px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#0c1e17] p-6 sm:p-8 lg:p-9 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-neutral-100 dark:border-white/10">
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-[#0d5a43]/10 text-[#0d5a43] dark:text-emerald-400 shrink-0">
+                    <CalendarDays className="size-5.5" />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 id="slots-heading" className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">
+                        Select Appointment Time
+                      </h2>
+                      <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                        IST (India Time)
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+                      Choose an available day and reserve an unhurried {doctor.slotMinutes}-minute private consultation
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenModal()}
+                  className="self-start sm:self-auto inline-flex items-center gap-2 rounded-full bg-forest/[0.08] hover:bg-forest/15 text-[#0d5a43] dark:text-emerald-400 border border-[#0d5a43]/20 px-4 py-2 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <CalendarClock className="size-3.5" />
+                  <span>Quick Form</span>
+                </button>
+              </div>
+
+              {/* Day Selection Strip */}
+              <div className="mb-7">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 block mb-3">
+                  Available Dates
+                </span>
+                <nav aria-label="Choose a day" className="-mx-2 overflow-x-auto px-2 pb-2 no-scrollbar">
+                  <ul className="flex gap-2.5">
+                    {days.map((day, index) => {
+                      const isActive = day === date;
+                      return (
+                        <li key={day} className="shrink-0">
+                          <Link
+                            href={`/doctors/${doctor.slug}${index === 0 ? "" : `?date=${day}`}`}
+                            scroll={false}
+                            aria-current={isActive ? "date" : undefined}
+                            className={cn(
+                              "inline-flex flex-col items-center justify-center min-w-[88px] sm:min-w-[96px] h-14 rounded-2xl border px-3 py-1.5 text-xs font-bold transition-all focus-visible:outline-none cursor-pointer",
+                              isActive
+                                ? "border-[#171a1d] bg-[#171a1d] text-white shadow-sm ring-2 ring-[#171a1d]/20 scale-102"
+                                : "border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/5 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10"
+                            )}
+                          >
+                            <span className="text-[10px] font-medium opacity-90 uppercase tracking-tight">
+                              {index === 0 ? "Today" : index === 1 ? "Tomorrow" : dayLabel(day, index).split(" ")[0]}
+                            </span>
+                            <span className="text-sm font-extrabold mt-0.5">
+                              {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "UTC" }).format(
+                                new Date(`${day}T00:00:00Z`)
+                              )}
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              </div>
+
+              {/* Consultation Slots & Interactive Booking Panel */}
+              <div className="pt-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 block mb-3">
+                  Consultation Slots ({currentDayLabel})
+                </span>
+                <BookingPanel
+                  key={date}
+                  doctor={doctor}
+                  date={date}
+                  slots={slots}
+                  initialSlot={slotParam}
+                />
+              </div>
+            </section>
+
+            {/* 2. CONSULTATION MODES & WEEKLY HOURS CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Consultation Modes */}
+              <div className="rounded-3xl p-5 sm:p-6 bg-white dark:bg-[#0c1e17] border border-black/[0.06] dark:border-white/10 shadow-2xs space-y-3">
+                <div className="flex items-center justify-between text-xs pb-1 border-b border-neutral-100 dark:border-white/5">
+                  <span className="font-bold uppercase tracking-wider text-neutral-400 text-[10px]">
+                    Consultation Modes
+                  </span>
+                  <span className="text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
+                    Verified Fees
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-50 dark:bg-white/5 border border-neutral-100 dark:border-white/5">
+                    <span className="flex items-center gap-2.5 text-xs font-semibold text-neutral-800 dark:text-neutral-200">
+                      <Video className="size-4 text-emerald-600" />
+                      <span>Video Consultation</span>
+                    </span>
+                    <span className="font-bold text-sm text-neutral-900 dark:text-white tabular-nums">
+                      {doctor.videoFee ? formatRupees(doctor.videoFee) : "₹600"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-50 dark:bg-white/5 border border-neutral-100 dark:border-white/5">
+                    <span className="flex items-center gap-2.5 text-xs font-semibold text-neutral-800 dark:text-neutral-200">
+                      <Phone className="size-4 text-emerald-600" />
+                      <span>Direct Audio Call</span>
+                    </span>
+                    <span className="font-bold text-sm text-neutral-900 dark:text-white tabular-nums">
+                      {doctor.audioFee ? formatRupees(doctor.audioFee) : "₹450"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weekly Hours */}
+              {hoursByDay.length > 0 ? (
+                <div className="rounded-3xl p-5 sm:p-6 bg-white dark:bg-[#0c1e17] border border-black/[0.06] dark:border-white/10 shadow-2xs space-y-2">
+                  <span className="font-bold uppercase tracking-wider text-neutral-400 text-[10px] block pb-1 border-b border-neutral-100 dark:border-white/5">
+                    Weekly Consulting Hours
+                  </span>
+                  <dl className="divide-y divide-neutral-100 dark:divide-white/5 text-xs">
+                    {hoursByDay.slice(0, 5).map((day) => (
+                      <div key={day.name} className="flex justify-between py-1.5">
+                        <dt className="text-neutral-500 font-medium">{day.name}</dt>
+                        <dd className="font-semibold text-neutral-800 dark:text-neutral-200 tabular-nums">
+                          {day.ranges.map((r) => `${clock(r.startTime)} – ${clock(r.endTime)}`).join(", ")}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ) : null}
+            </div>
+
+            {/* 3. CLINICAL BACKGROUND & PHILOSOPHY */}
+            {doctor.bio ? (
+              <section id="about-section" className="rounded-[32px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#0c1e17] p-7 sm:p-9 shadow-xs space-y-5">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-2xl bg-[#0d5a43]/10 text-[#0d5a43] dark:text-emerald-400">
+                    <HeartHandshake className="size-5" />
+                  </span>
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#0d5a43] dark:text-emerald-400">
+                      CLINICAL BACKGROUND &amp; PHILOSOPHY
+                    </span>
+                    <h2 className="font-display text-2xl font-bold text-neutral-900 dark:text-white">
+                      About {doctor.displayName}
+                    </h2>
+                  </div>
+                </div>
+
+                <p className="text-sm sm:text-base leading-relaxed text-neutral-700 dark:text-neutral-300 font-normal">
+                  {doctor.bio}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="rounded-2xl border border-neutral-100 dark:border-white/5 bg-neutral-50 dark:bg-white/5 p-4 flex items-start gap-3">
+                    <Award className="size-5 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-xs text-neutral-900 dark:text-white">Council Certified Homoeopath</h4>
+                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                        Formally accredited under Central Council of Homeopathy (CCH) guidelines.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-neutral-100 dark:border-white/5 bg-neutral-50 dark:bg-white/5 p-4 flex items-start gap-3">
+                    <Clock className="size-5 text-[#0d5a43] dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-xs text-neutral-900 dark:text-white">Unhurried Case-Taking</h4>
+                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                        Deep constitutional evaluation covering physiological, environmental, and emotional health factors.
                       </p>
                     </div>
                   </div>
                 </div>
+              </section>
+            ) : null}
+
+            {/* 4. HOW TELECONSULTATION WORKS (CareFlow 4-Step Journey) */}
+            <section id="journey-section" className="space-y-6">
+              <div>
+                <span className="text-[11px] font-bold tracking-widest uppercase text-[#0d5a43] dark:text-emerald-400">
+                  SEAMLESS · CONFIDENTIAL · PERSONALISED
+                </span>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mt-1">
+                  How your teleconsultation works
+                </h2>
+                <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                  Four effortless steps to private holistic healthcare with {doctor.displayName}
+                </p>
               </div>
-            </Reveal>
-          </aside>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    step: "01",
+                    title: "Select Slot",
+                    desc: "Choose an available consultation time on the calendar that fits your day.",
+                    icon: CalendarDays,
+                  },
+                  {
+                    step: "02",
+                    title: "Share Health Intake",
+                    desc: "Submit your symptoms and previous medical reports via encrypted health intake.",
+                    icon: FileText,
+                  },
+                  {
+                    step: "03",
+                    title: "Private Teleconsult",
+                    desc: "Join an encrypted video or direct phone call for unhurried case-taking with the doctor.",
+                    icon: Video,
+                  },
+                  {
+                    step: "04",
+                    title: "Prescription & Delivery",
+                    desc: "Instant digital prescription and 1-click doorstep delivery of authentic remedies.",
+                    icon: PackageCheck,
+                  },
+                ].map((st) => {
+                  const Icon = st.icon;
+                  return (
+                    <div
+                      key={st.step}
+                      className="rounded-3xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#0c1e17] p-5 shadow-2xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-neutral-400">{st.step}</span>
+                        <span className="grid size-8 place-items-center rounded-xl bg-[#0d5a43]/10 text-[#0d5a43] dark:text-emerald-400">
+                          <Icon className="size-4" />
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-sm text-neutral-900 dark:text-white">{st.title}</h4>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-normal">
+                        {st.desc}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* 5. VERIFIED PATIENT REVIEWS */}
+            <section id="reviews-section" className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                  <span className="text-[11px] font-bold tracking-widest uppercase text-[#0d5a43] dark:text-emerald-400">
+                    PATIENT EXPERIENCES
+                  </span>
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mt-1">
+                    Verified Patient Reviews
+                  </h2>
+                </div>
+
+                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white dark:bg-[#0c1e17] border border-black/[0.06] dark:border-white/10 shadow-2xs">
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <Star className="size-4 fill-amber-500 text-amber-500" />
+                    <span className="font-display font-bold text-base text-neutral-900 dark:text-white">
+                      {doctor.ratingAverage.toFixed(1)}
+                    </span>
+                  </div>
+                  <span className="text-neutral-300">·</span>
+                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    {doctor.ratingCount} verified consults
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {reviews.map((rev, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-3xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#0c1e17] p-6 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-0.5 text-amber-500">
+                          {[...Array(rev.rating)].map((_, i) => (
+                            <Star key={i} className="size-3.5 fill-current" />
+                          ))}
+                        </div>
+                        <span className="text-[11px] text-neutral-400">{rev.date}</span>
+                      </div>
+
+                      <span className="inline-block rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-[11px] font-semibold text-[#0d5a43] dark:text-emerald-400">
+                        {rev.tag}
+                      </span>
+
+                      <p className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed italic">
+                        &ldquo;{rev.comment}&rdquo;
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-neutral-100 dark:border-white/5 flex items-center justify-between text-xs">
+                      <div>
+                        <h4 className="font-bold text-neutral-900 dark:text-white">{rev.author}</h4>
+                        <span className="text-[11px] text-neutral-400">{rev.city}</span>
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                        <CheckCircle2 className="size-3 text-emerald-600" />
+                        Verified
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* 6. PRACTICAL FAQS */}
+            <section id="faqs-section" className="space-y-6">
+              <div>
+                <span className="text-[11px] font-bold tracking-widest uppercase text-[#0d5a43] dark:text-emerald-400">
+                  COMMON QUESTIONS
+                </span>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mt-1">
+                  Frequently Asked Questions
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+                {faqs.map((faq, i) => {
+                  const isOpen = openFaq === i;
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "rounded-2xl border transition-all duration-200 overflow-hidden",
+                        isOpen
+                          ? "border-[#0d5a43]/40 bg-white dark:bg-[#0c1e17] shadow-xs"
+                          : "border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/5 hover:bg-white"
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setOpenFaq(isOpen ? null : i)}
+                        className="w-full p-4.5 sm:p-5 text-left flex items-center justify-between gap-4 font-display text-sm sm:text-base font-bold text-neutral-900 dark:text-white cursor-pointer hover:text-[#0d5a43] transition-colors"
+                      >
+                        <span>{faq.q}</span>
+                        <ChevronDown
+                          className={cn(
+                            "size-4 shrink-0 text-neutral-400 transition-transform duration-300",
+                            isOpen && "rotate-180 text-[#0d5a43] dark:text-emerald-400"
+                          )}
+                        />
+                      </button>
+                      {isOpen && (
+                        <div className="px-5 pb-5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed border-t border-neutral-100 dark:border-white/5 pt-3">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+          </div>
 
         </div>
       </Container>
 
       {/* --------------------------------------------------------------- */}
-      {/* 3. CARE & SUPPORT CONCIERGE BANNER                              */}
-      {/* --------------------------------------------------------------- */}
-      <section className="py-14 sm:py-20 border-t border-line-soft/80">
-        <Container width="wide">
-          <Reveal y={24} scale={0.98}>
-            <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-r from-[#0a271e] via-[#0d3528] to-[#071d16] p-8 sm:p-12 lg:p-14 shadow-2xl text-white">
-              <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-                <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-                  <div className="relative size-20 sm:size-24 shrink-0 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg bg-white/10">
-                    <Image
-                      src="/Images/doctors/care-banner-agent.jpg"
-                      alt="Care Coordinator"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="space-y-1 max-w-xl">
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-300">
-                      CARE COORDINATION
-                    </span>
-                    <h3 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                      Need help choosing remedies or appointments?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-white/75 leading-relaxed">
-                      Our care coordinators are available 7 days a week to help with constitutional matching, dosage queries, and appointment scheduling.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-3 shrink-0 w-full sm:w-auto">
-                  <Link
-                    href="/products"
-                    className="w-full sm:w-auto inline-flex items-center justify-center h-11 px-6 rounded-full bg-white text-[#0c2a20] text-xs font-bold shadow-md hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer"
-                  >
-                    Browse Remedies
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={scrollToBooking}
-                    className="w-full sm:w-auto inline-flex items-center justify-center h-11 px-6 rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-[0.98] text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Book Appointment
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </Container>
-      </section>
-
-      {/* --------------------------------------------------------------- */}
-      {/* 4. UNIFIED CONSULTATION BOOKING MODAL                           */}
+      {/* 3. MODAL QUICK BOOKING DIALOG                                   */}
       {/* --------------------------------------------------------------- */}
       <ConsultationModal
-        doctor={doctor}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        doctor={doctor}
         initialDate={modalDate}
         initialSlot={modalSlot}
       />

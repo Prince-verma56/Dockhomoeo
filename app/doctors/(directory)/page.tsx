@@ -9,7 +9,6 @@ import {
   Lock,
   Phone,
   ShieldCheck,
-  Sparkles,
   Sprout,
   Video,
 } from "lucide-react";
@@ -108,7 +107,7 @@ export default async function DoctorsPage({ searchParams }: PageProps<"/doctors"
         {/* ============================================================== */}
         {/* 1. HERO SECTION: Editorial Layout Matching Reference Design     */}
         {/* ============================================================== */}
-        <section aria-labelledby="doctors-heading" className="relative pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
+        <section aria-labelledby="doctors-heading" className="relative pt-36 sm:pt-40 lg:pt-44 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
           {/* Background Ambient Accents to fill empty spaces */}
           <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0">
             <div

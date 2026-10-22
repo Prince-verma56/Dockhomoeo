@@ -46,6 +46,7 @@
 html {
   scroll-behavior: auto !important;
   scrollbar-gutter: stable;
+  scroll-padding-top: 140px;
 }
 
 /* Custom luxury themed scrollbar for modals, drawers, and panels */

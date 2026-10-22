@@ -12,7 +12,6 @@ import {
   Award,
   Leaf,
   Clock,
-  Sparkles,
   Mail,
   Info,
   X,
@@ -21,7 +20,8 @@ import {
   Stethoscope,
   Volume2,
   Share2,
-  Bookmark
+  Bookmark,
+  Bell
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link001 } from "@/components/ui/skiper-ui/skiper40";
@@ -423,7 +423,7 @@ export function HealthInsightsView({
                     {/* Bottom Shelf Badge Label */}
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white drop-shadow-xs text-xs font-medium">
                       <span className="font-semibold flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-3 py-1.5 rounded-full">
-                        <Sparkles className="size-3 text-amber-300" />
+                        <BookOpen className="size-3 text-amber-300" />
                         Materia Medica · Repertory · Clinical Insights
                       </span>
                     </div>
@@ -779,7 +779,7 @@ export function HealthInsightsView({
         className="py-12 sm:py-16 border-t border-line-soft/70"
       >
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-          <Reveal y={24} stagger={0.06}>
+          <Reveal y={20}>
             {/* Header Row */}
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
               <div>
@@ -798,55 +798,55 @@ export function HealthInsightsView({
                 View all topics
               </Link001>
             </div>
+          </Reveal>
 
-            {/* 4 Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5 sm:gap-6">
-              {CURATED_TOPICS.map((topic) => (
-                <Link
-                  key={topic.id}
-                  href={`/insights/${topic.slug}`}
-                  className="group rounded-3xl border border-line-soft bg-paper overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1.5 hover:border-forest/40 hover:shadow-lift flex flex-col justify-between select-none"
-                >
-                  <div>
-                    {/* Photo with Circular Arrow Badge */}
-                    <div className="relative aspect-16/10 w-full overflow-hidden bg-cream-sunk">
-                      <img
-                        src={topic.image}
-                        alt={topic.title}
-                        className="size-full object-cover object-center pointer-events-none select-none transition-transform duration-700 ease-premium group-hover:scale-106"
-                        draggable={false}
-                      />
-                      
-                      {/* Tag badge pill */}
-                      <span className="absolute top-3 left-3 rounded-full bg-black/45 text-white backdrop-blur-xs px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">
-                        {topic.tag}
-                      </span>
+          {/* 4 Cards Grid with measured GSAP card stagger */}
+          <Reveal y={24} stagger="a" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5 sm:gap-6">
+            {CURATED_TOPICS.map((topic) => (
+              <Link
+                key={topic.id}
+                href={`/insights/${topic.slug}`}
+                className="group rounded-3xl border border-line-soft bg-paper overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1.5 hover:border-forest/40 hover:shadow-lift flex flex-col justify-between select-none"
+              >
+                <div>
+                  {/* Photo with Circular Arrow Badge */}
+                  <div className="relative aspect-16/10 w-full overflow-hidden bg-cream-sunk">
+                    <img
+                      src={topic.image}
+                      alt={topic.title}
+                      className="size-full object-cover object-center pointer-events-none select-none transition-transform duration-700 ease-premium group-hover:scale-106"
+                      draggable={false}
+                    />
+                    
+                    {/* Tag badge pill */}
+                    <span className="absolute top-3 left-3 rounded-full bg-black/45 text-white backdrop-blur-xs px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">
+                      {topic.tag}
+                    </span>
 
-                      {/* Arrow circular pill */}
-                      <div className="absolute bottom-3 right-3 grid size-8 place-items-center rounded-full bg-white/95 text-forest shadow-xs backdrop-blur-xs transition-transform duration-300 group-hover:scale-110 group-hover:bg-forest group-hover:text-cream">
-                        <ArrowRight className="size-3.5" />
-                      </div>
-                    </div>
-
-                    {/* Body Content */}
-                    <div className="p-5 sm:p-6 space-y-2">
-                      <h3 className="font-display font-bold text-base sm:text-lg text-ink group-hover:text-forest transition-colors leading-snug">
-                        {topic.title}
-                      </h3>
-                      <p className="text-xs sm:text-[13px] text-muted-ink leading-relaxed">
-                        {topic.description}
-                      </p>
+                    {/* Arrow circular pill */}
+                    <div className="absolute bottom-3 right-3 grid size-8 place-items-center rounded-full bg-white/95 text-forest shadow-xs backdrop-blur-xs transition-transform duration-300 group-hover:scale-110 group-hover:bg-forest group-hover:text-cream">
+                      <ArrowRight className="size-3.5" />
                     </div>
                   </div>
 
-                  {/* Footer Count */}
-                  <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-2 text-xs font-semibold text-forest flex items-center justify-between border-t border-line-soft/50">
-                    <span>{topic.articleCount} articles</span>
-                    <span className="text-[11px] text-muted-ink">Explore →</span>
+                  {/* Body Content */}
+                  <div className="p-5 sm:p-6 space-y-2">
+                    <h3 className="font-display font-bold text-base sm:text-lg text-ink group-hover:text-forest transition-colors leading-snug">
+                      {topic.title}
+                    </h3>
+                    <p className="text-xs sm:text-[13px] text-muted-ink leading-relaxed">
+                      {topic.description}
+                    </p>
                   </div>
-                </Link>
-              ))}
-            </div>
+                </div>
+
+                {/* Footer Count */}
+                <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-2 text-xs font-semibold text-forest flex items-center justify-between border-t border-line-soft/50">
+                  <span>{topic.articleCount} articles</span>
+                  <span className="text-[11px] text-muted-ink">Explore →</span>
+                </div>
+              </Link>
+            ))}
           </Reveal>
         </div>
       </section>
@@ -932,7 +932,7 @@ export function HealthInsightsView({
                 </div>
 
                 {/* Right Column: 3 Pristine Article Cards (8 cols) */}
-                <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4.5 select-none">
+                <Reveal y={20} stagger="a" delay={0.15} className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4.5 select-none">
                   {EXPERT_ARTICLES.map((article) => (
                     <Link
                       key={article.id}
@@ -976,7 +976,7 @@ export function HealthInsightsView({
                       </div>
                     </Link>
                   ))}
-                </div>
+                </Reveal>
 
               </div>
 
@@ -1204,7 +1204,7 @@ export function HealthInsightsView({
             </button>
 
             <span className="grid size-12 place-items-center rounded-2xl bg-sage-wash text-forest shadow-2xs">
-              <Sparkles className="size-6" />
+              <Bell className="size-6" />
             </span>
 
             <div className="space-y-1">

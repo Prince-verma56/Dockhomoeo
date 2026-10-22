@@ -13,7 +13,6 @@ import {
   Play,
   Plus,
   ShieldCheck,
-  Sparkles,
   Star,
   ThumbsUp,
   Upload,
@@ -345,7 +344,7 @@ export function ProductReviewsSection({ product }: { product: ApiProductDetail }
             </p>
 
             <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-              <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>96% of verified buyers recommend this</span>
             </div>
           </div>

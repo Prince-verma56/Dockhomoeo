@@ -23,7 +23,6 @@ import {
   Quote,
   Share2,
   ShieldCheck,
-  Sparkles,
   Stethoscope,
 } from "lucide-react";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
@@ -243,8 +242,8 @@ export default async function InsightDetailPage(props: { params: Promise<{ slug:
 
                 {/* Floating Glass Pill: Clinical Takeaway */}
                 <div className="absolute top-4 right-4 sm:top-6 sm:right-6 rounded-2xl border border-white/85 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-md max-w-[260px] hidden sm:flex items-center gap-3 select-none">
-                  <span className="grid size-8 place-items-center rounded-xl bg-forest-abyss text-cream shrink-0 shadow-2xs">
-                    <Sparkles className="size-4 text-amber-300" />
+                  <span className="grid size-8 place-items-center rounded-xl bg-forest-abyss text-emerald-300 shrink-0 shadow-2xs">
+                    <Stethoscope className="size-4 text-emerald-300" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-ink leading-tight">

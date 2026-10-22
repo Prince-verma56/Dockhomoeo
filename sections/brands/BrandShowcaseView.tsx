@@ -17,7 +17,6 @@ import {
   Pill,
   Search,
   ShieldCheck,
-  Sparkles,
   Star,
   X,
 } from "lucide-react";
@@ -203,7 +202,7 @@ const PRODUCT_TYPES = [
     title: "External Applications",
     slug: "cream",
     image: "/Images/Products/bakson-arnica-oil.jpg",
-    icon: Sparkles,
+    icon: Droplets,
     href: "/products?form=cream",
     description: "Herbal ointments, gels, and nourishing massage oils.",
   },

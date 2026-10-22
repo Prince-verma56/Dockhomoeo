@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useId, type FormEvent } from "react";
 import { Dialog } from "radix-ui";
-import { Check, CheckCircle2, ChevronDown, Clock, Loader2, MapPin, Sparkles, Truck, X, XCircle } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, Clock, Loader2, MapPin, Truck, X, XCircle } from "lucide-react";
 import { repositories } from "@/lib/repositories";
 import { describeError } from "@/lib/api";
 import { cn } from "@/lib/utils";

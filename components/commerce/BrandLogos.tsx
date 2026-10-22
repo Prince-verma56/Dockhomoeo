@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { Award, Leaf, Sparkles } from "lucide-react";
+import { Award, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**

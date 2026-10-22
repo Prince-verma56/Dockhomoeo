@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Factory, MapPin, PackageSearch, RotateCw, Sparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck, Factory, MapPin, PackageSearch, RotateCw } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { MomentumRail, RailSlide } from "@/components/kokonutui/carousel-cards";
@@ -68,7 +68,7 @@ export function BestsellingProducts({
             <div>
               <Reveal y={12} delay={0}>
                 <p className="inline-flex items-center gap-1.5 rounded-full border border-forest/20 bg-paper/80 px-3 py-1 text-[0.6875rem] font-semibold tracking-[0.14em] text-forest uppercase">
-                  <Sparkles aria-hidden className="size-3.5" />
+                  <BadgeCheck aria-hidden className="size-3.5" />
                   Top picks
                 </p>
               </Reveal>
