@@ -20,6 +20,16 @@ export const HERO_START_TIME = 4;
 export const HERO_TRIM_SECONDS: number | null = null;
 
 /**
+ * Still frames pulled from the footage itself (`ffmpeg`, committed under
+ * public/Videos). A <video> paints nothing at all until it has decoded a
+ * frame, and this hero both starts 4 s in and parks on its closing frame, so
+ * without a poster each of those seeks showed the pale page background
+ * instead of the footage.
+ */
+export const HERO_POSTER_SRC = "/Videos/HeroVideo2-poster.jpg";
+export const HERO_END_POSTER_SRC = "/Videos/HeroVideo2-end.jpg";
+
+/**
  * How long before the video's end the hero copy starts revealing if not already revealed.
  * The headline transitions run ~1.0–1.2 s, so it lands as the footage settles.
  */
@@ -34,7 +44,25 @@ const START_TIMEOUT_MS = 2200;
 /** Playback stalled mid-way while buffering: show the copy rather than wait on the network. */
 const STALL_TIMEOUT_MS = 2000;
 
-const HERO_COMPLETED_KEY = "dochomoeo_hero_completed";
+/**
+ * Marks the intro as already seen *for this visit only*. Deliberately kept in
+ * sessionStorage and never localStorage: a permanent flag meant the footage ran
+ * once ever and every later visit opened on a paused, still-buffering frame —
+ * a blank hero. Every fresh visit now plays the intro exactly once.
+ */
+const HERO_SEEN_KEY = "dochomoeo_hero_seen";
+
+/** The old permanent flag. Cleared on sight so browsers carrying it recover. */
+const LEGACY_COMPLETED_KEY = "dochomoeo_hero_completed";
+
+const clearLegacyFlag = () => {
+  try {
+    if (localStorage.getItem(LEGACY_COMPLETED_KEY) !== null) {
+      localStorage.removeItem(LEGACY_COMPLETED_KEY);
+    }
+    sessionStorage.removeItem(LEGACY_COMPLETED_KEY);
+  } catch {}
+};
 
 const checkBuildSession = () => {
   if (typeof window === "undefined") return;
@@ -43,8 +71,8 @@ const checkBuildSession = () => {
     if (currentBuild) {
       const storedBuild = sessionStorage.getItem("dochomoeo_build_time");
       if (storedBuild !== currentBuild) {
-        // Dev server was restarted: clear completed flags so video and animations play from the start!
-        sessionStorage.removeItem(HERO_COMPLETED_KEY);
+        // Dev server was restarted: clear the seen flag so video and animations play from the start!
+        sessionStorage.removeItem(HERO_SEEN_KEY);
         sessionStorage.setItem("dochomoeo_build_time", currentBuild);
       }
     }
@@ -52,17 +80,16 @@ const checkBuildSession = () => {
 };
 
 /**
- * Whether this visit skips the intro: prefers reduced motion or previously completed.
+ * Whether this visit skips the intro: prefers reduced motion, or the footage
+ * already ran to the end earlier in this same session.
  */
 const getIntroSkipped = () => {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
   try {
+    clearLegacyFlag();
     checkBuildSession();
-    return (
-      sessionStorage.getItem(HERO_COMPLETED_KEY) === "true" ||
-      localStorage.getItem(HERO_COMPLETED_KEY) === "true"
-    );
+    return sessionStorage.getItem(HERO_SEEN_KEY) === "true";
   } catch {
     return false;
   }
@@ -101,13 +128,23 @@ const seekToStartTime = (video: HTMLVideoElement) => {
   }
 };
 
+/**
+ * Parks a skipped intro on its closing frame. While that seek is in flight the
+ * element has no frame to paint, so the markup pairs this with the matching
+ * end-frame poster — without one the hero renders as a blank pale panel.
+ * Seeking is skipped entirely until the duration is known, because the old
+ * `currentTime = 0` fallback fought the `#t=4` media fragment.
+ */
 const showLastFrame = (video: HTMLVideoElement) => {
-  const target =
-    Number.isFinite(video.duration) && video.duration > 0
-      ? Math.max(0, video.duration - 0.05)
-      : 0;
-  video.currentTime = target;
   video.pause();
+  if (!(Number.isFinite(video.duration) && video.duration > 0)) return;
+  const target = Math.max(0, video.duration - 0.05);
+  if (Math.abs(video.currentTime - target) < 0.02) return;
+  try {
+    video.currentTime = target;
+  } catch {
+    // Ignored if media isn't ready; event listeners will retry
+  }
 };
 
 export function HeroPlaybackProvider({
@@ -129,21 +166,28 @@ export function HeroPlaybackProvider({
   const hasSkipped = skippedAtLoad || skippedByVisitor;
   const contentVisible = hasSkipped || revealed;
   const navVisible = hasSkipped || revealed;
+  // A skipped intro is a finished one, derived rather than set from the effect.
+  const completed = isCompleted || hasSkipped;
 
+  /** The footage genuinely reached its end (or the visitor skipped past it). */
   const markCompleted = useCallback(() => {
     setIsCompleted(true);
     try {
-      sessionStorage.setItem(HERO_COMPLETED_KEY, "true");
-      localStorage.setItem(HERO_COMPLETED_KEY, "true");
+      sessionStorage.setItem(HERO_SEEN_KEY, "true");
     } catch {}
   }, []);
 
+  /**
+   * Shows the hero copy. Deliberately does NOT record the intro as seen: a
+   * reveal also comes from the start/stall timeouts, a media error and a
+   * scroll, none of which mean a single frame ever played. Recording those
+   * was what left later visits on a blank, paused hero.
+   */
   const reveal = useCallback(() => {
     if (revealedRef.current) return;
     revealedRef.current = true;
     setRevealed(true);
-    markCompleted();
-  }, [markCompleted]);
+  }, []);
 
   const skipIntro = useCallback(() => {
     setSkippedByVisitor(true);
@@ -157,9 +201,10 @@ export function HeroPlaybackProvider({
     const video = videoRef.current;
     const skip = getIntroSkipped();
     if (skip) {
+      // `hasSkipped` already drives contentVisible and isCompleted for this
+      // render, so only the ref needs arming — setting state here would just
+      // cascade an extra render for a value that is already true.
       revealedRef.current = true;
-      setIsCompleted(true);
-      setRevealed(true);
     }
 
     if (!video) {
@@ -237,21 +282,48 @@ export function HeroPlaybackProvider({
     video.addEventListener("ended", onEnded);
     video.addEventListener("error", reveal);
 
+    // Armed only if autoplay is refused, so the footage still gets its one run
+    // the moment the visitor touches the page.
+    const retryEvents = ["pointerdown", "keydown", "touchstart"] as const;
+    const retryOnGesture = () => {
+      video.muted = true;
+      applyRate(video);
+      seekToStartTime(video);
+      void video.play().catch(() => {});
+    };
+    let retryArmed = false;
+    const armRetry = () => {
+      if (retryArmed) return;
+      retryArmed = true;
+      retryEvents.forEach((name) =>
+        window.addEventListener(name, retryOnGesture, { once: true, passive: true })
+      );
+    };
+
     if (skip) {
       if (video.readyState >= 1) showLastFrame(video);
     } else {
+      // `muted` is re-asserted here because every browser gates autoplay on it,
+      // and a stale un-muted state from a previous mount would get play() refused.
+      video.muted = true;
       applyRate(video);
       if (video.readyState >= 1) {
         seekToStartTime(video);
       }
       startTimer = setTimeout(reveal, START_TIMEOUT_MS);
-      video.play().catch(reveal);
+      video.play().catch(() => {
+        // Show the copy rather than hold it hostage to a refused autoplay, but
+        // keep the poster frame up and wait for a gesture to run the footage.
+        reveal();
+        armRetry();
+      });
     }
 
     return () => {
       clearTimeout(startTimer);
       clearTimeout(stallTimer);
       clearTimeout(revealTimer);
+      retryEvents.forEach((name) => window.removeEventListener(name, retryOnGesture));
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
       video.removeEventListener("canplay", onCanPlay);
       video.removeEventListener("playing", onPlaying);
@@ -310,8 +382,7 @@ export function HeroPlaybackProvider({
     const video = videoRef.current;
     if (!video) return;
     try {
-      sessionStorage.removeItem(HERO_COMPLETED_KEY);
-      localStorage.removeItem(HERO_COMPLETED_KEY);
+      sessionStorage.removeItem(HERO_SEEN_KEY);
     } catch {}
     applyRate(video);
     video.currentTime = HERO_START_TIME;
@@ -325,7 +396,7 @@ export function HeroPlaybackProvider({
         videoRef,
         isPlaying,
         isMuted,
-        isCompleted,
+        isCompleted: completed,
         navVisible,
         contentVisible,
         hasSkipped,

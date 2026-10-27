@@ -14,7 +14,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
-import { useHeroPlayback } from "@/components/providers/HeroPlaybackContext";
+import {
+  useHeroPlayback,
+  HERO_POSTER_SRC,
+  HERO_END_POSTER_SRC,
+} from "@/components/providers/HeroPlaybackContext";
 import { gsap } from "@/lib/animation/gsap";
 
 /**
@@ -244,9 +248,16 @@ export function HomeHero() {
           ref={videoRef as React.RefObject<HTMLVideoElement>}
           src="/Videos/HeroVideo2.mp4#t=4"
           // Video trimmed via code logic: skips the starting 4 seconds, starts playback from 4.0s
+          // autoPlay starts the footage at parse time, before React hydrates, so the
+          // hero never depends on the provider effect landing to show motion.
+          autoPlay
           muted
           playsInline
           preload="auto"
+          // Covers every window in which the element has no decoded frame — the
+          // opening seek to 4 s, and the seek to the closing frame when a visitor
+          // returns mid-session. Without it those windows painted a blank panel.
+          poster={isInstant ? HERO_END_POSTER_SRC : HERO_POSTER_SRC}
           aria-hidden="true"
           className="h-full w-full object-cover object-center scale-[1.01]"
         />
